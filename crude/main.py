@@ -7,11 +7,7 @@ from base64 import b64encode
 from PIL import Image
 
 
-IMAGE_PATH = "../dataset/2.jpeg"
-EXPECTED_ANSWER = ""
-
-
-class AnswerEvaluator:
+class AIAnswerEvaluator:
 	def __init__(self):
 		api_key = ...
 
@@ -32,7 +28,7 @@ class AnswerEvaluator:
 
 
 if __name__ == "__main__":
-	image_path = IMAGE_PATH
+	image_path = "../dataset/2.jpeg"
 
 	system_prompt = """
 		You are given an image of a student's handwritten work in response to a math problem.
@@ -42,10 +38,10 @@ if __name__ == "__main__":
 		For example, given question "what is the equation shown in the image?", generate your answer as: "3x+2=8".
 		"""
 	
-	expected_answer = EXPECTED_ANSWER
+	expected_answer = ""
 	user_prompt = f"Is the final answer the same as '{expected_answer}'?"
 	
-	ai_evaluator = AnswerEvaluator()
+	ai_evaluator = AIAnswerEvaluator()
 	response = ai_evaluator.get_response(image_path, system_prompt, user_prompt)
 
 	print(response)
