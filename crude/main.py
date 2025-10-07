@@ -1,24 +1,39 @@
 """
-Property of Tomanan, Tuan at S3Labs of University of Philippines - Diliman.
+Crude application for evaluating answers using AI.
 """
-import sys
-
-sys.path.append("..")
-
+from base64 import b64encode
 from openai import OpenAI
 
-class OpenAIImageToText:
-	...
+
+class OpenAIAnswerEvaluator:
+	def __init__(self):
+		api_key = ...
+		self.client = OpenAI(api_key=api_key)
+
+	def encode_image(self, image_path):
+		"""Encode image in base64"""
+		with open(image_path, "rb") as image_file:
+			encoded_file = b64encode(image_file.read())
+			return encoded_file.decode("utf-8")
+
+	def get_response(self, image_path, system_prompt, user_prompt=None):
+		"""Send to OpenAI """
+		...
+
 
 if __name__ == "__main__":
-	path = ...
+	image_path = ...
 
-	prompt = """
-			You are a teacher and are given a student's handwritten work in an image format. The handwritten work is a response 
-			to a problem. Write a description for this image to explain everything in the image of the student's handwritten work 
-			in as much detail as you can so that another teacher can understand and reconstruct the math work in this image without 
-			viewing the image. Focus on describing the student's answers in the image. Your response should be a paragraph without bullet points.
+	prompt = f"""
+		You are given an image of a student's handwritten work in response to a math problem. 
+		The student's work is shown on the right side of the image, and the problem is displayed on the left side for context.
+		Your task is to answer a question based solely on the visual content of the student's handwritten work,
+		which is present on the right side of the image. Your answer should be clear and concise, and directly relate to the image presented
+		on the right side of the given image. 
+		For example, given the question: 
+		"What is the equation shown in the image?"
+		Generate your answer as: "3x + 2 = 8"
 		"""
 	
-	openai_api = OpenAIImageToText()
-	response = openai_api.generate(prompt=prompt.format(path=path))
+	ai_evaluator = OpenAIAnswerEvaluator()
+	response = ai_evaluator.generate()
