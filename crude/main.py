@@ -16,6 +16,7 @@ class ImagePreprocessor:
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
+		"""Get first problem-answer pair from CSV file. Assumed structure is PROBLEM|ANSWER"""
 		with open(question_path, "r") as csv_file:
 			reader = csv.reader(csv_file, delimiter="|")
 			return next(reader)
