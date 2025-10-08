@@ -7,11 +7,32 @@ from all_prompts import ANSWER_RUBRIC_PROMPT
 
 from google import genai
 from google.genai import types
+
+# from google import generativeai
+# from google.generativeai import types
+
 from dotenv import load_dotenv
 
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
 
 class ImagePreprocessor:
-	...
+	def load_image(self, image_path: str) -> np.ndarray:
+		image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+		if image is None:
+			raise ValueError(f"Could not load image from {image_path}")
+		return image
+	
+	def brighten(self, image: np.ndarray, amount: float = 0.1) -> np.ndarray:
+		"""
+        Brighten the image by scaling pixel values with (1 + amount).
+        - amount > 0 increases brightness; < 0 decreases it.
+        - Works directly on uint8 BGR arrays; preserves dtype/shape.
+        """
+        # Use cv2.convertScaleAbs for efficient scaling (alpha = scale factor)
+		brightened = cv2.convertScaleAbs(image, alpha=(1 + amount), beta=0)
+		return brightened
 
 class AIAnswerEvaluator:
 	def __init__(self):
