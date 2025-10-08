@@ -14,6 +14,12 @@ from dotenv import load_dotenv
 class ImagePreprocessor:
 	...
 
+class CSVProcessor:
+	def get_context(self, question_path: str) -> list[str]:
+		with open(question_path, "r") as csv_file:
+			reader = csv.reader(csv_file, delimiter="|")
+			return next(reader)
+
 class AIAnswerEvaluator:
 	def __init__(self):
 		api_key = os.getenv("GEMINI_API_KEY")
@@ -47,19 +53,13 @@ if __name__ == "__main__":
 	load_dotenv()
 
 	system_prompt = ANSWER_RUBRIC_PROMPT
-	
-	image_path = "dataset/2_enhanced.jpeg"
+	image_path = "dataset/2.jpeg"
 	question_path = "dataset/2.csv"
 
-	context: list[str] = []
-
-	with open(question_path, "r") as csv_file:
-		reader = csv.reader(csv_file, delimiter="|")
-		context = next(reader)
+	context = CSVProcessor().get_context(question_path)
+	context_question, expected_answer = context
 	
-	print("CONTEXT: ", context)
-	context_question = context[0]
-	expected_answer = context[1]
+	print("CONTEXT: ", context_question, expected_answer)
 
 	rubric_question = "What is the student's final answer? What is the expected answer for the question? Are they the same?"
 	
