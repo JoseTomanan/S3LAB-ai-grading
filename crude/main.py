@@ -9,16 +9,14 @@ from all_prompts import *
 from google import genai
 from google.genai import types
 
-# from google import generativeai
-# from google.generativeai import types
-
 from dotenv import load_dotenv
 
-import numpy as np # Required for byte-to-array conversion in brighten
+import numpy as np
 import cv2
 
 class ImagePreprocessor:
 	def load_image(self, image_path: str) -> bytes:
+		"""Load image (unencoded) and return as bytes"""
 		image = cv2.imread(image_path, cv2.IMREAD_COLOR)
 		if image is None:
 			raise ValueError(f"Could not load image from {image_path}")
@@ -61,22 +59,15 @@ class AIAnswerEvaluator:
 	def __init__(self):
 		api_key = os.getenv("GEMINI_API_KEY")
 		self.client = genai.Client(api_key=api_key)
-		
-	def get_image(self, image_path: str) -> bytes:
-		"""Get unencoded image"""
-		with open(image_path, "rb") as image_file:
-			return image_file.read()
+		self.imager = ImagePreprocessor()
 
 	def get_response(self, image_path: str, system_prompt: str, user_prompt: str):
-		"""Image Preprocessing"""
-		# preprocessor = ImagePreprocessor()
-		# image_bytes = preprocessor.load_image(image_path)
-		# brightened_bytes = preprocessor.brighten(image_bytes, amount=0.2)
-
 		"""Send a chat completion request with the image input"""
-		image_bytes = self.get_image(image_path)
+		image_bytes = self.imager.load_image(image_path)
+		brightened_image_bytes = self.imager.brighten(image_bytes, amount=0.2)
+
 		image_encoded = types.Part.from_bytes(
-				data=image_bytes,
+				data=brightened_image_bytes,
 				mime_type='image/jpeg'
 			)
 
