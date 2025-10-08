@@ -46,7 +46,7 @@ class AIAnswerEvaluator:
 if __name__ == "__main__":
 	load_dotenv()
 
-	system_prompt = ANSWER_RUBRIC_PROMPT_2
+	system_prompt = ANSWER_RUBRIC_PROMPT
 	
 	image_path = "dataset/2_enhanced.jpeg"
 	question_path = "dataset/2.csv"
