@@ -14,26 +14,41 @@ from google.genai import types
 
 from dotenv import load_dotenv
 
-import numpy as np
-import matplotlib.pyplot as plt
+import numpy as np # Required for byte-to-array conversion in brighten
 import cv2
 
 class ImagePreprocessor:
-	def load_image(self, image_path: str) -> np.ndarray:
+	def load_image(self, image_path: str) -> bytes:
 		image = cv2.imread(image_path, cv2.IMREAD_COLOR)
 		if image is None:
 			raise ValueError(f"Could not load image from {image_path}")
-		return image
+		
+		ret, buffer = cv2.imencode('.jpg', image)
+		if not ret:
+			raise ValueError("Failed to encode image")
+		return buffer.tobytes()
 	
-	def brighten(self, image: np.ndarray, amount: float = 0.1) -> np.ndarray:
+	def brighten(self, image_bytes: bytes, amount: float = 0.1) -> bytes:
 		"""
         Brighten the image by scaling pixel values with (1 + amount).
+        - Input: JPEG bytes
+        - Output: Brightened JPEG bytes
         - amount > 0 increases brightness; < 0 decreases it.
-        - Works directly on uint8 BGR arrays; preserves dtype/shape.
         """
-        # Use cv2.convertScaleAbs for efficient scaling (alpha = scale factor)
+        # Decode bytes to BGR uint8 array
+		nparr = np.frombuffer(image_bytes, np.uint8)
+		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+		if image is None:
+			raise ValueError("Failed to decode image bytes")
+        
+        # Apply brightness
 		brightened = cv2.convertScaleAbs(image, alpha=(1 + amount), beta=0)
-		return brightened
+        
+        # Encode back to JPEG bytes
+		ret, buffer = cv2.imencode('.jpg', brightened)
+		if not ret:
+			raise ValueError("Failed to encode brightened image")
+		return buffer.tobytes()
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
@@ -53,6 +68,11 @@ class AIAnswerEvaluator:
 			return image_file.read()
 
 	def get_response(self, image_path: str, system_prompt: str, user_prompt: str):
+		"""Image Preprocessing"""
+		# preprocessor = ImagePreprocessor()
+		# image_bytes = preprocessor.load_image(image_path)
+		# brightened_bytes = preprocessor.brighten(image_bytes, amount=0.2)
+
 		"""Send a chat completion request with the image input"""
 		image_bytes = self.get_image(image_path)
 		image_encoded = types.Part.from_bytes(

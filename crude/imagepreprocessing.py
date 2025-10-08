@@ -1,10 +1,11 @@
 """
-Test script for ImagePreprocessor: Load an image, brighten it, and visualize the difference using OpenCV.
+Test script for ImagePreprocessor: Load to bytes, brighten bytes, and save for visual check.
 """
 import os
 import cv2
+import numpy as np
 
-from main import ImagePreprocessor  # Assuming ImagePreprocessor is defined in main.py
+from main import ImagePreprocessor  # Assuming in main.py
 
 if __name__ == "__main__":
     # Define the image path (update if needed)
@@ -17,18 +18,16 @@ if __name__ == "__main__":
     # Instantiate the preprocessor
     preprocessor = ImagePreprocessor()
     amount = 0.7
-    # Load and process
-    image_array = preprocessor.load_image(image_path)
-    brightened_image = preprocessor.brighten(image_array, amount)  # amount% brighter
-    
-    cv2.imshow("Original", image_array)
-    cv2.imshow(f"Brightened ({amount*100})", brightened_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
+    # Load to bytes and brighten
+    original_bytes = preprocessor.load_image(image_path)
+    brightened_bytes = preprocessor.brighten(original_bytes, amount)  # amount% brighter
     
-    original_mean = cv2.mean(image_array)[0] 
-    brightened_mean = cv2.mean(brightened_image)[0]
-    print(f"Original mean brightness (B channel): {original_mean:.3f}")
-    print(f"Brightened mean brightness (B channel): {brightened_mean:.3f}")
-    print(f"Increase: {((brightened_mean - original_mean) / original_mean * 100):.1f}%")
+    # Save to files for visual inspection
+    with open("test_original.jpg", "wb") as f:
+        f.write(original_bytes)
+    with open("test_brightened.jpg", "wb") as f:
+        f.write(brightened_bytes)
+    print("Saved: test_original.jpg and test_brightened.jpg")
+    
+    
