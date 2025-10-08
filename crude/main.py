@@ -20,12 +20,12 @@ class AIAnswerEvaluator:
 			return image_file.read()
 
 	def get_response(self, image_path: str, system_prompt: str, user_prompt: str):
-		"""Send a chat completion request with the image input. Uses inline image for now"""
+		"""Send a chat completion request with the image input"""
 		image_bytes = self.get_image(image_path)
 		
 		image_encoded = types.Part.from_bytes(
 				data=image_bytes,
-				mime_type='image_jpeg'
+				mime_type='image/jpeg'
 			)
 
 		response = self.client.models.generate_content(
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 		For example, given question "what is the equation shown in the image?", generate your answer as: "3x+2=8".
 		"""
 	
-	image_path = "../dataset/2.jpeg"
+	image_path = "dataset/2.jpeg"
 	expected_answer = "2"
 	
 	user_prompt = f"Can the final answer (boxed) be interpreted as '{expected_answer}'?"
@@ -58,4 +58,4 @@ if __name__ == "__main__":
 	ai_evaluator = AIAnswerEvaluator()
 	response = ai_evaluator.get_response(image_path, system_prompt, user_prompt)
 
-	print(response)
+	print(f"RESPONSE: {response}")
