@@ -1,9 +1,9 @@
 """
-Test script for ImagePreprocessor: Load to bytes, brighten bytes, and save for visual check.
+Test script for ImagePreprocessor: Load to bytes, adjust contrast (and brighten), save for visual check.
 """
 import os
-import cv2
 import numpy as np
+import cv2
 
 from main import ImagePreprocessor  # Assuming in main.py
 
@@ -17,17 +17,21 @@ if __name__ == "__main__":
     
     # Instantiate the preprocessor
     preprocessor = ImagePreprocessor()
-    amount = 0.7
-
-    # Load to bytes and brighten
+    
+    # Load to bytes
     original_bytes = preprocessor.load_image(image_path)
-    brightened_bytes = preprocessor.brighten(original_bytes, amount)  # amount% brighter
+    
+    # Apply contrast
+    contrasted_bytes = preprocessor.adjust_contrast(original_bytes, alpha=2.5)
+    
+    # Apply brighten
+    processed_bytes = preprocessor.brighten(contrasted_bytes, amount=0.1)
     
     # Save to files for visual inspection
     with open("test_original.jpg", "wb") as f:
         f.write(original_bytes)
-    with open("test_brightened.jpg", "wb") as f:
-        f.write(brightened_bytes)
-    print("Saved: test_original.jpg and test_brightened.jpg")
-    
-    
+    with open("test_contrasted.jpg", "wb") as f:
+        f.write(contrasted_bytes)
+    with open("test_processed.jpg", "wb") as f:  # Contrast + brighten
+        f.write(processed_bytes)
+    print("Saved: test_original.jpg, test_contrasted.jpg, test_processed.jpg")

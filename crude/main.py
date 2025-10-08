@@ -47,6 +47,22 @@ class ImagePreprocessor:
 		if not ret:
 			raise ValueError("Failed to encode brightened image")
 		return buffer.tobytes()
+	
+	def adjust_contrast(self, image_bytes: bytes, alpha: float = 1.2) -> bytes:
+		# Decode bytes to BGR uint8 array
+		nparr = np.frombuffer(image_bytes, np.uint8)
+		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+		if image is None:
+			raise ValueError("Failed to decode image bytes")
+        
+        # Apply contrast (using alpha in convertScaleAbs; beta=0 for no brightness change)
+		contrasted = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
+        
+        # Encode back to JPEG bytes
+		ret, buffer = cv2.imencode('.jpg', contrasted)
+		if not ret:
+			raise ValueError("Failed to encode contrasted image")
+		return buffer.tobytes()
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
@@ -64,7 +80,9 @@ class AIAnswerEvaluator:
 	def get_response(self, image_path: str, system_prompt: str, user_prompt: str):
 		"""Send a chat completion request with the image input"""
 		image_bytes = self.imager.load_image(image_path)
-		brightened_image_bytes = self.imager.brighten(image_bytes, amount=0.2)
+		
+		contrasted_bytes = self.imager.adjust_contrast(image_bytes, alpha=1.2)
+		brightened_image_bytes = self.imager.brighten(contrasted_bytes, amount=0.2)
 
 		image_encoded = types.Part.from_bytes(
 				data=brightened_image_bytes,
