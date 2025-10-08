@@ -6,9 +6,7 @@ import os
 from google import genai
 from google.genai import types
 
-from base64 import b64encode
 from dotenv import load_dotenv
-from PIL import Image
 
 
 class AIAnswerEvaluator:
