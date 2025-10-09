@@ -5,18 +5,19 @@ import csv
 import os
 
 from all_prompts import *
-
 from google import genai
 from google.genai import types
-
 from dotenv import load_dotenv
 
 import numpy as np
 import cv2
 
+
 class ImagePreprocessor:
 	def load_image(self, image_path: str) -> bytes:
-		"""Load image (unencoded) and return as bytes"""
+		"""
+		Load image (unencoded) and return as bytes
+		"""
 		image = cv2.imread(image_path, cv2.IMREAD_COLOR)
 		if image is None:
 			raise ValueError(f"Could not load image from {image_path}")
@@ -49,6 +50,9 @@ class ImagePreprocessor:
 		return buffer.tobytes()
 	
 	def adjust_contrast(self, image_bytes: bytes, alpha: float = 1.2) -> bytes:
+		"""
+		Adjust contrast by given alpha
+		"""
 		# Decode bytes to BGR uint8 array
 		nparr = np.frombuffer(image_bytes, np.uint8)
 		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -64,12 +68,16 @@ class ImagePreprocessor:
 			raise ValueError("Failed to encode contrasted image")
 		return buffer.tobytes()
 
+
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
-		"""Get first problem-answer pair from CSV file. Assumed structure is PROBLEM|ANSWER"""
+		"""
+		Get first problem-answer pair from CSV file. Assumed structure is PROBLEM|ANSWER
+		"""
 		with open(question_path, "r") as csv_file:
 			reader = csv.reader(csv_file, delimiter="|")
 			return next(reader)
+
 
 class AIAnswerEvaluator:
 	def __init__(self):
@@ -78,7 +86,9 @@ class AIAnswerEvaluator:
 		self.imager = ImagePreprocessor()
 
 	def get_response(self, image_path: str, system_prompt: str, user_prompt: str):
-		"""Send a chat completion request with the image input"""
+		"""
+		Send a chat completion request with the image input
+		"""
 		image_bytes = self.imager.load_image(image_path)
 		
 		contrasted_bytes = self.imager.adjust_contrast(image_bytes, alpha=1.2)
