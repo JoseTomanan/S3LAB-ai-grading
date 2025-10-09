@@ -1,6 +1,9 @@
 .venv
 .env
-# */**.jpeg
-*/**.jpg
+
+*.jpeg
+!dataset/*
+*.jpg
+
 .DS_Store
 */__pycache__/**
