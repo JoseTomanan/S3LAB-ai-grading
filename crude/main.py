@@ -13,6 +13,9 @@ import numpy as np
 import cv2
 
 
+RUBRIC_QUESTION = "What is the student's final answer? What is the expected answer for the question? Are they the same?"
+
+
 class ImagePreprocessor:
 	def load_image(self, image_path: str) -> bytes:
 		"""
@@ -51,7 +54,7 @@ class ImagePreprocessor:
 	
 	def adjust_contrast(self, image_bytes: bytes, alpha: float = 1.2) -> bytes:
 		"""
-		Adjust contrast by given alpha
+		Increase/decrease contrast by given alpha
 		"""
 		# Decode bytes to BGR uint8 array
 		nparr = np.frombuffer(image_bytes, np.uint8)
@@ -85,17 +88,12 @@ class AIAnswerEvaluator:
 		self.client = genai.Client(api_key=api_key)
 		self.imager = ImagePreprocessor()
 
-	def get_response(self, image_path: str, system_prompt: str, user_prompt: str):
+	def get_response(self, image_bytes: bytes, system_prompt: str, user_prompt: str):
 		"""
 		Send a chat completion request with the image input
 		"""
-		image_bytes = self.imager.load_image(image_path)
-		
-		contrasted_bytes = self.imager.adjust_contrast(image_bytes, alpha=1.2)
-		brightened_image_bytes = self.imager.brighten(contrasted_bytes, amount=0.2)
-
 		image_encoded = types.Part.from_bytes(
-				data=brightened_image_bytes,
+				data=image_bytes,
 				mime_type='image/jpeg'
 			)
 
@@ -113,20 +111,26 @@ class AIAnswerEvaluator:
 if __name__ == "__main__":
 	load_dotenv()
 
+	image_preprocessor = ImagePreprocessor()
+	contexter = CSVProcessor()
+	ai_evaluator = AIAnswerEvaluator()
+
 	system_prompt = ANSWER_RUBRIC_PROMPT
+	rubric_question = RUBRIC_QUESTION
+
 	image_path = "dataset/2.jpeg"
 	question_path = "dataset/2.csv"
 
-	context = CSVProcessor().get_context(question_path)
+	context = contexter.get_context(question_path)
 	context_question, expected_answer = context
+	print("CONTEXT:", context_question, expected_answer)
 	
-	print("CONTEXT: ", context_question, expected_answer)
+	image_bytes = image_preprocessor.load_image(image_path)
+	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
+	image_bytes = image_preprocessor.adjust_contrast(image_bytes, alpha=1.2)
 
-	rubric_question = "What is the student's final answer? What is the expected answer for the question? Are they the same?"
-	
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
 	
-	ai_evaluator = AIAnswerEvaluator()
-	response = ai_evaluator.get_response(image_path, system_prompt, user_prompt)
+	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
 
 	print(f"RESPONSE: {response}")
