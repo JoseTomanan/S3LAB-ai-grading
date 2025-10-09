@@ -18,6 +18,7 @@ ANSWER_RUBRIC_PROMPT: str = """
 	Your answer should be clear and concise, and directly relate to the image presented on the right side of the given image. 
 	If a question can be answered with a yes or no, only generate your answer as "YES" or "NO".
 	Otherwise, for example, given question "what is the equation shown in the image?", generate your answer as "3x+2=8".
+	If multiple questions are given in the prompt, separate your answers for each with `; `.
 	"""
 
 GENERATE_OWN_ANSWER_PROMPT: str = ""
