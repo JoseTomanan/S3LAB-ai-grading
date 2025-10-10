@@ -13,6 +13,8 @@ import numpy as np
 import cv2
 
 
+IMAGE_PATH = "dataset/2.jpeg"
+QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "What is the student's final answer? What is the expected answer for the question? Are they the same?"
 
 
@@ -117,9 +119,8 @@ if __name__ == "__main__":
 
 	system_prompt = ANSWER_RUBRIC_PROMPT
 	rubric_question = RUBRIC_QUESTION
-
-	image_path = "dataset/2.jpeg"
-	question_path = "dataset/2.csv"
+	image_path = IMAGE_PATH
+	question_path = QUESTION_PATH
 
 	context = contexter.get_context(question_path)
 	context_question, expected_answer = context
