@@ -32,18 +32,14 @@ class ImagePreprocessor:
 			raise ValueError("Failed to encode image")
 		return buffer.tobytes()
 	
-	def brighten(self, image_bytes: bytes, amount: float = 0.1) -> bytes:
+	def brighten(self, image_bytes: bytes, amount: float=0.1) -> bytes:
 		"""
         Brighten the image by scaling pixel values with (1 + amount).
         - Input: JPEG bytes
         - Output: Brightened JPEG bytes
         - amount > 0 increases brightness; < 0 decreases it.
         """
-        # Decode bytes to BGR uint8 array
-		nparr = np.frombuffer(image_bytes, np.uint8)
-		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-		if image is None:
-			raise ValueError("Failed to decode image bytes")
+		image = self._decode_bytes(image_bytes)
         
         # Apply brightness
 		brightened = cv2.convertScaleAbs(image, alpha=(1 + amount), beta=0)
@@ -58,11 +54,7 @@ class ImagePreprocessor:
 		"""
 		Increase/decrease contrast by given alpha
 		"""
-		# Decode bytes to BGR uint8 array
-		nparr = np.frombuffer(image_bytes, np.uint8)
-		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-		if image is None:
-			raise ValueError("Failed to decode image bytes")
+		image = self._decode_bytes(image_bytes)
         
         # Apply contrast (using alpha in convertScaleAbs; beta=0 for no brightness change)
 		contrasted = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
@@ -72,6 +64,18 @@ class ImagePreprocessor:
 		if not ret:
 			raise ValueError("Failed to encode contrasted image")
 		return buffer.tobytes()
+	
+	def _decode_bytes(self, image_bytes: bytes):
+		"""
+		Decode bytes into BGR uint8 array
+		"""
+		nparr = np.frombuffer(image_bytes, np.uint8)
+		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+		if image is None:
+			raise ValueError("Failed to decode image bytes")
+		
+		return image
 
 
 class CSVProcessor:
@@ -124,7 +128,7 @@ if __name__ == "__main__":
 
 	context = contexter.get_context(question_path)
 	context_question, expected_answer = context
-	print("CONTEXT:", context_question, expected_answer)
+	# print("CONTEXT:", context_question, expected_answer)
 	
 	image_bytes = image_preprocessor.load_image(image_path)
 	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
