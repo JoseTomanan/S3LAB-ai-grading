@@ -135,7 +135,8 @@ if __name__ == "__main__":
 	image_bytes = image_preprocessor.adjust_contrast(image_bytes, alpha=1.2)
 
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
-	
+
+	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
 	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
 
-	print(f"RESPONSE: {response}")
+	print(f"ITEM NUMBER: {item_number}\nRESPONSE: {response}")
