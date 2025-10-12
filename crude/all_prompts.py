@@ -13,4 +13,11 @@ ANSWER_RUBRIC_PROMPT: str = """
 	If multiple questions are given in the prompt, separate your answers for each with `; `.
 	"""
 
+FIND_ITEM_NUMBER_PROMPT: str = """
+	There is an item number indicated on the upper left corner of the image attached.
+	It is encircled and may be written with poor handwriting, and/or have gridlines underneath them.
+	Identify what it is; generate your answer simply (for example, just "2").
+	If there is no number, generate your answer as "NONE".
+	"""
+
 GENERATE_OWN_ANSWER_PROMPT: str = ""
