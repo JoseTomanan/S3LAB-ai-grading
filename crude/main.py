@@ -31,8 +31,8 @@ class ImagePreprocessor:
 		if not ret:
 			raise ValueError("Failed to encode image")
 		return buffer.tobytes()
-	
-	def brighten(self, image_bytes: bytes, amount: float=0.1) -> bytes:
+
+	def brighten(self, image_bytes: bytes, amount: float) -> bytes:
 		"""
         Brighten the image by scaling pixel values with (1 + amount).
         - Input: JPEG bytes
@@ -42,7 +42,7 @@ class ImagePreprocessor:
 		image = self._decode_bytes(image_bytes)
         
         # Apply brightness
-		brightened = cv2.convertScaleAbs(image, alpha=(1 + amount), beta=0)
+		brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
         
         # Encode back to JPEG bytes
 		ret, buffer = cv2.imencode('.jpg', brightened)
@@ -50,14 +50,13 @@ class ImagePreprocessor:
 			raise ValueError("Failed to encode brightened image")
 		return buffer.tobytes()
 	
-	def adjust_contrast(self, image_bytes: bytes, alpha: float = 1.2) -> bytes:
+	def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
 		"""
 		Increase/decrease contrast by given alpha
 		"""
 		image = self._decode_bytes(image_bytes)
         
-        # Apply contrast (using alpha in convertScaleAbs; beta=0 for no brightness change)
-		contrasted = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
+		contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
         
         # Encode back to JPEG bytes
 		ret, buffer = cv2.imencode('.jpg', contrasted)
@@ -132,7 +131,7 @@ if __name__ == "__main__":
 	
 	image_bytes = image_preprocessor.load_image(image_path)
 	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
-	image_bytes = image_preprocessor.adjust_contrast(image_bytes, alpha=1.2)
+	image_bytes = image_preprocessor.adjust_contrast(image_bytes, amount=1.2)
 
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
 
