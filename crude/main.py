@@ -9,8 +9,8 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-import numpy as np
-import cv2
+from io import BytesIO
+from PIL import Image, ImageEnhance
 
 
 IMAGE_PATH = "dataset/2.jpeg"
@@ -19,62 +19,25 @@ RUBRIC_QUESTION = "What is the student's final answer? What is the expected answ
 
 
 class ImagePreprocessor:
-	def load_image(self, image_path: str) -> bytes:
-		"""
-		Load image (unencoded) and return as bytes
-		"""
-		image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-		if image is None:
-			raise ValueError(f"Could not load image from {image_path}")
-		
-		ret, buffer = cv2.imencode('.jpg', image)
-		if not ret:
-			raise ValueError("Failed to encode image")
-		return buffer.tobytes()
+	def __init__(self):
+		self.buffer = BytesIO()
 
-	def brighten(self, image_bytes: bytes, amount: float) -> bytes:
-		"""
-        Brighten the image by scaling pixel values with (1 + amount).
-        - Input: JPEG bytes
-        - Output: Brightened JPEG bytes
-        - amount > 0 increases brightness; < 0 decreases it.
-        """
-		image = self._decode_bytes(image_bytes)
-        
-        # Apply brightness
-		brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
-        
-        # Encode back to JPEG bytes
-		ret, buffer = cv2.imencode('.jpg', brightened)
-		if not ret:
-			raise ValueError("Failed to encode brightened image")
-		return buffer.tobytes()
-	
-	def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
-		"""
-		Increase/decrease contrast by given alpha
-		"""
-		image = self._decode_bytes(image_bytes)
-        
-		contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
-        
-        # Encode back to JPEG bytes
-		ret, buffer = cv2.imencode('.jpg', contrasted)
-		if not ret:
-			raise ValueError("Failed to encode contrasted image")
-		return buffer.tobytes()
-	
-	def _decode_bytes(self, image_bytes: bytes):
-		"""
-		Decode bytes into BGR uint8 array
-		"""
-		nparr = np.frombuffer(image_bytes, np.uint8)
-		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+	def load_image(self, image_path: str) -> Image.Image:
+		return Image.open(image_path)
 
-		if image is None:
-			raise ValueError("Failed to decode image bytes")
+	def increase_visibility(self, image: Image.Image, brighten_val: float=1.3, contrast_val: float=1.5) -> Image.Image:
+		brightened = ImageEnhance.Brightness(image)\
+				.enhance(brighten_val)
+		contrasted = ImageEnhance.Contrast(brightened)\
+				.enhance(contrast_val)
 		
-		return image
+		return contrasted
+	
+	def encode_to_bytes(self, image: Image.Image) -> bytes:
+		image.save(self.buffer, format="JPEG")
+		image_bytes = self.buffer.getvalue()
+
+		return image_bytes
 
 
 class CSVProcessor:
@@ -127,15 +90,15 @@ if __name__ == "__main__":
 
 	context = contexter.get_context(question_path)
 	context_question, expected_answer = context
-	# print("CONTEXT:", context_question, expected_answer)
 	
-	image_bytes = image_preprocessor.load_image(image_path)
-	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
-	image_bytes = image_preprocessor.adjust_contrast(image_bytes, amount=1.2)
+	image = image_preprocessor.load_image(image_path)
+	image = image_preprocessor.increase_visibility(image, brighten_val=1.2, contrast_val=1.7)
+	image_bytes = image_preprocessor.encode_to_bytes(image)
 
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
 
 	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
-	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
+	print("ITEM NUMBER:", item_number)
 
-	print(f"ITEM NUMBER: {item_number}\nRESPONSE: {response}")
+	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
+	print("RESPONSE:", response)
