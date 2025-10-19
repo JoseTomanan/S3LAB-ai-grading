@@ -8,6 +8,8 @@ from all_prompts import *
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+from PIL import Image, ImageEnhance
+from io import BytesIO
 
 import numpy as np
 import cv2
@@ -18,7 +20,28 @@ QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "What is the student's final answer? What is the expected answer for the question? Are they the same?"
 
 
-class ImagePreprocessor:
+class PILImagePreprocessor:
+	def __init__(self):
+		self.buffer = BytesIO()
+
+	def load_image(self, image_path: str) -> Image.Image:
+		return Image.open(image_path)
+
+	def increase_visibility(self, image: Image.Image, brighten_val: float=1.3, contrast_val: float=1.5) -> Image.Image:
+		brightened = ImageEnhance.Brightness(image)\
+				.enhance(brighten_val)
+		contrasted = ImageEnhance.Contrast(brightened)\
+				.enhance(contrast_val)
+		
+		return contrasted
+	
+	def encode_to_bytes(self, image: Image.Image) -> bytes:
+		image.save(self.buffer, format="JPEG")
+		image_bytes = self.buffer.getvalue()
+
+		return image_bytes
+
+class CVImagePreprocessor:
 	def load_image(self, image_path: str) -> bytes:
 		"""
 		Load image (unencoded) and return as bytes
@@ -91,7 +114,7 @@ class AIAnswerEvaluator:
 	def __init__(self):
 		api_key = os.getenv("GEMINI_API_KEY")
 		self.client = genai.Client(api_key=api_key)
-		self.imager = ImagePreprocessor()
+		self.imager = CVImagePreprocessor()
 
 	def get_response(self, image_bytes: bytes, system_prompt: str, user_prompt: str):
 		"""
@@ -116,7 +139,7 @@ class AIAnswerEvaluator:
 if __name__ == "__main__":
 	load_dotenv()
 
-	image_preprocessor = ImagePreprocessor()
+	image_preprocessor = CVImagePreprocessor()
 	contexter = CSVProcessor()
 	ai_evaluator = AIAnswerEvaluator()
 
