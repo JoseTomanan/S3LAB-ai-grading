@@ -15,7 +15,7 @@ import numpy as np
 import cv2
 
 
-IMAGE_PATH = "dataset/2.jpeg"
+IMAGE_PATH = "dataset/2_test_bad.jpg"
 QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "What is the student's final answer? What is the expected answer for the question? Are they the same?"
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
 	context = contexter.get_context(question_path)
 	context_question, expected_answer = context
-	# print("CONTEXT:", context_question, expected_answer)
+	print("CONTEXT:", context_question, expected_answer)
 	
 	image_bytes = image_preprocessor.load_image(image_path)
 	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
@@ -201,6 +201,7 @@ if __name__ == "__main__":
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
 
 	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
-	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
+	print(f"ITEM NUMBER: {item_number}")
 
-	print(f"ITEM NUMBER: {item_number}\nRESPONSE: {response}")
+	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
+	print(f"RESPONSE: {response}")
