@@ -2,7 +2,7 @@ import os
 import numpy as np
 import cv2
 
-from crude.main import CVImagePreprocessor
+from app.main import CVImagePreprocessor
 from extractor_to_txt import extract_csv_column_to_txt
 
 if __name__ == "__main__":
