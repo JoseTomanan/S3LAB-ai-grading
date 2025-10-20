@@ -2,7 +2,8 @@ import os
 import numpy as np
 import cv2
 
-from main import CVImagePreprocessor, extract_csv_column_to_txt
+from crude.main import CVImagePreprocessor
+from extractor_to_txt import extract_csv_column_to_txt
 
 if __name__ == "__main__":
     # Test 1
