@@ -14,6 +14,8 @@ from io import BytesIO
 import numpy as np
 import cv2
 
+from cv2.typing import MatLike
+
 
 IMAGE_PATH = "dataset/2_test_bad.jpg"
 QUESTION_PATH = "dataset/2.csv"
@@ -63,29 +65,18 @@ class CVImagePreprocessor:
         - amount > 0 increases brightness; < 0 decreases it.
         """
 		image = self._decode_bytes(image_bytes)
-        
-        # Apply brightness
 		brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
         
-        # Encode back to JPEG bytes
-		ret, buffer = cv2.imencode('.jpg', brightened)
-		if not ret:
-			raise ValueError("Failed to encode brightened image")
-		return buffer.tobytes()
+		return self._encode_bytes(brightened)
 	
 	def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
 		"""
 		Increase/decrease contrast by given alpha
 		"""
 		image = self._decode_bytes(image_bytes)
-        
 		contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
-        
-        # Encode back to JPEG bytes
-		ret, buffer = cv2.imencode('.jpg', contrasted)
-		if not ret:
-			raise ValueError("Failed to encode contrasted image")
-		return buffer.tobytes()
+
+		return self._encode_bytes(contrasted)
 	
 	def save_image(self, image_bytes: bytes, save_path: str) -> None:
 		"""
@@ -93,7 +84,6 @@ class CVImagePreprocessor:
 		- image_bytes: The image in byte form, after any preprocessing (brightened, cropped, etc.)
 		- save_path: The path where the image will be saved, including the filename and .jpeg extension.
 		"""
-
 		with open(save_path, "wb") as f:
 			ret = f.write(image_bytes)
 		if not ret:
@@ -107,11 +97,18 @@ class CVImagePreprocessor:
 		"""
 		nparr = np.frombuffer(image_bytes, np.uint8)
 		image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
 		if image is None:
 			raise ValueError("Failed to decode image bytes")
-		
 		return image
+	
+	def _encode_bytes(self, arr: MatLike) -> bytes:
+		"""
+		Encode into JPEG bytes
+		"""
+		ret, buffer = cv2.imencode('.jpg', arr)
+		if not ret:
+			raise ValueError("Failed to encode image")
+		return buffer.tobytes()
 
 
 class CSVProcessor:
