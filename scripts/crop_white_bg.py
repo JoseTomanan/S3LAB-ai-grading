@@ -2,10 +2,6 @@ import numpy as np
 import cv2
 
 
-INPUT_FILE = "TEST_IMAGE.jpeg"
-OUTPUT_FILE = "TEST_OUTPUT.jpeg"
-
-
 def crop_white_background(input_path: str, output_path: str, line_thickness: int=5, color_tolerance: int=10):
 	"""
 	Finds a thick, continuous, single-color vertical line to use as a divider.
@@ -19,10 +15,14 @@ def crop_white_background(input_path: str, output_path: str, line_thickness: int
 		color_tolerance (int): How much a pixel's color can deviate from the line's
 								main color (0-255). A small value handles JPEG artifacts.
 	"""
-	original_img = cv2.imread(input_path)
-	assert original_img is not None
-
-	height, width, _ = original_img.shape
+	try:
+		original_img = cv2.imread(input_path)
+		if original_img is None:
+			raise FileNotFoundError
+		height, width, _ = original_img.shape
+	except (FileNotFoundError, AttributeError):
+		print(f"Error: The file '{input_path}' was not found or is not a valid image.")
+		return
 
 	divider_x = None
 
@@ -76,9 +76,10 @@ def crop_white_background(input_path: str, output_path: str, line_thickness: int
 	else:
 		print(f"Found divider but no content to the right of it.")
 
-def _get_right_side():
-	...
 
 
 if __name__ == "__main__":
-	crop_white_background(INPUT_FILE, OUTPUT_FILE)
+	for i in range(2030):
+		input_file = f"dataset/DrawEduMath/Before/image_{i}.png"
+		output_path = f"dataset/DrawEduMath/Postprocessing/{i}.png"
+		crop_white_background(input_file, output_path)
