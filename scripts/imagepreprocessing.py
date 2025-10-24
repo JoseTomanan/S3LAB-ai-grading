@@ -98,3 +98,4 @@ if __name__ == "__main__":
 
     # Test 4. .CSV to .TXT file
     extract_csv_column_to_txt(csv_path=f"dataset/DrawEduMath_QA.csv",column_name="Image URL",output_path=f"dataset/DrawEduMath_QA_ImageURL.txt")
+    
