@@ -92,7 +92,7 @@ class CVImagePreprocessor:
 		print(f"Image saved to {save_path}")
 
 
-	def _decode_bytes(self, image_bytes: bytes):
+	def _decode_bytes(self, image_bytes: bytes) -> cv2.typing.MatLike:
 		"""
 		Decode bytes into BGR uint8 array
 		"""
@@ -105,11 +105,14 @@ class CVImagePreprocessor:
 		return image
 	
 	def _encode_to_bytes(self, image_matrix: cv2.typing.MatLike) -> bytes:
-		# Encode back to JPEG bytes
+		"""
+		Encode BGR uint8 array back to JPEG bytes
+		"""
 		ret, buffer = cv2.imencode('.jpg', image_matrix)
 		if not ret:
 			raise ValueError("Failed to encode image")
 		return buffer.tobytes()
+
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
