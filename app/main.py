@@ -64,14 +64,9 @@ class CVImagePreprocessor:
         """
 		image = self._decode_bytes(image_bytes)
         
-        # Apply brightness
 		brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
         
-        # Encode back to JPEG bytes
-		ret, buffer = cv2.imencode('.jpg', brightened)
-		if not ret:
-			raise ValueError("Failed to encode brightened image")
-		return buffer.tobytes()
+		return self._encode_to_bytes(brightened)
 	
 	def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
 		"""
@@ -81,11 +76,7 @@ class CVImagePreprocessor:
         
 		contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
         
-        # Encode back to JPEG bytes
-		ret, buffer = cv2.imencode('.jpg', contrasted)
-		if not ret:
-			raise ValueError("Failed to encode contrasted image")
-		return buffer.tobytes()
+		return self._encode_to_bytes(contrasted)
 	
 	def save_image(self, image_bytes: bytes, save_path: str) -> None:
 		"""
@@ -101,7 +92,7 @@ class CVImagePreprocessor:
 		print(f"Image saved to {save_path}")
 
 
-	def _decode_bytes(self, image_bytes: bytes):
+	def _decode_bytes(self, image_bytes: bytes) -> cv2.typing.MatLike:
 		"""
 		Decode bytes into BGR uint8 array
 		"""
@@ -112,6 +103,15 @@ class CVImagePreprocessor:
 			raise ValueError("Failed to decode image bytes")
 		
 		return image
+	
+	def _encode_to_bytes(self, image_matrix: cv2.typing.MatLike) -> bytes:
+		"""
+		Encode BGR uint8 array back to JPEG bytes
+		"""
+		ret, buffer = cv2.imencode('.jpg', image_matrix)
+		if not ret:
+			raise ValueError("Failed to encode image")
+		return buffer.tobytes()
 
 
 class CSVProcessor:
