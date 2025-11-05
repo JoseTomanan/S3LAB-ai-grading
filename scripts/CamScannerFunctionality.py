@@ -15,9 +15,19 @@ def flatten_document(image_path, save_debug=False):
     #     cv2.imwrite("../output/gray.jpg", gray)
     #     cv2.imwrite("../output/canny.jpg", edges)
 
+    kernel = np.ones((5,5), np.uint8)
+    edges = cv2.dilate(edges,kernel,iterations=1)
+    edges = cv2.morphologyEx(edges,cv2.MORPH_CLOSE,kernel)
+
     # Find contours
     contours, i = cv2.findContours(edges.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+    if save_debug:
+        all_contours_img = image.copy()
+        cv2.drawContours(all_contours_img, contours, -1, (0, 255, 0), 2)
+        cv2.imwrite("../output/all_contours.jpg", all_contours_img)
+
 
     doc_contour = None
     for contour in contours:
@@ -34,6 +44,7 @@ def flatten_document(image_path, save_debug=False):
         contour_img = image.copy()
         cv2.drawContours(contour_img, [doc_contour], -1, (0, 255, 0), 2)
         cv2.imwrite("../output/contour.jpg", contour_img)
+
 
     # Order the corner points
     pts = doc_contour.reshape(4, 2)
@@ -75,7 +86,7 @@ def flatten_document(image_path, save_debug=False):
 # Get the folder where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Build the correct path to dataset
-image_path = os.path.join(script_dir, "..", "dataset", "contour_3.jpg")
+image_path = os.path.join(script_dir, "..", "dataset", "contour_8.jpg")
 # Normalize to absolute path
 image_path = os.path.normpath(image_path)
 
