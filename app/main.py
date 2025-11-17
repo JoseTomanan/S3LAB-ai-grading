@@ -15,7 +15,7 @@ import numpy as np
 import cv2
 
 
-IMAGE_PATH = "dataset/contour_3_flattened_3.jpg"
+IMAGE_PATH = "dataset/2_test_good.jpg"
 QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "Based only on the visual content of the student's work, what is the student's final answer? What is the correct mathematical answer to the problem? Are they the same?"
 
@@ -165,13 +165,13 @@ if __name__ == "__main__":
 	context = contexter.get_context(question_path)
 	context_question, expected_answer = context
 	print("CONTEXT:", context_question, expected_answer)
+	print("PROMPT:", rubric_question)
 	
 	image_bytes = image_preprocessor.load_image(image_path)
 	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
 	image_bytes = image_preprocessor.adjust_contrast(image_bytes, amount=1.2)
 
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
-	print(user_prompt)
 
 	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
 	print(f"ITEM NUMBER: {item_number}")
