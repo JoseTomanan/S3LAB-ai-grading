@@ -4,6 +4,6 @@ export interface TestInstance {
 	test_name: string
 	section: string
 	date: string
-	status: boolean
+	is_done_rendering: boolean
 }
 
