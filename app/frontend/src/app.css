@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400");
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
@@ -120,6 +122,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+	h1 {
+		@apply text-2xl;
+		font-weight: bold;
+	}
 }
 
 @layer components {
