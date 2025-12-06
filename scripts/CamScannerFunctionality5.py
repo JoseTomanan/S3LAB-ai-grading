@@ -178,6 +178,10 @@ def flatten_document(image_path, save_debug=False, top_n=5):
     print(f"Document flattening completed for top {len(warped_results)} contours.")
     return warped_results  # Dict {0: warped0, 1: warped1, ...}
 
+
+
+
+
 class CVImagePreprocessor:
     def __init__(self):
         pass
@@ -331,7 +335,7 @@ class CVImagePreprocessor:
 if __name__ == "__main__":
     # Step 22 – Set Up Paths for Testing
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    image_path = os.path.normpath(os.path.join(script_dir, "..", "dataset", "contour_13.jpg"))
+    image_path = os.path.normpath(os.path.join(script_dir, "..", "dataset", "contour_14.jpg"))
   
     print("Starting document flattening process...")
     # Step 23 – Flatten Document (Now processes top_n=3)
