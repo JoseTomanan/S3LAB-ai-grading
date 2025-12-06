@@ -2,13 +2,18 @@ import cv2
 import numpy as np
 import os
 
-def flatten_document(image_path, save_debug=False):
+def flatten_document(image_path, save_debug=False, top_n=5):
+    """
+    Flatten document using top N largest contours.
+    - top_n: Number of top contours to process (default=3 for efficiency).
+    Returns: Dict of {index: warped_image} for each processed contour.
+    """
     # Step 1 – Load and Preprocess Image
     script_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.normpath(os.path.join(script_dir, "..", "output"))
     if save_debug and not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
-   
+    
     # Step 2 – Apply Gaussian Blur
     image = cv2.imread(image_path)
     orig = image.copy()
@@ -22,7 +27,7 @@ def flatten_document(image_path, save_debug=False):
         cv2.imwrite(os.path.join(output_dir, "4_gray.jpg"), gray)
         # Step 5 – Save Canny Edges
         cv2.imwrite(os.path.join(output_dir, "5_canny.jpg"), edges)
-   
+    
     # Step 6 – Dilate Edges
     kernel = np.ones((5,5), np.uint8)
     edges = cv2.dilate(edges, kernel, iterations=1)
@@ -30,153 +35,148 @@ def flatten_document(image_path, save_debug=False):
     # Step 7 – Apply Morphological Close
     edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
     
-    # Step 8 – Find Contours
-    contours, _ = cv2.findContours(edges.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    # Step 8 – Find Contours (Full Hierarchy + Top-Level Filter)
+    contours, hierarchy = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # Filter to top-level: Contours with no parent (hierarchy[0, i, 3] == -1)
+    top_level_indices = [i for i, h in enumerate(hierarchy[0]) if h[3] == -1]  # h[3] = parent
+    contours = [contours[i] for i in top_level_indices]
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    contours = [c for c in contours if cv2.contourArea(c) > 1000] # Filter contour to ignore random small shapes
+    contours = [c for c in contours if cv2.contourArea(c) > 1000]
     if save_debug:
         # Step 9 – Save All Contours
         all_contours_img = image.copy()
         cv2.drawContours(all_contours_img, contours, -1, (0, 255, 0), 2)
         cv2.imwrite(os.path.join(output_dir, "9_all_contours.jpg"), all_contours_img)
-   
+    
     if save_debug:
-        # Step 10 – Save Top 10 Individual Contours
-        for i, contour in enumerate(contours[:10]):
+        # Step 10 – Save Top 10 Individual Contours (Extended to top_n if >10)
+        top_contours = contours[:min(10, len(contours))]
+        for i, contour in enumerate(top_contours):
             debug_img = image.copy()
             cv2.drawContours(debug_img, [contour], -1, (0, 255, 0), 2)
             cv2.imwrite(os.path.join(output_dir, f"10_individual_contour_{i+1}.jpg"), debug_img)
-   
-    # # Step 11 – Detect Document Contour (4 Corners)
-    # doc_contour = None
-    # valid_candidates = []
-    # for i, contour in enumerate(contours):  # Add enumerate
-    #     perimeter = cv2.arcLength(contour, True)
-    #     approx = cv2.approxPolyDP(contour, 0.03 * perimeter, True)
-    #     if len(approx) == 4 and cv2.isContourConvex(approx):
-    #         raw_area = cv2.contourArea(contour)
-    #         valid_candidates.append((i, approx, raw_area))
-
-    # if valid_candidates:
-    #     selected_i, doc_contour, selected_area = max(valid_candidates, key=lambda x: x[2])  # Max area
-    #     print(f"Selected contour at index {selected_i+1} ... area {selected_area:.0f} ...")
-    # else:
-    #     raise Exception("Could not find a 4-cornered contour (document boundary).")
-
-    # # Enforce: Pick the largest raw area among valids
-    # selected_i, doc_contour, selected_area = max(valid_candidates, key=lambda x: x[2])
-    # print(f"*** SELECTED LARGEST VALID: Index {selected_i} (file 10_individual_contour_{selected_i+1}.jpg) with area {selected_area:.0f} square pixels for approximation. Found {len(valid_candidates)} total valids. ***")
-
-    # # Optional: Log other candidates for audit
-    # if len(valid_candidates) > 1:
-    #     print(f"Other valids (indices/areas): {[(idx, area) for idx, _, area in valid_candidates if idx != selected_i]}")
-        
-    # if save_debug:
-    #     # Step 12 – Save Detected Document Contour
-    #     contour_img = image.copy()
-    #     cv2.drawContours(contour_img, [doc_contour], -1, (0, 255, 0), 2)
-    #     cv2.imwrite(os.path.join(output_dir, "12_doc_contour.jpg"), contour_img)
     
-    # Step 11 – Force Largest Contour to Convex 4-Point Approximation
+    # Step 11 – Force Top N Contours to Convex 4-Point Approximations
     if not contours:
         raise Exception("No contours available for document boundary detection.")
 
-    largest_contour = contours[0]  # Explicitly select the 0th (largest by area)
-    raw_area = cv2.contourArea(largest_contour)
-    print(f"Forcing largest contour (index 0, file 10_individual_contour_1.jpg): Raw area {raw_area:.0f} square px")
+    top_contours = contours[:top_n]
+    warped_results = {}  # {index: warped_image}
 
-    # Substep 11a: Compute Convex Hull (Eliminates Concavities)
-    hull = cv2.convexHull(largest_contour)
-    hull_perimeter = cv2.arcLength(hull, True)
-    print(f"Convex hull perimeter: {hull_perimeter:.0f} px")
+    for idx, largest_contour in enumerate(top_contours):
+        raw_area = cv2.contourArea(largest_contour)
+        print(f"Processing contour {idx} (file 10_individual_contour_{idx+1}.jpg): Raw area {raw_area:.0f} square px")
 
-    # Substep 11b: Approximate Hull to Polygon (Tune Epsilon for ~4 Sides)
-    epsilon = 0.03 * hull_perimeter  # Starting point
-    approx = cv2.approxPolyDP(hull, epsilon, True)
-    num_sides = len(approx)
+        # Substep 11a: Compute Convex Hull (Eliminates Concavities)
+        hull = cv2.convexHull(largest_contour)
+        hull_perimeter = cv2.arcLength(hull, True)
+        print(f"  Convex hull perimeter: {hull_perimeter:.0f} px")
 
-    # Iteratively Increase Epsilon Until ≤4 Sides (Aggressive Simplification)
-    while num_sides > 4 and epsilon < 0.2 * hull_perimeter:  # Cap at 20% to avoid over-flattening
-        epsilon *= 1.5  # Progressive increase (e.g., 0.03 → 0.045 → 0.0675 → ...)
+        # Substep 11b: Approximate Hull to Polygon (Tune Epsilon for ~4 Sides)
+        epsilon = 0.03 * hull_perimeter  # Starting point
         approx = cv2.approxPolyDP(hull, epsilon, True)
         num_sides = len(approx)
 
-    # Substep 11c: Clamp to Exactly 4 if Needed (<4 is Rare, but Handle)
-    if num_sides > 4:
-        print(f"Warning: Could not simplify to ≤4 sides (got {num_sides}); using as-is for transform.")
-        # Optional: Further force by sampling 4 extrema (min/max x/y on hull)
-        # pts = hull.reshape(-1, 2)
-        # approx = np.array([
-        #     [pts[:, 0].min(), pts[:, 1].min()],  # Bottom-left
-        #     [pts[:, 0].max(), pts[:, 1].min()],  # Bottom-right
-        #     [pts[:, 0].max(), pts[:, 1].max()],  # Top-right
-        #     [pts[:, 0].min(), pts[:, 1].max()]   # Top-left
-        # ], dtype="float32")
-    elif num_sides < 4:
-        print(f"Warning: Under-simplified to {num_sides} sides; clamping to 4 extrema.")
-        pts = hull.reshape(-1, 2)
-        approx = np.array([
-            [pts[:, 0].min(), pts[:, 1].min()],  # BL
-            [pts[:, 0].max(), pts[:, 1].min()],  # BR
-            [pts[:, 0].max(), pts[:, 1].max()],  # TR
-            [pts[:, 0].min(), pts[:, 1].max()]   # TL
+        # Iteratively Increase Epsilon Until ≤4 Sides (Aggressive Simplification)
+        while num_sides > 4 and epsilon < 0.2 * hull_perimeter:  # Cap at 20% to avoid over-flattening
+            epsilon *= 1.5  # Progressive increase (e.g., 0.03 → 0.045 → 0.0675 → ...)
+            approx = cv2.approxPolyDP(hull, epsilon, True)
+            num_sides = len(approx)
+
+        # Substep 11c: Clamp to Exactly 4 if Needed (<4 is Rare, but Handle)
+        if num_sides > 4:
+            print(f"  Warning: Could not simplify to ≤4 sides (got {num_sides}); using as-is for transform.")
+            # Optional: Force extrema (uncomment if you want aggressive clamping)
+            # pts = hull.reshape(-1, 2)
+            # approx = np.array([...])  # As before
+        elif num_sides < 4:
+            print(f"  Warning: Under-simplified to {num_sides} sides; clamping to 4 extrema.")
+            pts = hull.reshape(-1, 2)
+            approx = np.array([
+                [pts[:, 0].min(), pts[:, 1].min()],  # BL
+                [pts[:, 0].max(), pts[:, 1].min()],  # BR
+                [pts[:, 0].max(), pts[:, 1].max()],  # TR
+                [pts[:, 0].min(), pts[:, 1].max()]   # TL
+            ], dtype="float32")
+            num_sides = 4
+
+        # Final Assignment
+        doc_contour = approx
+        print(f"  Final approx: {num_sides} convex sides, final epsilon={epsilon:.2f}")
+
+        # NEW: Validate Non-Degenerate Contour (Fixes Draw Error)
+        unique_pts = np.unique(doc_contour, axis=0)  # Remove duplicates
+        approx_area = cv2.contourArea(doc_contour)
+        if len(unique_pts) < 3 or approx_area < 100:  # <3 pts or tiny area = degenerate
+            print(f"  Skipping contour {idx}: Degenerate approx (area {approx_area:.0f}, unique pts {len(unique_pts)})")
+            continue
+
+        # Quick Coverage Check (Now on Validated Area)
+        image_area = image.shape[0] * image.shape[1]
+        if approx_area < 0.1 * image_area:
+            print(f"  Skipping contour {idx}: Forced approx too small ({approx_area:.0f} vs {image_area:.0f} image area); check preprocessing.")
+            continue
+
+        # NEW: Normalize Shape for Drawing (Fixes Assertion Error)
+        if doc_contour.ndim == 2:  # (4,2) from clamp → Reshape to (4,1,2)
+            doc_contour_draw = doc_contour.reshape(4, 1, 2).astype(np.int32)
+        else:  # Already (4,1,2) from approxPolyDP
+            doc_contour_draw = doc_contour.astype(np.int32)  # Ensure int32
+        # Re-check area post-reshape (catches float→int rounding degenerates)
+        approx_area_draw = cv2.contourArea(doc_contour_draw)
+        if approx_area_draw < 100:
+            print(f"  Skipping contour {idx}: Degenerate after reshape (area {approx_area_draw:.0f})")
+            continue
+
+        if save_debug:
+            # Enhanced Debug: Draw Raw, Hull, and Approx for this contour
+            debug_img = image.copy()
+            cv2.drawContours(debug_img, [largest_contour], -1, (255, 0, 0), 3)  # Red: Raw
+            cv2.drawContours(debug_img, [hull], -1, (0, 255, 255), 2)           # Yellow: Hull
+            cv2.drawContours(debug_img, [doc_contour_draw], -1, (0, 0, 255), 4)  # Blue: Final approx (Safe now)
+            cv2.imwrite(os.path.join(output_dir, f"11_forced_approx_{idx+1}.jpg"), debug_img)
+
+        # Step 13 – Order Corner Points (Use original doc_contour (4,2) float32)
+        pts = doc_contour.reshape(4, 2)
+        rect = np.zeros((4, 2), dtype="float32")
+        s = pts.sum(axis=1)
+        rect[0] = pts[np.argmin(s)]
+        rect[2] = pts[np.argmax(s)]
+        diff = np.diff(pts, axis=1)
+        rect[1] = pts[np.argmin(diff)]
+        rect[3] = pts[np.argmax(diff)]
+        (tl, tr, br, bl) = rect
+
+        # Step 14 – Calculate Output Dimensions
+        widthA = np.linalg.norm(br - bl)
+        widthB = np.linalg.norm(tr - tl)
+        heightA = np.linalg.norm(tr - br)
+        heightB = np.linalg.norm(tl - bl)
+        maxWidth = int(max(widthA, widthB))
+        maxHeight = int(max(heightA, heightB))
+        dst = np.array([
+            [0, 0],
+            [maxWidth - 1, 0],
+            [maxWidth - 1, maxHeight - 1],
+            [0, maxHeight - 1]
         ], dtype="float32")
-        num_sides = 4
 
-    # Final Assignment and Validation
-    doc_contour = approx
-    print(f"Final approx: {num_sides} convex sides, final epsilon={epsilon:.2f}")
+        # Step 15 – Compute Perspective Transformation
+        M = cv2.getPerspectiveTransform(rect, dst)
 
-    # Quick Coverage Check (Optional: Reject if Too Small)
-    image_area = image.shape[0] * image.shape[1]
-    approx_area = cv2.contourArea(doc_contour)
-    if approx_area < 0.1 * image_area:  # <10%? Unlikely but flag
-        raise Exception(f"Forced approx too small ({approx_area:.0f} vs {image_area:.0f} image area); check preprocessing.")
+        # Step 16 – Warp Perspective
+        warped = cv2.warpPerspective(orig, M, (maxWidth, maxHeight))
+        warped_results[idx] = warped  # Store by 0-based index
 
-    if save_debug:
-        # Enhanced Debug: Draw Raw, Hull, and Approx
-        debug_img = image.copy()
-        cv2.drawContours(debug_img, [largest_contour], -1, (255, 0, 0), 3)  # Red: Raw largest
-        cv2.drawContours(debug_img, [hull], -1, (0, 255, 255), 2)           # Yellow: Hull
-        cv2.drawContours(debug_img, [doc_contour], -1, (0, 0, 255), 4)      # Blue: Final approx
-        cv2.imwrite(os.path.join(output_dir, "11_forced_approx.jpg"), debug_img)
+        if save_debug:
+            # Step 17 – Save Flattened Document for this contour
+            cv2.imwrite(os.path.join(output_dir, f"17_flattened_{idx+1}.jpg"), warped)
 
+    if not warped_results:
+        raise Exception("No valid contours produced warped images.")
 
-    # Step 13 – Order Corner Points
-    pts = doc_contour.reshape(4, 2)
-    rect = np.zeros((4, 2), dtype="float32")
-    s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)]
-    rect[2] = pts[np.argmax(s)]
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]
-    rect[3] = pts[np.argmax(diff)]
-    (tl, tr, br, bl) = rect
-    
-    # Step 14 – Calculate Output Dimensions
-    widthA = np.linalg.norm(br - bl)
-    widthB = np.linalg.norm(tr - tl)
-    heightA = np.linalg.norm(tr - br)
-    heightB = np.linalg.norm(tl - bl)
-    maxWidth = int(max(widthA, widthB))
-    maxHeight = int(max(heightA, heightB))
-    dst = np.array([
-        [0, 0],
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]
-    ], dtype="float32")
-    
-    # Step 15 – Compute Perspective Transformation
-    M = cv2.getPerspectiveTransform(rect, dst)
-    
-    # Step 16 – Warp Perspective
-    warped = cv2.warpPerspective(orig, M, (maxWidth, maxHeight))
-    if save_debug:
-        # Step 17 – Save Flattened Document
-        cv2.imwrite(os.path.join(output_dir, "17_flattened.jpg"), warped)
-    print("Document flattening completed.")
-    return warped
+    print(f"Document flattening completed for top {len(warped_results)} contours.")
+    return warped_results  # Dict {0: warped0, 1: warped1, ...}
 
 class CVImagePreprocessor:
     def __init__(self):
@@ -331,16 +331,19 @@ class CVImagePreprocessor:
 if __name__ == "__main__":
     # Step 22 – Set Up Paths for Testing
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    image_path = os.path.normpath(os.path.join(script_dir, "..", "dataset", "contour_12.jpg"))
+    image_path = os.path.normpath(os.path.join(script_dir, "..", "dataset", "contour_13.jpg"))
   
     print("Starting document flattening process...")
-    # Step 23 – Flatten Document
-    flattened_doc = flatten_document(image_path, save_debug=True)
-  
+    # Step 23 – Flatten Document (Now processes top_n=3)
+    flattened_results = flatten_document(image_path, save_debug=True, top_n=5)
+    
+    # For backward compatibility: Use the first (largest) for preprocessor
+    flattened_doc = flattened_results[0]  # Index 0: Largest
+    flattened_path = os.path.join(script_dir, "..", "output", "17_flattened_1.jpg")  # Use _1.jpg
+    
     print("Starting paper type detection and preprocessing...")
     # Step 24 – Initialize Preprocessor and Load Flattened Image
     preprocessor = CVImagePreprocessor()
-    flattened_path = os.path.join(script_dir, "..", "output", "17_flattened.jpg") # Adjusted to match save name
     if os.path.exists(flattened_path):
         flattened_bytes = preprocessor.load_image(flattened_path)
     else:
