@@ -1,7 +1,0 @@
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
-
-h1 {
-	@apply font-bold;
-}
