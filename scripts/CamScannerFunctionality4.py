@@ -144,7 +144,7 @@ class CVImagePreprocessor:
                     horizontal_lines += 1
       
         paper_type = 'lined' if horizontal_lines >= line_threshold else 'blank'
-        print(f"Detected {horizontal_lines} horizontal lines → Paper type: {paper_type}")
+        print(f"Detected {horizontal_lines} horizontal lines; Paper type: {paper_type}")
         return paper_type
 
     def remove_horizontal_lines(self, image_bytes: bytes, kernel_size: int = 3) -> bytes:
