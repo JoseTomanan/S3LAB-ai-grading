@@ -5,5 +5,4 @@
 !dataset/*
 
 .DS_Store
-*/__pycache__/**
-# **/ignoreable/*
+**/__pycache__
