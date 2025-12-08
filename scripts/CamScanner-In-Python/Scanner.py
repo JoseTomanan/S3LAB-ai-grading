@@ -5,10 +5,10 @@ import mapper
 
 
 if __name__ == "__main__":
-    image=cv2.imread("dataset/contour_9.jpg")   #read in the image
+    image = cv2.imread("dataset/contour_13.jpg")	# read in the image
     assert image is not None
 
-    image=cv2.resize(image,(1300,800)) #resizing because opencv does not work well with bigger images
+    image=cv2.resize(image,(1300,800)) 	# resizing because opencv does not work well with bigger images
     orig=image.copy()
 
 	# STEP 1 : MAKE GRAYSCALE (TEMPORARILY)
@@ -23,10 +23,12 @@ if __name__ == "__main__":
 
     # STEP 4: SUBTRACT LINES FROM ORIGINAL
     gray_no_lines = cv2.subtract(gray, detected_lines)
-    # Optional: Apply adaptive thresholding to enhance content
-    # thresh = cv2.adaptiveThreshold(gray_no_lines, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-    #                                cv2.THRESH_BINARY, 11, 2)
     cv2.imshow("Without Lines", gray_no_lines)
+    
+    # STEP 4.1: ADAPTIVE THRESHOLDING
+    thresh = cv2.adaptiveThreshold(gray_no_lines, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv2.THRESH_BINARY, 3, 2)
+    cv2.imshow("Adaptive threshold", thresh)
 
     # STEP 5: APPLY GAUSSIAN BLUR
     blurred = cv2.GaussianBlur(gray_no_lines, (5,5), 0)  # (5,5) is the kernel size and 0 is sigma that determines the amount of blur
@@ -37,11 +39,11 @@ if __name__ == "__main__":
     cv2.imshow("Canny",edged)
 
 
+	# STEP 7: CONTOURING
     contours,hierarchy=cv2.findContours(edged,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)  #retrieve the contours as a list, with simple apprximation model
     contours=sorted(contours,key=cv2.contourArea,reverse=True)
 
-    #the loop extracts the boundary contours of the page
-    for c in contours:
+    for c in contours:	#the loop extracts the boundary contours of the page
         p=cv2.arcLength(c,True)
         approx=cv2.approxPolyDP(c,0.02*p,True)
 
@@ -52,10 +54,11 @@ if __name__ == "__main__":
 
     pts=np.float32(np.array([[0,0],[800,0],[800,800],[0,800]]))  #map to 800*800 target window
 
-    op=cv2.getPerspectiveTransform(approx,pts) #pyright: ignore #get the top or bird eye view effect
+	# STEP 8: PERSPECTIVE TRANSFORM
+    op=cv2.getPerspectiveTransform(approx,pts) #pyright: ignore
     dst=cv2.warpPerspective(orig,op,(800,800))
 
-	# SHOW FINAL RESULT
+	# STEP 9: SHOW FINAL RESULT!
     cv2.imshow("FINAL SCANNED",dst)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
