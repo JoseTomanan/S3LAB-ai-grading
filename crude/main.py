@@ -5,6 +5,8 @@ import csv
 import os
 
 from all_prompts import *
+from scanner import *
+
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -18,29 +20,6 @@ import cv2
 IMAGE_PATH = "dataset/2_test_good.jpg"
 QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "Based only on the visual content of the student's work, what is the student's final answer? What is the correct mathematical answer to the problem? Are they the same?"
-
-
-
-class PILImagePreprocessor:
-	def __init__(self):
-		self.buffer = BytesIO()
-
-	def load_image(self, image_path: str) -> Image.Image:
-		return Image.open(image_path)
-
-	def increase_visibility(self, image: Image.Image, brighten_val: float=1.3, contrast_val: float=1.5) -> Image.Image:
-		brightened = ImageEnhance.Brightness(image)\
-				.enhance(brighten_val)
-		contrasted = ImageEnhance.Contrast(brightened)\
-				.enhance(contrast_val)
-		
-		return contrasted
-	
-	def encode_to_bytes(self, image: Image.Image) -> bytes:
-		image.save(self.buffer, format="JPEG")
-		image_bytes = self.buffer.getvalue()
-
-		return image_bytes
 
 
 
@@ -198,8 +177,15 @@ class CVImagePreprocessor:
 					return self._encode_to_bytes(deskewed)
         
 		return image_bytes  # No skew detected
+	
+	def _mapp(self, h):
+		"""Internal function; find endpoints of sheet"""
+		return mapp(h)	# TEMPORARY SEGREGATION!
 
-
+	def find_first_box(self, image_bytes: bytes):
+		"""Find first box within image. SOURCE: https://github.com/AdityaPai2398/CamScanner-In-Python"""
+		image_matlike = self._decode_bytes(image_bytes)
+		return self._encode_to_bytes(find_first_box(image_matlike))
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
@@ -257,6 +243,7 @@ if __name__ == "__main__":
 	print("PROMPT:", rubric_question)
 	
 	image_bytes = image_preprocessor.load_image(image_path)
+	image_bytes = image_preprocessor.find_first_box(image_bytes)
 	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
 	image_bytes = image_preprocessor.adjust_contrast(image_bytes, amount=1.2)
 
