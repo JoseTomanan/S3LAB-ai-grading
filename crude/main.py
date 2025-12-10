@@ -20,6 +20,7 @@ QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "Based only on the visual content of the student's work, what is the student's final answer? What is the correct mathematical answer to the problem? Are they the same?"
 
 
+
 class PILImagePreprocessor:
 	def __init__(self):
 		self.buffer = BytesIO()
@@ -40,6 +41,8 @@ class PILImagePreprocessor:
 		image_bytes = self.buffer.getvalue()
 
 		return image_bytes
+
+
 
 class CVImagePreprocessor:
 	def load_image(self, image_path: str) -> bytes:
@@ -130,6 +133,7 @@ class CVImagePreprocessor:
 		horizontal_lines = 0
 		if lines is not None:
 			for line in lines:
+				assert isinstance(line, np.ndarray) and line.ndim == 2
 				x1, y1, x2, y2 = line[0]
 				# Check if mostly horizontal (small angle)
 				if abs(y2 - y1) < 10:  # Vertical tolerance for "horizontal"
@@ -186,11 +190,16 @@ class CVImagePreprocessor:
 				if abs(median_angle) > 0.5:  # Worth correcting
 					(h, w) = image.shape[:2]
 					center = (w // 2, h // 2)
+					assert isinstance(median_angle, float)
+
 					M = cv2.getRotationMatrix2D(center, median_angle, 1.0)
 					deskewed = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+
 					return self._encode_to_bytes(deskewed)
         
 		return image_bytes  # No skew detected
+
+
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
@@ -200,6 +209,7 @@ class CSVProcessor:
 		with open(question_path, "r") as csv_file:
 			reader = csv.reader(csv_file, delimiter="|")
 			return next(reader)
+
 
 
 class AIAnswerEvaluator:
@@ -226,6 +236,7 @@ class AIAnswerEvaluator:
 			)
 
 		return response.text
+
 
 
 if __name__ == "__main__":
