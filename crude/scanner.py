@@ -42,7 +42,8 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 	gray_no_lines = cv2.subtract(gray, detected_lines)
 	cv2.imshow("Without Lines", gray_no_lines)
 	
-	# STEP 4.1: ADAPTIVE THRESHOLDING
+	# STEP 4.1: ADAPTIVE THRESHOLDING (Not used)
+	# TODO: FIX PARAMETER VALUES
 	thresh = cv2.adaptiveThreshold(gray_no_lines, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
 								cv2.THRESH_BINARY, 3, 2)
 	cv2.imshow("Adaptive threshold", thresh)
