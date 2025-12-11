@@ -7,6 +7,7 @@ import os
 from all_prompts import *
 from scanner import *
 
+from typing import List, Tuple
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -45,9 +46,7 @@ class CVImagePreprocessor:
         - amount > 0 increases brightness; < 0 decreases it.
         """
 		image = self._decode_bytes(image_bytes)
-        
 		brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
-        
 		return self._encode_to_bytes(brightened)
 	
 	def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
@@ -55,9 +54,7 @@ class CVImagePreprocessor:
 		Increase/decrease contrast by given alpha
 		"""
 		image = self._decode_bytes(image_bytes)
-        
 		contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
-        
 		return self._encode_to_bytes(contrasted)
 	
 	def save_image(self, image_bytes: bytes, save_path: str) -> None:
@@ -66,7 +63,6 @@ class CVImagePreprocessor:
 		- image_bytes: The image in byte form, after any preprocessing (brightened, cropped, etc.)
 		- save_path: The path where the image will be saved, including the filename and .jpeg extension.
 		"""
-
 		with open(save_path, "wb") as f:
 			ret = f.write(image_bytes)
 		if not ret:
@@ -83,7 +79,6 @@ class CVImagePreprocessor:
 
 		if image is None:
 			raise ValueError("Failed to decode image bytes")
-		
 		return image
 	
 	def _encode_to_bytes(self, image_matrix: cv2.typing.MatLike) -> bytes:
@@ -178,14 +173,27 @@ class CVImagePreprocessor:
         
 		return image_bytes  # No skew detected
 	
-	def _mapp(self, h):
-		"""Internal function; find endpoints of sheet"""
-		return mapp(h)	# TEMPORARY SEGREGATION!
+	def _find_endpoints(self, h: cv2.typing.MatLike):
+		"""Internal function; find endpoints of sheet. Ordered clockwise, starting from upper left."""
+		h = h.reshape((4,2))
+		hnew = np.zeros((4,2),dtype = np.float32)
+
+		add = h.sum(1)
+		hnew[0] = h[np.argmin(add)]
+		hnew[2] = h[np.argmax(add)]
+
+		diff = np.diff(h,axis = 1)
+		hnew[1] = h[np.argmin(diff)]
+		hnew[3] = h[np.argmax(diff)]
+
+		return hnew
 
 	def find_first_box(self, image_bytes: bytes):
 		"""Find first box within image. SOURCE: https://github.com/AdityaPai2398/CamScanner-In-Python"""
 		image_matlike = self._decode_bytes(image_bytes)
 		return self._encode_to_bytes(find_first_box(image_matlike))
+
+
 
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
