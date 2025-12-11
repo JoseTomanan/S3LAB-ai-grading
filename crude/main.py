@@ -91,7 +91,7 @@ class CVImagePreprocessor:
 		return buffer.tobytes()
 
 	# Experimental Additions
-	def detect_paper_type(self, image_bytes: bytes, line_threshold: int = 5, min_line_length: int = 100) -> str:
+	def _detect_paper_type(self, image_bytes: bytes, line_threshold: int = 5, min_line_length: int = 100) -> str:
 		"""
         Detect if image is lined (Group L) or blank (Group B) paper.
         - line_threshold: Min number of horizontal lines to classify as lined.
@@ -117,7 +117,7 @@ class CVImagePreprocessor:
 		print(f"Detected {horizontal_lines} horizontal lines → Paper type: {paper_type}")
 		return paper_type
 		
-	def remove_horizontal_lines(self, image_bytes: bytes, kernel_size: int = 3) -> bytes:
+	def _remove_horizontal_lines(self, image_bytes: bytes, kernel_size: int = 3) -> bytes:
 		"""
         Remove horizontal lines from lined paper using morphology.
         - kernel_size: Width of horizontal structuring element.
@@ -141,7 +141,7 @@ class CVImagePreprocessor:
 				
 		return self._encode_to_bytes(result)
 
-	def deskew_for_blank(self, image_bytes: bytes, angle_threshold: float = 10) -> bytes:
+	def _deskew_for_blank(self, image_bytes: bytes, angle_threshold: float = 10) -> bytes:
 		"""
 		Deskew (straighten) for blank paper to handle uneven layouts.
 		"""
