@@ -5,7 +5,7 @@ import csv
 import os
 
 from all_prompts import *
-from scanner import *
+from find_box import *
 
 from typing import List, Tuple
 from google import genai
