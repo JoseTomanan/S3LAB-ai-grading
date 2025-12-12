@@ -77,7 +77,7 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 	dst=cv2.warpPerspective(orig,op,(800,800))
 
 	# STEP 9: SHOW FINAL RESULT!
-	cv2.imshow("FINAL SCANNED",dst)
+	cv2.imshow("Detected Segmented Image",dst)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
