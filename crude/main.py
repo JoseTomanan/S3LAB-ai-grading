@@ -18,7 +18,7 @@ import numpy as np
 import cv2
 
 
-IMAGE_PATH = "dataset/2_test_good.jpg"
+IMAGE_PATH = "dataset/contour_15.jpg"
 QUESTION_PATH = "dataset/2.csv"
 RUBRIC_QUESTION = "Based only on the visual content of the student's work, what is the student's final answer? What is the correct mathematical answer to the problem? Are they the same?"
 
@@ -68,7 +68,6 @@ class CVImagePreprocessor:
 		if not ret:
 			raise ValueError(f"Failed to save image to {save_path}")
 		print(f"Image saved to {save_path}")
-
 
 	def _decode_bytes(self, image_bytes: bytes) -> cv2.typing.MatLike:
 		"""
