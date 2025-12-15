@@ -187,7 +187,7 @@ class CVImagePreprocessor:
 
 		return hnew
 
-	def find_first_box(self, image_bytes: bytes):
+	def find_first_box(self, image_bytes: bytes) -> bytes:
 		"""Find first box within image. SOURCE: https://github.com/AdityaPai2398/CamScanner-In-Python"""
 		image_matlike = self._decode_bytes(image_bytes)
 		return self._encode_to_bytes(find_first_box(image_matlike))
