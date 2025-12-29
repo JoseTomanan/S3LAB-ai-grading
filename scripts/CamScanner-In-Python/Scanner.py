@@ -7,7 +7,7 @@ IS_LINED = False
 
 
 if __name__ == "__main__":
-    image = cv2.imread("ignoreable/white4croppedB.jpg")	# read in the image
+    image = cv2.imread("dataset/contour_8.jpg")	# read in the image
     assert image is not None
 
     image=cv2.resize(image,(800,1300)) 	# resizing because opencv does not work well with bigger images

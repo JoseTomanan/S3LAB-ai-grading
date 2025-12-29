@@ -70,11 +70,11 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 
 	approx=mapp(target)
 
-	pts=np.float32(np.array([[0,0],[800,0],[800,800],[0,800]]))  #map to 800*800 target window
+	pts=np.float32(np.array([[0,0],[1300,0],[1300,800],[0,800]]))  #map to 800*800 target window
 
 	# STEP 8: PERSPECTIVE TRANSFORM
 	op=cv2.getPerspectiveTransform(approx,pts) #pyright: ignore
-	dst=cv2.warpPerspective(orig,op,(800,800))
+	dst=cv2.warpPerspective(orig,op,(1300,800))
 
 	# STEP 9: SHOW FINAL RESULT!
 	cv2.destroyAllWindows()

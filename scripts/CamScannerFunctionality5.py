@@ -337,7 +337,7 @@ class CVImagePreprocessor:
 if __name__ == "__main__":
     # Step 22 – Set Up Paths for Testing
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    image_path = os.path.normpath(os.path.join(script_dir, "..", "dataset", "contour_14.jpg"))
+    image_path = os.path.normpath(os.path.join(script_dir, "..", "dataset", "contour_13.jpg"))
   
     print("Starting document flattening process...")
     # Step 23 – Flatten Document (Now processes top_n=3)
