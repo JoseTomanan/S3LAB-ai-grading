@@ -4,8 +4,8 @@ All object classes
 import csv
 import os
 
-from all_prompts import *
-from find_box import *
+from crude.prompts import *
+from crude.findBox import *
 
 from google import genai
 from google.genai import types
@@ -162,26 +162,12 @@ class CVImagePreprocessor:
 					return self._encode_to_bytes(deskewed)
         
 		return image_bytes  # No skew detected
-	
-	def _find_endpoints(self, h: cv2.typing.MatLike):
-		"""Internal function; find endpoints of sheet. Ordered clockwise, starting from upper left."""
-		h = h.reshape((4,2))
-		hnew = np.zeros((4,2),dtype = np.float32)
-
-		add = h.sum(1)
-		hnew[0] = h[np.argmin(add)]
-		hnew[2] = h[np.argmax(add)]
-
-		diff = np.diff(h,axis = 1)
-		hnew[1] = h[np.argmin(diff)]
-		hnew[3] = h[np.argmax(diff)]
-
-		return hnew
 
 	def find_first_box(self, image_bytes: bytes) -> bytes:
 		"""Find first box within image. SOURCE: https://github.com/AdityaPai2398/CamScanner-In-Python"""
 		image_matlike = self._decode_bytes(image_bytes)
-		return self._encode_to_bytes(find_first_box(image_matlike))
+		returnable_matlike = find_first_box(image_matlike)	# method is segregated because of definition length
+		return self._encode_to_bytes(returnable_matlike)
 
 
 
