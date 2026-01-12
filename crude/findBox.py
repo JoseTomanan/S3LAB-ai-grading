@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+import math
 
 
 def mapp(h):
@@ -20,13 +20,50 @@ def mapp(h):
 
 	return hnew
 
+
+def get_robust_aspect_ratio(coords):
+	"""
+	Calculates the ratio using the 'Minimum Area' logic.
+	Works better for trapezoids and skewed shapes.
+	"""
+	pts = np.array(coords)
+
+	# 1. Find the center of the shape
+	center = np.mean(pts, axis=0)
+
+	# 2. Sort points to ensure they are in order (Clockwise)
+	angles = np.arctan2(pts[:, 1] - center[1], pts[:, 0] - center[0])
+	pts = pts[np.argsort(angles)]
+
+	# 3. Calculate side vectors
+	# Side A (Top/Bottom) and Side B (Left/Right)
+	side_a1 = pts[1] - pts[0]
+	side_a2 = pts[3] - pts[2]
+	side_b1 = pts[2] - pts[1]
+	side_b2 = pts[0] - pts[3]
+
+	# 4. Use the magnitude of the vectors
+	# This effectively treats the shape as a rectangle 
+	# based on its primary spans.
+	w = (np.linalg.norm(side_a1) + np.linalg.norm(side_a2)) / 2
+	h = (np.linalg.norm(side_b1) + np.linalg.norm(side_b2)) / 2
+
+	return max(w,h) / min(w,h)
+
+
 def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 	"""
 	TEMPORARY SEGREGATION!!! TO BE FIXED!!!
 	"""
+	image_h, image_w, _ = image.shape
+	image_ratio = image_w/image_h
+	print("IMAGE RATIO:", 800*image_ratio)
+
 	# Temporary; resizing because opencv does not work well with bigger images
-	image=cv2.resize(image,(1300,800)) 
-	orig=image.copy()
+	image = cv2.resize(image, (int(800*(image_ratio**2)), 800))
+	orig = image.copy()
+	cv2.imshow("", image)
+	cv2.waitKey(0)
 
 	# STEP 1 : MAKE GRAYSCALE (TEMPORARILY)
 	gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -58,7 +95,8 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 
 
 	# STEP 7: CONTOURING
-	contours,hierarchy=cv2.findContours(edged,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)  #retrieve the contours as a list, with simple apprximation model
+	contours, hierarchy = cv2.findContours(edged,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+			#retrieve the contours as a list, with simple apprximation model
 	contours = sorted(contours,key=cv2.contourArea,reverse=True)
 
 	for c in contours:	#the loop extracts the boundary contours of the page
@@ -69,17 +107,27 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 			break
 
 	approx = mapp(target)
+	box_ratio = math.sqrt(get_robust_aspect_ratio(approx))
 
-	pts = np.float32(np.array([[0,0],[1300,0],[1300,800],[0,800]]))  #map to 800*800 target window
+	print("APPROX:", approx)
+	print("BOX RATIO:", box_ratio)
+
+	pts = np.float32(np.array([[0,0], [int(800*box_ratio),0], [int(800*box_ratio),800], [0,800]]))
 
 	# STEP 8: PERSPECTIVE TRANSFORM
-	op = cv2.getPerspectiveTransform(approx,pts) #pyright: ignore
-	dst = cv2.warpPerspective(orig,op,(1300,800))
+	op = cv2.getPerspectiveTransform(approx, pts) #pyright: ignore
+	dst = cv2.warpPerspective(orig, op, (int(800*box_ratio), 800))
 
 	# STEP 9: SHOW FINAL RESULT!
 	cv2.destroyAllWindows()
-	cv2.imshow("Detected Segmented Image",dst)
+	cv2.imshow("Detected Segmented Image", dst)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
 	return dst
+
+
+if __name__ == "__main__":
+	image = cv2.imread("dataset/contour_15.jpg")
+	assert image is not None
+	find_first_box(image)
