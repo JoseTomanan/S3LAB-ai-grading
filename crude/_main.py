@@ -37,7 +37,7 @@ if __name__ == "__main__":
 	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
 
 	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
-	print(f"ITEM NUMBER: {item_number}")
+	print("--> ITEM NUMBER:", item_number)
 
 	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
-	print(f"RESPONSE: {response}")
+	print("--> RESPONSE:", response)
