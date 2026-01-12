@@ -4,8 +4,8 @@ All object classes
 import csv
 import os
 
-from crude.prompts import *
-from crude.findBox import *
+from prompts import *
+from findBox import *
 
 from google import genai
 from google.genai import types
@@ -198,7 +198,7 @@ class AIAnswerEvaluator:
 			)
 
 		response = self.client.models.generate_content(
-				model="gemini-2.5-pro",
+				model="gemini-2.5-flash",
 				contents=[
 					image_encoded,
 					f"{system_prompt}\n{user_prompt}"
