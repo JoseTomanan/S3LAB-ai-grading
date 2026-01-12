@@ -53,28 +53,28 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 	cv2.imshow("Blur",blurred)
 
 	# STEP 6: SEGMENT CANNY LINES
-	edged=cv2.Canny(blurred,30,50)  #30 MinThreshold and 50 is the MaxThreshold
+	edged = cv2.Canny(blurred, 30, 50)  #30 MinThreshold and 50 is the MaxThreshold
 	cv2.imshow("Canny",edged)
 
 
 	# STEP 7: CONTOURING
 	contours,hierarchy=cv2.findContours(edged,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)  #retrieve the contours as a list, with simple apprximation model
-	contours=sorted(contours,key=cv2.contourArea,reverse=True)
+	contours = sorted(contours,key=cv2.contourArea,reverse=True)
 
 	for c in contours:	#the loop extracts the boundary contours of the page
-		p=cv2.arcLength(c,True)
-		approx=cv2.approxPolyDP(c,0.02*p,True)
-		if len(approx)==4:
+		p = cv2.arcLength(c,True)
+		approx = cv2.approxPolyDP(c,0.02*p,True)
+		if len(approx) == 4:
 			target=approx
 			break
 
-	approx=mapp(target)
+	approx = mapp(target)
 
-	pts=np.float32(np.array([[0,0],[1300,0],[1300,800],[0,800]]))  #map to 800*800 target window
+	pts = np.float32(np.array([[0,0],[1300,0],[1300,800],[0,800]]))  #map to 800*800 target window
 
 	# STEP 8: PERSPECTIVE TRANSFORM
-	op=cv2.getPerspectiveTransform(approx,pts) #pyright: ignore
-	dst=cv2.warpPerspective(orig,op,(1300,800))
+	op = cv2.getPerspectiveTransform(approx,pts) #pyright: ignore
+	dst = cv2.warpPerspective(orig,op,(1300,800))
 
 	# STEP 9: SHOW FINAL RESULT!
 	cv2.destroyAllWindows()
