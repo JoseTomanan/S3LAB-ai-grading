@@ -62,8 +62,7 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 	# Temporary; resizing because opencv does not work well with bigger images
 	image = cv2.resize(image, (int(800*(image_ratio**2)), 800))
 	orig = image.copy()
-	cv2.imshow("", image)
-	cv2.waitKey(0)
+	cv2.imshow("Elongated original image", image)
 
 	# STEP 1 : MAKE GRAYSCALE (TEMPORARILY)
 	gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -108,11 +107,11 @@ def find_first_box(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
 
 	approx = mapp(target)
 	box_ratio = math.sqrt(get_robust_aspect_ratio(approx))
+	box_length = int(800*math.sqrt(box_ratio))
 
-	print("APPROX:", approx)
 	print("BOX RATIO:", box_ratio)
 
-	pts = np.float32(np.array([[0,0], [int(800*box_ratio),0], [int(800*box_ratio),800], [0,800]]))
+	pts = np.float32(np.array([[0,0], [box_length,0], [box_length,800], [0,800]]))
 
 	# STEP 8: PERSPECTIVE TRANSFORM
 	op = cv2.getPerspectiveTransform(approx, pts) #pyright: ignore

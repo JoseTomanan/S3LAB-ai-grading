@@ -25,16 +25,14 @@ if __name__ == "__main__":
 	question_path = QUESTION_PATH
 
 	context = contexter.get_context(question_path)
-	context_question, expected_answer = context
-	print("CONTEXT:", context_question, expected_answer)
-	print("PROMPT:", rubric_question)
+	user_prompt = f"QUESTION: {context[0]}\nPROMPT: {rubric_question}"
+
+	print(user_prompt)
 	
 	image_bytes = image_preprocessor.load_image(image_path)
 	image_bytes = image_preprocessor.find_first_box(image_bytes)
 	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
 	image_bytes = image_preprocessor.adjust_contrast(image_bytes, amount=1.2)
-
-	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
 
 	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
 	print("--> ITEM NUMBER:", item_number)
