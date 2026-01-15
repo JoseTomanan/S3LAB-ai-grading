@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { TestInstance } from '$lib/types';
+	import type { TestInstance } from '$lib/types.ts';
 	
 	let instances: TestInstance[] = [
-		{test_name: "Quiz 1", section: "3-Aguinaldo", date: "kasbu erp", is_done_rendering: true},
-		{test_name: "Quiz 2", section: "3-Aguinaldo", date: "next week erp", is_done_rendering: false},
+		{test_name: "Quiz 1", section: "3-Aguinaldo", date: "2026-01-12T20:17:46.384Z", is_done_rendering: true},
+		{test_name: "Quiz 2", section: "3-Aguinaldo", date: "2025-12-12T20:17:46.384Z", is_done_rendering: false},
 	];
 </script>
 
