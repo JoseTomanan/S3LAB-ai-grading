@@ -19,8 +19,8 @@ ANSWER_RUBRIC_PROMPT: str = """
 	Included in this prompt, preceded by "CONTEXT:" is the problem the student is answering.
 	Your task is to answer a question/questions (in a new line, preceded by "PROMPT:") based solely on the visual content of the student's work.
 	Your answer should be clear and concise, and directly relate to the image.
-	If a question can be answered with a yes or no, only generate your answer as "YES" or "NO".
-	Otherwise, generate your answer as text (e.g., "3x+2=8", or if the final answer is ambiguous, return "AMBIGUOUS").
+	If a question can be answered with a yes or no, only generate your answer as "YES" or "NO"
+	Otherwise, generate your answer as raw text, with no prefixes or sentences (e.g. "3x+2=8" or "5").
 	If multiple questions are given in the prompt, separate your answers for each with `; `.
 	"""
 	# **When determining the final answer from a number line drawing, consider two possibilities: the final landing point of the operation and any prominently marked (e.g., encircled) number. If these conflict, state both possible answers and justify which is most likely the student's intended final answer.**

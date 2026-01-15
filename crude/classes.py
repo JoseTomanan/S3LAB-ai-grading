@@ -1,26 +1,17 @@
 """
-Crude application for evaluating answers using AI. Powered by Google Gemini API.
+All object classes
 """
 import csv
 import os
 
-from all_prompts import *
-from find_box import *
+from prompts import *
+from findBox import *
 
-from typing import List, Tuple
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv
-from PIL import Image, ImageEnhance
-from io import BytesIO
 
 import numpy as np
 import cv2
-
-
-IMAGE_PATH = "dataset/contour_15.jpg"
-QUESTION_PATH = "dataset/2.csv"
-RUBRIC_QUESTION = "Based only on the visual content of the student's work, what is the student's final answer? What is the correct mathematical answer to the problem? Are they the same?"
 
 
 
@@ -171,26 +162,12 @@ class CVImagePreprocessor:
 					return self._encode_to_bytes(deskewed)
         
 		return image_bytes  # No skew detected
-	
-	def _find_endpoints(self, h: cv2.typing.MatLike):
-		"""Internal function; find endpoints of sheet. Ordered clockwise, starting from upper left."""
-		h = h.reshape((4,2))
-		hnew = np.zeros((4,2),dtype = np.float32)
-
-		add = h.sum(1)
-		hnew[0] = h[np.argmin(add)]
-		hnew[2] = h[np.argmax(add)]
-
-		diff = np.diff(h,axis = 1)
-		hnew[1] = h[np.argmin(diff)]
-		hnew[3] = h[np.argmax(diff)]
-
-		return hnew
 
 	def find_first_box(self, image_bytes: bytes) -> bytes:
 		"""Find first box within image. SOURCE: https://github.com/AdityaPai2398/CamScanner-In-Python"""
 		image_matlike = self._decode_bytes(image_bytes)
-		return self._encode_to_bytes(find_first_box(image_matlike))
+		returnable_matlike = find_first_box(image_matlike)	# method is segregated because of definition length
+		return self._encode_to_bytes(returnable_matlike)
 
 
 
@@ -221,7 +198,7 @@ class AIAnswerEvaluator:
 			)
 
 		response = self.client.models.generate_content(
-				model="gemini-2.5-pro",
+				model="gemini-2.5-flash",
 				contents=[
 					image_encoded,
 					f"{system_prompt}\n{user_prompt}"
@@ -229,35 +206,3 @@ class AIAnswerEvaluator:
 			)
 
 		return response.text
-
-
-
-if __name__ == "__main__":
-	load_dotenv()
-
-	image_preprocessor = CVImagePreprocessor()
-	contexter = CSVProcessor()
-	ai_evaluator = AIAnswerEvaluator()
-
-	system_prompt = ANSWER_RUBRIC_PROMPT
-	rubric_question = RUBRIC_QUESTION
-	image_path = IMAGE_PATH
-	question_path = QUESTION_PATH
-
-	context = contexter.get_context(question_path)
-	context_question, expected_answer = context
-	print("CONTEXT:", context_question, expected_answer)
-	print("PROMPT:", rubric_question)
-	
-	image_bytes = image_preprocessor.load_image(image_path)
-	image_bytes = image_preprocessor.find_first_box(image_bytes)
-	image_bytes = image_preprocessor.brighten(image_bytes, amount=0.2)
-	image_bytes = image_preprocessor.adjust_contrast(image_bytes, amount=1.2)
-
-	user_prompt = f"CONTEXT:{context_question}\nPROMPT:{rubric_question}"
-
-	item_number = ai_evaluator.get_response(image_bytes, FIND_ITEM_NUMBER_PROMPT, "")
-	print(f"ITEM NUMBER: {item_number}")
-
-	response = ai_evaluator.get_response(image_bytes, system_prompt, user_prompt)
-	print(f"RESPONSE: {response}")
