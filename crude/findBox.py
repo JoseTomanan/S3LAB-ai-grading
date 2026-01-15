@@ -1,3 +1,6 @@
+"""
+Method find_first_box (and auxiliary functions), segregated into own file
+"""
 import cv2
 import numpy as np
 import math
