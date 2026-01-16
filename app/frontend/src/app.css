@@ -142,6 +142,7 @@
 
 	h4 {
 		@apply text-lg;
+		@apply opacity-75;
 	}
 }
 
