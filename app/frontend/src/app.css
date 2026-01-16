@@ -119,13 +119,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
   body {
     @apply bg-background text-foreground;
+    @apply mt-[2em];
+    @apply mx-[1em];
   }
 
 	h1 {
 		@apply text-2xl;
 		font-weight: bold;
+    text-align: center;
 	}
 }
 
