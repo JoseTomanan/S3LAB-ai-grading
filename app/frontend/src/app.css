@@ -127,9 +127,21 @@
   }
 
 	h1 {
-		@apply text-2xl;
+		@apply text-3xl;
 		font-weight: bold;
     text-align: center;
+	}
+
+	h2 {
+		@apply text-2xl;
+	}
+
+	h3 {
+		@apply text-xl;
+	}
+
+	h4 {
+		@apply text-lg;
 	}
 }
 
