@@ -9,11 +9,10 @@
 	];
 </script>
 
-<div class="flex flex-col gap-4">
-	<h1>View Test Instances</h1>
-	<div class="flex flex-col gap-3">
-		{#each instances as instance}
-			<TestInstanceCard {...instance} />
-		{/each}
-	</div>
+<h1 class="mb-4">View Test Instances</h1>
+
+<div class="flex flex-col gap-3">
+	{#each instances as instance}
+		<TestInstanceCard {...instance} />
+	{/each}
 </div>
