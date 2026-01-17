@@ -6,11 +6,11 @@
 
 	import Icon from '@iconify/svelte';
 
-	const testid: string = test_name + section;
+	const testid: string = section + "-" + test_name;
 	const dateObj: Date = new Date(date);
 </script>
 
-<div class="flex gap-2 rounded card border border-border px-3 py-1.5">
+<div class="flex gap-2 rounded card bg-card px-3 py-1.5">
 	<a href={testid}>
 		<h3 class="flex flex-row items-center gap-1">
 			{#if is_done_rendering}
