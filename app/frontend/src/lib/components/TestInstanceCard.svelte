@@ -10,16 +10,11 @@
 	const dateObj: Date = new Date(date);
 </script>
 
-<div class="flex gap-2 rounded card bg-card px-3 py-1.5">
-	<a href={testid}>
-		<h3 class="flex flex-row items-center gap-1">
-			{#if is_done_rendering}
-				<Icon icon="proicons:checkbox-checked" class="size-6"/>
-			{:else}
-				<Icon icon="proicons:checkbox-unchecked" class="size-6"/>
-			{/if}
-			{test_name}
-		</h3>
-		<h4>{section} &centerdot; {dateObj.toLocaleDateString()}</h4>
-	</a>
-</div>
+<a href={testid} class="flex flex-col rounded card bg-card px-3 py-1.5">
+	<span class="flex flex-row items-center gap-1">
+		<Icon icon={is_done_rendering ? 'proicons:checkbox-checked' : 'proicons:checkbox-unchecked'}
+				class="size-6"/>
+		<h3>{test_name}</h3>
+	</span>
+	<h4>{section} &centerdot; {dateObj.toLocaleDateString()}</h4>
+</a>
