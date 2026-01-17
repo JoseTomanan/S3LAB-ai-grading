@@ -16,6 +16,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.38.0",
+		"@iconify-json/lucide": "^1.2.86",
 		"@iconify/svelte": "^5.2.1",
 		"@lucide/svelte": "^0.554.0",
 		"@sveltejs/adapter-auto": "^7.0.0",
