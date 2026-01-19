@@ -13,3 +13,7 @@ export interface TestInstance {
 	is_done_rendering: boolean;
 }
 
+export interface TestQuestion {
+	question: string;
+	is_problem_solving: boolean;
+}
