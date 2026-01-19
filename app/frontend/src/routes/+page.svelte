@@ -15,7 +15,7 @@
 	let paginationValues: TestInstance[];
 </script>
 
-<div class="px-2 py-4 flex flex-col gap-4">
+<div class="px-2 py-6 flex flex-col gap-4">
 	<h1>View Test Instances</h1>
 	<div class="flex flex-col gap-3">
 		{#each paginationValues as instance}
