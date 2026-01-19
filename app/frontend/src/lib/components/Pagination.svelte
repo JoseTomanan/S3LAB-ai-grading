@@ -20,18 +20,22 @@
 
 {#if totalRows && totalRows > perPage}
 	<div class='pagination'>
-		<button on:click={() => currentPage -= 1} 
-				disabled={currentPage === 0 ? true : false} 
-				aria-label="left arrow icon" 
-				aria-describedby="prev">
-					<MdiArrowBack />
+		<button
+					class="button-secondary"
+					on:click={() => currentPage -= 1} 
+					disabled={currentPage === 0 ? true : false} 
+					aria-label="left arrow icon" 
+					aria-describedby="prev">
+			<MdiArrowBack />
 		</button>
 		<span id='prev' class='sr-only'>Load previous {perPage} rows</span>
 		<p>{start + 1} - {end + 1} of {totalRows}</p>
-		<button on:click={() => currentPage += 1} 
-				disabled={currentPage === totalPages - 1 ? true : false} 
-				aria-label="right arrow icon" 
-				aria-describedby="next">
+		<button
+					class="button-secondary"
+					on:click={() => currentPage += 1} 
+					disabled={currentPage === totalPages - 1 ? true : false} 
+					aria-label="right arrow icon" 
+					aria-describedby="next">
 			<MdiArrowForward />
 		</button>
 		<span id='next' class='sr-only'>Load next {perPage} rows</span>

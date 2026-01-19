@@ -144,13 +144,20 @@
 
 @layer components {
 	button {
-		@apply bg-primary;
-		@apply text-primary-foreground;
 		@apply py-1 px-2;
 		@apply rounded;
 	}
 }
 
 @layer utilities {
-	
+	.button-primary {
+		@apply bg-primary;
+		@apply text-primary-foreground;
+	}
+
+	.button-secondary {
+		@apply bg-secondary;
+		@apply text-secondary-foreground;
+		@apply ring;
+	}
 }
