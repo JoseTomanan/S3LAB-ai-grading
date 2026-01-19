@@ -61,10 +61,6 @@
 			margin: 0 1rem;
 	}
 
-	.selected {
-			background-color: var(--accent-color)
-	}
-
 	button {
 		display: flex;
 	}
