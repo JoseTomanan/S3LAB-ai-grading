@@ -17,13 +17,11 @@
 </script>
 
 <div class="bg-sidebar p-4 border-b border-sidebar-border space-y-4">
-	<span class="flex flex-row items-center justify-between">
-		<span class="flex flex-row items-center gap-2">
-			<a class="size-8" href="/">
-				<MdiArrowBack class="size-full" />
-			</a>
-			<h1>{ test_name }</h1>
-		</span>
+	<span class="flex flex-row items-center gap-4">
+		<a class="size-8" href="/">
+			<MdiArrowBack class="size-full" />
+		</a>
+		<h1>{ test_name }</h1>
 		{#if is_done_rendering}
 			<MdiCheckboxMarkedOutline class="size-6 text-muted-foreground"/>
 		{:else}
