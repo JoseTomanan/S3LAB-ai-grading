@@ -151,11 +151,15 @@
 
 @layer utilities {
 	.button-primary {
+		@apply py-1 px-2;
+		@apply rounded;
 		@apply bg-primary;
 		@apply text-primary-foreground;
 	}
 
 	.button-secondary {
+		@apply py-1 px-2;
+		@apply rounded;
 		@apply bg-secondary;
 		@apply text-secondary-foreground;
 		@apply ring;
