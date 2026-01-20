@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TestInstanceCard from '$lib/components/TestInstanceCard.svelte';
+	import TestInstanceCard from '$lib/components/cards/TestInstanceCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 
 	import type { TestInstance } from '$lib/types.ts';
