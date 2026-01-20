@@ -10,7 +10,7 @@
 	const testid: string = section + "-" + test_name;
 </script>
 
-<a href={testid + "/questions"} class="flex flex-col rounded card bg-card px-3 py-1.5">
+<a href={"/" + testid + "/questions"} class="flex flex-col rounded card bg-card px-3 py-1.5">
 	<span class="flex flex-row items-center gap-1">
 		{#if is_done_rendering}
 			<MdiCheckboxMarkedOutline/>
