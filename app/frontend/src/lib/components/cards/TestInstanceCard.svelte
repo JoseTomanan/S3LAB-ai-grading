@@ -8,7 +8,6 @@
 	import MdiCheckboxMarked from '~icons/mdi/checkbox-marked';
 
 	const testid: string = section + "-" + test_name;
-	const dateObj: Date = new Date(date);
 </script>
 
 <a href={testid + "/questions"} class="flex flex-col rounded card bg-card px-3 py-1.5">
@@ -18,7 +17,7 @@
 		{:else}
 			<MdiCheckboxBlank/>
 		{/if}
-		<h3>{test_name}</h3>
+		<h3>{ test_name }</h3>
 	</span>
-	<h4>{section} &centerdot; {dateObj.toLocaleDateString()}</h4>
+	<h4>{ section } &centerdot; { new Date(date).toLocaleDateString() }</h4>
 </a>
