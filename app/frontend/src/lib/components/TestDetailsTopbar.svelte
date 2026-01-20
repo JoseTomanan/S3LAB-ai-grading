@@ -2,13 +2,14 @@
 	export let test_name: string;
 	export let section: string;
 	export let date: string;
-	// svelte-ignore export_let_unused
 	export let is_done_rendering: boolean;
 
 	export let countShortFormItems: number;
 	export let countProbSolItems: number;
 
 	import MdiArrowBack from '~icons/mdi/arrow-back';
+	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
+	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiTable from '~icons/mdi/table';
 	import MdiUpload from '~icons/mdi/upload';
 
@@ -16,11 +17,18 @@
 </script>
 
 <div class="bg-sidebar p-4 border-b border-sidebar-border space-y-4">
-	<span class="flex flex-row items-center gap-2">
-		<a class="size-8" href=".">
-			<MdiArrowBack class="size-full" />
-		</a>
-		<h1>{ test_name }</h1>
+	<span class="flex flex-row items-center justify-between">
+		<span class="flex flex-row items-center gap-2">
+			<a class="size-8" href="/">
+				<MdiArrowBack class="size-full" />
+			</a>
+			<h1>{ test_name }</h1>
+		</span>
+		{#if is_done_rendering}
+			<MdiCheckboxMarkedOutline class="size-6 text-muted-foreground"/>
+		{:else}
+			<MdiCheckboxBlankOutline class="size-6 text-muted-foreground" />
+		{/if}
 	</span>
 	<div id="change-instance-details">
 		<h3>Section: { section }</h3>
