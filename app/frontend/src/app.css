@@ -164,4 +164,9 @@
 		@apply text-secondary-foreground;
 		@apply ring;
 	}
+
+	.card {
+		@apply bg-card;
+		@apply border border-border;
+	}
 }
