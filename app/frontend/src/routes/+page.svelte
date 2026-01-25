@@ -6,7 +6,15 @@
 
 	import type { TestInstance } from '$lib/types/types.ts';
 	
-	let instances: TestInstance[] = [
+	let instances: TestInstance[] = [];
+	let paginationValues: TestInstance[];
+
+	function retrieveItems() {
+		// TODO : function that retrieves from API call and populates array
+	}
+
+	// temporary!
+	instances = [
 		{test_name: "Seatwork-1", section: "3-Rizal", date: "2025-11-11T20:17:46.384Z", is_done_rendering: true},
 		{test_name: "Seatwork-2", section: "3-Aguinaldo", date: "2025-12-12T20:17:46.384Z", is_done_rendering: false},
 		{test_name: "Quiz-1", section: "3-Aguinaldo", date: "2026-01-12T20:17:46.384Z", is_done_rendering: false},
@@ -14,7 +22,6 @@
 		{test_name: "Quiz-2", section: "3-Aguinaldo", date: "2026-01-19T20:17:46.384Z", is_done_rendering: true},
 	];
 
-	let paginationValues: TestInstance[];
 </script>
 
 <div class="px-4 py-8 flex flex-col gap-4">
