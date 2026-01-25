@@ -20,9 +20,9 @@
 <div class="px-2 py-6 flex flex-col gap-4">
 	<span class="flex flex-row items-center justify-between">
 		<h1>View Test Instances</h1>
-		<button class="h-fit">
+		<button>
 			<!-- TODO : open imported dialog component as popup on click -->
-			<MdiPlus class="size-full"/>
+			<MdiPlus class="size-8"/>
 		</button>
 	</span>
 	<div class="flex flex-col gap-3">
@@ -33,6 +33,6 @@
 	<hr>
 	<Pagination
 			rows={instances}
-			perPage={3}
+			perPage={5}
 			bind:trimmedRows={paginationValues} />
 </div>
