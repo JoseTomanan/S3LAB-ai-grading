@@ -2,7 +2,9 @@
 	import TestInstanceCard from '$lib/components/TestInstanceCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 
-	import type { TestInstance } from '$lib/types.ts';
+	import MdiPlus from '~icons/mdi/plus';
+
+	import type { TestInstance } from '$lib/types/types.ts';
 	
 	let instances: TestInstance[] = [
 		{test_name: "Seatwork-1", section: "3-Rizal", date: "2025-11-11T20:17:46.384Z", is_done_rendering: true},
@@ -16,7 +18,13 @@
 </script>
 
 <div class="px-2 py-6 flex flex-col gap-4">
-	<h1>View Test Instances</h1>
+	<span class="flex flex-row items-center justify-between">
+		<h1>View Test Instances</h1>
+		<button class="h-fit">
+			<!-- TODO : open imported dialog component as popup on click -->
+			<MdiPlus class="size-full"/>
+		</button>
+	</span>
 	<div class="flex flex-col gap-3">
 		{#each paginationValues as instance}
 			<TestInstanceCard {...instance} />
