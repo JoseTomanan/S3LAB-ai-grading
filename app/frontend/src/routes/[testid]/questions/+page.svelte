@@ -6,28 +6,31 @@
 
 	import MdiEdit from '~icons/mdi/edit';
 
-	import type { TestQuestion } from '$lib/types/types.ts';
+	import type { TestItem } from '$lib/types/types.ts';
 	import TestDetails from '$lib/components/TestInstanceTopbar.svelte';
-
+	
+	let allItems: TestItem[] = [];
+	let shortFormItems: TestItem[];
+	let probSolItems: TestItem[];
+	
+	function retrieveItems() {
+		// TODO: function that retrieves from API call and populate allQuestions
+	}
+	
+	$: shortFormItems = allItems.filter(item => !item.is_problem_solving);
+	$: probSolItems = allItems.filter(item => item.is_problem_solving);
+	
 	// temporary!
 	test_name = "Seatwork 1";
 	section = "3-Rizal";
 	date = "2025-11-11T20:17:46.384Z";
 	is_done_rendering = false;
-	
-	let allItems: TestQuestion[] = [];
-	let shortFormItems: String[];
-	let probSolItems: String[];
 
-	function retrieveItems() {
-		// TODO: function that retrieves from API call and populate allQuestions
-	}
-
-	// temporary
-	allItems = [];
-
-	$: shortFormItems = allItems.filter(item => !item.is_problem_solving).map(item => item.question);
-	$: probSolItems = allItems.filter(item => item.is_problem_solving).map(item => item.question);
+	// temporary!
+	allItems = [
+		{number: 1, question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_question: ""},
+		{number: 2, question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: false, expected_answer_rubric_question: ""},
+	];
 
 </script>
 
@@ -35,16 +38,35 @@
 	<TestDetails {test_name} {section} {date} {is_done_rendering}
 				countShortFormItems={shortFormItems.length} countProbSolItems={probSolItems.length}/>
 	<div class="px-4 space-y-4">
-		{#each [{name: "Short form Items", items: shortFormItems}, {name: "Problem solving Items", items: probSolItems}] as listOfItems}
-			<div class="p-2 bg-card ring">
-				<span class="flex flex-row items-center w-full justify-between">
-					<h3>{ listOfItems.name }</h3>
+		<div class="card p-2">
+			<span class="flex flex-row items-center w-full justify-between">
+				<h3>Short Form Items</h3>
+				<button on:click={() => {}}>
 					<MdiEdit/>
-				</span>
-				{#each listOfItems.items as item}
-					{ item }
+				</button>
+			</span>
+			<div class="ml-4">
+				{#each shortFormItems as item}
+					<p class="truncate text-ellipsis">
+						{item.number}: {item.question}
+					</p>
 				{/each}
 			</div>
-		{/each}
+		</div>
+		<div class="card p-2">
+			<span class="flex flex-row items-center w-full justify-between">
+				<h3>Problem Solving Items</h3>
+				<button on:click={() => {}}>
+					<MdiEdit/>
+				</button>
+			</span>
+			<div class="ml-4">
+				{#each probSolItems as item}
+					<p class="truncate text-ellipsis">
+						{item.number}: {item.question}
+					</p>
+				{/each}
+			</div>
+		</div>
 	</div>
 </div>
