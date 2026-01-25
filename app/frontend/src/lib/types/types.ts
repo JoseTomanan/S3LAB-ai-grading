@@ -14,6 +14,8 @@ export interface TestInstance {
 }
 
 export interface TestQuestion {
+	number: number,
 	question: string;
 	is_problem_solving: boolean;
+	expected_answer_rubric_question: string;	// if rubric question? separate with `. `
 }
