@@ -13,7 +13,7 @@ export interface TestInstance {
 	is_done_rendering: boolean;
 }
 
-export interface TestQuestion {
+export interface TestItem {
 	number: number,
 	question: string;
 	is_problem_solving: boolean;
