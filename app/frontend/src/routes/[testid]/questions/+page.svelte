@@ -9,7 +9,7 @@
 	import MdiTable from '~icons/mdi/table';
 	import MdiUpload from '~icons/mdi/upload';
 
-	import type { TestQuestion } from '$lib/types.ts';
+	import type { TestInstance, TestQuestion } from '$lib/types/types.ts';
 
 	$: test_name = "Seatwork 1";
 	$: section = "3-Rizal";
