@@ -30,9 +30,8 @@
 			<TestInstanceCard {...instance} />
 		{/each}
 	</div>
-	<hr>
 	<Pagination
 			rows={instances}
-			perPage={5}
+			perPage={6}
 			bind:trimmedRows={paginationValues} />
 </div>
