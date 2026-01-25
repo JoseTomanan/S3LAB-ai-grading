@@ -17,7 +17,7 @@
 	let paginationValues: TestInstance[];
 </script>
 
-<div class="px-2 py-6 flex flex-col gap-4">
+<div class="px-4 py-8 flex flex-col gap-4">
 	<span class="flex flex-row items-center justify-between">
 		<h1>View Test Instances</h1>
 		<button>
