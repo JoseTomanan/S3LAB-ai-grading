@@ -9,7 +9,7 @@
 	import MdiTable from '~icons/mdi/table';
 	import MdiUpload from '~icons/mdi/upload';
 
-	import type { TestQuestion } from '$lib/types.ts';
+	import type { TestInstance, TestQuestion } from '$lib/types/types.ts';
 
 	$: test_name = "Seatwork 1";
 	$: section = "3-Rizal";
@@ -33,7 +33,7 @@
 <div class="py-4 space-y-8">
 	<div class="bg-sidebar p-4 border-b border-sidebar-border space-y-4">
 		<span class="flex flex-row items-center gap-2">
-			<a class="size-8" href=".">
+			<a class="size-8" href="/">
 				<MdiArrowBack class="size-full" />
 			</a>
 			<h1>{ test_name }</h1>
