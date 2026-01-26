@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import TestInstanceCard from '$lib/components/cards/TestInstanceCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 
@@ -9,8 +11,31 @@
 	let instances: TestInstance[] = [];
 	let paginationValues: TestInstance[];
 
-	function retrieveItems() {
-		// TODO : function that retrieves from API call and populates array
+	let isLoadingPage: boolean = false;
+
+	onMount(async () => await retrieveInstances());
+
+	async function retrieveInstances() {
+		isLoadingPage = true;
+		try {
+			const response = await fetch(
+				``,
+				{
+					method: "GET",
+					headers: {
+						'Content-Type': 'application/json',
+					}
+				}
+			);
+
+			const data = await response.json();
+
+			
+		} catch {
+
+		} finally {
+
+		}
 	}
 
 	// temporary!
