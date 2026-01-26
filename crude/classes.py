@@ -12,6 +12,7 @@ from google.genai import types
 
 import numpy as np
 import cv2
+import openpyxl
 
 
 
@@ -184,8 +185,38 @@ class SheetsExporter:
 			return
 		self.sheet_items[key_name] = num_to_score
 
-	def export_sheet(self):
-		...
+	def export_sheet(self, file_name: str):
+		wb = openpyxl.Workbook()
+		
+		sheet = wb.active
+		assert sheet is not None
+
+		students_list = list(self.sheet_items.keys())
+
+		for key_name in students_list:
+			sheet.cell(
+					row=students_list.index(key_name)+2,
+					column=1,
+					value=key_name
+				)
+		
+		for item in self.columns:
+			sheet.cell(
+					row=1,
+					column=self.columns.index(item)+2,
+					value=item
+				)
+
+		for key_name in students_list:
+			for item in self.columns:
+				sheet.cell(
+						row=students_list.index(key_name)+2,
+						column=self.columns.index(item)+2,
+						value=self.sheet_items[key_name][item]
+					)
+		
+		wb.save(f"./crude/output/{file_name}.xlsx")
+		print(f"--> NOTICE: File '{file_name}.xlsx' saved successfully!")
 
 
 
