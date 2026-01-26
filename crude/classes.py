@@ -170,6 +170,25 @@ class CVImagePreprocessor:
 
 
 
+class SheetsExporter:
+	def __init__(self, columns: list[str]):
+		self.columns: list[str] = columns
+		self.sheet_items: dict[str, dict[str,float]] = {}
+
+	def add_student(self, key_name: str):
+		self.sheet_items[key_name] = {i: -1 for i in self.columns}
+
+	def append(self, key_name: str, num_to_score: dict[str, float]):
+		if key_name not in self.sheet_items:
+			print("WARNING: Student not in sheet; append operation aborted.")
+			return
+		self.sheet_items[key_name] = num_to_score
+
+	def export_sheet(self):
+		...
+
+
+
 class CSVProcessor:
 	def get_context(self, question_path: str) -> list[str]:
 		"""
