@@ -2,13 +2,13 @@
 Crude application for evaluating answers using AI. Powered by Google Gemini API.
 """
 from classes import *
-
 from dotenv import load_dotenv
 
 
+BASE_PATH = "./crude/input/"
 SYSTEM_PROMPT = ANSWER_RUBRIC_PROMPT
-IMAGE_PATH = "dataset/contour_15.jpg"
-QUESTION_PATH = "dataset/2.csv"
+IMAGE_PATH = f"{BASE_PATH}test_good.jpg"
+QUESTION_PATH = f"{BASE_PATH}item.csv"
 RUBRIC_QUESTION = "Based only on the visual content of the student's work, what is the student's final answer? What is the correct mathematical answer to the problem? Are they the same?"
 
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 	load_dotenv()
 
 	context = CSVProcessor().get_context(QUESTION_PATH)
-	user_prompt = f"QUESTION: {context[0]}\nPROMPT: {RUBRIC_QUESTION}"
+	user_prompt = "QUESTION:" + context[0] + "\nPROMPT:" + RUBRIC_QUESTION
 
 	print(user_prompt)
 	
