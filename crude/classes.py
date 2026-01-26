@@ -80,88 +80,87 @@ class CVImagePreprocessor:
 			raise ValueError("Failed to encode image")
 		return buffer.tobytes()
 
-	# Experimental Additions
-	def _detect_paper_type(self, image_bytes: bytes, line_threshold: int = 5, min_line_length: int = 100) -> str:
-		"""
-        Detect if image is lined (Group L) or blank (Group B) paper.
-        - line_threshold: Min number of horizontal lines to classify as lined.
-        - Returns: 'lined' or 'blank'.
-        """
-		image = self._decode_bytes(image_bytes)
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+	# def _detect_paper_type(self, image_bytes: bytes, line_threshold: int = 5, min_line_length: int = 100) -> str:
+	# 	"""
+    #     Detect if image is lined (Group L) or blank (Group B) paper.
+    #     - line_threshold: Min number of horizontal lines to classify as lined.
+    #     - Returns: 'lined' or 'blank'.
+    #     """
+	# 	image = self._decode_bytes(image_bytes)
+	# 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	# 	edges = cv2.Canny(gray, 50, 150, apertureSize=3)
         
-        # Detect lines using probabilistic Hough Transform
-		lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=min_line_length, maxLineGap=10)
+    #     # Detect lines using probabilistic Hough Transform
+	# 	lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=min_line_length, maxLineGap=10)
         
-		horizontal_lines = 0
-		if lines is not None:
-			for line in lines:
-				assert isinstance(line, np.ndarray) and line.ndim == 2
-				x1, y1, x2, y2 = line[0]
-				# Check if mostly horizontal (small angle)
-				if abs(y2 - y1) < 10:  # Vertical tolerance for "horizontal"
-					horizontal_lines += 1
+	# 	horizontal_lines = 0
+	# 	if lines is not None:
+	# 		for line in lines:
+	# 			assert isinstance(line, np.ndarray) and line.ndim == 2
+	# 			x1, y1, x2, y2 = line[0]
+	# 			# Check if mostly horizontal (small angle)
+	# 			if abs(y2 - y1) < 10:  # Vertical tolerance for "horizontal"
+	# 				horizontal_lines += 1
         
-		paper_type = 'lined' if horizontal_lines >= line_threshold else 'blank'
-		print(f"Detected {horizontal_lines} horizontal lines → Paper type: {paper_type}")
-		return paper_type
+	# 	paper_type = 'lined' if horizontal_lines >= line_threshold else 'blank'
+	# 	print(f"Detected {horizontal_lines} horizontal lines → Paper type: {paper_type}")
+	# 	return paper_type
 		
-	def _remove_horizontal_lines(self, image_bytes: bytes, kernel_size: int = 3) -> bytes:
-		"""
-        Remove horizontal lines from lined paper using morphology.
-        - kernel_size: Width of horizontal structuring element.
-        """
-		image = self._decode_bytes(image_bytes)
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	# def _remove_horizontal_lines(self, image_bytes: bytes, kernel_size: int = 3) -> bytes:
+	# 	"""
+    #     Remove horizontal lines from lined paper using morphology.
+    #     - kernel_size: Width of horizontal structuring element.
+    #     """
+	# 	image = self._decode_bytes(image_bytes)
+	# 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 				
-		# Horizontal kernel for line detection
-		horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size * 20, 1))  # Wide for horizontals
-		horizontal_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, horizontal_kernel)  # Extract lines
-		vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, kernel_size * 20))  # For any vertical noise
-		vertical_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, vertical_kernel)
+	# 	# Horizontal kernel for line detection
+	# 	horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size * 20, 1))  # Wide for horizontals
+	# 	horizontal_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, horizontal_kernel)  # Extract lines
+	# 	vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, kernel_size * 20))  # For any vertical noise
+	# 	vertical_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, vertical_kernel)
 				
-		# Combine and mask
-		lines_mask = cv2.addWeighted(horizontal_lines, 1, vertical_lines, 1, 0)
-		lines_mask = cv2.dilate(lines_mask, horizontal_kernel, iterations=1)  # Thicken mask
+	# 	# Combine and mask
+	# 	lines_mask = cv2.addWeighted(horizontal_lines, 1, vertical_lines, 1, 0)
+	# 	lines_mask = cv2.dilate(lines_mask, horizontal_kernel, iterations=1)  # Thicken mask
 				
-		# Inpaint: Replace lines with surrounding pixels (seamless clone for better results)
-		mask_inv = cv2.bitwise_not(lines_mask)
-		result = cv2.inpaint(image, lines_mask, 1, cv2.INPAINT_TELEA)  # Telea algorithm for smooth fill
+	# 	# Inpaint: Replace lines with surrounding pixels (seamless clone for better results)
+	# 	mask_inv = cv2.bitwise_not(lines_mask)
+	# 	result = cv2.inpaint(image, lines_mask, 1, cv2.INPAINT_TELEA)  # Telea algorithm for smooth fill
 				
-		return self._encode_to_bytes(result)
+	# 	return self._encode_to_bytes(result)
 
-	def _deskew_for_blank(self, image_bytes: bytes, angle_threshold: float = 10) -> bytes:
-		"""
-		Deskew (straighten) for blank paper to handle uneven layouts.
-		"""
-		image = self._decode_bytes(image_bytes)
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	# def _deskew_for_blank(self, image_bytes: bytes, angle_threshold: float = 10) -> bytes:
+	# 	"""
+	# 	Deskew (straighten) for blank paper to handle uneven layouts.
+	# 	"""
+	# 	image = self._decode_bytes(image_bytes)
+	# 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 				
-		# Edge detection and Hough for skew angle
-		edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-		lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
+	# 	# Edge detection and Hough for skew angle
+	# 	edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+	# 	lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
 				
-		if lines is not None:
-			angles = []
-			for rho, theta in lines[:, 0]:
-				angle = (theta * 180 / np.pi) - 90
-				if 0 < abs(angle) < angle_threshold:  # Small angles only
-					angles.append(angle)
+	# 	if lines is not None:
+	# 		angles = []
+	# 		for rho, theta in lines[:, 0]:
+	# 			angle = (theta * 180 / np.pi) - 90
+	# 			if 0 < abs(angle) < angle_threshold:  # Small angles only
+	# 				angles.append(angle)
             
-			if angles:
-				median_angle = np.median(angles)
-				if abs(median_angle) > 0.5:  # Worth correcting
-					(h, w) = image.shape[:2]
-					center = (w // 2, h // 2)
-					assert isinstance(median_angle, float)
+	# 		if angles:
+	# 			median_angle = np.median(angles)
+	# 			if abs(median_angle) > 0.5:  # Worth correcting
+	# 				(h, w) = image.shape[:2]
+	# 				center = (w // 2, h // 2)
+	# 				assert isinstance(median_angle, float)
 
-					M = cv2.getRotationMatrix2D(center, median_angle, 1.0)
-					deskewed = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+	# 				M = cv2.getRotationMatrix2D(center, median_angle, 1.0)
+	# 				deskewed = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
-					return self._encode_to_bytes(deskewed)
+	# 				return self._encode_to_bytes(deskewed)
         
-		return image_bytes  # No skew detected
+	# 	return image_bytes  # No skew detected
 
 	def find_first_box(self, image_bytes: bytes) -> bytes:
 		"""Find first box within image. SOURCE: https://github.com/AdityaPai2398/CamScanner-In-Python"""
