@@ -6,7 +6,7 @@
 # if target_dir not in sys.path:
 #     sys.path.insert(0, target_dir)
 
-from classes import SheetsExporter
+from model import SheetsExporter
 
 
 if __name__ == "__main__":
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 	
 	sheet.append(
 			"RIVERO, Ricci",
-			{"1": 0.5, "2a": 0.25, "2b": 0.1}
+			{"1": 1.0, "2a": 2.25, "2b": 3.5}
 		)
 	
 	sheet.export_sheet("TESTFILE")

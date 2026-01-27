@@ -1,7 +1,7 @@
 """
 Crude application for evaluating answers using AI. Powered by Google Gemini API.
 """
-from classes import *
+from model import *
 from dotenv import load_dotenv
 
 
