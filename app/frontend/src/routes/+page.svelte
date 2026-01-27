@@ -1,42 +1,39 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import MdiPlus from '~icons/mdi/plus';
 
 	import TestInstanceCard from '$lib/components/cards/TestInstanceCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
-
-	import MdiPlus from '~icons/mdi/plus';
-
 	import type { TestInstance } from '$lib/types/types.ts';
+	import { error } from 'console';
+
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	
+	let isPageLoading: boolean = true;
 	let instances: TestInstance[] = [];
 	let paginationValues: TestInstance[];
 
-	let isLoadingPage: boolean = false;
-
-	onMount(async () => await retrieveInstances());
-
-	async function retrieveInstances() {
-		isLoadingPage = true;
+	// unstable; TODO : verify if correct logic
+	onMount(async () => {
 		try {
 			const response = await fetch(
-				``,
+				`${apiBaseUrl}/api/test_instances`,
 				{
 					method: "GET",
-					headers: {
-						'Content-Type': 'application/json',
-					}
+					headers: {'Content-Type': 'application/json',}
 				}
 			);
 
 			const data = await response.json();
-
-			
-		} catch {
-
+			instances = data.map((item: TestInstance) => {
+				return item
+			});
+		} catch (e) {
+			alert("Failed to fetch instances.");
 		} finally {
-
+			isPageLoading = false;
 		}
-	}
+	});
 
 	// temporary!
 	instances = [
