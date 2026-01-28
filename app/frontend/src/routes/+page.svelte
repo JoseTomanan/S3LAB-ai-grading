@@ -16,7 +16,7 @@
 	let instances: TestInstance[] = [];
 	let paginationValues: TestInstance[];
 
-	// unstable; TODO : verify if correct logic
+	// untested, TODO : verify if correct logic
 	onMount(async () => {
 		try {
 			const response = await fetch(
@@ -57,8 +57,9 @@
 			if (response.status == 200) {
 				const data = response.json();
 				alert("Addition of instance with ID successful:\n"+data);
-			} else
+			} else {
 				alert("Addition fail: " + response.statusText);
+			}
 		} catch (e) {
 			alert("Failed to add new test instance:\n"+e);
 		}
