@@ -88,7 +88,7 @@
 					<Dialog.Title>Add new test instance</Dialog.Title>
 				</Dialog.Header>
 				<Label for="name">Name</Label>
-				<Input id="name" type="text" placeholder="Quiz #1"
+				<Input id="name" type="text" placeholder="Quiz 1"
 							bind:value={newInstanceName}/>
 				<Label for="section">Section</Label>
 				<Input id="section" type="text" placeholder="1-Acacia"
@@ -98,7 +98,7 @@
 								on:click={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
 						Save changes
 					</button>
-					<Dialog.Description>Note that test name and section cannot be changed after creation.</Dialog.Description>
+					<Dialog.Description>Note that the name and section cannot be changed after creation.</Dialog.Description>
 				</Dialog.Footer>
 			</Dialog.Content>
 		</Dialog.Root>
