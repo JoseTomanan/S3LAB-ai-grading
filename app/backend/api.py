@@ -11,8 +11,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-response = {
-    "instances": [
+@app.get("/api/test_instances")
+def get_test_instances():
+    response = {"instances": [
         {
             "name": "Seatwork-1",
             "section": "3-Rizal",
@@ -48,9 +49,5 @@ response = {
             "test_id": "Quiz-2_3-Aguinaldo",
             "is_done_rendering": True
         }
-    ]
-}
-
-@app.get("/api/test_instances")
-def get_test_instances():
+    ]}
     return response
