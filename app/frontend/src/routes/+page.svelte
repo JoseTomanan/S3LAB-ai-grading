@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import MdiPlus from '~icons/mdi/plus';
-
+	
+	import type { TestInstance } from '$lib/types/types.ts';
+	
 	import TestInstanceCard from '$lib/components/cards/TestInstanceCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { TestInstance } from '$lib/types/types.ts';
+	import * as Dialog from "$lib/components/ui/dialog/index.js";
+	import { Label } from '$lib/components/ui/label/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
 
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	
@@ -26,13 +31,13 @@
 			const data = await response.json();
 			instances = data.map((item: TestInstance) => item);
 		} catch (e) {
-			alert("Failed to fetch instances.");
+			console.log("Failed to fetch instances:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}
 	});
 
-	// temporary!
+	// TODO : remove once API is working
 	instances = [
 		{test_name: "Seatwork-1", section: "3-Rizal", date: "2025-11-11T20:17:46.384Z", is_done_rendering: true},
 		{test_name: "Seatwork-2", section: "3-Aguinaldo", date: "2025-12-12T20:17:46.384Z", is_done_rendering: false},
@@ -46,10 +51,29 @@
 <div class="px-4 py-8 flex flex-col gap-4">
 	<span class="flex flex-row items-center justify-between">
 		<h1>View Test Instances</h1>
-		<button>
-			<!-- TODO : open imported dialog component as popup on click -->
-			<MdiPlus class="size-8"/>
-		</button>
+		<Dialog.Root>
+			<Dialog.Trigger>
+				<MdiPlus class="size-8"/>
+			</Dialog.Trigger>
+			<Dialog.Content>
+				<Dialog.Header>
+					<Dialog.Title>Add new test instance</Dialog.Title>
+				</Dialog.Header>
+				<Label for="name">Name</Label>
+				<Input id="name" type="text" placeholder="Quiz #1"
+							bind:value={newInstanceName}/>
+				<Label for="section">Section</Label>
+				<Input id="section" type="text" placeholder="1-Acacia"
+							bind:value={newInstanceSection}/>
+				<Dialog.Footer>
+					<button class="button-primary"
+								on:click={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
+						Save changes
+					</button>
+					<Dialog.Description>Note that test name and section cannot be changed after creation.</Dialog.Description>
+				</Dialog.Footer>
+			</Dialog.Content>
+		</Dialog.Root>
 	</span>
 	<div class="flex flex-col gap-3">
 		{#each paginationValues as instance}
