@@ -9,7 +9,6 @@
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
 
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	
@@ -40,7 +39,7 @@
 	let newInstanceName: string = "";
 	let newInstanceSection: string = "";
 
-	async function addNewTestInstance() {
+	async function addNewTestInstance(name: string, section: string) {
 		// TODO : finish (remove this only when verified with working API)
 		try {
 			const response = await fetch(
@@ -49,15 +48,16 @@
 					method: "POST",
 					headers: {'Content-Type': 'application/json',},
 					body: JSON.stringify({
-						"name": newInstanceName,
-						"section": newInstanceSection
+						"name": name,
+						"section": section
 					}),
 				}
 			);
 
-			if (response.status == 200)
-				alert("Addition success.");
-			else
+			if (response.status == 200) {
+				const data = response.json();
+				alert("Addition of instance with ID successful:\n"+data);
+			} else
 				alert("Addition fail: " + response.statusText);
 		} catch (e) {
 			alert("Failed to add new test instance:\n"+e);
@@ -94,7 +94,7 @@
 							bind:value={newInstanceSection}/>
 				<Dialog.Footer>
 					<button class="button-primary"
-								on:click={() => addNewTestInstance()}>
+								on:click={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
 						Save changes
 					</button>
 					<Dialog.Description>Note that test name and section cannot be changed after creation.</Dialog.Description>
