@@ -5,7 +5,6 @@
 	import TestInstanceCard from '$lib/components/cards/TestInstanceCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import type { TestInstance } from '$lib/types/types.ts';
-	import { error } from 'console';
 
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	
@@ -25,9 +24,7 @@
 			);
 
 			const data = await response.json();
-			instances = data.map((item: TestInstance) => {
-				return item
-			});
+			instances = data.map((item: TestInstance) => item);
 		} catch (e) {
 			alert("Failed to fetch instances.");
 		} finally {
