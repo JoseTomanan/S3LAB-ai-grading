@@ -37,6 +37,26 @@
 		}
 	});
 
+	let newInstanceName: string = "";
+	let newInstanceSection: string = "";
+
+	async function addNewTestInstance(name: string, section: string) {
+		// TODO : finish
+		try {
+			const response = await fetch(
+				`${apiBaseUrl}/api/test_instances`,
+				{
+					method: "POST",
+					headers: {'Content-Type': 'application/json',}
+				}
+			);
+
+			const data = await response.json();
+		} catch (e) {
+			alert("Failed to add new test instance:\n"+e);
+		}
+	}
+
 	// TODO : remove once API is working
 	instances = [
 		{test_name: "Seatwork-1", section: "3-Rizal", date: "2025-11-11T20:17:46.384Z", is_done_rendering: true},
