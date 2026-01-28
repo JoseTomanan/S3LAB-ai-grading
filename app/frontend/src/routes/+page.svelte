@@ -40,18 +40,25 @@
 	let newInstanceName: string = "";
 	let newInstanceSection: string = "";
 
-	async function addNewTestInstance(name: string, section: string) {
-		// TODO : finish
+	async function addNewTestInstance() {
+		// TODO : finish (remove this only when verified with working API)
 		try {
 			const response = await fetch(
 				`${apiBaseUrl}/api/test_instances`,
 				{
 					method: "POST",
-					headers: {'Content-Type': 'application/json',}
+					headers: {'Content-Type': 'application/json',},
+					body: JSON.stringify({
+						"name": newInstanceName,
+						"section": newInstanceSection
+					}),
 				}
 			);
 
-			const data = await response.json();
+			if (response.status == 200)
+				alert("Addition success.");
+			else
+				alert("Addition fail: " + response.statusText);
 		} catch (e) {
 			alert("Failed to add new test instance:\n"+e);
 		}
@@ -87,7 +94,7 @@
 							bind:value={newInstanceSection}/>
 				<Dialog.Footer>
 					<button class="button-primary"
-								on:click={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
+								on:click={() => addNewTestInstance()}>
 						Save changes
 					</button>
 					<Dialog.Description>Note that test name and section cannot be changed after creation.</Dialog.Description>
