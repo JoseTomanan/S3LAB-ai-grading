@@ -123,22 +123,27 @@
   }
 
 	h1 {
-		@apply text-3xl;
+		@apply text-2xl;
 		font-weight: bold;
     text-align: center;
 	}
 
 	h2 {
-		@apply text-2xl;
-	}
-
-	h3 {
 		@apply text-xl;
 	}
 
-	h4 {
+	h3 {
 		@apply text-lg;
+	}
+
+	h4 {
+		@apply text-base;
 		@apply opacity-75;
+	}
+
+	p {
+		@apply text-sm;
+		@apply opacity-90;
 	}
 }
 
