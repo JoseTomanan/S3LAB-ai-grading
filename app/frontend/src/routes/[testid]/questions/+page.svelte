@@ -35,6 +35,10 @@
 			isPageLoading = false;
 		}
 	});
+
+	async function editItems() {
+		// TODO : the whole thing	
+	}
 	
 	$: shortFormItems = allItems.filter(item => !item.is_problem_solving);
 	$: probSolItems = allItems.filter(item => item.is_problem_solving);
