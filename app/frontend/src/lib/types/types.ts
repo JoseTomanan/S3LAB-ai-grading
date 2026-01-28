@@ -7,15 +7,15 @@ export enum RenderStatus {
 }
 
 export interface TestInstance {
-	test_name: string;
+	name: string;
 	section: string;
 	date: string;
 	is_done_rendering: boolean;
 }
 
 export interface TestItem {
-	number: number,
+	item_id: string;
 	question: string;
 	is_problem_solving: boolean;
-	expected_answer_rubric_question: string;	// if rubric question? separate with `. `
+	expected_answer_rubric_questions: string;	// if rubric question, separate with `. `
 }
