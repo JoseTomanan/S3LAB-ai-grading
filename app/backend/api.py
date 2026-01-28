@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from models import *
+from schema import *
+from database import *
 
 
+
+create_db_and_tables()
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
