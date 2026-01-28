@@ -22,7 +22,7 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				``,
+				`${apiBaseUrl}/api/test_instances/${"Seatwork-1_3-Aguinaldo"}`,
 				{
 					method: "GET",
 					headers: {'Content-Type': 'application/json',},
@@ -30,7 +30,8 @@
 				}
 			);
 		} catch {
-			alert();
+			// TODO : revert to alert() once functional
+			console.log("Failed to add ");
 		} finally {
 			isPageLoading = false;
 		}
@@ -51,8 +52,8 @@
 
 	// TODO : remove once API is working
 	allItems = [
-		{number: 1, question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_question: ""},
-		{number: 2, question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: false, expected_answer_rubric_question: ""},
+		{item_id: '1', question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_questions: ""},
+		{item_id: '2', question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: false, expected_answer_rubric_questions: ""},
 	];
 
 </script>
@@ -71,7 +72,7 @@
 			<div class="ml-4">
 				{#each shortFormItems as item}
 					<p class="truncate text-ellipsis">
-						{item.number}: {item.question}
+						{item.item_id}: {item.question}
 					</p>
 				{/each}
 			</div>
@@ -86,7 +87,7 @@
 			<div class="ml-4">
 				{#each probSolItems as item}
 					<p class="truncate text-ellipsis">
-						{item.number}: {item.question}
+						{item.item_id}: {item.question}
 					</p>
 				{/each}
 			</div>
