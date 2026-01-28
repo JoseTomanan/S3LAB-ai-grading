@@ -28,9 +28,9 @@
 			);
 
 			const data = await response.json();
-			instances = data.map((item: TestInstance) => item);
+			instances = data.instances;
 		} catch (e) {
-			console.log("Failed to fetch instances:\n"+e);
+			alert("Failed to fetch instances:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}
@@ -65,15 +65,6 @@
 		}
 	}
 
-	// TODO : remove once API is working
-	instances = [
-		{test_name: "Seatwork-1", section: "3-Rizal", date: "2025-11-11T20:17:46.384Z", is_done_rendering: true},
-		{test_name: "Seatwork-2", section: "3-Aguinaldo", date: "2025-12-12T20:17:46.384Z", is_done_rendering: false},
-		{test_name: "Quiz-1", section: "3-Aguinaldo", date: "2026-01-12T20:17:46.384Z", is_done_rendering: false},
-		{test_name: "Quiz-1", section: "3-Rizal", date: "2026-01-13T20:17:46.384Z", is_done_rendering: true},
-		{test_name: "Quiz-2", section: "3-Aguinaldo", date: "2026-01-19T20:17:46.384Z", is_done_rendering: true},
-	];
-
 </script>
 
 <div class="px-4 py-8 flex flex-col gap-4">
@@ -104,9 +95,13 @@
 		</Dialog.Root>
 	</span>
 	<div class="flex flex-col gap-3">
-		{#each paginationValues as instance}
-			<TestInstanceCard {...instance} />
-		{/each}
+		{#if isPageLoading}
+			<p>Loading...</p>
+		{:else}
+			{#each instances as instance}
+				<TestInstanceCard {...instance} />
+			{/each}
+		{/if}
 	</div>
 	<Pagination
 			rows={instances}
