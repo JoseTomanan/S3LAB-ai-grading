@@ -99,7 +99,7 @@
 			<p>Loading...</p>
 		{:else}
 			{#each instances as instance}
-				<TestInstanceCard {...instance} />
+				<TestInstanceCard {...instance} test_id={instance.section + "_" + instance.name}/>
 			{/each}
 		{/if}
 	</div>
