@@ -1,7 +1,8 @@
 <script lang="ts">
-	export let test_name: string;
+	export let name: string;
 	export let section: string;
 	export let date: string;
+	export let test_id: string;
 	export let is_done_rendering: boolean;
 
 	export let countShortFormItems: number;
@@ -21,7 +22,7 @@
 		<a class="size-8" href="/">
 			<MdiArrowBack class="size-full" />
 		</a>
-		<h1>{ test_name }</h1>
+		<h1>{ name }</h1>
 		{#if is_done_rendering}
 			<MdiCheckboxMarkedOutline class="size-6 text-muted-foreground"/>
 		{:else}
@@ -29,6 +30,7 @@
 		{/if}
 	</span>
 	<div id="change-instance-details">
+		<h3>TEST_ID: { test_id }</h3>
 		<h3>Section: { section }</h3>
 		<h3>Date: { dateObj.toLocaleDateString() }</h3>
 		<h3>No. of Short form: { countShortFormItems }</h3>
