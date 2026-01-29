@@ -1,8 +1,18 @@
-from pydantic import BaseModel
+from sqlmodel import SQLModel
 
 
-class GetItemsRequest(BaseModel):
-	...
+class TestInstancesBase(SQLModel):
+    name: str
+    section: str
+    date: str
+    is_done_rendering: str
 
-class GetItemsResponse(GetItemsRequest):
-	...
+class TestInstancesGetResponse(TestInstancesBase):
+    test_id: str
+
+class TestInstancesAddRequest(TestInstancesBase):
+    test_id: str
+
+class TestInstancesAddResponse(TestInstancesBase):
+    ...
+
