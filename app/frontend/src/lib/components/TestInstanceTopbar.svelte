@@ -1,12 +1,13 @@
 <script lang="ts">
-	export let name: string;
-	export let section: string;
-	export let date: string;
-	export let test_id: string;
-	export let is_done_rendering: boolean;
-
-	export let countShortFormItems: number;
-	export let countProbSolItems: number;
+	let {
+		name,
+		section,
+		date,
+		testid,
+		is_done_rendering,
+		countShortFormItems,
+		countProbSolItems
+	} = $props();
 
 	import MdiArrowBack from '~icons/mdi/arrow-back';
 	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
@@ -30,7 +31,10 @@
 		{/if}
 	</span>
 	<div id="change-instance-details">
-		<h3>TEST_ID: { test_id }</h3>
+		<h3>
+			TestID:
+			<span class="font-mono text-sm">{ testid }</span>
+		</h3>
 		<h3>Section: { section }</h3>
 		<h3>Date: { dateObj.toLocaleDateString() }</h3>
 		<h3>No. of Short form: { countShortFormItems }</h3>
