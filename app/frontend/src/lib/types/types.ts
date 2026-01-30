@@ -10,6 +10,7 @@ export interface TestInstance {
 	name: string;
 	section: string;
 	date: string;
+	test_id: string;
 	is_done_rendering: boolean;
 }
 
