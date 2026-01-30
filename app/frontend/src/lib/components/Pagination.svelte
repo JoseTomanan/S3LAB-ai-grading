@@ -2,27 +2,28 @@
 	import MdiArrowForward from '~icons/mdi/arrow-forward';
 	import MdiArrowBack from '~icons/mdi/arrow-back';
 	
-	export let rows;
-	export let perPage;
-	export let trimmedRows;
+	let { rows = [], perPage = 10, trimmedRows = $bindable() } = $props();
 
-	$: totalRows = rows.length 
-	$: currentPage = 0
-	$: totalPages = Math.ceil(totalRows / perPage) 
-	$: start =  currentPage * perPage
-	$: end = currentPage === totalPages - 1 ? totalRows - 1 : start + perPage - 1  ;
+	let totalRows = $derived(rows.length);
+	let currentPage = $state(0);
+	let totalPages = $derived(Math.ceil(totalRows / perPage));
+	let start = $derived(currentPage * perPage);
+	let end = $derived(currentPage === totalPages - 1 ? totalRows - 1 : start + perPage - 1);
 
-	$: trimmedRows = rows.slice(start, end + 1);
+	$effect(() => {
+		trimmedRows = rows.slice(start, end + 1);
+	});
 
-	$: totalRows, currentPage = 0
-	$: currentPage, start, end
+	$effect(() => {
+		if (totalRows > 0) currentPage = 0;
+	});
 </script>
 
 {#if totalRows && totalRows > perPage}
 	<div class='pagination'>
 		<button
 					class="button-secondary"
-					on:click={() => currentPage -= 1} 
+					onclick={() => currentPage -= 1} 
 					disabled={currentPage === 0 ? true : false} 
 					aria-label="left arrow icon" 
 					aria-describedby="prev">
@@ -32,7 +33,7 @@
 		<p>{start + 1} - {end + 1} of {totalRows}</p>
 		<button
 					class="button-secondary"
-					on:click={() => currentPage += 1} 
+					onclick={() => currentPage += 1} 
 					disabled={currentPage === totalPages - 1 ? true : false} 
 					aria-label="right arrow icon" 
 					aria-describedby="next">
