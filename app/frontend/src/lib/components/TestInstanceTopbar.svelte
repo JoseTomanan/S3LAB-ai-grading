@@ -3,7 +3,7 @@
 		name,
 		section,
 		date,
-		testid,
+		test_id,
 		is_done_rendering,
 		countShortFormItems,
 		countProbSolItems
@@ -33,7 +33,7 @@
 	<div id="change-instance-details">
 		<h3>
 			TestID:
-			<span class="font-mono text-sm">{ testid }</span>
+			<span class="font-mono text-sm">{ test_id }</span>
 		</h3>
 		<h3>Section: { section }</h3>
 		<h3>Date: { dateObj.toLocaleDateString() }</h3>

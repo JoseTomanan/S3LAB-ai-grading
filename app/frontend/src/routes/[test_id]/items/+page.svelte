@@ -11,7 +11,7 @@
 		is_done_rendering: boolean,
 	}>();
 
-	const testid: string = data.testid;
+	const test_id: string = data.test_id;
 
 	import { onMount } from 'svelte';
 	import MdiEdit from '~icons/mdi/edit';
@@ -69,7 +69,7 @@
 
 <div class="py-4 space-y-8">
 	<TestInstanceTopbar
-				name={isPageLoading ? "Loading..." : name} {section} {date} {testid} {is_done_rendering}
+				name={isPageLoading ? "Loading..." : name} {section} {date} {test_id} {is_done_rendering}
 				countShortFormItems={shortFormItems.length} countProbSolItems={probSolItems.length}/>
 	<div class="px-4 space-y-4">
 		<div class="card p-2">

@@ -1,5 +1,5 @@
 import type { LayoutLoad } from './$types.d.ts';
 
 export const load: LayoutLoad = async ({ params }) => {
-	return { testid: params.testid };
+	return { test_id: params.test_id };
 };
