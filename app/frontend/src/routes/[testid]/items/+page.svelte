@@ -1,24 +1,31 @@
 <script lang="ts">
-	export let name: string;
-	export let section: string;
-	export let date: string;
-	export let is_done_rendering: boolean;
+	import type { PageData } from './$types.d.ts';
+	
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+	let { data, name, section, date, is_done_rendering } = $props<{
+		data: PageData,
+		name: string,
+		section: string,
+		date: string,
+		is_done_rendering: boolean,
+	}>();
+
+	const testid: string = data.testid;
 
 	import { onMount } from 'svelte';
 	import MdiEdit from '~icons/mdi/edit';
 
 	import type { TestItem } from '$lib/types/types.ts';
 	import TestInstanceTopbar from '$lib/components/TestInstanceTopbar.svelte';
-	
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-	let isPageLoading: boolean = true;
+	let isPageLoading: boolean = $state(true);
 
-	let allItems: TestItem[] = [];
-	let shortFormItems: TestItem[];
-	let probSolItems: TestItem[];
+	let allItems: TestItem[] = $state([]);
+
+	let shortFormItems: TestItem[] = $derived(allItems.filter(item => !item.is_problem_solving));
+	let probSolItems: TestItem[] = $derived(allItems.filter(item => item.is_problem_solving));
 	
-	// TODO : the whole thing
 	onMount(async () => {
 		try {
 			const response = await fetch(
@@ -29,6 +36,8 @@
 					body: JSON.stringify({}),
 				}
 			);
+
+			
 		} catch {
 			// TODO : revert to alert() once functional
 			console.log("Failed to add ");
@@ -41,9 +50,6 @@
 		// TODO : the whole thing	
 	}
 	
-	$: shortFormItems = allItems.filter(item => !item.is_problem_solving);
-	$: probSolItems = allItems.filter(item => item.is_problem_solving);
-	
 	// TODO : remove once API is working
 	setTimeout(() => {
 		name = "Seatwork 1";
@@ -55,18 +61,21 @@
 			{item_id: '1', question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_questions: ""},
 			{item_id: '2', question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: false, expected_answer_rubric_questions: ""},
 		];
+
+		isPageLoading = false;
 	}, 2000);
 
 </script>
 
 <div class="py-4 space-y-8">
-	<TestInstanceTopbar {name} {section} {date} {test_id} {is_done_rendering}
+	<TestInstanceTopbar
+				name={isPageLoading ? "Loading..." : name} {section} {date} {testid} {is_done_rendering}
 				countShortFormItems={shortFormItems.length} countProbSolItems={probSolItems.length}/>
 	<div class="px-4 space-y-4">
 		<div class="card p-2">
 			<span class="flex flex-row items-center w-full justify-between">
 				<h3>Short Form Items</h3>
-				<button on:click={() => {}}>
+				<button onclick={() => {}}>
 					<MdiEdit/>
 				</button>
 			</span>
@@ -81,7 +90,7 @@
 		<div class="card p-2">
 			<span class="flex flex-row items-center w-full justify-between">
 				<h3>Problem Solving Items</h3>
-				<button on:click={() => {}}>
+				<button onclick={() => {}}>
 					<MdiEdit/>
 				</button>
 			</span>
