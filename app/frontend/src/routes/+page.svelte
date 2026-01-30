@@ -98,8 +98,8 @@
 		{#if isPageLoading}
 			<p>Loading...</p>
 		{:else}
-			{#each instances as instance}
-				<TestInstanceCard {...instance} test_id={instance.section + "_" + instance.name}/>
+			{#each paginationValues as instance}
+				<TestInstanceCard {...instance}/>
 			{/each}
 		{/if}
 	</div>
