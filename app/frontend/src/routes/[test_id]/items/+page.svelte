@@ -1,7 +1,16 @@
 <script lang="ts">
-	import type { PageData } from './$types.d.ts';
-	
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+	import type { PageData } from './$types.d.ts';
+	import { onMount } from 'svelte';
+	import MdiEditOutline from '~icons/mdi/edit-outline';
+	import MdiPlus from '~icons/mdi/plus';
+	
+	import type { TestItem } from '$lib/types/types.ts';
+	import TestInstanceTopbar from '$lib/components/TestInstanceTopbar.svelte';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Label } from '$lib/components/ui/label/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
 
 	let { data, name, section, date, is_done_rendering } = $props<{
 		data: PageData,
@@ -10,14 +19,6 @@
 		date: string,
 		is_done_rendering: boolean,
 	}>();
-
-	const test_id: string = data.test_id;
-
-	import { onMount } from 'svelte';
-	import MdiEdit from '~icons/mdi/edit';
-
-	import type { TestItem } from '$lib/types/types.ts';
-	import TestInstanceTopbar from '$lib/components/TestInstanceTopbar.svelte';
 
 	let isPageLoading: boolean = $state(true);
 
@@ -37,17 +38,21 @@
 				}
 			);
 
-			
-		} catch {
+			const data = await response.json();
+			allItems = data.items;
+		} catch (e) {
 			// TODO : revert to alert() once functional
-			console.log("Failed to add ");
+			console.log("Failed to fetch test details:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}
 	});
 
-	async function editItems() {
-		// TODO : the whole thing	
+	async function editItemDetails() {
+		// TODO : finish (remove this only when everything is finally done)
+		try {
+		} catch(e) {
+		}
 	}
 	
 	// TODO : remove once API is working
@@ -69,38 +74,51 @@
 
 <div class="py-4 space-y-8">
 	<TestInstanceTopbar
-				name={isPageLoading ? "Loading..." : name} {section} {date} {test_id} {is_done_rendering}
+				name={isPageLoading ? "Loading..." : name} {section} {date} test_id={data.test_id} {is_done_rendering}
 				countShortFormItems={shortFormItems.length} countProbSolItems={probSolItems.length}/>
 	<div class="px-4 space-y-4">
-		<div class="card p-2">
-			<span class="flex flex-row items-center w-full justify-between">
-				<h3>Short Form Items</h3>
-				<button onclick={() => {}}>
-					<MdiEdit/>
-				</button>
-			</span>
-			<div class="ml-4">
-				{#each shortFormItems as item}
-					<p class="truncate text-ellipsis">
-						{item.item_id}: {item.question}
-					</p>
-				{/each}
+		{#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
+			<div class="card p-2">
+				<span class="flex flex-row items-center w-full justify-between">
+					<h3>{ bigItem.a }</h3>
+					<!-- TODO : add new item dialog; please segregate into own file -->
+					<MdiPlus class="size-8"/>
+				</span>
+				<div class="ml-4">
+					{#each bigItem.b as smallItem}
+						<span class="flex flex-row items-center justify-between">
+							<p class="truncate text-ellipsis w-7/8">
+								{smallItem.item_id}. {smallItem.question}
+							</p>
+							<!-- TODO : segregate into own file -->
+							<Dialog.Root>
+								<Dialog.Trigger>
+									<MdiEditOutline/>
+								</Dialog.Trigger>
+								<Dialog.Content>
+									<Dialog.Header>
+										<Dialog.Title>Edit test item {smallItem.item_id}</Dialog.Title>
+									</Dialog.Header>
+									<Label for="question">Question</Label>
+									<Input id="question"
+												bind:value={ smallItem.question }/>
+									<Label for="e_a_r_q">
+										{ smallItem.is_problem_solving ? "Rubric questions" : "Expected answer" }
+									</Label>
+									<Input id="e_a_r_q"
+												bind:value={ smallItem.expected_answer_rubric_questions }/>
+									<Dialog.Footer>
+										<button class="button-primary"
+													onclick={() => editItemDetails()}>
+											Save changes
+										</button>
+									</Dialog.Footer>
+								</Dialog.Content>
+							</Dialog.Root>
+						</span>
+					{/each}
+				</div>
 			</div>
-		</div>
-		<div class="card p-2">
-			<span class="flex flex-row items-center w-full justify-between">
-				<h3>Problem Solving Items</h3>
-				<button onclick={() => {}}>
-					<MdiEdit/>
-				</button>
-			</span>
-			<div class="ml-4">
-				{#each probSolItems as item}
-					<p class="truncate text-ellipsis">
-						{item.item_id}: {item.question}
-					</p>
-				{/each}
-			</div>
-		</div>
+		{/each}
 	</div>
 </div>
