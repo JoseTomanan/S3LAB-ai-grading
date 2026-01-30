@@ -86,7 +86,7 @@
 							bind:value={newInstanceSection}/>
 				<Dialog.Footer>
 					<button class="button-primary"
-								on:click={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
+								onclick={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
 						Save changes
 					</button>
 					<Dialog.Description>Note that the name and section cannot be changed after creation.</Dialog.Description>
