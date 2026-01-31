@@ -41,14 +41,14 @@
 			const result = await response.json();
 			allItems = result.items;
 		} catch (e) {
-			// TODO : revert to alert() once functional
+			// FIXME: revert to alert() once functional
 			console.log("Failed to fetch test details:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}
 	});
 	
-	// TODO : remove once API is working
+	// FIXME: remove once API is working
 	setTimeout(() => {
 		name = "Seatwork 1";
 		section = "3-Rizal";
@@ -61,7 +61,7 @@
 		];
 
 		isPageLoading = false;
-	}, 2000);
+	}, 1000);
 
 </script>
 
