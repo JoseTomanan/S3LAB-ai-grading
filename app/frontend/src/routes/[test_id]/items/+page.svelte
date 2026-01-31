@@ -9,8 +9,8 @@
 	import type { TestItem } from '$lib/types/types.ts';
 	import TestInstanceTopbar from '$lib/components/TestInstanceTopbar.svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
+	import EditTestItem from '$lib/components/dialogs/EditTestItem.svelte';
+	import AddTestItem from '$lib/components/dialogs/AddTestItem.svelte';
 
 	let { data, name, section, date, is_done_rendering } = $props<{
 		data: PageData,
@@ -30,7 +30,7 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances/${"Seatwork-1_3-Aguinaldo"}`,
+				`${apiBaseUrl}/api/test_instances/${data.test_id}`,
 				{
 					method: "GET",
 					headers: {'Content-Type': 'application/json',},
@@ -38,8 +38,8 @@
 				}
 			);
 
-			const data = await response.json();
-			allItems = data.items;
+			const result = await response.json();
+			allItems = result.items;
 		} catch (e) {
 			// TODO : revert to alert() once functional
 			console.log("Failed to fetch test details:\n"+e);
@@ -47,13 +47,6 @@
 			isPageLoading = false;
 		}
 	});
-
-	async function editItemDetails() {
-		// TODO : finish (remove this only when everything is finally done)
-		try {
-		} catch(e) {
-		}
-	}
 	
 	// TODO : remove once API is working
 	setTimeout(() => {
@@ -81,8 +74,12 @@
 			<div class="card p-2">
 				<span class="flex flex-row items-center w-full justify-between">
 					<h3>{ bigItem.a }</h3>
-					<!-- TODO : add new item dialog; please segregate into own file -->
-					<MdiPlus class="size-8"/>
+					<Dialog.Root>
+						<Dialog.Trigger>
+							<MdiPlus class="size-8"/>
+						</Dialog.Trigger>
+						<AddTestItem />
+					</Dialog.Root>
 				</span>
 				<div class="ml-4">
 					{#each bigItem.b as smallItem}
@@ -90,30 +87,11 @@
 							<p class="truncate text-ellipsis w-7/8">
 								{smallItem.item_id}. {smallItem.question}
 							</p>
-							<!-- TODO : segregate into own file -->
 							<Dialog.Root>
 								<Dialog.Trigger>
 									<MdiEditOutline/>
 								</Dialog.Trigger>
-								<Dialog.Content>
-									<Dialog.Header>
-										<Dialog.Title>Edit test item {smallItem.item_id}</Dialog.Title>
-									</Dialog.Header>
-									<Label for="question">Question</Label>
-									<Input id="question"
-												bind:value={ smallItem.question }/>
-									<Label for="e_a_r_q">
-										{ smallItem.is_problem_solving ? "Rubric questions" : "Expected answer" }
-									</Label>
-									<Input id="e_a_r_q"
-												bind:value={ smallItem.expected_answer_rubric_questions }/>
-									<Dialog.Footer>
-										<button class="button-primary"
-													onclick={() => editItemDetails()}>
-											Save changes
-										</button>
-									</Dialog.Footer>
-								</Dialog.Content>
+								<EditTestItem testItem={smallItem} test_id={data.test_id}/>
 							</Dialog.Root>
 						</span>
 					{/each}
