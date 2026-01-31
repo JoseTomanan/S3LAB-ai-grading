@@ -6,9 +6,14 @@
 	import type { LayoutData } from './$types.d.ts';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
+
+	import MdiArrowBack from '~icons/mdi/arrow-back';
+	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
+	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
+	import MdiTable from '~icons/mdi/table';
+	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 	
 	import type { TestInstance, TestItem } from '$lib/types/types.ts';
-	import TestInstanceTopbar from '$lib/components/TestInstanceTopbar.svelte';
 
 	let isPageLoading: boolean = $state(true);
 
@@ -45,13 +50,10 @@
 	});
 
 	setTimeout(() => {
-		activeTestInstance = {
-			name: "Seatwork 1",
-			section: "3-Rizal",
-			date: "2025-11-11T20:17:46.384Z",
-			test_id: "Seatwork-1_3-Rizal",
-			is_done_rendering: false
-		};
+		activeTestInstance.name = "Seatwork 1";
+		activeTestInstance.section = "3-Rizal";
+		activeTestInstance.date = "2025-11-11T20:17:46.384Z";
+		activeTestInstance.is_done_rendering = false;
 
 		isPageLoading = false;
 	}, 500);
@@ -59,7 +61,42 @@
 </script>
 
 <div class="space-y-8">
-	<TestInstanceTopbar
-				{...activeTestInstance} name={isPageLoading ? "Loading..." : activeTestInstance.name} date={new Date(activeTestInstance.date).toLocaleDateString()} />
+	<!-- <TestInstanceTopbar
+				{...activeTestInstance} name={isPageLoading ? "Loading..." : activeTestInstance.name} date={new Date(activeTestInstance.date).toLocaleDateString()} /> -->
+	<div class="bg-sidebar px-4 py-8 border-b border-sidebar-border space-y-4">
+		<span class="flex flex-row items-center gap-4">
+			<a class="size-8" href="/">
+				<MdiArrowBack class="size-full" />
+			</a>
+			<h1>{ activeTestInstance.name }</h1>
+			{#if activeTestInstance.is_done_rendering}
+				<MdiCheckboxMarkedOutline class="size-6 text-muted-foreground"/>
+			{:else}
+				<MdiCheckboxBlankOutline class="size-6 text-muted-foreground" />
+			{/if}
+		</span>
+		<div id="change-instance-details">
+			<h3>
+				TestID:
+				<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
+			</h3>
+			<h3>Section: { activeTestInstance.section }</h3>
+			<h3>Date: { new Date(activeTestInstance.date).toLocaleString() }</h3>
+		</div>
+		<span id="thisOne" class="flex items-center gap-2 justify-end">
+			<a class="button-primary" href={`/${data.test_id}/items`}>
+				Items
+			</a>
+			<a class="button-primary" href={`/${data.test_id}/papers`}>
+				Papers
+			</a>
+			<button class="button-primary">
+				<MdiTable class="size-6" />
+			</button>
+			<button class="button-primary">
+				<MdiPaperAddOutline class="size-6"/>
+			</button>
+		</span>
+	</div>
 	{@render children()}
 </div>
