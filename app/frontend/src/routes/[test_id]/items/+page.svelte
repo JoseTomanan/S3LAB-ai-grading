@@ -1,24 +1,17 @@
 <script lang="ts">
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
+	let { data } = $props();
+
 	import type { PageData } from './$types.d.ts';
 	import { onMount } from 'svelte';
 	import MdiEditOutline from '~icons/mdi/edit-outline';
 	import MdiPlus from '~icons/mdi/plus';
 	
-	import type { TestItem } from '$lib/types/types.ts';
-	import TestInstanceTopbar from '$lib/components/TestInstanceTopbar.svelte';
+	import type { TestInstance, TestItem } from '$lib/types/types.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import EditTestItem from '$lib/components/dialogs/EditTestItem.svelte';
 	import AddTestItem from '$lib/components/dialogs/AddTestItem.svelte';
-
-	let { data, name, section, date, is_done_rendering } = $props<{
-		data: PageData,
-		name: string,
-		section: string,
-		date: string,
-		is_done_rendering: boolean,
-	}>();
 
 	let isPageLoading: boolean = $state(true);
 
@@ -30,7 +23,7 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances/${data.test_id}`,
+				`${apiBaseUrl}/api/test_instances/${data.test_id}/items`,
 				{
 					method: "GET",
 					headers: {'Content-Type': 'application/json',},
@@ -50,11 +43,6 @@
 	
 	// FIXME: remove once API is working
 	setTimeout(() => {
-		name = "Seatwork 1";
-		section = "3-Rizal";
-		date = "2025-11-11T20:17:46.384Z";
-		is_done_rendering = false;
-
 		allItems = [
 			{item_id: '1', question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_questions: ""},
 			{item_id: '2', question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: true, expected_answer_rubric_questions: ""},
@@ -65,11 +53,10 @@
 
 </script>
 
-<div class="py-4 space-y-8">
-	<TestInstanceTopbar
-				name={isPageLoading ? "Loading..." : name} {section} {date} test_id={data.test_id} {is_done_rendering}
-				countShortFormItems={shortFormItems.length} countProbSolItems={probSolItems.length}/>
-	<div class="px-4 space-y-4">
+<div class="px-4 space-y-4">
+	{#if isPageLoading}
+		<p>Loading...</p>
+	{:else}
 		{#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
 			<div class="card p-2">
 				<span class="flex flex-row items-center w-full justify-between">
@@ -98,5 +85,5 @@
 				</div>
 			</div>
 		{/each}
-	</div>
+	{/if}
 </div>

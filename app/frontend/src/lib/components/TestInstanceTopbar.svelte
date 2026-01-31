@@ -5,8 +5,6 @@
 		date,
 		test_id,
 		is_done_rendering,
-		countShortFormItems,
-		countProbSolItems
 	} = $props();
 
 	import MdiArrowBack from '~icons/mdi/arrow-back';
@@ -14,11 +12,9 @@
 	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiTable from '~icons/mdi/table';
 	import MdiUpload from '~icons/mdi/upload';
-
-	const dateObj: Date = new Date(date);
 </script>
 
-<div class="bg-sidebar p-4 border-b border-sidebar-border space-y-4">
+<div class="bg-sidebar px-4 py-8 border-b border-sidebar-border space-y-4">
 	<span class="flex flex-row items-center gap-4">
 		<a class="size-8" href="/">
 			<MdiArrowBack class="size-full" />
@@ -36,9 +32,7 @@
 			<span class="font-mono text-sm">{ test_id }</span>
 		</h3>
 		<h3>Section: { section }</h3>
-		<h3>Date: { dateObj.toLocaleDateString() }</h3>
-		<h3>No. of Short form: { countShortFormItems }</h3>
-		<h3>No. of Problem solving: { countProbSolItems }</h3>
+		<h3>Date: { date }</h3>
 	</div>
 	<span id="thisOne" class="flex items-center gap-2 justify-end">
 		<a class="button-primary" href={`/${test_id}/papers`}>
