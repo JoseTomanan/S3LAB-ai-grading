@@ -41,7 +41,9 @@
 		<h3>No. of Problem solving: { countProbSolItems }</h3>
 	</div>
 	<span id="thisOne" class="flex items-center gap-2 justify-end">
-		<button class="button-primary">Open class list</button>
+		<a class="button-primary" href={`/${test_id}/papers`}>
+			Open test papers
+		</a>
 		<button class="button-primary">
 			<MdiTable class="size-6" />
 		</button>
