@@ -20,3 +20,9 @@ export interface TestItem {
 	is_problem_solving: boolean;
 	expected_answer_rubric_questions: string;	// if rubric question, separate with `. `
 }
+
+export interface TestPaper {
+	paper_id: string;
+	student_no: string;
+	// TODO: add more; I'm definitely forgetting something.
+}
