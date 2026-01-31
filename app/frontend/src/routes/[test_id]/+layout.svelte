@@ -98,5 +98,7 @@
 			</button>
 		</span>
 	</div>
-	{@render children()}
+	<div class="px-4">
+		{@render children()}
+	</div>
 </div>
