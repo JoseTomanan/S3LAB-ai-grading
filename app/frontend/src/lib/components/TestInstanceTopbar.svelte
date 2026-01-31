@@ -11,7 +11,7 @@
 	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
 	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiTable from '~icons/mdi/table';
-	import MdiUpload from '~icons/mdi/upload';
+	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 </script>
 
 <div class="bg-sidebar px-4 py-8 border-b border-sidebar-border space-y-4">
@@ -35,14 +35,17 @@
 		<h3>Date: { date }</h3>
 	</div>
 	<span id="thisOne" class="flex items-center gap-2 justify-end">
+		<a class="button-primary" href={`/${test_id}/items`}>
+			Items
+		</a>
 		<a class="button-primary" href={`/${test_id}/papers`}>
-			Open test papers
+			Papers
 		</a>
 		<button class="button-primary">
 			<MdiTable class="size-6" />
 		</button>
 		<button class="button-primary">
-			<MdiUpload class="size-6"/>
+			<MdiPaperAddOutline class="size-6"/>
 		</button>
 	</span>
 </div>
