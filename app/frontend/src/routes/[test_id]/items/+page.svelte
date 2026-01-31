@@ -57,7 +57,7 @@
 
 		allItems = [
 			{item_id: '1', question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_questions: ""},
-			{item_id: '2', question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: false, expected_answer_rubric_questions: ""},
+			{item_id: '2', question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: true, expected_answer_rubric_questions: ""},
 		];
 
 		isPageLoading = false;
@@ -83,13 +83,13 @@
 				</span>
 				<div class="ml-4">
 					{#each bigItem.b as smallItem}
-						<span class="flex flex-row items-center justify-between">
-							<p class="truncate text-ellipsis w-7/8">
-								{smallItem.item_id}. {smallItem.question}
+						<span class="flex flex-row items-end justify-between">
+							<p class="truncate text-ellipsis w-fill">
+								({smallItem.item_id}) {smallItem.question}
 							</p>
 							<Dialog.Root>
 								<Dialog.Trigger>
-									<MdiEditOutline/>
+									<MdiEditOutline class="size-4"/>
 								</Dialog.Trigger>
 								<EditTestItem testItem={smallItem} test_id={data.test_id}/>
 							</Dialog.Root>
