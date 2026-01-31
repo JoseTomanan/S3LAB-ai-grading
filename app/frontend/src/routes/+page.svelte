@@ -1,4 +1,6 @@
 <script lang="ts">
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 	import { onMount } from 'svelte';
 	import MdiPlus from '~icons/mdi/plus';
 	
@@ -9,14 +11,14 @@
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
-
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 	
 	let isPageLoading: boolean = true;
 	let instances: TestInstance[] = [];
 	let paginationValues: TestInstance[];
 
-	// untested, TODO : verify if correct logic
+	let newInstanceName: string = "";
+	let newInstanceSection: string = "";
+
 	onMount(async () => {
 		try {
 			const response = await fetch(
@@ -36,11 +38,8 @@
 		}
 	});
 
-	let newInstanceName: string = "";
-	let newInstanceSection: string = "";
-
 	async function addNewTestInstance(name: string, section: string) {
-		// TODO : finish (remove this only when verified with working API)
+		// TODO: finish (remove this only when verified with working API)
 		try {
 			const response = await fetch(
 				`${apiBaseUrl}/api/test_instances`,
@@ -61,7 +60,9 @@
 				alert("Addition fail: " + response.statusText);
 			}
 		} catch (e) {
-			alert("Failed to add new test instance:\n"+e);
+			alert("Failed to add new test instance. Check your network connection and try again.");
+		} finally {
+			window.location.reload();
 		}
 	}
 
