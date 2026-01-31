@@ -5,7 +5,6 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
-	import { REACT_LOADABLE_MANIFEST } from 'next/dist/shared/lib/constants.js';
 
 	let { testItem, test_id } = $props<{
 		testItem: TestItem,
@@ -45,7 +44,7 @@
 						break;
 					
 					case 404:
-						alert("Operation failed. Please check the details and try again.");
+						alert("Received 404. Please check the test_id and item_id, and try again.");
 						break;
 
 					default:
