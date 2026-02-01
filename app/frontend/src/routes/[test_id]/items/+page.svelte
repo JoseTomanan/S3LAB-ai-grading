@@ -65,7 +65,7 @@
 						<Dialog.Trigger>
 							<MdiPlus class="size-8"/>
 						</Dialog.Trigger>
-						<AddTestItem />
+						<AddTestItem test_id={data.test_id} />
 					</Dialog.Root>
 				</span>
 				<div class="ml-4">

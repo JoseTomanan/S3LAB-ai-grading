@@ -10,7 +10,7 @@ engine = create_engine(sqlite_url)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
-    print("Database generated successfully.")
+    print("--> Database generated successfully.")
 
 def get_session():
     with Session(engine) as session:
