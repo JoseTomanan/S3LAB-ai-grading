@@ -79,43 +79,6 @@ test_items_db = {
 }
 
 # ==============================
-# Pydantic Models
-# ==============================
-
-class TestItemSummary(BaseModel):
-    """Response model for GET /items endpoint (minimal fields per contract)"""
-    question: str
-    is_problem_solving: bool
-
-class TestItemsResponse(BaseModel):
-    test_id: str
-    items: List[TestItemSummary]
-
-class NewTestItemRequest(BaseModel):
-    """Request body for POST /items"""
-    item_id: str = Field(..., min_length=1)
-    question: str = Field(..., min_length=1)
-    is_problem_solving: bool
-    expected_answer_rubric_questions: str = Field(..., min_length=1)
-
-class NewTestItemResponse(BaseModel):
-    """Response for POST /items"""
-    items: List[NewTestItemRequest]
-
-class UpdateTestItemRequest(BaseModel):
-    """Request body for PATCH endpoint (partial updates)"""
-    question: Optional[str] = Field(None, min_length=1)
-    is_problem_solving: Optional[bool] = None
-    expected_answer_rubric_questions: Optional[str] = Field(None, min_length=1)
-
-class FullTestItemResponse(BaseModel):
-    """Full item representation for PATCH response"""
-    item_id: str
-    question: str
-    is_problem_solving: bool
-    expected_answer_rubric_questions: str
-
-# ==============================
 # App Setup
 # ==============================
 
@@ -133,20 +96,169 @@ app.add_middleware(
 # Endpoints
 # ==============================
 
+# For Test Instances
 @app.get("/api/test_instances")
 def get_test_instances():
     return {"instances": TEST_INSTANCES}
 
-
 @app.get(
-    "/api/test_instances/{test_id}/items",
-    response_model=TestItemsResponse,
+    "/api/test_instances/{test_id}",
     status_code=status.HTTP_200_OK,
     responses={
-        404: {"description": "Test instance not found"},
-        400: {"description": "Invalid test_id format"}
+        400: {"description": "Invalid test_id format"},
+        404: {"description": "Test instance not found"}
     }
 )
+def get_test_instance(test_id: str):
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    instance = next((inst for inst in TEST_INSTANCES if inst["test_id"] == test_id), None)
+    if instance is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance with ID '{test_id}' not found"
+        )
+    
+    return instance
+
+
+@app.post(
+    "/api/test_instances",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Missing required fields"},
+        409: {"description": "Test instance already exists"}
+    }
+)
+def add_test_instance(request: NewTestInstanceRequest):  # <-- typed!
+    name = request.name
+    section = request.section
+    date = request.date
+    
+    if not name or not section or not date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing required fields: name, section, and date"
+        )
+    
+    test_id = f"{section}_{name}"
+    if test_id in VALID_TEST_IDS:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Test instance with ID '{test_id}' already exists"
+        )
+    
+    new_instance = {
+        "name": name,
+        "section": section,
+        "date": date,
+        "test_id": test_id,
+        "is_done_rendering": False
+    }
+    
+    TEST_INSTANCES.append(new_instance)
+    VALID_TEST_IDS.add(test_id)
+    # test_items_db will be initialized on first item POST
+    
+    return new_instance
+
+
+@app.patch(
+    "/api/test_instances/{test_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid test_id format or update payload"},
+        404: {"description": "Test instance not found"}
+    }
+)
+def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
+    # Validate test_id format
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    # Check existence
+    if test_id not in VALID_TEST_IDS:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance with ID '{test_id}' not found"
+        )
+    
+    # Ensure only 'date' is being updated
+    if update.date is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only 'date' can be updated for a test instance"
+        )
+    
+    # Update the instance in TEST_INSTANCES
+    target_instance = None
+    for inst in TEST_INSTANCES:
+        if inst["test_id"] == test_id:
+            inst["date"] = update.date
+            target_instance = inst
+            break
+    
+    # Build items summary (even if empty)
+    items = test_items_db.get(test_id, [])
+    summary_items = [
+        TestItemSummary(
+            question=item["question"],
+            is_problem_solving=item["is_problem_solving"]
+        )
+        for item in items
+    ]
+
+    return TestInstanceResponse(
+        name=target_instance["name"],
+        section=target_instance["section"],
+        date=target_instance["date"],
+        test_id=target_instance["test_id"],
+        is_done_rendering=target_instance["is_done_rendering"],
+        items=summary_items
+    )
+
+@app.delete(
+    "/api/test_instances/{test_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        400: {"description": "Invalid test_id format"},
+        404: {"description": "Test instance not found"}
+    }
+)
+def delete_test_instance(test_id: str):
+    # Validate test_id format
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    # Check existence
+    if test_id not in VALID_TEST_IDS:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance with ID '{test_id}' not found"
+        )
+    
+    # Remove from TEST_INSTANCES
+    global TEST_INSTANCES
+    TEST_INSTANCES = [inst for inst in TEST_INSTANCES if inst["test_id"] != test_id]
+    VALID_TEST_IDS.discard(test_id)
+    
+    # Cascade delete: remove all associated test items
+    test_items_db.pop(test_id, None)  # Safe deletion (no KeyError if missing)
+    
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+# For Test Items
+
 def get_test_items(test_id: str):
     if not test_id or len(test_id) > 100:
         raise HTTPException(
