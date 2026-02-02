@@ -185,7 +185,6 @@
 		@apply rounded;
 		@apply bg-secondary;
 		@apply text-secondary-foreground;
-		@apply ring;
 	}
 
 	.card {
