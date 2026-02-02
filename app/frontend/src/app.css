@@ -24,8 +24,8 @@
   --primary-foreground: oklch(0.12 0 0); /* Black text on yellow */
 
   /* Secondary: Deep Ink Black */
-  --secondary: oklch(0.12 0 0);
-  --secondary-foreground: oklch(0.86 0.19 95);
+  --secondary: oklch(0.35 0.05 95);
+  --secondary-foreground:  oklch(1 0 0);
 
   /* Muted & Accents */
   --muted: oklch(0.96 0.01 95);
