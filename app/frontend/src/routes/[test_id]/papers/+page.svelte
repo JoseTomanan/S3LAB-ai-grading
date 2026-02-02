@@ -1,11 +1,9 @@
 <script lang="ts">
-	let { data } = $props();
+	const { data } = $props();
 		
 	import { onMount } from "svelte";
-	import MdiPaperAdd from '~icons/mdi/paper-add';
+	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 
-	import ProcessImage from "$lib/components/dialogs/ProcessImage.svelte";
-	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import type { Student, TestItemHeader } from "$lib/types/types.ts";
 
 	let isPageLoading: boolean = $state(true);
@@ -17,33 +15,24 @@
 		try {
 			const response = await fetch(``, {});
 		} catch(e) {
-			console.log("Failed to fetch, check your network connection and try again.");
+			console.log("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
 		}
 	});
-
-	// FIXME: remove (temporary!)
-	setTimeout(() => {
-		students = [
-			{student_no: "2021-00000", name: "ABALOS, Benhur E.", section: "3-Acacia"},
-			{student_no: "2021-00001", name: "ANDAL, David V.", section: "3-Acacia"}
-		];
-		itemHeaders = [ {item_id: 1, label: '1a'}, {item_id: 2, label: '1b'} ];
-		isPageLoading = false;
-	}, 500);
 </script>
 
-<div class="flex flex-col gap-4">
+
+<div class="space-y-4">
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else}
 		{#each students as student}
-			<Dialog.Root>
-				<Dialog.Trigger>
-					<MdiPaperAdd class="size-8"/>
-				</Dialog.Trigger>
-				<ProcessImage {student} {itemHeaders}/>
-			</Dialog.Root>
+			<a href={`/${data.test_id}/papers/${student.student_no}`}>
+				<div class="card flex flex-row gap-2 items-center">
+					<MdiPaperAddOutline class="size-6"/>
+					<h3>{student.name}</h3>
+				</div>
+			</a>
 		{/each}
 	{/if}
 </div>
