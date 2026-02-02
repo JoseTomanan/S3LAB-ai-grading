@@ -47,6 +47,12 @@ export interface StudentAnswer {
 }
 
 
+/*
+	// Adding this as a comment because I feel this does not need a new interface.
+	StudentItem: StudentAnswer & {label: string}
+*/
+
+
 export interface Section {
 	section_id: number;
 	section: string;
