@@ -189,7 +189,12 @@
 	}
 
 	.card {
-		@apply bg-card text-card-foreground;
+		@apply bg-card;
+    @apply text-card-foreground;
 		@apply border border-border;
+    @apply flex;
+    @apply px-3;
+    @apply py-1.5;
+    @apply rounded;
 	}
 }
