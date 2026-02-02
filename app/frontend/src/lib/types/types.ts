@@ -37,8 +37,9 @@ export interface Student {
 }
 
 
+// NOTE: non-identical to entity (student_no instead of paper_id).
 export interface StudentAnswer {
-	answer_id: string;
+	answer_id: number;
 	student_no: string;
 	item_id: number;
 	image_directory: string;
