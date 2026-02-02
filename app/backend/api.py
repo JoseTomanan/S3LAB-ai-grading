@@ -3,9 +3,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from models import *
-from schema import *
+from models import TestInstance, TestItem, Person, Section, TestPaperInstance
+from schemas import (
+    TestItemSummary,
+    TestItemsResponse,
+    NewTestItemRequest,
+    NewTestItemResponse,
+    UpdateTestItemRequest,
+    FullTestItemResponse,
+    NewTestInstanceRequest,
+    UpdateTestInstanceRequest,
+    TestInstanceResponse,
+)
 from database import *
+
+from fastapi import File, UploadFile
+from image_preprocessor import CVImagePreprocessor, CVProcessingError
+import mimetypes
+
+import uuid
+import os
+from pathlib import Path
+from fastapi.responses import FileResponse
 
 # ==============================
 # Static Test Data (Temporary – Replace with DB Later)
@@ -215,6 +234,8 @@ def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
         for item in items
     ]
 
+    assert target_instance is not None
+
     return TestInstanceResponse(
         name=target_instance["name"],
         section=target_instance["section"],
@@ -401,3 +422,101 @@ def delete_test_item(test_id: str, test_item_id: str):
         )
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# ==============================
+# Computer Vision Preprocessing Endpoint (Multi-Box)
+# ==============================
+
+
+
+# Temporary directory for processed images
+TEMP_DIR = Path("temp_cv_output")
+TEMP_DIR.mkdir(exist_ok=True)
+
+@app.post(
+    "/api/test_instances/image_preprocess",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid input (no file, empty file, or invalid format)"},
+        415: {"description": "Unsupported media type (not JPEG/PNG)"},
+        500: {"description": "CV processing failed"}
+    }
+)
+async def image_preprocess(file: UploadFile = File(...)):
+    """
+    Process raw student assessment image through CV pipeline.
+    Detects up to 3 document-like regions, applies brightening + contrast.
+    Returns metadata with URLs to access each processed box.
+    """
+    # --- Validation ---
+    if not file or not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file provided"
+        )
+    
+    if not CVImagePreprocessor.validate_file_extension(file.filename):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
+        )
+    
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty"
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to read file: {str(e)}"
+        )
+
+    # --- Processing ---
+    try:
+        preprocessor = CVImagePreprocessor()
+        processed_list = preprocessor.process_assessment_image(contents)  # List[bytes], 1–3 items
+    except CVProcessingError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"CV processing failed: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error during image processing: {str(e)}"
+        )
+
+    # --- Save to temp files and generate URLs ---
+    session_id = str(uuid.uuid4())
+    boxes_info = []
+
+    for i, img_bytes in enumerate(processed_list):
+        filename = f"{session_id}_{i}.jpg"
+        filepath = TEMP_DIR / filename
+        with open(filepath, "wb") as f:
+            f.write(img_bytes)
+        boxes_info.append({
+            "index": i,
+            "image_path": f"/api/temp/{filename}"
+        })
+
+    return {
+        "num_boxes": len(processed_list),
+        "boxes": boxes_info
+    }
+
+# --- Serve temporary processed images ---
+@app.get("/api/temp/{filename}")
+async def get_processed_image(filename: str):
+    if not filename.endswith(".jpg") or ".." in filename or not filename.replace(".jpg", "").replace("-", "").replace("_", "").replace(".", "").isalnum():
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
+    filepath = TEMP_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Processed image not found or expired")
+    
+    return FileResponse(filepath, media_type="image/jpeg")
