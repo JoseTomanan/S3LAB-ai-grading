@@ -45,12 +45,13 @@
 	<Textarea id="item_id" rows={4} bind:value={formItemQuestion} />
 	<Label>Type of question</Label>
 	<RadioGroup.Root value="short_form"
+									class="flex flex-row justify-between"
 									onValueChange={(v) => formItemIsProblemSolving = (v == "prob_sol")}>
-		<span class="flex flex-row gap-2">
+		<span class="flex flex-row gap-2 w-2/5">
 			<RadioGroup.Item value="short_form" id="short_form"/>
 			<Label for="short_form" class="font-normal">Short form</Label>
 		</span>
-		<span class="flex flex-row gap-2">
+		<span class="flex flex-row gap-2 w-3/5">
 			<RadioGroup.Item value="prob_sol" id="prob_sol"/>
 			<Label for="prob_sol" class="font-normal">Problem solving</Label>
 		</span>
