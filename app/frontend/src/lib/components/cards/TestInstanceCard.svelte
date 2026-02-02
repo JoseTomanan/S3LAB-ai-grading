@@ -12,7 +12,7 @@
 
 </script>
 
-<a href={`/${test_id}/items`} class="flex flex-col rounded card px-3 py-1.5">
+<a href={`/${test_id}/items`} class="card">
 	<span class="flex flex-row items-center gap-1">
 		{#if is_done_rendering}
 			<MdiCheckboxMarkedOutline/>
