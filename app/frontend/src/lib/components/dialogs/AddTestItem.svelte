@@ -3,8 +3,8 @@
 
 	let { test_id } = $props();
 
-	import type { TestItem } from '$lib/types/types.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.ts';
@@ -22,7 +22,9 @@
 				{
 					method: "POST",
 					headers: {'Content-Type': 'application/json',},
-					body: JSON.stringify({}),
+					body: JSON.stringify({
+						// TODO: add body
+					}),
 				}
 			);
 
@@ -37,21 +39,25 @@
 	<Dialog.Header>
 		<Dialog.Title>Add new test item</Dialog.Title>
 	</Dialog.Header>
-	<!-- TODO: finish -->
-	<Label for="item_id">Item label (item_id)</Label>
+	<Label for="item_id">Item label</Label>
 	<Input id="item_id" bind:value={formItemLabel} />
 	<Label for="item_id">Question</Label>
 	<Textarea id="item_id" rows={4} bind:value={formItemQuestion} />
 	<Label>Type of question</Label>
-	<span class="flex flex-row gap-2">
-		<input type="radio" name="is_problem_solving" id="short_form" value="short_form"/>
-		<Label for="short_form">Short form</Label>
-	</span>
-	<span class="flex flex-row gap-2">
-		<input type="radio" name="is_problem_solving" id="prob_sol" value="prob_sol" />
-		<Label for="prob_sol">Problem solving</Label>
-	</span>
-	<Label for="e_a_r_q">Expected answer</Label>
+	<RadioGroup.Root value="short_form"
+									onValueChange={(v) => formItemIsProblemSolving = (v == "prob_sol")}>
+		<span class="flex flex-row gap-2">
+			<RadioGroup.Item value="short_form" id="short_form"/>
+			<Label for="short_form" class="font-normal">Short form</Label>
+		</span>
+		<span class="flex flex-row gap-2">
+			<RadioGroup.Item value="prob_sol" id="prob_sol"/>
+			<Label for="prob_sol" class="font-normal">Problem solving</Label>
+		</span>
+	</RadioGroup.Root>
+	<Label for="e_a_r_q">
+		{formItemIsProblemSolving ? "Rubric questions (separate with `. `)" : "Expected answer"}
+	</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={formItemEARQ} />
 	<Dialog.Footer>
 		<button class="button-primary" onclick={() => addTestItem()}>
