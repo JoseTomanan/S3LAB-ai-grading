@@ -5,6 +5,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
+	import { Input } from '$lib/components/ui/input/index.ts';
 
 	let { testItem, test_id } = $props<{
 		testItem: TestItem,
@@ -29,6 +30,7 @@
 						method: "PATCH",
 						headers: {'Content-Type': 'application/json',},
 						body: JSON.stringify({
+							"label": submittedTestItem.label,
 							"question": submittedTestItem.question,
 							"is_problem_solving": submittedTestItem.is_problem_solving,
 							"expected_answer_rubric_questions": submittedTestItem.expected_answer_rubric_questions,
@@ -65,6 +67,8 @@
 	<Dialog.Header>
 		<Dialog.Title>Edit test item {testItem.item_id}</Dialog.Title>
 	</Dialog.Header>
+	<Label for="label">Label</Label>
+	<Input id="label" bind:value={ formTestItem.label }/>
 	<Label for="question">Question</Label>
 	<Textarea id="question" rows={4} bind:value={ formTestItem.question } required/>
 	<Label for="e_a_r_q">
