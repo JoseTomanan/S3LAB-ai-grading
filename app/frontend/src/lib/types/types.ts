@@ -16,6 +16,12 @@ export interface TestItem {
 }
 
 
+export interface TestItemHeader {
+	item_id: number;
+	label: string;
+}
+
+
 export interface TestPaper {
 	paper_id: number;
 	student_no: string;
