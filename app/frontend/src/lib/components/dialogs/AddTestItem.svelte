@@ -42,9 +42,15 @@
 	<Input id="item_id" bind:value={formItemLabel} />
 	<Label for="item_id">Question</Label>
 	<Textarea id="item_id" rows={4} bind:value={formItemQuestion} />
-	<Label for="is_problem_solving">Type of question</Label>
-	<Input id="is_probem_solving" type="radio" name="short">Short form</Input>
-	<Input id="is_probem_solving" type="radio" name="problem">Problem solving</Input>
+	<Label>Type of question</Label>
+	<span class="flex flex-row gap-2">
+		<input type="radio" name="is_problem_solving" id="short_form" value="short_form"/>
+		<Label for="short_form">Short form</Label>
+	</span>
+	<span class="flex flex-row gap-2">
+		<input type="radio" name="is_problem_solving" id="prob_sol" value="prob_sol" />
+		<Label for="prob_sol">Problem solving</Label>
+	</span>
 	<Label for="e_a_r_q">Expected answer</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={formItemEARQ} />
 	<Dialog.Footer>
