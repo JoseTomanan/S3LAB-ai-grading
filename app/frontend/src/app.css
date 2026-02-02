@@ -7,7 +7,7 @@
 @import "tw-animate-css";
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.625rem;
 
   /* Backgrounds: Creamy Off-whites */
   --background: oklch(0.99 0.01 90);
@@ -192,7 +192,6 @@
 		@apply bg-card;
     @apply text-card-foreground;
 		@apply border border-border;
-    @apply flex;
     @apply px-3;
     @apply py-1.5;
     @apply rounded;
