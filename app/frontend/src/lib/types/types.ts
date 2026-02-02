@@ -40,7 +40,7 @@ export interface Student {
 export interface StudentAnswer {
 	answer_id: string;
 	student_no: string;
-	item_id: string;
+	item_id: number;
 	image_directory: string;
 	ai_evaluation: string;
 	is_done_rendering: boolean;
