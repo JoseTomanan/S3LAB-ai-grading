@@ -63,11 +63,11 @@
 <div class="space-y-8">
 	<!-- <TestInstanceTopbar
 				{...activeTestInstance} name={isPageLoading ? "Loading..." : activeTestInstance.name} date={new Date(activeTestInstance.date).toLocaleDateString()} /> -->
-	<div class="bg-sidebar px-4 py-8 border-b border-sidebar-border space-y-4">
+	<div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-b border-sidebar-border space-y-4">
 		<span class="flex flex-row items-center gap-4">
-			<a class="size-8" href="/">
+			<button class="p-0 size-8" onclick={() => history.back()}>
 				<MdiArrowBack class="size-full" />
-			</a>
+			</button>
 			<h1>{ activeTestInstance.name }</h1>
 			{#if activeTestInstance.is_done_rendering}
 				<MdiCheckboxMarkedOutline class="size-6 text-muted-foreground"/>
