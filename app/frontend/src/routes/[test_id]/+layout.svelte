@@ -79,7 +79,7 @@
 				<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
 			</h3>
 			<h3>Section: { activeTestInstance.section }</h3>
-			<h3>Date: { new Date(activeTestInstance.date).toLocaleString() }</h3>
+			<h3>Date: { new Date(activeTestInstance.date).toLocaleDateString() }</h3>
 		</div>
 		<span id="thisOne" class="flex items-center gap-2 justify-end">
 			<a class="button-primary" href={`/${data.test_id}/items`}>
