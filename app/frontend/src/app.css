@@ -14,9 +14,9 @@
   --foreground: oklch(0.12 0 0); /* Near Black */
   
   /* Cards & Popovers */
-  --card: oklch(0.98 0 0);
+  --card: oklch(0.99 0 0);
   --card-foreground: oklch(0.12 0 0);
-  --popover: oklch(0.98 0 0);
+  --popover: oklch(0.99 0 0);
   --popover-foreground: oklch(0.12 0 0);
 
   /* Primary: High-Voltage Yellow (Lightness 0.86, Chroma 0.19, Hue 95) */
