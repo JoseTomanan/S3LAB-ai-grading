@@ -60,19 +60,22 @@
 		<p>Loading...</p>
 	{:else}
 		{#each studentItems as item}
-			<Label for={item.label}>{item.label}</Label>
-			<Dialog.Root>
-				<Dialog.Trigger>
-					<div class="flex justify-center items-center border border-border">
-						{#if item.image_directory == ""}
-							<MdiPaperOff class="size-6 my-2" />
-						{:else}
-							<img src="https://i.redd.it/wkijc5hpavt31.jpg" class="size-fill" alt={item.label}/>
-						{/if}
-					</div>
-				</Dialog.Trigger>
-				<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
-			</Dialog.Root>
+			<Label for={item.label}>
+				{item.label}
+				<Dialog.Root>
+					<Dialog.Trigger class="ring">
+						Process image
+					</Dialog.Trigger>
+					<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+				</Dialog.Root>
+			</Label>
+			<div class="flex justify-center items-center border border-border">
+				{#if item.image_directory == ""}
+					<MdiPaperOff class="size-6 my-2" />
+				{:else}
+					<img src="https://i.redd.it/wkijc5hpavt31.jpg" class="size-fill" alt={item.label}/>
+				{/if}
+			</div>
 		{/each}
 	{/if}
 </div>
