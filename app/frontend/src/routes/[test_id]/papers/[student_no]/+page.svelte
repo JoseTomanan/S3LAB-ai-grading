@@ -1,4 +1,6 @@
 <script lang="ts">
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 	const { data } = $props();
 
 	import { onMount } from 'svelte';
@@ -14,12 +16,23 @@
 	let studentItems: (StudentAnswer & {label: string})[] = $state([]);
 
 	onMount(async () => {
-		// TODO: add fetch function
 		try {
-			const response = await fetch(``, {});
+			const response = await fetch(
+				`${apiBaseUrl}/test_instances/${data.test_id}/${data.student_no}`,
+				{
+					method: "GET",
+					headers: {'Content-Type': 'application/json',},
+				}
+			);
+
+			const result = await response.json();
+			studentItems = result.answers;
+
+			console.log(response.status + response.statusText);
 		} catch(e) {
 			console.log("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
+			// isPageLoading = false;
 		}
 	});
 
@@ -58,7 +71,7 @@
 						{/if}
 					</div>
 				</Dialog.Trigger>
-				<ProcessImage student_no={data.student_no} studentItem={item}/>
+				<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
 			</Dialog.Root>
 		{/each}
 	{/if}
