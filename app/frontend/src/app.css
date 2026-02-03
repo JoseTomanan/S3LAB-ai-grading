@@ -14,33 +14,33 @@
   --foreground: oklch(0.12 0 0); /* Near Black */
   
   /* Cards & Popovers */
-  --card: oklch(1 0 0);
+  --card: oklch(0.98 0 0);
   --card-foreground: oklch(0.12 0 0);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.98 0 0);
   --popover-foreground: oklch(0.12 0 0);
 
   /* Primary: High-Voltage Yellow (Lightness 0.86, Chroma 0.19, Hue 95) */
-  --primary: oklch(0.86 0.19 95); 
-  --primary-foreground: oklch(0.12 0 0); /* Black text on yellow */
+  --primary: oklch(0.8683 0.1506 86.4);
+  --primary-foreground: oklch(0 0 0); /* Black text on yellow */
 
   /* Secondary: Deep Ink Black */
-  --secondary: oklch(0.35 0.05 95);
-  --secondary-foreground:  oklch(1 0 0);
+  --secondary: oklch(0.8999 0.0146 238.04);
+  --secondary-foreground:  oklch(0 0 0);
 
   /* Muted & Accents */
   --muted: oklch(0.96 0.01 95);
   --muted-foreground: oklch(0.45 0.02 95);
-  --accent: oklch(0.86 0.19 95);
+  --accent: oklch(0.8683 0.1506 86.4);
   --accent-foreground: oklch(0.12 0 0);
 
   /* Feedback & UI Elements */
   --destructive: oklch(0.6 0.2 25);
   --border: oklch(0.12 0 0 / 0.1); /* Subtle black borders */
   --input: oklch(0.12 0 0 / 0.1);
-  --ring: oklch(0.86 0.19 95);
+  --ring: oklch(0.8683 0.1506 86.4)
 
   /* Data Visualization: High Contrast */
-  --chart-1: oklch(0.86 0.19 95);  /* Electric Yellow */
+  --chart-1: oklch(0.8683 0.1506 86.4);
   --chart-2: oklch(0.12 0 0);     /* Black */
   --chart-3: oklch(0.75 0.15 70);  /* Deep Gold */
   --chart-4: oklch(0.55 0.12 95);  /* Olive/Dark Yellow */
@@ -49,12 +49,12 @@
   /* Sidebar: Stark Black */
   --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.12 0 0);
-  --sidebar-primary: oklch(0.86 0.19 95);
+  --sidebar-primary: oklch(0.8683 0.1506 86.4);
   --sidebar-primary-foreground: oklch(0.12 0 0);
   --sidebar-accent: oklch(0.25 0 0);
-  --sidebar-accent-foreground: oklch(0.86 0.19 95);
+  --sidebar-accent-foreground: oklch(0.8683 0.1506 86.4);
   --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.86 0.19 95);
+  --sidebar-ring: oklch(0.8683 0.1506 86.4)
 }
 
 .dark {
@@ -185,6 +185,7 @@
 		@apply rounded;
 		@apply bg-secondary;
 		@apply text-secondary-foreground;
+    @apply border border-border;
 	}
 
 	.card {
