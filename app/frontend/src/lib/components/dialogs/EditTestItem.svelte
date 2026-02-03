@@ -74,8 +74,7 @@
 	<Label for="e_a_r_q">
 		{ testItem.is_problem_solving
 					? "Rubric questions (separate with `. `)"
-					: "Expected answer"
-		}
+					: "Expected answer"}
 	</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={ formTestItem.expected_answer_rubric_questions } required/>
 	<Dialog.Footer>

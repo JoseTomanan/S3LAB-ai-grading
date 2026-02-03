@@ -61,8 +61,6 @@
 </script>
 
 <div class="space-y-8">
-	<!-- <TestInstanceTopbar
-				{...activeTestInstance} name={isPageLoading ? "Loading..." : activeTestInstance.name} date={new Date(activeTestInstance.date).toLocaleDateString()} /> -->
 	<div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-b border-sidebar-border space-y-4">
 		<span class="flex flex-row items-center gap-4">
 			<button class="p-0 size-8" onclick={() => history.back()}>

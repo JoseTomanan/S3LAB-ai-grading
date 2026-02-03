@@ -81,13 +81,13 @@
 				</Dialog.Header>
 				<Label for="name">Name</Label>
 				<Input id="name" type="text" placeholder="Quiz 1"
-							bind:value={newInstanceName}/>
+								bind:value={newInstanceName}/>
 				<Label for="section">Section</Label>
 				<Input id="section" type="text" placeholder="1-Acacia"
-							bind:value={newInstanceSection}/>
+								bind:value={newInstanceSection}/>
 				<Dialog.Footer>
 					<button class="button-primary"
-								onclick={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
+									onclick={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
 						Save changes
 					</button>
 					<Dialog.Description>Note that the name and section cannot be changed after creation.</Dialog.Description>
@@ -104,8 +104,7 @@
 			{/each}
 		{/if}
 	</div>
-	<Pagination
-			rows={instances}
-			perPage={6}
-			bind:trimmedRows={paginationValues} />
+	<Pagination rows={instances}
+							perPage={6}
+							bind:trimmedRows={paginationValues} />
 </div>
