@@ -37,12 +37,12 @@
 			});
 
 		isPageLoading = false;
-	});
+	}, 500);
 </script>
 
 
 <div class="flex flex-col gap-4">
-	<h2 class="font-bold">For {data.student_no}</h2>
+	<h2 class="font-semibold">For student {data.student_no}:</h2>
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else}
