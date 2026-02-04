@@ -9,9 +9,13 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 
+	let isOperationOngoing: boolean = $state(false);
+
 	let formFile: FileList | undefined = $state();
 
 	async function sendImage() {
+		isOperationOngoing = true;
+
 		if (!formFile || formFile.length == 0)
 			return;
 
@@ -33,6 +37,7 @@
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
+			isOperationOngoing = false;
 		}
 	}
 </script>
@@ -42,6 +47,9 @@
 	<Dialog.Title>Send image</Dialog.Title>
 	<Dialog.Description>{test_id} &middot; {student_no} &middot; Item {studentItem.label}</Dialog.Description>
 	<Input id="sendImage" type="file" accept="image/*" bind:files={formFile}/>
+	{#if isOperationOngoing}
+		<p>Loading...</p>
+	{/if}
 	<Button variant="default"  onclick={() => sendImage()} disabled={!formFile}>
 		Send for processing
 	</Button>
