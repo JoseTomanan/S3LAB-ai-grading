@@ -168,9 +168,14 @@
 	}
 
 	p {
-		@apply text-sm;
+    @apply text-sm;
 		@apply opacity-90;
 	}
+  
+  h6 {
+    @apply text-sm;
+    @apply opacity-60;
+  }
 }
 
 @layer components {
