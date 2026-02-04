@@ -9,8 +9,8 @@
 	
 	import type { TestInstance, TestItem } from '$lib/types/types.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import EditTestItem from '$lib/components/dialogs/EditTestItem.svelte';
-	import AddTestItem from '$lib/components/dialogs/AddTestItem.svelte';
+	import EditTestItem from './EditTestItem.svelte';
+	import AddTestItem from './AddTestItem.svelte';
 
 	let isPageLoading: boolean = $state(true);
 

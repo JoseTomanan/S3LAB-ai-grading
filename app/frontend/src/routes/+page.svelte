@@ -6,8 +6,8 @@
 	
 	import type { TestInstance } from '$lib/types/types.ts';
 	
-	import TestInstanceCard from '$lib/components/cards/TestInstanceCard.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import TestInstanceCard from './TestInstanceCard.svelte';
+	import Pagination from './Pagination.svelte';
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
