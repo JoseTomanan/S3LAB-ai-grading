@@ -46,11 +46,11 @@
 	<Dialog.Title>Send image</Dialog.Title>
 	<Dialog.Description>{test_id} &middot; {student_no} &middot; Item {studentItem.label}</Dialog.Description>
 	<Input id="sendImage" type="file" accept="image/*" bind:files={formFile}/>
+	<Button variant="default" onclick={() => sendImage()} disabled={!formFile}>
+		Send for processing
+	</Button>
 	{#if isOperationOngoing}
 		<p>Loading...</p>
 	{/if}
-	<Button variant="default"  onclick={() => sendImage()} disabled={!formFile}>
-		Send for processing
-	</Button>
 </Dialog.Content>
 
