@@ -8,11 +8,10 @@
 	import MdiImagePlus from '~icons/mdi/image-plus';
 	import MdiCrop from '~icons/mdi/crop';
 
-	import type { StudentAnswer, TestItemHeader } from '$lib/types/types.ts';
+	import type { StudentAnswer } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import ProcessImage from './ProcessImage.svelte';
-	import ManualCrop from './ManualCrop.svelte';
 
 	let isPageLoading: boolean = $state(true);
 
@@ -73,12 +72,9 @@
 							</Dialog.Trigger>
 							<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
 						</Dialog.Root>
-						<!-- <Dialog.Root> -->
 						<a href={`/${data.test_id}/papers/${data.student_no}/manual`} class="button-secondary border-none">
 							<MdiCrop />
 						</a>
-							<!-- <ManualCrop test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
-						</Dialog.Root> -->
 					</span>
 				</Label>
 				<div class="flex justify-center items-center bg-muted">
