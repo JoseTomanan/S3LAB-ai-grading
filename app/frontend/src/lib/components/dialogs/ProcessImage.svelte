@@ -29,11 +29,10 @@
 			);
 
 			if (response.ok) {
-				alert("Sending is successful.");
+				alert("Image has been processed and replaced.");
 				window.location.reload();
-			} else {
+			} else
 				alert(response.status + response.statusText);
-			}
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
@@ -43,7 +42,7 @@
 </script>
 
 
-<Dialog.Content class="max-h-[90vh] overflow-y-auto">
+<Dialog.Content>
 	<Dialog.Title>Send image</Dialog.Title>
 	<Dialog.Description>{test_id} &middot; {student_no} &middot; Item {studentItem.label}</Dialog.Description>
 	<Input id="sendImage" type="file" accept="image/*" bind:files={formFile}/>
