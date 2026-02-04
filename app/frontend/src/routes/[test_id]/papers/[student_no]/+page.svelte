@@ -5,11 +5,14 @@
 
 	import { onMount } from 'svelte';
 	import MdiPaperOff from '~icons/mdi/paper-off';
+	import MdiImagePlus from '~icons/mdi/image-plus';
+	import MdiCrop from '~icons/mdi/crop';
 
 	import type { StudentAnswer, TestItemHeader } from '$lib/types/types.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import ProcessImage from '$lib/components/dialogs/ProcessImage.svelte';
+	import ManualCrop from '$lib/components/dialogs/ManualCrop.svelte';
 
 	let isPageLoading: boolean = $state(true);
 
@@ -44,7 +47,7 @@
 				item_id: i,
 				label: i.toString(),
 				student_no: data.student_no,
-				image_directory: "",
+				image_directory: "https://www.math-only-math.com/images/partial-fraction.jpg",
 				ai_evaluation: "",
 				is_done_rendering: false,
 			});
@@ -60,18 +63,26 @@
 		<p>Loading...</p>
 	{:else}
 		{#each studentItems as item}
-			<Label for={item.label}>
+			<Label for={item.label} class="flex flex-row justify-between">
 				{item.label}
-				<Dialog.Root>
-					<Dialog.Trigger class="ring">
-						Process image
-					</Dialog.Trigger>
-					<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
-				</Dialog.Root>
+				<span>
+					<Dialog.Root>
+						<Dialog.Trigger class="button-secondary border-none">
+							<MdiImagePlus />
+						</Dialog.Trigger>
+						<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+					</Dialog.Root>
+					<Dialog.Root>
+						<Dialog.Trigger class="button-secondary border-none">
+							<MdiCrop />
+						</Dialog.Trigger>
+						<ManualCrop test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+					</Dialog.Root>
+				</span>
 			</Label>
-			<div class="flex justify-center items-center border border-border">
+			<div class="flex justify-center items-center bg-muted">
 				{#if item.image_directory == ""}
-					<MdiPaperOff class="size-6 my-2" />
+					<MdiPaperOff class="size-10 my-2 text-muted-foreground" />
 				{:else}
 					<img src="https://i.redd.it/wkijc5hpavt31.jpg" class="size-fill" alt={item.label}/>
 				{/if}
