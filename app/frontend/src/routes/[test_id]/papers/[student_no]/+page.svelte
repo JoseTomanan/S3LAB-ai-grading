@@ -11,8 +11,8 @@
 	import type { StudentAnswer, TestItemHeader } from '$lib/types/types.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Label } from '$lib/components/ui/label/index.js';
-	import ProcessImage from '$lib/components/dialogs/ProcessImage.svelte';
-	import ManualCrop from '$lib/components/dialogs/ManualCrop.svelte';
+	import ProcessImage from './ProcessImage.svelte';
+	import ManualCrop from './ManualCrop.svelte';
 
 	let isPageLoading: boolean = $state(true);
 
