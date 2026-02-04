@@ -66,19 +66,19 @@
 			<div class="card space-y-1">
 				<Label for={item.label} class="flex flex-row justify-between">
 					{item.label}
-					<span>
+					<span class="flex flex-row space-x-1">
 						<Dialog.Root>
 							<Dialog.Trigger class="button-secondary border-none">
 								<MdiImagePlus />
 							</Dialog.Trigger>
 							<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
 						</Dialog.Root>
-						<Dialog.Root>
-							<Dialog.Trigger class="button-secondary border-none">
-								<MdiCrop />
-							</Dialog.Trigger>
-							<ManualCrop test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
-						</Dialog.Root>
+						<!-- <Dialog.Root> -->
+						<a href={`/${data.test_id}/papers/${data.student_no}/manual`} class="button-secondary border-none">
+							<MdiCrop />
+						</a>
+							<!-- <ManualCrop test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+						</Dialog.Root> -->
 					</span>
 				</Label>
 				<div class="flex justify-center items-center bg-muted">
