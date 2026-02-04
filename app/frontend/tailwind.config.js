@@ -1,15 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 
 export default {
-	darkMode: ["class"],
-	safelist: ["dark"],
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	theme: {
 		extend: {
 			fontFamily: {
-			heading: "var(--font-heading)",
-			sans: "var(--font-sans)",
-			mono: "var(--font-mono)",
+				heading: "var(--font-heading)",
+				sans: "var(--font-sans)",
+				mono: "var(--font-mono)",
 			},
 			container: {
 				center: true,
