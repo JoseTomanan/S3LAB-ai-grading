@@ -77,11 +77,11 @@
 						</a>
 					</span>
 				</Label>
-				<div class="flex justify-center items-center bg-muted">
+				<div class="flex justify-center items-center">
 					{#if item.image_directory == ""}
-						<MdiPaperOff class="size-10 my-2 text-muted-foreground" />
+						<MdiPaperOff class="h-12 w-full py-2 bg-muted text-muted-foreground border" />
 					{:else}
-						<img src="https://i.redd.it/wkijc5hpavt31.jpg" class="size-fill" alt={item.label}/>
+						<img src={item.image_directory} class="size-fill border" alt={item.label}/>
 					{/if}
 				</div>
 			</div>
