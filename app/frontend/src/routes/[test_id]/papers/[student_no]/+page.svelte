@@ -47,7 +47,7 @@
 				item_id: i,
 				label: i.toString(),
 				student_no: data.student_no,
-				image_directory: "https://www.math-only-math.com/images/partial-fraction.jpg",
+				image_directory: i==2 ? "https://www.math-only-math.com/images/partial-fraction.jpg" : "",
 				ai_evaluation: "",
 				is_done_rendering: false,
 			});
@@ -63,29 +63,31 @@
 		<p>Loading...</p>
 	{:else}
 		{#each studentItems as item}
-			<Label for={item.label} class="flex flex-row justify-between">
-				{item.label}
-				<span>
-					<Dialog.Root>
-						<Dialog.Trigger class="button-secondary border-none">
-							<MdiImagePlus />
-						</Dialog.Trigger>
-						<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
-					</Dialog.Root>
-					<Dialog.Root>
-						<Dialog.Trigger class="button-secondary border-none">
-							<MdiCrop />
-						</Dialog.Trigger>
-						<ManualCrop test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
-					</Dialog.Root>
-				</span>
-			</Label>
-			<div class="flex justify-center items-center bg-muted">
-				{#if item.image_directory == ""}
-					<MdiPaperOff class="size-10 my-2 text-muted-foreground" />
-				{:else}
-					<img src="https://i.redd.it/wkijc5hpavt31.jpg" class="size-fill" alt={item.label}/>
-				{/if}
+			<div class="card space-y-1">
+				<Label for={item.label} class="flex flex-row justify-between">
+					{item.label}
+					<span>
+						<Dialog.Root>
+							<Dialog.Trigger class="button-secondary border-none">
+								<MdiImagePlus />
+							</Dialog.Trigger>
+							<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+						</Dialog.Root>
+						<Dialog.Root>
+							<Dialog.Trigger class="button-secondary border-none">
+								<MdiCrop />
+							</Dialog.Trigger>
+							<ManualCrop test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+						</Dialog.Root>
+					</span>
+				</Label>
+				<div class="flex justify-center items-center bg-muted">
+					{#if item.image_directory == ""}
+						<MdiPaperOff class="size-10 my-2 text-muted-foreground" />
+					{:else}
+						<img src="https://i.redd.it/wkijc5hpavt31.jpg" class="size-fill" alt={item.label}/>
+					{/if}
+				</div>
 			</div>
 		{/each}
 	{/if}
