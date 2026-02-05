@@ -52,6 +52,7 @@
 	},
 	"dependencies": {
 		"cookie": "^1.1.1",
+		"cropperjs": "^2.1.0",
 		"fabric": "^7.1.0"
 	}
 }
