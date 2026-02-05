@@ -32,7 +32,6 @@
 				{
 					method: "GET",
 					headers: {'Content-Type': 'application/json',},
-					body: JSON.stringify({}),
 				}
 			);
 
@@ -42,23 +41,11 @@
 			activeTestInstance.date = result.date;
 			activeTestInstance.is_done_rendering = result.is_done_rendering;
 		} catch (e) {
-			// FIXME: revert to alert() once functional
-			console.log("Failed to fetch test details:\n"+e);
+			alert("Failed to fetch test details:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}
 	});
-
-
-	// FIXME: remove once functional
-	setTimeout(() => {
-		activeTestInstance.name = "Seatwork 1";
-		activeTestInstance.section = "3-Rizal";
-		activeTestInstance.date = "2025-11-11T20:17:46.384Z";
-		activeTestInstance.is_done_rendering = false;
-
-		isPageLoading = false;
-	}, 500);
 		
 </script>
 
