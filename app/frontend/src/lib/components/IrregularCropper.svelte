@@ -135,6 +135,7 @@
 	};
 </script>
 
+
 <Dialog.Root bind:open={isOpen}>
 	<Dialog.Trigger>
 		Open dialog
