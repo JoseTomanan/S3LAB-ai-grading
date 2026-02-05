@@ -1,8 +1,11 @@
 <script lang="ts">
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
+	import MdiDelete from "~icons/mdi/delete";
+
 	import type { TestItem } from '$lib/types/types.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { Button } from '$lib/components/ui/button/index.ts';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import { Input } from '$lib/components/ui/input/index.ts';
@@ -12,47 +15,40 @@
 		test_id: string
 	}>();
 
-	let formTestItem: TestItem = {
+	let formTestItem: TestItem = $state({
 		item_id: testItem.item_id,
 		label: testItem.label,
 		question: testItem.question,
 		is_problem_solving: testItem.is_problem_solving,
 		expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
-	};
+	});
 
-	// TODO: validate workingness with backend API
 	async function editTestItem(submittedTestItem: TestItem) {
+		// FIXME: remove once validated workingness
 		if (testItem != submittedTestItem) {
 			try {
+				const formBody = {
+							label: submittedTestItem.label,
+							question: submittedTestItem.question,
+							is_problem_solving: submittedTestItem.is_problem_solving ? "true" : "false",
+							expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
+						};
+
+				console.log(formBody);
+				
 				const response = await fetch(
 					`${apiBaseUrl}/api/test_instances/${test_id}/${submittedTestItem.item_id}`,
 					{
 						method: "PATCH",
-						headers: {'Content-Type': 'application/json',},
-						body: JSON.stringify({
-							"label": submittedTestItem.label,
-							"question": submittedTestItem.question,
-							"is_problem_solving": submittedTestItem.is_problem_solving,
-							"expected_answer_rubric_questions": submittedTestItem.expected_answer_rubric_questions,
-						}),
+						body: JSON.stringify(formBody),
 					}
 				);
 				
-				const status: number = await response.status;
-
-				switch (status) {
-					case 200:
-						alert("Change successful.");
-						break;
-					
-					case 404:
-						alert("Received 404. Please check the test_id and item_id, and try again.");
-						break;
-
-					default:
-						alert("Status code returned: " + status);
-						break;
-				}
+				if (response.ok) {
+					const result = await response.json();
+					alert("Success: "+result.item_id);
+				} else
+					alert(response.status + response.statusText);
 			} catch (e) {
 				alert("Failed to send POST request.");
 			} finally {
@@ -61,11 +57,34 @@
 		} else
 			alert("No changes were made.");
 	}
+
+	async function deleteTestItem() {
+		// FIXME: remove once validated workingness
+		try {
+			const response = await fetch(
+					`${apiBaseUrl}/api/test_instances/${test_id}/${formTestItem.item_id}`,
+					{
+						method: "DELETE",
+						headers: {'Content-Type': 'application/json',},
+					}
+				);
+				
+				if (response.ok) {
+					alert("Delete success.");
+					window.location.reload();
+				} else
+					alert(response.status + response.statusText);
+		} catch (e) {
+			alert("Failed; try again.")
+		}
+	}
 </script>
 
 <Dialog.Content>
 	<Dialog.Header>
-		<Dialog.Title>Edit test item {testItem.item_id}</Dialog.Title>
+		<Dialog.Title>
+			Edit test item {testItem.label}
+		</Dialog.Title>
 	</Dialog.Header>
 	<Label for="label">Label</Label>
 	<Input id="label" bind:value={ formTestItem.label }/>
@@ -78,8 +97,13 @@
 	</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={ formTestItem.expected_answer_rubric_questions } required/>
 	<Dialog.Footer>
-		<button class="button-primary" onclick={() => editTestItem(formTestItem)}>
-			Save changes
-		</button>
+		<div class="flex flex-row w-full gap-2">
+			<Button variant="secondary" class="w-4/5" onclick={() => editTestItem(formTestItem)}>
+				Save changes
+			</Button>
+			<Button variant="destructive" class="w-1/5">
+				<MdiDelete class="size-6"/>
+			</Button>
+		</div>
 	</Dialog.Footer>
 </Dialog.Content>
