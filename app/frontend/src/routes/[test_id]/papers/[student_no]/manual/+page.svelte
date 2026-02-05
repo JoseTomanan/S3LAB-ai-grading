@@ -36,7 +36,7 @@
 				{ x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }													// Bottom-Left
 				];
 
-		console.log("POINTS TO PASS: "+returnablePoints);
+		console.log(returnablePoints);
 
 		const formData: FormData = new FormData();
 		formData.append('image', canvasFile![0]);
@@ -78,7 +78,7 @@
 		<Button variant="secondary"
 					disabled={!canvasFile || !canvasImageUrl || isOperationOngoing}
 					onclick={() => sendCropRequest()}>
-			Send crop request
+			Send
 		</Button>
 	</span>
 	{#if canvasImageUrl}
