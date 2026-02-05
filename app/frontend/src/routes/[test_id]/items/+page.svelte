@@ -7,7 +7,7 @@
 	import MdiEditOutline from '~icons/mdi/edit-outline';
 	import MdiPlus from '~icons/mdi/plus';
 	
-	import type { TestInstance, TestItem } from '$lib/types/types.ts';
+	import type { TestInstance, TestItem } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import EditTestItem from './EditTestItem.svelte';
 	import AddTestItem from './AddTestItem.svelte';
@@ -49,8 +49,8 @@
 
 		isPageLoading = false;
 	}, 1000);
-
 </script>
+
 
 <div class="space-y-4">
 	{#if isPageLoading}

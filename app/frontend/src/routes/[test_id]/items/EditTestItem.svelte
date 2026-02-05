@@ -3,7 +3,7 @@
 
 	import MdiDelete from "~icons/mdi/delete";
 
-	import type { TestItem } from '$lib/types/types.ts';
+	import type { TestItem } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Button } from '$lib/components/ui/button/index.ts';
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -80,6 +80,7 @@
 	}
 </script>
 
+
 <Dialog.Content>
 	<Dialog.Header>
 		<Dialog.Title>
@@ -87,7 +88,7 @@
 		</Dialog.Title>
 	</Dialog.Header>
 	<Label for="label">Label</Label>
-	<Input id="label" bind:value={ formTestItem.label }/>
+	<Input id="label" bind:value={ formTestItem.label } required/>
 	<Label for="question">Question</Label>
 	<Textarea id="question" rows={4} bind:value={ formTestItem.question } required/>
 	<Label for="e_a_r_q">
@@ -98,10 +99,12 @@
 	<Textarea id="e_a_r_q" rows={6} bind:value={ formTestItem.expected_answer_rubric_questions } required/>
 	<Dialog.Footer>
 		<div class="flex flex-row w-full gap-2">
-			<Button variant="secondary" class="w-4/5" onclick={() => editTestItem(formTestItem)}>
+			<Button variant="secondary" class="w-4/5"
+						onclick={() => editTestItem(formTestItem)}>
 				Save changes
 			</Button>
-			<Button variant="destructive" class="w-1/5">
+			<Button variant="destructive" class="w-1/5"
+						onclick={() => deleteTestItem()}>
 				<MdiDelete class="size-6"/>
 			</Button>
 		</div>
