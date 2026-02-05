@@ -79,12 +79,12 @@
 					cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
 					/>
 	{/if}
-	{#if isOperationOngoing}
-		<p>Loading...</p>
-	{/if}
 	<Button variant="secondary"
 				disabled={!canvasFile || !canvasImageUrl || isOperationOngoing}
 				onclick={() => sendCropRequest()}>
 		Send crop request
 	</Button>
+	{#if isOperationOngoing}
+		<p>Loading...</p>
+	{/if}
 </div>
