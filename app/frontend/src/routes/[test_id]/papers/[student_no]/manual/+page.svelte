@@ -3,6 +3,7 @@
 
 	const { data } = $props();
 
+	import MdiUpload from '~icons/mdi/upload';
 	import { Cropper, type CropperInstance } from "svelte-cropper";
 	import { Input } from '$lib/components/ui/input/index.ts';
 	import { Button } from '$lib/components/ui/button/index.ts';
@@ -68,22 +69,28 @@
 <div class="flex flex-col space-y-2">
 	<h2 class="font-bold">Manually crop image</h2>
 	<h6>{data.test_id} &middot; {data.student_no} &middot; ...</h6>
-	<Input id="croppable"
-				type="file" accept="image/*"
-				bind:files={canvasFile}
-				onchange={handleFileUpload}
-				/>
+	<span class="flex flex-row space-x-1 w-full">
+		<Input id="croppable"
+					type="file" accept="image/*"
+					bind:files={canvasFile}
+					onchange={handleFileUpload}
+					/>
+		<Button variant="secondary"
+					disabled={!canvasFile || !canvasImageUrl || isOperationOngoing}
+					onclick={() => sendCropRequest()}>
+			Send crop request
+		</Button>
+	</span>
 	{#if canvasImageUrl}
 		<Cropper bind:cropper={canvasCropper}
 					src={canvasImageUrl}
 					cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
 					/>
+	{:else}
+		<span class="py-4 border bg-muted text-muted-foreground">
+			<MdiUpload class="h-8 w-full"/>
+		</span>
 	{/if}
-	<Button variant="secondary"
-				disabled={!canvasFile || !canvasImageUrl || isOperationOngoing}
-				onclick={() => sendCropRequest()}>
-		Send crop request
-	</Button>
 	{#if isOperationOngoing}
 		<p>Loading...</p>
 	{/if}
