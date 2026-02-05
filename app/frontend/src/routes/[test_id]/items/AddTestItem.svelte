@@ -15,7 +15,7 @@
 	let formItemEARQ: string = $state("");
 
 	async function addTestItem() {
-		// TODO: finish
+		// FIXME: remove this once verified that functional
 		try {
 			const response = await fetch(
 				`${apiBaseUrl}/api/test_instances/${test_id}/items`,
@@ -23,12 +23,20 @@
 					method: "POST",
 					headers: {'Content-Type': 'application/json',},
 					body: JSON.stringify({
-						// TODO: add body
+						label: formItemLabel,
+						question: formItemQuestion,
+						is_problem_solving: formItemIsProblemSolving,
+						expected_answer_rubric_questions: formItemEARQ,
 					}),
 				}
 			);
 
-			alert(response.status + response.statusText)
+			if (response.ok) {
+				const data = await response.json();
+				alert("Success:" + data.items);
+			}
+			else
+				alert(response.status + response.statusText);
 		} catch (e) {
 			alert("Failed completing operation, check your connection and try again.")
 		}
