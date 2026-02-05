@@ -81,7 +81,7 @@
 					{#if item.image_directory == ""}
 						<MdiPaperOff class="h-12 w-full py-2 bg-muted text-muted-foreground border" />
 					{:else}
-						<img src={item.image_directory} class="size-fill border" alt={item.label}/>
+						<img src={item.image_directory} class="size-fill max-h-[25vh]" alt={item.label}/>
 					{/if}
 				</div>
 			</div>
