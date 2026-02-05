@@ -5,6 +5,7 @@
 
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
+	import { Button } from '$lib/components/ui/button/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.ts';
@@ -69,8 +70,8 @@
 	</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={formItemEARQ} />
 	<Dialog.Footer>
-		<button class="button-primary" onclick={() => addTestItem()}>
+		<Button variant="secondary" onclick={() => addTestItem()}>
 			Add item
-		</button>
+		</Button>
 	</Dialog.Footer>
 </Dialog.Content>
