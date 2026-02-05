@@ -49,6 +49,8 @@
 		}
 	});
 
+
+	// FIXME: remove once functional
 	setTimeout(() => {
 		activeTestInstance.name = "Seatwork 1";
 		activeTestInstance.section = "3-Rizal";
