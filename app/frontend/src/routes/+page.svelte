@@ -59,7 +59,7 @@
 				alert("Addition successful.");
 				window.location.reload();
 			} else {
-				alert("Addition fail: " + response.status + response.statusText);
+				alert(`Addition fail: ${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
 			alert("Failed to add new test instance. Check your network connection and try again.");
@@ -80,10 +80,14 @@
 					<Dialog.Title>Add new test instance</Dialog.Title>
 				</Dialog.Header>
 				<Label for="name">Test name</Label>
-				<Input id="name" type="text" placeholder="Quiz 1"
+				<Input id="name" type="text"
+								placeholder="Test name..."
+								required
 								bind:value={newInstanceName}/>
 				<Label for="section">Section</Label>
-				<Input id="section" type="text" placeholder="1-Acacia"
+				<Input id="section" type="text"
+								placeholder="Section..."
+								required
 								bind:value={newInstanceSection}/>
 				<Dialog.Footer>
 					<Button variant="outline"
