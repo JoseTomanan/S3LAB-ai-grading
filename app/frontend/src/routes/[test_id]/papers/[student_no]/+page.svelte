@@ -18,6 +18,7 @@
 	let studentItems: (StudentAnswer & {label: string})[] = $state([]);
 
 	onMount(async () => {
+		// FIXME: uncomment when good to go
 		try {
 			const response = await fetch(
 				`${apiBaseUrl}/test_instances/${data.test_id}/${data.student_no}`,
@@ -28,11 +29,14 @@
 			);
 
 			const result = await response.json();
-			studentItems = result.answers;
+			// studentItems = result.answers;
 
-			console.log(response.status + response.statusText);
+			// if (response.ok)
+			// 	window.location.reload();
+			// else
+			// 	alert(response.status + response.statusText);
 		} catch(e) {
-			console.log("Failed to fetch, check your network connection and try again.\n"+e);
+			// alert("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
 			// isPageLoading = false;
 		}
@@ -56,7 +60,7 @@
 </script>
 
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4 overflow-auto">
 	<h2 class="font-semibold">For student {data.student_no}:</h2>
 	{#if isPageLoading}
 		<p>Loading...</p>
@@ -72,7 +76,7 @@
 							</Dialog.Trigger>
 							<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
 						</Dialog.Root>
-						<a href={`/${data.test_id}/papers/${data.student_no}/manual`} class="button-secondary border-none">
+						<a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${item.item_id}`} class="button-secondary border-none">
 							<MdiCrop />
 						</a>
 					</span>
