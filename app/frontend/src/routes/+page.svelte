@@ -40,7 +40,6 @@
 	});
 
 	async function addNewTestInstance(name: string, section: string) {
-		// TODO: finish (remove this only when verified with working API)
 		try {
 			const response = await fetch(
 				`${apiBaseUrl}/api/test_instances`,
@@ -99,6 +98,8 @@
 	<div class="flex flex-col gap-3">
 		{#if isPageLoading}
 			<p>Loading...</p>
+		{:else if instances.length == 0}
+			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
 			{#each paginationValues as instance}
 				<TestInstanceCard {...instance}/>
