@@ -2,7 +2,7 @@
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 	import { onMount } from 'svelte';
-	import MdiPlus from '~icons/mdi/plus';
+	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 	
 	import type { TestInstance } from '$lib/types/types.ts';
 	
@@ -65,15 +65,15 @@
 			alert("Failed to add new test instance. Check your network connection and try again.");
 		}
 	}
-
 </script>
+
 
 <div class="px-4 py-8 flex flex-col gap-4">
 	<span class="flex flex-row items-center justify-between">
-		<h1>View Test Instances</h1>
+		<h1>View test instances</h1>
 		<Dialog.Root>
-			<Dialog.Trigger>
-				<MdiPlus class="size-8"/>
+			<Dialog.Trigger class="button-primary">
+				<MdiPaperAddOutline class="size-6"/>
 			</Dialog.Trigger>
 			<Dialog.Content>
 				<Dialog.Header>
