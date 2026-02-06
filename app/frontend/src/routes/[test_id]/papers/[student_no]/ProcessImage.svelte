@@ -19,11 +19,11 @@
 			return;
 
 		const formData = new FormData();
-    formData.append('image', formFile[0]);
+    formData.append('file', formFile[0]);
 
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/test_instances/${test_id}/${student_no}/${studentItem.item_id}/image_preprocess`,
+				`${apiBaseUrl}/api/test_instances/${test_id}/${student_no}/${studentItem.item_id}/image_preprocess`,
 				{ method: "POST", body: formData, }
 			);
 
