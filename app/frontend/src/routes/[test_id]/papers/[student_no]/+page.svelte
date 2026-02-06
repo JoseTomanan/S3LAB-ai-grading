@@ -18,6 +18,7 @@
 	let studentItems: (StudentAnswer & {label: string})[] = $state([]);
 
 	onMount(async () => {
+		// FIXME: uncomment when good to go
 		try {
 			const response = await fetch(
 				`${apiBaseUrl}/test_instances/${data.test_id}/${data.student_no}`,
@@ -28,11 +29,14 @@
 			);
 
 			const result = await response.json();
-			studentItems = result.answers;
+			// studentItems = result.answers;
 
-			console.log(response.status + response.statusText);
+			// if (response.ok)
+			// 	window.location.reload();
+			// else
+			// 	alert(response.status + response.statusText);
 		} catch(e) {
-			console.log("Failed to fetch, check your network connection and try again.\n"+e);
+			// alert("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
 			// isPageLoading = false;
 		}
