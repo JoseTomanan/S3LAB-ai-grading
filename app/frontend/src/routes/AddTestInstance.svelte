@@ -1,8 +1,6 @@
 <script lang="ts">
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-	let {} = $props();
-
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -29,8 +27,7 @@
 				}
 			);
 
-			if (response.status == 200) {
-				const data = response.json();
+			if (response.ok) {
 				alert("Addition successful.");
 				window.location.reload();
 			} else {
