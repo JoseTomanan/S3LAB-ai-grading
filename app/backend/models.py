@@ -30,12 +30,12 @@ class TestInstance(SQLModel, table=True):
 class TestItem(SQLModel, table=True):
     __tablename__ = "test_item"
 
-    item_id: str = Field(primary_key=True, index=True)
+    item_id: int = Field(primary_key=True, index=True)
     test_id: str = Field(foreign_key="test_instance.test_id")  # Now matches __tablename__
     question: str
     is_problem_solving: bool
     expected_answer_rubric_questions: str
-    label: Optional[str] = None
+    label: str
 
 
 class TestPaperInstance(SQLModel, table=True):

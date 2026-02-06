@@ -802,7 +802,7 @@ async def update_answer_segmentation(
     }
 )
 def get_test_paper_statuses(test_id: str):
-    """Return processing status of all student submissions for a test instance"""
+    """Return per-student rendering status for a test instance (per updated contract)"""
     if not test_id or len(test_id) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -811,6 +811,7 @@ def get_test_paper_statuses(test_id: str):
     
     session = get_direct_session()
     try:
+        # Validate test instance exists
         test_inst = session.exec(
             select(TestInstance).where(TestInstance.test_id == test_id)
         ).first()
@@ -820,39 +821,39 @@ def get_test_paper_statuses(test_id: str):
                 detail=f"Test instance '{test_id}' not found"
             )
         
+        # Get all students in the test's section
         students = session.exec(
             select(Person).where(Person.section == test_inst.section)
         ).all()
-        items = session.exec(
-            select(TestItem).where(TestItem.test_id == test_id)
-        ).all()
         
+        # Build contract-compliant response
         statuses = []
         for student in students:
-            student_items = []
+            # Check if ALL items for this student have processed files
+            items = session.exec(
+                select(TestItem).where(TestItem.test_id == test_id)
+            ).all()
+            
+            all_items_processed = True
             for item in items:
-                has_processed = any(
-                    f"{test_id}_{student.student_no}_{item.item_id}" in f.name 
+                # Check for ANY processed file (Endpoint 1 or Endpoint 2 pattern)
+                pattern1 = f"{test_id}_{student.student_no}_{item.item_id}_"
+                pattern2 = f"segmented_{test_id}_{student.student_no}_{item.item_id}_"
+                if not any(
+                    f.name.startswith(pattern1) or f.name.startswith(pattern2)
                     for f in TEMP_DIR.glob("*.jpg")
-                )
-                student_items.append({
-                    "item_id": item.item_id,
-                    "status": "processed" if has_processed else "pending",
-                    "last_updated": None
-                })
+                ):
+                    all_items_processed = False
+                    break
             
             statuses.append({
-                "student_no": student.student_no,
-                "student_name": student.name,
-                "items": student_items
+                "student_no": str(student.student_no),  # Contract requires string
+                "is_done_rendering": all_items_processed
             })
         
         return {
             "test_id": test_id,
-            "section": test_inst.section,
-            "total_students": len(students),
-            "total_items": len(items),
-            "statuses": statuses
+            "statuses": statuses  # ONLY these two top-level fields per contract
         }
     finally:
         session.close()
@@ -866,7 +867,7 @@ def get_test_paper_statuses(test_id: str):
     }
 )
 def get_ai_evaluation_results(test_id: str):
-    """Return AI evaluation results for all student answers in a test instance"""
+    """Return AI evaluations per updated contract (placeholder until AI module implemented)"""
     if not test_id or len(test_id) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -875,25 +876,184 @@ def get_ai_evaluation_results(test_id: str):
     
     session = get_direct_session()
     try:
-        if not session.exec(select(TestInstance).where(TestInstance.test_id == test_id)).first():
+        # Validate test instance exists
+        if not session.exec(
+            select(TestInstance).where(TestInstance.test_id == test_id)
+        ).first():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Test instance '{test_id}' not found"
             )
         
+        # Contract-compliant response structure (empty until AI implemented)
         return {
             "test_id": test_id,
-            "evaluation_summary": {
-                "total_papers": 0,
-                "fully_graded": 0,
-                "pending_review": 0,
-                "average_score": None
-            },
-            "student_results": []
+            "evaluations": []  # Array of {student_no: str, ai_evaluation: str}
         }
     finally:
         session.close()
 
+@app.get(
+    "/api/test_instances/{test_id}/items",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid test_id format"},
+        404: {"description": "Test instance not found"}
+    }
+)
+def get_test_instance_items(test_id: str):
+    """
+    Get all test items for a specific test instance (per API contract).
+    Returns items with item_id, label, question, and is_problem_solving.
+    """
+    # Validate test_id format
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    # Check if test instance exists in DATABASE
+    session = get_direct_session()
+    try:
+        db_test = session.exec(
+            select(TestInstance).where(TestInstance.test_id == test_id)
+        ).first()
+        
+        if not db_test:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance '{test_id}' not found"
+            )
+        
+        # Get all items for this test from DATABASE
+        items = session.exec(
+            select(TestItem).where(TestItem.test_id == test_id)
+        ).all()
+        
+        # Format response per contract
+        items_response = []
+        for item in items:
+            items_response.append({
+                "item_id": item.item_id,
+                "label": item.label if item.label else "",  # Handle None
+                "question": item.question,
+                "is_problem_solving": item.is_problem_solving
+            })
+        
+        return {
+            "test_id": test_id,
+            "items": items_response
+        }
+    
+    finally:
+        session.close()
+
+
+# ==============================
+# NEW ENDPOINT 2(a): Get answers by student for test
+# ==============================
+
+@app.get(
+    "/api/test_instances/{test_id}/{student_no}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        204: {"description": "Test and student exist but no answers found"},
+        400: {"description": "Invalid test_id or student_no format"},
+        404: {"description": "Test instance or student not found"}
+    }
+)
+def get_student_answers(test_id: str, student_no: str):
+    """
+    Get all answers by a specific student for a test instance (per API contract).
+    Returns answer metadata including image URLs and AI evaluation status.
+    """
+    # Validate test_id format
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    # Validate and convert student_no to integer
+    try:
+        student_no_int = int(student_no)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="student_no must be a valid integer"
+        )
+    
+    session = get_direct_session()
+    try:
+        # Check if test instance exists
+        db_test = session.exec(
+            select(TestInstance).where(TestInstance.test_id == test_id)
+        ).first()
+        
+        if not db_test:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance '{test_id}' not found"
+            )
+        
+        # Check if student exists
+        db_student = session.exec(
+            select(Person).where(Person.student_no == student_no_int)
+        ).first()
+        
+        if not db_student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student with ID '{student_no}' not found"
+            )
+        
+        # Get all items for this test
+        items = session.exec(
+            select(TestItem).where(TestItem.test_id == test_id)
+        ).all()
+        
+        # Build answers array by checking for processed files
+        answers = []
+        for item in items:
+            # Check for BOTH processing patterns:
+            # 1. Endpoint 1 files: {test_id}_{student}_{item}_*.jpg
+            # 2. Endpoint 2 files: segmented_{test_id}_{student}_{item}_*.jpg
+            
+            pattern1 = f"{test_id}_{student_no}_{item.item_id}_"
+            pattern2 = f"segmented_{test_id}_{student_no}_{item.item_id}_"
+            
+            matching_files = [
+                f for f in TEMP_DIR.glob("*.jpg")
+                if f.name.startswith(pattern1) or f.name.startswith(pattern2)
+            ]
+            
+            # If files exist, create answer entry
+            if matching_files:
+                # Use the most recent file (alphabetically last)
+                latest_file = sorted(matching_files, reverse=True)[0]
+                
+                answers.append({
+                    "answer_id": item.item_id,  # Using item_id as answer_id for now
+                    "student_no": str(student_no),  # Contract requires string
+                    "item_id": item.item_id,
+                    "label": item.label if item.label else "",
+                    "image_directory": f"/api/temp/{latest_file.name}",
+                    "ai_evaluation": "",  # Placeholder - AI module not implemented yet
+                    "is_done_rendering": True
+                })
+        
+        # Return 204 No Content if no answers found
+        if not answers:
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+        
+        return {
+            "answers": answers
+        }
+    
+    finally:
+        session.close()
+        
 # --- Serve temporary processed images ---
 @app.get("/api/temp/{filename}")
 async def get_processed_image(filename: str):
