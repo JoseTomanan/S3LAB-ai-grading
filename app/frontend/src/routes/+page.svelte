@@ -3,6 +3,7 @@
 
 	import { onMount } from 'svelte';
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
+	import MdiGoogleClassroom from '~icons/mdi/google-classroom';
 	
 	import type { TestInstance } from '$lib/types/types.ts';
 	
@@ -38,6 +39,9 @@
 
 <div class="px-4 py-8 flex flex-col gap-4">
 	<span class="flex flex-row items-center justify-between">
+		<a href="/sections">
+			<MdiGoogleClassroom class="size-8"/>
+		</a>
 		<h1>View test instances</h1>
 		<Dialog.Root>
 			<Dialog.Trigger class="button-primary">
