@@ -3,10 +3,14 @@
 
 	const { data } = $props();
 
+	import { page } from '$app/state';
+
 	import MdiUpload from '~icons/mdi/upload';
 	import { Cropper, type CropperInstance } from "svelte-cropper";
 	import { Input } from '$lib/components/ui/input/index.ts';
 	import { Button } from '$lib/components/ui/button/index.ts';
+	
+	const item_id = $derived(page.url.searchParams.get('item_id'));
 
 	let isOperationOngoing: boolean = $state(false);
 
@@ -36,29 +40,36 @@
 				{ x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }													// Bottom-Left
 				];
 
-		console.log(returnablePoints);
-
 		const formData: FormData = new FormData();
-		formData.append('image', canvasFile![0]);
+		formData.append('file', canvasFile![0]);
 
-		const formMetadata = { points: {
-					ul: returnablePoints[0],
-					ur: returnablePoints[1],
-					lr: returnablePoints[2],
-					ll: returnablePoints[3],
-					}};
-		formData.append('metadata', JSON.stringify(formMetadata));
+		const formMetadata = {
+					ul: { x: returnablePoints[0].x.toString(), y: returnablePoints[0].y.toString() },
+					ur: { x: returnablePoints[1].x.toString(), y: returnablePoints[1].y.toString() },
+					lr: { x: returnablePoints[2].x.toString(), y: returnablePoints[2].y.toString() },
+					ll: { x: returnablePoints[3].x.toString(), y: returnablePoints[3].y.toString() },
+					};
+		formData.append('points', JSON.stringify(formMetadata));
+
+		console.log(JSON.stringify(formMetadata));
 
 		try {
 			const response = await fetch(
-						`${apiBaseUrl}/test_instances/${data.test_id}/${data.student_no}`,
+						`${apiBaseUrl}/api/test_instances/${data.test_id}/${data.student_no}/${item_id}`,
 						{ method: "PATCH", body: formData, }
 						);
 
 			const result = await response.json();
 			canvasImageUrl = result.image_directory;
+
+			if (response.ok) {
+				alert("Addition successful.");
+				window.location.reload();
+			}
+			else
+				alert(`${response.status} ${response.statusText}`);
 		} catch(e) {
-			console.log("Failed to finish, check your network connection and try again.\n"+e);
+			alert("Failed to finish, check your network connection and try again.\n"+e);
 		} finally {
 			isOperationOngoing = false;
 		}
@@ -68,7 +79,7 @@
 
 <div class="flex flex-col space-y-2">
 	<h2 class="font-bold">Manually crop image</h2>
-	<h6>{data.test_id} &middot; {data.student_no} &middot; ...</h6>
+	<h6>{data.test_id} &middot; {data.student_no} &middot; ITEM_ID {item_id}</h6>
 	<span class="flex flex-row space-x-1 w-full">
 		<Input id="croppable"
 					type="file" accept="image/*"
