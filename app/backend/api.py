@@ -1,7 +1,13 @@
-from fastapi import FastAPI, HTTPException, Response, status
+from fastapi import FastAPI, HTTPException, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
+import uuid
+import os
+from pathlib import Path
+import json
+import numpy as np
+import cv2
 
 from models import TestInstance, TestItem, Person, Section, TestPaperInstance
 from schemas import (
@@ -15,16 +21,11 @@ from schemas import (
     UpdateTestInstanceRequest,
     TestInstanceResponse,
 )
-from database import *
-
-from fastapi import File, UploadFile
+from database import create_db_and_tables, engine, get_direct_session
+from fastapi import File, UploadFile, Form
 from image_preprocessor import CVImagePreprocessor, CVProcessingError
-import mimetypes
-
-import uuid
-import os
-from pathlib import Path
 from fastapi.responses import FileResponse
+from sqlmodel import select
 
 # ==============================
 # Static Test Data (Temporary – Replace with DB Later)
@@ -98,10 +99,54 @@ test_items_db = {
 }
 
 # ==============================
-# App Setup
+# Database Seeding (REMOVE AFTER TESTING)
 # ==============================
 
 create_db_and_tables()
+
+from sqlmodel import Session as SQLModelSession
+with SQLModelSession(engine) as session:
+    # 1. Sections
+    for sec_name in ["3-Rizal", "3-Aguinaldo"]:
+        if not session.exec(select(Section).where(Section.section_name == sec_name)).first():
+            session.add(Section(section_name=sec_name))
+    
+    # 2. Student (your ID from memory)
+    if not session.exec(select(Person).where(Person.student_no == 202160151)).first():
+        session.add(Person(
+            student_no=202160151,
+            name="Mohammad Hamdi S. Tuan",
+            section="3-Rizal"
+        ))
+    
+    # 3. Test Instances (sync with in-memory TEST_INSTANCES)
+    for inst in TEST_INSTANCES:
+        if not session.exec(select(TestInstance).where(TestInstance.test_id == inst["test_id"])).first():
+            session.add(TestInstance(
+                test_id=inst["test_id"],
+                name=inst["name"],
+                section=inst["section"],
+                date=inst["date"],
+                is_done_rendering=inst["is_done_rendering"]
+            ))
+    
+    # 4. Test Items (sync with in-memory test_items_db)
+    for test_id, items in test_items_db.items():
+        for item in items:
+            if not session.exec(select(TestItem).where(TestItem.item_id == item["item_id"])).first():
+                session.add(TestItem(
+                    item_id=item["item_id"],
+                    test_id=test_id,
+                    question=item["question"],
+                    is_problem_solving=item["is_problem_solving"],
+                    expected_answer_rubric_questions=item["expected_answer_rubric_questions"]
+                ))
+    session.commit()
+
+# ==============================
+# App Setup
+# ==============================
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -111,11 +156,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Temporary directory for processed images
+TEMP_DIR = Path("temp_cv_output")
+TEMP_DIR.mkdir(exist_ok=True)
+
 # ==============================
-# Endpoints
+# Existing Endpoints (Unchanged)
 # ==============================
 
-# For Test Instances
 @app.get("/api/test_instances")
 def get_test_instances():
     return {"instances": TEST_INSTANCES}
@@ -144,7 +192,6 @@ def get_test_instance(test_id: str):
     
     return instance
 
-
 @app.post(
     "/api/test_instances",
     status_code=status.HTTP_200_OK,
@@ -153,7 +200,7 @@ def get_test_instance(test_id: str):
         409: {"description": "Test instance already exists"}
     }
 )
-def add_test_instance(request: NewTestInstanceRequest):  # <-- typed!
+def add_test_instance(request: NewTestInstanceRequest):
     name = request.name
     section = request.section
     date = request.date
@@ -181,10 +228,8 @@ def add_test_instance(request: NewTestInstanceRequest):  # <-- typed!
     
     TEST_INSTANCES.append(new_instance)
     VALID_TEST_IDS.add(test_id)
-    # test_items_db will be initialized on first item POST
     
     return new_instance
-
 
 @app.patch(
     "/api/test_instances/{test_id}",
@@ -195,28 +240,24 @@ def add_test_instance(request: NewTestInstanceRequest):  # <-- typed!
     }
 )
 def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
-    # Validate test_id format
     if not test_id or len(test_id) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid test_id format"
         )
     
-    # Check existence
     if test_id not in VALID_TEST_IDS:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Test instance with ID '{test_id}' not found"
         )
     
-    # Ensure only 'date' is being updated
     if update.date is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only 'date' can be updated for a test instance"
         )
     
-    # Update the instance in TEST_INSTANCES
     target_instance = None
     for inst in TEST_INSTANCES:
         if inst["test_id"] == test_id:
@@ -224,7 +265,6 @@ def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
             target_instance = inst
             break
     
-    # Build items summary (even if empty)
     items = test_items_db.get(test_id, [])
     summary_items = [
         TestItemSummary(
@@ -254,31 +294,25 @@ def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
     }
 )
 def delete_test_instance(test_id: str):
-    # Validate test_id format
     if not test_id or len(test_id) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid test_id format"
         )
     
-    # Check existence
     if test_id not in VALID_TEST_IDS:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Test instance with ID '{test_id}' not found"
         )
     
-    # Remove from TEST_INSTANCES
     global TEST_INSTANCES
     TEST_INSTANCES = [inst for inst in TEST_INSTANCES if inst["test_id"] != test_id]
     VALID_TEST_IDS.discard(test_id)
     
-    # Cascade delete: remove all associated test items
-    test_items_db.pop(test_id, None)  # Safe deletion (no KeyError if missing)
+    test_items_db.pop(test_id, None)
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-# For Test Items
 
 def get_test_items(test_id: str):
     if not test_id or len(test_id) > 100:
@@ -303,7 +337,6 @@ def get_test_items(test_id: str):
     ]
     
     return TestItemsResponse(test_id=test_id, items=summary_items)
-
 
 @app.post(
     "/api/test_instances/{test_id}/items",
@@ -338,7 +371,6 @@ def add_test_item(test_id: str, item: NewTestItemRequest):
     
     test_items_db[test_id].append(item.dict())
     return NewTestItemResponse(items=[item])
-
 
 @app.patch(
     "/api/test_instances/{test_id}/{test_item_id}",
@@ -376,12 +408,10 @@ def edit_test_item(test_id: str, test_item_id: str, update: UpdateTestItemReques
             item.update(update_data)
             return FullTestItemResponse(**item)
     
-    # Fallback (should not occur)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Item update failed unexpectedly"
     )
-
 
 @app.delete(
     "/api/test_instances/{test_id}/{test_item_id}",
@@ -423,16 +453,9 @@ def delete_test_item(test_id: str, test_item_id: str):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
 # ==============================
 # Computer Vision Preprocessing Endpoint (Multi-Box)
 # ==============================
-
-
-
-# Temporary directory for processed images
-TEMP_DIR = Path("temp_cv_output")
-TEMP_DIR.mkdir(exist_ok=True)
 
 @app.post(
     "/api/test_instances/image_preprocess",
@@ -478,7 +501,7 @@ async def image_preprocess(file: UploadFile = File(...)):
     # --- Processing ---
     try:
         preprocessor = CVImagePreprocessor()
-        processed_list = preprocessor.process_assessment_image(contents)  # List[bytes], 1–3 items
+        processed_list = preprocessor.process_assessment_image(contents)
     except CVProcessingError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -508,6 +531,368 @@ async def image_preprocess(file: UploadFile = File(...)):
         "num_boxes": len(processed_list),
         "boxes": boxes_info
     }
+
+# ==============================
+# Test Paper Instance Endpoints (FULLY FIXED)
+# ==============================
+
+@app.post(
+    "/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid input format or student_no not integer"},
+        404: {"description": "Test instance, student, or item not found"},
+        415: {"description": "Unsupported media type"},
+        500: {"description": "CV processing failed"}
+    }
+)
+async def process_student_answer_image(
+    test_id: str,
+    student_no: str,
+    item_id: str,
+    file: UploadFile = File(...)
+):
+    # ===== VALIDATION PHASE =====
+    try:
+        student_no_int = int(student_no)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="student_no must be a valid integer"
+        )
+    
+    # Validate IDs exist in DATABASE
+    session = get_direct_session()
+    try:
+        # Check test instance exists
+        db_test = session.exec(
+            select(TestInstance).where(TestInstance.test_id == test_id)
+        ).first()
+        if not db_test:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance '{test_id}' not found in database"
+            )
+        
+        # Check student exists
+        db_student = session.exec(
+            select(Person).where(Person.student_no == student_no_int)
+        ).first()
+        if not db_student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student with ID '{student_no}' not found"
+            )
+        
+        # Check item exists AND belongs to this test
+        db_item = session.exec(
+            select(TestItem).where(
+                TestItem.item_id == item_id,
+                TestItem.test_id == test_id
+            )
+        ).first()
+        if not db_item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Item '{item_id}' not found in test instance '{test_id}'"
+            )
+    finally:
+        session.close()
+    
+    # Validate file
+    if not file or not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file provided"
+        )
+    
+    if not CVImagePreprocessor.validate_file_extension(file.filename):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
+        )
+    
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty"
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to read file: {str(e)}"
+        )
+    
+    # ===== PROCESSING PHASE =====
+    try:
+        preprocessor = CVImagePreprocessor()
+        processed_list = preprocessor.process_assessment_image(contents)
+    except CVProcessingError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"CV processing failed: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected processing error: {str(e)}"
+        )
+    
+    # ===== STORAGE & RESPONSE PHASE =====
+    session_id = str(uuid.uuid4())
+    boxes_info = []
+    
+    for i, img_bytes in enumerate(processed_list):
+        safe_filename = f"{test_id}_{student_no}_{item_id}_{session_id}_{i}.jpg"
+        safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
+        filepath = TEMP_DIR / safe_filename
+        
+        with open(filepath, "wb") as f:
+            f.write(img_bytes)
+        
+        boxes_info.append({
+            "index": i,
+            "image_directory": f"/api/temp/{safe_filename}"
+        })
+    
+    return {
+        "image_directory": session_id,
+        "num_boxes": len(processed_list),
+        "boxes": boxes_info
+    }
+
+@app.patch(
+    "/api/test_instances/{test_id}/{student_no}/{item_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid points format, student_no not integer, or missing file"},
+        404: {"description": "Test instance, student, or item not found"},
+        415: {"description": "Unsupported media type"},
+        500: {"description": "Image processing failed"}
+    }
+)
+async def update_answer_segmentation(
+    test_id: str,
+    student_no: str,
+    item_id: str,
+    file: UploadFile = File(...),
+    points: str = Form(...)
+):
+    # ===== VALIDATION PHASE =====
+    try:
+        student_no_int = int(student_no)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="student_no must be a valid integer"
+        )
+    
+    # Validate existence in DATABASE
+    session = get_direct_session()
+    try:
+        if not session.exec(select(TestInstance).where(TestInstance.test_id == test_id)).first():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Test instance '{test_id}' not found")
+        if not session.exec(select(Person).where(Person.student_no == student_no_int)).first():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Student '{student_no}' not found")
+        if not session.exec(
+            select(TestItem).where(TestItem.item_id == item_id, TestItem.test_id == test_id)
+        ).first():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Item '{item_id}' not found in test '{test_id}'")
+    finally:
+        session.close()
+    
+    # Validate file
+    if not file or not file.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No image file provided")
+    if not CVImagePreprocessor.validate_file_extension(file.filename):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported image format: {file.filename}"
+        )
+    
+    # Validate and parse points JSON
+    try:
+        points_data = json.loads(points)
+        required = ["ul", "ur", "lr", "ll"]
+        for corner in required:
+            if corner not in points_data:
+                raise ValueError(f"Missing corner point: {corner}")
+            if not all(k in points_data[corner] for k in ["x", "y"]):
+                raise ValueError(f"Point {corner} missing x/y coordinates")
+            float(points_data[corner]["x"])
+            float(points_data[corner]["y"])
+    except (json.JSONDecodeError, ValueError, TypeError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid points format: {str(e)}"
+        )
+    
+    # ===== IMAGE PROCESSING PHASE =====
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded image is empty")
+        
+        nparr = np.frombuffer(contents, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if image is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image content")
+        
+        src_pts = np.array([
+            [points_data["ul"]["x"], points_data["ul"]["y"]],
+            [points_data["ur"]["x"], points_data["ur"]["y"]],
+            [points_data["lr"]["x"], points_data["lr"]["y"]],
+            [points_data["ll"]["x"], points_data["ll"]["y"]]
+        ], dtype=np.float32)
+        
+        def calc_aspect(pts):
+            w_top = np.linalg.norm(pts[0] - pts[1])
+            w_bot = np.linalg.norm(pts[3] - pts[2])
+            h_left = np.linalg.norm(pts[0] - pts[3])
+            h_right = np.linalg.norm(pts[1] - pts[2])
+            return (w_top + w_bot) / (h_left + h_right + 1e-5)
+        
+        aspect_ratio = calc_aspect(src_pts)
+        OUT_HEIGHT = 800
+        OUT_WIDTH = int(OUT_HEIGHT * aspect_ratio)
+        
+        dst_pts = np.float32([
+            [0, 0],
+            [OUT_WIDTH, 0],
+            [OUT_WIDTH, OUT_HEIGHT],
+            [0, OUT_HEIGHT]
+        ])
+        
+        M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+        warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
+        
+        preprocessor = CVImagePreprocessor()
+        enhanced = preprocessor.brighten(warped, amount=0.2)
+        enhanced = preprocessor.adjust_contrast(enhanced, amount=1.2)
+        
+        success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+        if not success:
+            raise CVProcessingError("Failed to encode processed image")
+        img_bytes = buffer.tobytes()
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Image segmentation failed: {str(e)}"
+        )
+    
+    # ===== STORAGE & RESPONSE =====
+    safe_filename = f"segmented_{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
+    filepath = TEMP_DIR / safe_filename
+    with open(filepath, "wb") as f:
+        f.write(img_bytes)
+    
+    return {
+        "image_directory": f"/api/temp/{safe_filename}"
+    }
+
+@app.get(
+    "/api/test_instances/{test_id}/statuses",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid test_id format"},
+        404: {"description": "Test instance not found"}
+    }
+)
+def get_test_paper_statuses(test_id: str):
+    """Return processing status of all student submissions for a test instance"""
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    session = get_direct_session()
+    try:
+        test_inst = session.exec(
+            select(TestInstance).where(TestInstance.test_id == test_id)
+        ).first()
+        if not test_inst:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance '{test_id}' not found"
+            )
+        
+        students = session.exec(
+            select(Person).where(Person.section == test_inst.section)
+        ).all()
+        items = session.exec(
+            select(TestItem).where(TestItem.test_id == test_id)
+        ).all()
+        
+        statuses = []
+        for student in students:
+            student_items = []
+            for item in items:
+                has_processed = any(
+                    f"{test_id}_{student.student_no}_{item.item_id}" in f.name 
+                    for f in TEMP_DIR.glob("*.jpg")
+                )
+                student_items.append({
+                    "item_id": item.item_id,
+                    "status": "processed" if has_processed else "pending",
+                    "last_updated": None
+                })
+            
+            statuses.append({
+                "student_no": student.student_no,
+                "student_name": student.name,
+                "items": student_items
+            })
+        
+        return {
+            "test_id": test_id,
+            "section": test_inst.section,
+            "total_students": len(students),
+            "total_items": len(items),
+            "statuses": statuses
+        }
+    finally:
+        session.close()
+
+@app.get(
+    "/api/test_instances/{test_id}/results",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "Invalid test_id format"},
+        404: {"description": "Test instance not found"}
+    }
+)
+def get_ai_evaluation_results(test_id: str):
+    """Return AI evaluation results for all student answers in a test instance"""
+    if not test_id or len(test_id) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid test_id format"
+        )
+    
+    session = get_direct_session()
+    try:
+        if not session.exec(select(TestInstance).where(TestInstance.test_id == test_id)).first():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance '{test_id}' not found"
+            )
+        
+        return {
+            "test_id": test_id,
+            "evaluation_summary": {
+                "total_papers": 0,
+                "fully_graded": 0,
+                "pending_review": 0,
+                "average_score": None
+            },
+            "student_results": []
+        }
+    finally:
+        session.close()
 
 # --- Serve temporary processed images ---
 @app.get("/api/temp/{filename}")
