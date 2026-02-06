@@ -2,13 +2,14 @@
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 	import { onMount } from 'svelte';
+	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
+	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 	import MdiGoogleClassroom from '~icons/mdi/google-classroom';
 	
 	import type { TestInstance } from '$lib/types/types.ts';
 	
 	import Pagination from '$lib/components/Pagination.svelte';
-	import TestInstanceCard from './TestInstanceCard.svelte';
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import AddTestInstance from './AddTestInstance.svelte';
 	
@@ -57,7 +58,17 @@
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
 			{#each paginationValues as instance}
-				<TestInstanceCard {...instance}/>
+				<a href={`/${instance.test_id}/items`} class="card">
+					<span class="flex flex-row items-center gap-1">
+						{#if instance.is_done_rendering}
+							<MdiCheckboxMarkedOutline/>
+						{:else}
+							<MdiCheckboxBlankOutline/>
+						{/if}
+						<h3>{ instance.name }</h3>
+					</span>
+					<h4>{ instance.section } &centerdot; { new Date(instance.date).toLocaleDateString() }</h4>
+				</a>
 			{/each}
 		{/if}
 	</div>
