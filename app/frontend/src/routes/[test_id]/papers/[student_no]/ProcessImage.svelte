@@ -7,7 +7,6 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
 
 	let isOperationOngoing: boolean = $state(false);
 
@@ -24,7 +23,7 @@
 
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/test_instances/cvprocess`,
+				`${apiBaseUrl}/test_instances/${test_id}/${student_no}/${studentItem.item_id}/image_preprocess`,
 				{ method: "POST", body: formData, }
 			);
 
@@ -46,7 +45,7 @@
 	<Dialog.Title>Send image</Dialog.Title>
 	<Dialog.Description>{test_id} &middot; {student_no} &middot; Item {studentItem.label}</Dialog.Description>
 	<Input id="sendImage" type="file" accept="image/*" bind:files={formFile}/>
-	<Button variant="default" onclick={() => sendImage()} disabled={!formFile}>
+	<Button variant="outline" onclick={() => sendImage()} disabled={!formFile}>
 		Send for processing
 	</Button>
 	{#if isOperationOngoing}
