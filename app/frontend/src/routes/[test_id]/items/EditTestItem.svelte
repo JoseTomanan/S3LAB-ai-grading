@@ -1,6 +1,6 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
+	import { API_BASE_URL } from '$lib/constants.ts';
+	
 	import MdiDelete from "~icons/mdi/delete";
 
 	import type { TestItem } from '$lib/index.ts';
@@ -37,7 +37,7 @@
 				console.log(formBody);
 				
 				const response = await fetch(
-					`${apiBaseUrl}/api/test_instances/${test_id}/${submittedTestItem.item_id}`,
+					`${API_BASE_URL}/api/test_instances/${test_id}/${submittedTestItem.item_id}`,
 					{
 						method: "PATCH",
 						body: JSON.stringify(formBody),
@@ -62,7 +62,7 @@
 		// FIXME: remove once validated workingness
 		try {
 			const response = await fetch(
-					`${apiBaseUrl}/api/test_instances/${test_id}/${formTestItem.item_id}`,
+					`${API_BASE_URL}/api/test_instances/${test_id}/${formTestItem.item_id}`,
 					{
 						method: "DELETE",
 						headers: {'Content-Type': 'application/json',},

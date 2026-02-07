@@ -1,7 +1,7 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-	let { test_id } = $props();
+	const { test_id } = $props();
+	
+	import { API_BASE_URL } from '$lib/constants.ts';
 
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
@@ -19,7 +19,7 @@
 		// FIXME: remove this once verified that functional
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances/${test_id}/items`,
+				`${API_BASE_URL}/api/test_instances/${test_id}/items`,
 				{
 					method: "POST",
 					headers: {'Content-Type': 'application/json',},

@@ -1,13 +1,11 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
 	const { data } = $props();
-		
+	
+	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from "svelte";
+	
 	import MdiPaperEditOutline from '~icons/mdi/paper-edit-outline';
 	import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
-
-	import type { Student, TestItemHeader } from "$lib/types/types.ts";
 
 	let isPageLoading: boolean = $state(true);
 	let perStudentStatuses: {student_no: string, is_done_rendering: boolean}[] = $state([]);
@@ -15,7 +13,7 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-						`${apiBaseUrl}/api/test_instances/${data.test_id}/statuses`,
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/statuses`,
 						{
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},

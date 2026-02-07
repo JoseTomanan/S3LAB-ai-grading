@@ -1,11 +1,11 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
 	const { data } = $props();
 
+	import { API_BASE_URL } from '$lib/constants.ts';
 	import { page } from '$app/state';
 
 	import MdiUpload from '~icons/mdi/upload';
+	
 	import { Cropper, type CropperInstance } from "svelte-cropper";
 	import { Input } from '$lib/components/ui/input/index.ts';
 	import { Button } from '$lib/components/ui/button/index.ts';
@@ -55,7 +55,7 @@
 
 		try {
 			const response = await fetch(
-						`${apiBaseUrl}/api/test_instances/${data.test_id}/${data.student_no}/${item_id}`,
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}/${item_id}`,
 						{ method: "PATCH", body: formData, }
 						);
 

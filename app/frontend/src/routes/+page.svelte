@@ -1,7 +1,7 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
+	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from 'svelte';
+
 	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
 	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
@@ -20,7 +20,7 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances`,
+				`${API_BASE_URL}/api/test_instances`,
 				{
 					method: "GET",
 					headers: {'Content-Type': 'application/json',}

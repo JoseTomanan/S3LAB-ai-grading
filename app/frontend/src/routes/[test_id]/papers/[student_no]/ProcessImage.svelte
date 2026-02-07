@@ -1,7 +1,7 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-	
 	const { test_id, student_no, studentItem }: { test_id: string, student_no: string, studentItem: (StudentAnswer & {label: string}) } = $props();
+	
+	import { API_BASE_URL } from '$lib/constants.ts';
 
 	import type { Student, StudentAnswer } from '$lib/types/types.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -23,7 +23,7 @@
 
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances/${test_id}/${student_no}/${studentItem.item_id}/image_preprocess`,
+				`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/${studentItem.item_id}/image_preprocess`,
 				{ method: "POST", body: formData, }
 			);
 
