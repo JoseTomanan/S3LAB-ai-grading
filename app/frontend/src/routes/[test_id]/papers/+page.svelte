@@ -1,30 +1,39 @@
 <script lang="ts">
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 	const { data } = $props();
 		
 	import { onMount } from "svelte";
 	import MdiPaperEditOutline from '~icons/mdi/paper-edit-outline';
+	import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
 
 	import type { Student, TestItemHeader } from "$lib/types/types.ts";
 
 	let isPageLoading: boolean = $state(true);
-	let students: Student[] = $state([]);
+	let perStudentStatuses: {student_no: string, is_done_rendering: boolean}[] = $state([]);
 
 	onMount(async () => {
-		// TODO: finish; revert console.log() to alert() and isPageLoading when done.
 		try {
-			const response = await fetch(``, {});
+			const response = await fetch(
+						`${apiBaseUrl}/api/test_instances/${data.test_id}/statuses`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+					);
+
+			const result = await response.json();
+
+			if (!response.ok)
+				alert(`${response.status} ${response.statusText}`);
+			else
+				perStudentStatuses = result.statuses;
 		} catch(e) {
-			console.log("Failed to fetch, check your network connection and try again.\n"+e);
+			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
+			isPageLoading = false;
 		}
 	});
-
-	// FIXME: placeholders; remove when done
-	setTimeout(() => {
-		students = [{student_no: "202100000", name: "Abalos, Benhur P.", section: "1-Narra"},
-					{student_no: "202100022", name: "Baclaan, Kean Christopher P.", section: "1-Narra"}];
-		isPageLoading = false;
-	}, 500);
 </script>
 
 
@@ -32,11 +41,16 @@
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else}
-		{#each students as student}
-			<a href={`/${data.test_id}/papers/${student.student_no}`}
+		{#each perStudentStatuses as status}
+			<a href={`/${data.test_id}/papers/${status.student_no}`}
 						class="card flex flex-row items-center justify-between">
-				<h3>{student.name}</h3>
-				<MdiPaperEditOutline class="size-6"/>
+				<h3>{status.student_no}</h3>
+				<!-- TODO: make this status.name once response body is fixed -->
+				{#if status.is_done_rendering}
+					<MdiPaperEditOutline class="size-6"/>
+				{:else}
+					<MdiPaperCheckOutline class="size-6"/>
+				{/if}
 			</a>
 		{/each}
 	{/if}

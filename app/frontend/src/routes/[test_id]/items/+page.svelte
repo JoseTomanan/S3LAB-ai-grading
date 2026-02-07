@@ -22,32 +22,25 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances/${data.test_id}/items`,
-				{
-					method: "GET",
-					headers: {'Content-Type': 'application/json',},
-				}
-			);
+						`${apiBaseUrl}/api/test_instances/${data.test_id}/items`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+					);
 
 			const result = await response.json();
-			allItems = result.items;
+			
+			if (!response.ok)
+				alert(`${response.status} ${response.statusText}`);
+			else
+				allItems = result.items;
 		} catch (e) {
-			// FIXME: revert to alert() once functional
-			console.log("Failed to fetch test details:\n"+e);
+			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}
 	});
-	
-	// FIXME: remove once API is working
-	setTimeout(() => {
-		allItems = [
-			{item_id: 1, label: '1a', question: "David and Goliath divide a pie in half. If they were to divide it evenly, how many should each one get?", is_problem_solving: false, expected_answer_rubric_questions: ""},
-			{item_id: 2, label: '1b', question: "Three people are to share a pie evenly. Using a circle, illustrate how this pie will be sliced.", is_problem_solving: true, expected_answer_rubric_questions: ""},
-		];
-
-		isPageLoading = false;
-	}, 1000);
 </script>
 
 
