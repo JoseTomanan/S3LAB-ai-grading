@@ -38,6 +38,8 @@
 <div class="space-y-4">
 	{#if isPageLoading}
 		<p>Loading...</p>
+	{:else if perStudentStatuses.length == 0}
+		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
 		{#each perStudentStatuses as status}
 			<a href={`/${data.test_id}/papers/${status.student_no}`}

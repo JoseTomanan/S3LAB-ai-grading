@@ -48,6 +48,8 @@
 	<h2 class="font-semibold">For student {data.student_no}:</h2>
 	{#if isPageLoading}
 		<p>Loading...</p>
+	{:else if studentItems.length == 0}
+		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
 		{#each studentItems as item}
 			<div class="card space-y-1">

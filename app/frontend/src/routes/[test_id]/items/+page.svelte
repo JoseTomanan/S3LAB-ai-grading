@@ -73,6 +73,9 @@
 							</Dialog.Root>
 						</span>
 					{/each}
+					{#if bigItem.b.length == 0}
+						<p class="italic">Nothing to see here. If this is a mistake, check your network connection.</p>
+					{/if}
 				</div>
 			</div>
 		{/each}
