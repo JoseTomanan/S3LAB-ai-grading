@@ -18,45 +18,30 @@
 	let studentItems: (StudentAnswer & {label: string})[] = $state([]);
 
 	onMount(async () => {
-		// FIXME: uncomment when good to go
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/test_instances/${data.test_id}/${data.student_no}`,
-				{
-					method: "GET",
-					headers: {'Content-Type': 'application/json',},
-				}
-			);
-
+						`${apiBaseUrl}/api/test_instances/${data.test_id}/${data.student_no}`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+					);
+			
+			// FIXME: there's an error here. 1 executes but 2 doesn't. Must be a backend thing.
+			console.log("--> umabot dito 1");
 			const result = await response.json();
-			// studentItems = result.answers;
+			console.log("--> umabot dito 2");
 
-			// if (response.ok)
-			// 	window.location.reload();
-			// else
-			// 	alert(response.status + response.statusText);
+			if (!(response.ok))
+				alert(`${response.status} ${response.statusText}`);
+			else
+				studentItems = result.answers;
 		} catch(e) {
-			// alert("Failed to fetch, check your network connection and try again.\n"+e);
+			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
-			// isPageLoading = false;
+			isPageLoading = false;
 		}
 	});
-
-	// FIXME: remove (temporary!)
-	setTimeout(() => {
-		for (let i: number = 1; i < 5; i++)
-			studentItems.push({
-				answer_id: i,
-				item_id: i,
-				label: i.toString(),
-				student_no: data.student_no,
-				image_directory: i==2 ? "https://www.math-only-math.com/images/partial-fraction.jpg" : "",
-				ai_evaluation: "",
-				is_done_rendering: false,
-			});
-
-		isPageLoading = false;
-	}, 500);
 </script>
 
 
