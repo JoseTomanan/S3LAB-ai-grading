@@ -1,6 +1,12 @@
 <script lang="ts">
-	const { data } = $props();
+	// const { data } = $props();
 	
+	import { page } from '$app/stores';
+
+	// Get parameters from current route structure
+	const test_id = $page.params.test_id;
+	const student_no = $page.params.student_no;
+
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from 'svelte';
 	import MdiPaperOff from '~icons/mdi/paper-off';
@@ -18,8 +24,10 @@
 
 	onMount(async () => {
 		try {
+			// const response = await fetch(
+			// 			`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}`,
 			const response = await fetch(
-						`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}`,
+						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}`,
 						{
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},
@@ -27,14 +35,34 @@
 					);
 			
 			// FIXME: there's an error here. 1 executes but 2 doesn't. Must be a backend thing.
-			console.log("--> umabot dito 1");
-			const result = await response.json();
-			console.log("--> umabot dito 2");
+		//	console.log("--> umabot dito 1");
+		// 	const result = await response.json();
+		// 	console.log("--> umabot dito 2");
 
-			if (!(response.ok))
-				alert(`${response.status} ${response.statusText}`);
-			else
+		// 	if (!(response.ok))
+		// 		alert(`${response.status} ${response.statusText}`);
+		// 	else
+		// 		studentItems = result.answers;
+		// } catch(e) {
+		// 	alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+		// } finally {
+		// 	isPageLoading = false;
+		// }
+			console.log("--> umabot dito 1");
+			
+			if (response.status === 204) {
+				// No answers found - handle empty case
+				console.log("--> umabot dito 2 (204: No Content)");
+				studentItems = [];
+			} else if (response.ok) {
+				// Answers exist - parse JSON
+				const result = await response.json();
+				console.log("--> umabot dito 2 (200: OK)");
 				studentItems = result.answers;
+			} else {
+				// Error case
+				alert(`${response.status} ${response.statusText}`);
+			}
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
@@ -45,7 +73,8 @@
 
 
 <div class="flex flex-col gap-4 overflow-auto">
-	<h2 class="font-semibold">For student {data.student_no}:</h2>
+	<!-- <h2 class="font-semibold">For student {data.student_no}:</h2> -->
+	<h2 class="font-semibold">For student {student_no}:</h2>
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if studentItems.length == 0}
@@ -60,10 +89,12 @@
 							<Dialog.Trigger class="button-secondary border-none">
 								<MdiImagePlus />
 							</Dialog.Trigger>
-							<ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/>
+							<!-- <ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/> -->
+							<ProcessImage test_id={test_id} student_no={student_no} studentItem={item}/>
 						</Dialog.Root>
-						<a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${item.item_id}`} class="button-secondary border-none">
-							<MdiCrop />
+						<!-- <a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${item.item_id}`} class="button-secondary border-none"> -->
+						<a href={`/${test_id}/papers/${student_no}/manual?item_id=${item.item_id}`} class="button-secondary border-none">
+							<MdiCrop/>
 						</a>
 					</span>
 				</Label>

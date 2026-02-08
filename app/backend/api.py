@@ -106,20 +106,36 @@ create_db_and_tables()
 
 from sqlmodel import Session as SQLModelSession
 with SQLModelSession(engine) as session:
-    # 1. Sections
+    # 1. Sections 
     for sec_name in ["3-Rizal", "3-Aguinaldo"]:
         if not session.exec(select(Section).where(Section.section_name == sec_name)).first():
             session.add(Section(section_name=sec_name))
     
-    # 2. Student (your ID from memory)
-    if not session.exec(select(Person).where(Person.student_no == 202160151)).first():
-        session.add(Person(
-            student_no=202160151,
-            name="Mohammad Hamdi S. Tuan",
-            section="3-Rizal"
-        ))
+    # 2. Students
+    students_data = [
+        # Section: 3-Rizal
+        {"student_no": 202160151, "name": "Mohammad Hamdi S. Tuan", "section": "3-Rizal"},
+        {"student_no": 202160152, "name": "Jose Ernesto Tomanan", "section": "3-Rizal"},
+        {"student_no": 202160153, "name": "Bong Revilla", "section": "3-Rizal"},
+        {"student_no": 202011111, "name": "Kean Baclaan", "section": "3-Rizal"},
+        
+        # Section: 3-Aguinaldo
+        {"student_no": 202160154, "name": "Ana Manalang", "section": "3-Aguinaldo"},
+        {"student_no": 202160155, "name": "Jose Rizal", "section": "3-Aguinaldo"},
+        {"student_no": 202160156 , "name": "Pedro Penduko", "section": "3-Aguinaldo"},
+    ]
     
-    # 3. Test Instances (sync with in-memory TEST_INSTANCES)
+    for student in students_data:
+        if not session.exec(
+            select(Person).where(Person.student_no == student["student_no"])
+        ).first():
+            session.add(Person(
+                student_no=student["student_no"],
+                name=student["name"],
+                section=student["section"]
+            ))
+    
+    # 3. Test Instances
     for inst in TEST_INSTANCES:
         if not session.exec(select(TestInstance).where(TestInstance.test_id == inst["test_id"])).first():
             session.add(TestInstance(
