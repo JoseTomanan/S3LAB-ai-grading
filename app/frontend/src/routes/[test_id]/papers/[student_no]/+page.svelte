@@ -1,8 +1,8 @@
 <script lang="ts">
-	const { routeParams } = $props();
+	const { data } = $props();
 
-	const test_id: string = routeParams.test_id;
-	const student_no: string = routeParams.student_no;
+	const test_id: string = data.test_id;
+	const student_no: string = data.student_no;
 
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from 'svelte';
