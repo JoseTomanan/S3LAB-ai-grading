@@ -108,7 +108,7 @@
 				</Label>
 				<div class="flex justify-center items-center">
 					{#if studentItem.image_directory == ""}
-						<MdiPaperOff class="h-12 w-full py-2 bg-muted text-muted-foreground border" />
+						<MdiPaperOff class="size-8 opacity-50" />
 					{:else}
 						<img class="size-fill max-h-[25vh]"
 									src={`${API_BASE_URL}${studentItem.image_directory}`}
