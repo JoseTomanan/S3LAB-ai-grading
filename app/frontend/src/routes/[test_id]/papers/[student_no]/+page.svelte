@@ -52,6 +52,8 @@
 								ai_evaluation: "",
 								is_done_rendering: false,
 							});
+
+			// TODO: add dual call here to the GetItems endpoint. it's the only way.
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
