@@ -1,19 +1,14 @@
 <script lang="ts">
-	// const { data } = $props();
-	
-	import { page } from '$app/stores';
-
-	// Get parameters from current route structure
-	const test_id = $page.params.test_id;
-	const student_no = $page.params.student_no;
+	const { data } = $props();
 
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from 'svelte';
+
 	import MdiPaperOff from '~icons/mdi/paper-off';
 	import MdiImagePlus from '~icons/mdi/image-plus';
 	import MdiCrop from '~icons/mdi/crop';
 
-	import type { StudentAnswer } from '$lib/index.ts';
+	import type { TestItem, StudentAnswer } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import ProcessImage from './ProcessImage.svelte';
@@ -21,88 +16,103 @@
 	let isPageLoading: boolean = $state(true);
 
 	let studentItems: (StudentAnswer & {label: string})[] = $state([]);
+	let testItems: TestItem[] = $state([]);
 
 	onMount(async () => {
 		try {
-			// const response = await fetch(
-			// 			`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}`,
 			const response = await fetch(
-						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}`,
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}`,
 						{
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},
 						}
 					);
 			
-			// FIXME: there's an error here. 1 executes but 2 doesn't. Must be a backend thing.
-		//	console.log("--> umabot dito 1");
-		// 	const result = await response.json();
-		// 	console.log("--> umabot dito 2");
-
-		// 	if (!(response.ok))
-		// 		alert(`${response.status} ${response.statusText}`);
-		// 	else
-		// 		studentItems = result.answers;
-		// } catch(e) {
-		// 	alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
-		// } finally {
-		// 	isPageLoading = false;
-		// }
-			console.log("--> umabot dito 1");
-			
-			if (response.status === 204) {
-				// No answers found - handle empty case
-				console.log("--> umabot dito 2 (204: No Content)");
-				studentItems = [];
-			} else if (response.ok) {
-				// Answers exist - parse JSON
-				const result = await response.json();
-				console.log("--> umabot dito 2 (200: OK)");
-				studentItems = result.answers;
-			} else {
-				// Error case
-				alert(`${response.status} ${response.statusText}`);
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					studentItems = result.answers;
+					break;
+				case 204:
+					console.log("--> 204");
+					studentItems = [];
+					break;
+				default:
+					alert(`CALL 1: ${response.status} ${response.statusText}`);
 			}
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
-		} finally {
-			isPageLoading = false;
 		}
+
+		try {
+			const response = await fetch(
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+					);
+
+			switch (response.status) {
+				case 200:
+				case 204:
+					const result = await response.json();
+					testItems = result.items;
+					for (const testItem of testItems)
+						if (!studentItems.find(si => si.item_id === testItem.item_id))
+							studentItems.push({
+										answer_id: 0,
+										item_id: testItem.item_id,
+										label: testItem.label,
+										student_no: data.student_no,
+										image_directory: "",
+										ai_evaluation: "",
+										is_done_rendering: false,
+										});
+					break;
+				default:
+					alert(`CALL 2: ${response.status} ${response.statusText}`);
+			}
+		} catch (e) {
+			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+		}
+
+		isPageLoading = false;
 	});
 </script>
 
 
 <div class="flex flex-col gap-4 overflow-auto">
-	<!-- <h2 class="font-semibold">For student {data.student_no}:</h2> -->
-	<h2 class="font-semibold">For student {student_no}:</h2>
+	<h2 class="font-semibold">For student {data.student_no}:</h2>
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if studentItems.length == 0}
 		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
-		{#each studentItems as item}
+		{#each studentItems as studentItem}
 			<div class="card space-y-1">
-				<Label for={item.label} class="flex flex-row justify-between">
-					{item.label}
+				<Label for={studentItem.label} class="flex flex-row justify-between">
+					{studentItem.label}
 					<span class="flex flex-row space-x-1">
 						<Dialog.Root>
 							<Dialog.Trigger class="button-secondary border-none">
 								<MdiImagePlus />
 							</Dialog.Trigger>
-							<!-- <ProcessImage test_id={data.test_id} student_no={data.student_no} studentItem={item}/> -->
-							<ProcessImage test_id={test_id} student_no={student_no} studentItem={item}/>
+							<ProcessImage test_id={data.test_id} student_no={data.student_no} {studentItem}/>
 						</Dialog.Root>
-						<!-- <a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${item.item_id}`} class="button-secondary border-none"> -->
-						<a href={`/${test_id}/papers/${student_no}/manual?item_id=${item.item_id}`} class="button-secondary border-none">
+						<a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
+									class="button-secondary border-none">
 							<MdiCrop/>
 						</a>
 					</span>
 				</Label>
 				<div class="flex justify-center items-center">
-					{#if item.image_directory == ""}
-						<MdiPaperOff class="h-12 w-full py-2 bg-muted text-muted-foreground border" />
+					{#if studentItem.image_directory == ""}
+						<MdiPaperOff class="size-8 opacity-50" />
 					{:else}
-						<img src={item.image_directory} class="size-fill max-h-[25vh]" alt={item.label}/>
+						<img class="size-fill max-h-[25vh]"
+									src={`${API_BASE_URL}${studentItem.image_directory}`}
+									alt={studentItem.label}/>
 					{/if}
 				</div>
 			</div>

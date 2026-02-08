@@ -7,7 +7,7 @@
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 	import MdiGoogleClassroom from '~icons/mdi/google-classroom';
 	
-	import type { TestInstance } from '$lib/types/types.ts';
+	import type { TestInstance } from '$lib/index.ts';
 	
 	import Pagination from '$lib/components/Pagination.svelte';
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
@@ -27,8 +27,14 @@
 				}
 			);
 
-			const data = await response.json();
-			instances = data.instances;
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					instances = result.instances;
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch (e) {
 			alert("Failed to fetch instances:\n"+e);
 		} finally {

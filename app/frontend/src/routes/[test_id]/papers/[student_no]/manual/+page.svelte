@@ -18,6 +18,8 @@
 	let canvasFile: FileList | undefined = $state();
 	let canvasImageUrl: string | null = $state(null);
 
+	let responseImage: string = $state("");
+
 	function handleFileUpload(e: Event) {
 		const target = e.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -34,11 +36,11 @@
 
 		const canvasRectangle: {x: number, y: number, width: number, height: number} = canvasCropper!.getData();
 		const returnablePoints: {x: number, y: number}[] = [
-				{ x: canvasRectangle.x, y: canvasRectangle.y },																								// Top-Left
-				{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y },													// Top-Right
-				{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y+canvasRectangle.height },	// Bottom-Right
-				{ x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }													// Bottom-Left
-				];
+					{ x: canvasRectangle.x, y: canvasRectangle.y },
+					{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y },
+					{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y+canvasRectangle.height },
+					{ x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }
+					];
 
 		const formData: FormData = new FormData();
 		formData.append('file', canvasFile![0]);
@@ -51,23 +53,22 @@
 					};
 		formData.append('points', JSON.stringify(formMetadata));
 
-		console.log(JSON.stringify(formMetadata));
-
 		try {
 			const response = await fetch(
 						`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}/${item_id}`,
 						{ method: "PATCH", body: formData, }
 						);
 
-			const result = await response.json();
-			canvasImageUrl = result.image_directory;
-
-			if (response.ok) {
-				alert("Addition successful.");
-				window.location.reload();
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					responseImage = result.image_directory;
+					canvasImageUrl = null;
+					alert("Addition successful.");
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
 			}
-			else
-				alert(`${response.status} ${response.statusText}`);
 		} catch(e) {
 			alert("Failed to finish, check your network connection and try again.\n"+e);
 		} finally {
@@ -97,9 +98,13 @@
 					src={canvasImageUrl}
 					cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
 					/>
+	{:else if responseImage != ""}
+		<img class="border"
+					src={API_BASE_URL+responseImage} alt="Test item"/>
 	{:else}
-		<span class="py-4 border bg-muted text-muted-foreground">
+		<span class="py-4 border bg-muted text-muted-foreground flex flex-col items-center">
 			<MdiUpload class="h-8 w-full"/>
+			<p>Upload an image to start cropping.</p>
 		</span>
 	{/if}
 	{#if isOperationOngoing}
