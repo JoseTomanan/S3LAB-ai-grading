@@ -63,7 +63,7 @@ TEST_INSTANCES = [
         "test_id": "3-Aguinaldo_Quiz-2",
         "is_done_rendering": True
     }
-]
+    ]
 
 # Use a set for O(1) lookup
 VALID_TEST_IDS = {inst["test_id"] for inst in TEST_INSTANCES}
@@ -95,7 +95,7 @@ test_items_db = {
             "expected_answer_rubric_questions": "Correct formula (2pts), substitution (1pt), calculation (1pt), units (1pt)"
         }
     ]
-}
+    }
 
 
 # ==============================
@@ -121,7 +121,7 @@ with SQLModelSession(engine) as session:
         {"student_no": 202160154, "name": "Ana Manalang", "section": "3-Aguinaldo"},
         {"student_no": 202160155, "name": "Jose Rizal", "section": "3-Aguinaldo"},
         {"student_no": 202160156, "name": "Pedro Penduko", "section": "3-Aguinaldo"},
-    ]
+        ]
     
     for student in students_data:
         if not session.exec(
@@ -131,7 +131,7 @@ with SQLModelSession(engine) as session:
                 student_no=student["student_no"],
                 name=student["name"],
                 section=student["section"]
-            ))
+                ))
     
     # 3. Test Instances
     for inst in TEST_INSTANCES:
@@ -142,7 +142,7 @@ with SQLModelSession(engine) as session:
                 section=inst["section"],
                 date=inst["date"],
                 is_done_rendering=inst["is_done_rendering"]
-            ))
+                ))
     
     # 4. Test Items (sync with in-memory test_items_db)
     for test_id, items in test_items_db.items():
@@ -158,7 +158,7 @@ with SQLModelSession(engine) as session:
                     is_problem_solving=item["is_problem_solving"],
                     expected_answer_rubric_questions=item["expected_answer_rubric_questions"],
                     label=item["label"]
-                ))
+                    ))
     session.commit()
 
 
