@@ -18,6 +18,8 @@
 	let canvasFile: FileList | undefined = $state();
 	let canvasImageUrl: string | null = $state(null);
 
+	let responseImage: string = $state("");
+
 	function handleFileUpload(e: Event) {
 		const target = e.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -60,9 +62,9 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					canvasImageUrl = result.image_directory;
+					responseImage = result.image_directory;
+					canvasImageUrl = null;
 					alert("Addition successful.");
-					// window.location.reload();
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
@@ -96,9 +98,13 @@
 					src={canvasImageUrl}
 					cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
 					/>
+	{:else if responseImage != ""}
+		<img class="border"
+					src={API_BASE_URL+responseImage} alt="Test item"/>
 	{:else}
-		<span class="py-4 border bg-muted text-muted-foreground">
+		<span class="py-4 border bg-muted text-muted-foreground flex flex-col items-center">
 			<MdiUpload class="h-8 w-full"/>
+			<p>Upload an image to start cropping.</p>
 		</span>
 	{/if}
 	{#if isOperationOngoing}
