@@ -48,7 +48,7 @@
 								item_id: i,
 								label: i.toString(),
 								student_no: data.student_no,
-								image_directory: i==2 ? "https://www.math-only-math.com/images/partial-fraction.jpg" : "",
+								image_directory: "",
 								ai_evaluation: "",
 								is_done_rendering: false,
 							});
