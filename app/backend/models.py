@@ -33,7 +33,7 @@ class TestItem(SQLModel, table=True):
     # Composite primary key: (item_id, test_id)
     item_id: int = Field(primary_key=True, index=True)
     test_id: str = Field(
-        primary_key=True,  # ← Add this!
+        primary_key=True, 
         foreign_key="test_instance.test_id",
         index=True
     )
