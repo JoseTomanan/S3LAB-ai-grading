@@ -8,7 +8,7 @@
 	import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
 
 	let isPageLoading: boolean = $state(true);
-	let perStudentStatuses: {student_no: string, is_done_rendering: boolean}[] = $state([]);
+	let perStudentStatuses: {student_no: string, name: string, is_done_rendering: boolean}[] = $state([]);
 
 	onMount(async () => {
 		try {
@@ -44,8 +44,7 @@
 		{#each perStudentStatuses as status}
 			<a href={`/${data.test_id}/papers/${status.student_no}`}
 						class="card flex flex-row items-center justify-between">
-				<h3>{status.student_no}</h3>
-				<!-- TODO: make this status.name once response body is fixed -->
+				<h3>{status.name}</h3>
 				{#if status.is_done_rendering}
 					<MdiPaperEditOutline class="size-6"/>
 				{:else}
