@@ -20,12 +20,14 @@
 						}
 					);
 
-			const result = await response.json();
-
-			if (!response.ok)
-				alert(`${response.status} ${response.statusText}`);
-			else
-				perStudentStatuses = result.statuses;
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					perStudentStatuses = result.statuses;
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {

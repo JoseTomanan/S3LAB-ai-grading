@@ -59,15 +59,16 @@
 						{ method: "PATCH", body: formData, }
 						);
 
-			const result = await response.json();
-			canvasImageUrl = result.image_directory;
-
-			if (response.ok) {
-				alert("Addition successful.");
-				window.location.reload();
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					canvasImageUrl = result.image_directory;
+					alert("Addition successful.");
+					// window.location.reload();
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
 			}
-			else
-				alert(`${response.status} ${response.statusText}`);
 		} catch(e) {
 			alert("Failed to finish, check your network connection and try again.\n"+e);
 		} finally {

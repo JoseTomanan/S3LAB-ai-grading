@@ -1,11 +1,9 @@
 <script lang="ts">
 	const { data } = $props();
 
-	const test_id: string = data.test_id;
-	const student_no: string = data.student_no;
-
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from 'svelte';
+
 	import MdiPaperOff from '~icons/mdi/paper-off';
 	import MdiImagePlus from '~icons/mdi/image-plus';
 	import MdiCrop from '~icons/mdi/crop';
@@ -22,22 +20,24 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}`,
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}`,
 						{
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},
 						}
 					);
 			
-			console.log("--> umabot dito 1");
-			
-			if (response.status === 204) {
-				studentItems = [];
-			} else if (response.ok) {
-				const result = await response.json();
-				studentItems = result.answers;
-			} else
-				alert(`${response.status} ${response.statusText}`);
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					studentItems = result.answers;
+					break;
+				case 204:
+					studentItems = [];
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
@@ -48,7 +48,7 @@
 
 
 <div class="flex flex-col gap-4 overflow-auto">
-	<h2 class="font-semibold">For student {student_no}:</h2>
+	<h2 class="font-semibold">For student {data.student_no}:</h2>
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if studentItems.length == 0}
@@ -63,9 +63,10 @@
 							<Dialog.Trigger class="button-secondary border-none">
 								<MdiImagePlus />
 							</Dialog.Trigger>
-							<ProcessImage {test_id} {student_no} {studentItem}/>
+							<ProcessImage test_id={data.test_id} student_no={data.student_no} {studentItem}/>
 						</Dialog.Root>
-						<a href={`/${test_id}/papers/${student_no}/manual?item_id=${studentItem.item_id}`} class="button-secondary border-none">
+						<a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
+									class="button-secondary border-none">
 							<MdiCrop/>
 						</a>
 					</span>
