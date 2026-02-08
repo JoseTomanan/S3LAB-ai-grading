@@ -2,31 +2,27 @@ from fastapi import FastAPI, HTTPException, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional
+
 import uuid
 import os
+
 from pathlib import Path
+
 import json
 import numpy as np
 import cv2
+
 from models import TestInstance, TestItem, Person, Section, TestPaperInstance
-from schemas import (
-    TestItemSummary,
-    TestItemsResponse,
-    NewTestItemRequest,
-    NewTestItemResponse,
-    UpdateTestItemRequest,
-    FullTestItemResponse,
-    NewTestInstanceRequest,
-    UpdateTestInstanceRequest,
-    TestInstanceResponse,
-)
+from schemas import *
 from database import create_db_and_tables, engine, get_direct_session
 from fastapi import File, UploadFile, Form
 from image_preprocessor import CVImagePreprocessor, CVProcessingError
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlmodel import select
+
 import io
 import pandas as pd
+
 
 # ==============================
 # Static Test Data (Temporary – Replace with DB Later)
@@ -92,7 +88,7 @@ test_items_db = {
     ],
     "3-Aguinaldo_Quiz-2": [
         {
-            "item_id": 1,
+            "item_id": 3,
             "label": "Problem 1",
             "question": "Calculate the area of a circle with radius 7cm",
             "is_problem_solving": True,
@@ -100,6 +96,7 @@ test_items_db = {
         }
     ]
 }
+
 
 # ==============================
 # Database Seeding (REMOVE AFTER TESTING)
@@ -164,6 +161,7 @@ with SQLModelSession(engine) as session:
                 ))
     session.commit()
 
+
 # ==============================
 # App Setup
 # ==============================
@@ -180,6 +178,7 @@ app.add_middleware(
 # Temporary directory for processed images
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
+
 
 # ==============================
 # Helper Functions
@@ -203,10 +202,10 @@ def get_test_items_summary(test_id: str):
     finally:
         session.close()
 
+
 # ==============================
 # Test Instances Endpoints
 # ==============================
-
 @app.get("/api/test_instances")
 def get_test_instances():
     """Get all test instances"""
