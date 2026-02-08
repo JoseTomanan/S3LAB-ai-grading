@@ -1,8 +1,6 @@
 # schemas.py
 from pydantic import BaseModel, Field
 from typing import List, Optional
-
-
 # ==============================
 # Test Item Schemas
 # ==============================
@@ -58,10 +56,15 @@ class NewTestInstanceRequest(BaseModel):
     section: str
     date: str
 
+class UpdateTestItemSchema(BaseModel):
+    """Schema for updating test items within a test instance"""
+    question: str = Field(..., min_length=1)
+    is_problem_solving: bool
 
 class UpdateTestInstanceRequest(BaseModel):
+    """Request body for PATCH /api/test_instances/{test_id}"""
     date: Optional[str] = Field(None, min_length=1)
-
+    items: Optional[List[UpdateTestItemSchema]] = None
 
 class TestInstanceResponse(BaseModel):
     """

@@ -307,6 +307,7 @@ def add_test_instance(request: NewTestInstanceRequest):
         "items": summary_items
     }
 
+
 @app.patch(
     "/api/test_instances/{test_id}",
     status_code=status.HTTP_200_OK,
@@ -317,38 +318,65 @@ def add_test_instance(request: NewTestInstanceRequest):
 )
 def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
     """
-    Edit test instance details.
-    Now supports updating date and items (fulfills contract requirement).
+    Edit test instance details including date and items array.
+    FULFILLS CONTRACT: Supports updating both date and items.
+    
+    Items update behavior:
+    - If items array is provided, it REPLACES all existing items for this test
+    - Each item must have question and is_problem_solving fields
+    - Item IDs are auto-assigned sequentially starting from 1
+    - label field defaults to "Item {item_id}" if not specified in database
     """
+    # Validate test_id format
     if not test_id or len(test_id) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid test_id format"
         )
     
+    # Check if test instance exists
     if test_id not in VALID_TEST_IDS:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Test instance with ID '{test_id}' not found"
         )
     
-    # Update date if provided
-    if update.date is not None:
-        for inst in TEST_INSTANCES:
-            if inst["test_id"] == test_id:
-                inst["date"] = update.date
-                break
-    
-    # Update items if provided in request body
-    # Note: This requires modifying the UpdateTestInstanceRequest schema
-    # to include an optional items field
-    
     session = get_direct_session()
     try:
-        # Get updated instance
+        # Update date if provided
+        if update.date is not None:
+            for inst in TEST_INSTANCES:
+                if inst["test_id"] == test_id:
+                    inst["date"] = update.date
+                    break
+        
+        # Update items if provided
+        if update.items is not None:
+            # Delete all existing items for this test
+            existing_items = session.exec(
+                select(TestItem).where(TestItem.test_id == test_id)
+            ).all()
+            for item in existing_items:
+                session.delete(item)
+            
+            # Create new items from the request
+            for idx, item_data in enumerate(update.items, start=1):
+                new_item = TestItem(
+                    item_id=idx,
+                    test_id=test_id,
+                    question=item_data.question,
+                    is_problem_solving=item_data.is_problem_solving,
+                    expected_answer_rubric_questions="",  # Empty for now, can be updated later
+                    label=f"Item {idx}"  # Default label
+                )
+                session.add(new_item)
+            
+            session.commit()
+        
+        # Get updated instance from in-memory storage
         target_instance = next((inst for inst in TEST_INSTANCES if inst["test_id"] == test_id), None)
         
-        # Get items from database
+        # Get items from database for response
         items = session.exec(
             select(TestItem).where(TestItem.test_id == test_id)
         ).all()
@@ -362,6 +390,8 @@ def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
         ]
         
         assert target_instance is not None
+        
+        # Return full response with items array (fulfills contract)
         return {
             "name": target_instance["name"],
             "section": target_instance["section"],
@@ -370,6 +400,7 @@ def edit_test_instance(test_id: str, update: UpdateTestInstanceRequest):
             "is_done_rendering": target_instance["is_done_rendering"],
             "items": summary_items
         }
+    
     finally:
         session.close()
 
