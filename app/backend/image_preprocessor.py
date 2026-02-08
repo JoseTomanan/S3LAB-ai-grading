@@ -1,7 +1,3 @@
-"""
-Computer Vision Image preprocessing pipeline for student assessment images.
-Now supports multi-box detection (top 3).
-"""
 import cv2
 import numpy as np
 import math
