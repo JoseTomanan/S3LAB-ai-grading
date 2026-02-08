@@ -34,11 +34,11 @@
 
 		const canvasRectangle: {x: number, y: number, width: number, height: number} = canvasCropper!.getData();
 		const returnablePoints: {x: number, y: number}[] = [
-				{ x: canvasRectangle.x, y: canvasRectangle.y },																								// Top-Left
-				{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y },													// Top-Right
-				{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y+canvasRectangle.height },	// Bottom-Right
-				{ x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }													// Bottom-Left
-				];
+					{ x: canvasRectangle.x, y: canvasRectangle.y },
+					{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y },
+					{ x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y+canvasRectangle.height },
+					{ x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }
+					];
 
 		const formData: FormData = new FormData();
 		formData.append('file', canvasFile![0]);
@@ -50,8 +50,6 @@
 					ll: { x: returnablePoints[3].x.toString(), y: returnablePoints[3].y.toString() },
 					};
 		formData.append('points', JSON.stringify(formMetadata));
-
-		console.log(JSON.stringify(formMetadata));
 
 		try {
 			const response = await fetch(
