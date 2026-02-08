@@ -1,25 +1,18 @@
-# models.py
 from sqlmodel import SQLModel, Field
 from typing import Optional
 
 
 class Section(SQLModel, table=True):
-    __tablename__ = "section"
-    
     section_name: str = Field(primary_key=True)
 
 
 class Person(SQLModel, table=True):
-    __tablename__ = "person"
-    
     student_no: int = Field(primary_key=True, index=True)
     name: str
     section: str = Field(foreign_key="section.section_name")
 
 
 class TestInstance(SQLModel, table=True):
-    __tablename__ = "test_instance"
-    
     test_id: str = Field(primary_key=True)
     name: str
     section: str
@@ -28,13 +21,11 @@ class TestInstance(SQLModel, table=True):
 
 
 class TestItem(SQLModel, table=True):
-    __tablename__ = "test_item"
-    
     # Composite primary key: (item_id, test_id)
     item_id: int = Field(primary_key=True, index=True)
     test_id: str = Field(
         primary_key=True,  # ← Add this!
-        foreign_key="test_instance.test_id",
+        foreign_key="testinstance.test_id",
         index=True
     )
     
@@ -45,7 +36,5 @@ class TestItem(SQLModel, table=True):
 
 
 class TestPaperInstance(SQLModel, table=True):
-    __tablename__ = "test_paper_instance"
-    
     id: str = Field(primary_key=True)
     student_no: str = Field(foreign_key="person.student_no")
