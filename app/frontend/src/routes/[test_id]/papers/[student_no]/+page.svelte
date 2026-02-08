@@ -8,7 +8,7 @@
 	import MdiImagePlus from '~icons/mdi/image-plus';
 	import MdiCrop from '~icons/mdi/crop';
 
-	import type { StudentAnswer } from '$lib/index.ts';
+	import type { TestItem, StudentAnswer } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import ProcessImage from './ProcessImage.svelte';
@@ -16,6 +16,7 @@
 	let isPageLoading: boolean = $state(true);
 
 	let studentItems: (StudentAnswer & {label: string})[] = $state([]);
+	let testItems: TestItem[] = $state([]);
 
 	onMount(async () => {
 		try {
@@ -37,28 +38,46 @@
 					studentItems = [];
 					break;
 				default:
-					alert(`${response.status} ${response.statusText}`);
+					alert(`CALL 1: ${response.status} ${response.statusText}`);
 			}
-
-			// TODO: remove once backend code is fixed
-			if (studentItems.length == 0)
-				for (let i: number = 1; i < 5; i++)
-					studentItems.push({
-								answer_id: i,
-								item_id: i,
-								label: i.toString(),
-								student_no: data.student_no,
-								image_directory: "",
-								ai_evaluation: "",
-								is_done_rendering: false,
-							});
-
-			// TODO: add dual call here to the GetItems endpoint. it's the only way.
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
-		} finally {
-			isPageLoading = false;
 		}
+
+		try {
+			const response = await fetch(
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+					);
+
+			switch (response.status) {
+				case 200:
+				case 204:
+					const result = await response.json();
+					testItems = result.items;
+					for (const testItem of testItems)
+						if (!studentItems.find(si => si.item_id === testItem.item_id))
+							studentItems.push({
+										answer_id: 0,
+										item_id: testItem.item_id,
+										label: testItem.label,
+										student_no: data.student_no,
+										image_directory: "",
+										ai_evaluation: "",
+										is_done_rendering: false,
+										});
+					break;
+				default:
+					alert(`CALL 2: ${response.status} ${response.statusText}`);
+			}
+		} catch (e) {
+			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+		}
+
+		isPageLoading = false;
 	});
 </script>
 
