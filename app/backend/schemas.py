@@ -20,7 +20,8 @@ class TestItemsResponse(BaseModel):
 
 class NewTestItemRequest(BaseModel):
     """Request body for POST /items"""
-    item_id: str = Field(..., min_length=1)
+    item_id: int = Field(..., gt=0)  # Changed from str to int
+    label: str = Field(..., min_length=1)  # ADDED: label field
     question: str = Field(..., min_length=1)
     is_problem_solving: bool
     expected_answer_rubric_questions: str = Field(..., min_length=1)
@@ -33,6 +34,7 @@ class NewTestItemResponse(BaseModel):
 
 class UpdateTestItemRequest(BaseModel):
     """Request body for PATCH endpoint (partial updates)"""
+    label: Optional[str] = Field(None, min_length=1)  # ADDED: label field
     question: Optional[str] = Field(None, min_length=1)
     is_problem_solving: Optional[bool] = None
     expected_answer_rubric_questions: Optional[str] = Field(None, min_length=1)
@@ -40,7 +42,8 @@ class UpdateTestItemRequest(BaseModel):
 
 class FullTestItemResponse(BaseModel):
     """Full item representation for PATCH response"""
-    item_id: str
+    item_id: int  # Changed from str to int
+    label: str  # ADDED: label field
     question: str
     is_problem_solving: bool
     expected_answer_rubric_questions: str
