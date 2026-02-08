@@ -33,11 +33,25 @@
 					studentItems = result.answers;
 					break;
 				case 204:
+					console.log("--> 204");
 					studentItems = [];
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
 			}
+
+			// TODO: remove once backend code is fixed
+			if (studentItems.length == 0)
+				for (let i: number = 1; i < 5; i++)
+					studentItems.push({
+								answer_id: i,
+								item_id: i,
+								label: i.toString(),
+								student_no: data.student_no,
+								image_directory: i==2 ? "https://www.math-only-math.com/images/partial-fraction.jpg" : "",
+								ai_evaluation: "",
+								is_done_rendering: false,
+							});
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		} finally {
@@ -75,7 +89,9 @@
 					{#if studentItem.image_directory == ""}
 						<MdiPaperOff class="h-12 w-full py-2 bg-muted text-muted-foreground border" />
 					{:else}
-						<img src={studentItem.image_directory} class="size-fill max-h-[25vh]" alt={studentItem.label}/>
+						<img class="size-fill max-h-[25vh]"
+									src={`${API_BASE_URL}${studentItem.image_directory}`}
+									alt={studentItem.label}/>
 					{/if}
 				</div>
 			</div>
