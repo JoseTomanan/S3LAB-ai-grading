@@ -1,159 +1,481 @@
 import cv2
 import numpy as np
 import math
-from typing import List, Tuple
+import logging
+from typing import List, Tuple, Optional
+from pathlib import Path
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class CVProcessingError(Exception):
     """Custom exception for CV processing failures"""
     pass
 
-def mapp(h):
-    """Map corner points to consistent order (TL, TR, BR, BL)"""
-    h = h.reshape((4, 2))
-    hnew = np.zeros((4, 2), dtype=np.float32)
-    add = h.sum(1)
-    hnew[0] = h[np.argmin(add)]
-    hnew[2] = h[np.argmax(add)]
-    diff = np.diff(h, axis=1)
-    hnew[1] = h[np.argmin(diff)]
-    hnew[3] = h[np.argmax(diff)]
-    return hnew
-
-def get_robust_aspect_ratio(coords):
-    """Calculate aspect ratio robustly for skewed quadrilaterals"""
-    pts = np.array(coords)
-    center = np.mean(pts, axis=0)
-    angles = np.arctan2(pts[:, 1] - center[1], pts[:, 0] - center[0])
-    pts = pts[np.argsort(angles)]
-    
-    side_a1 = pts[1] - pts[0]
-    side_a2 = pts[3] - pts[2]
-    side_b1 = pts[2] - pts[1]
-    side_b2 = pts[0] - pts[3]
-    
-    w = (np.linalg.norm(side_a1) + np.linalg.norm(side_a2)) / 2
-    h = (np.linalg.norm(side_b1) + np.linalg.norm(side_b2)) / 2
-    return max(w, h) / min(w, h)
-
-def is_valid_box(approx, image_area: float, min_area_ratio: float = 0.005) -> bool:
-    """Filter out degenerate or too-small boxes"""
-    if len(approx) != 4:
-        return False
-    area = cv2.contourArea(approx)
-    if area < min_area_ratio * image_area:
-        return False
-    # Optional: check aspect ratio isn't extreme
-    try:
-        ratio = get_robust_aspect_ratio(approx.reshape(4, 2))
-        if ratio > 10:  # e.g., very long thin shape
-            return False
-    except:
-        return False
-    return True
-
-def find_top_boxes(image: cv2.typing.MatLike, top_k: int = 5) -> List[cv2.typing.MatLike]:
-    """
-    Detect up to `top_k` document-like quadrilateral regions.
-    Returns list of warped (perspective-corrected) images.
-    """
-    orig = image.copy()
-    image_h, image_w = image.shape[:2]
-    image_area = image_h * image_w
-    
-    # Resize for performance (maintain aspect ratio)
-    scale = 800 / max(image_h, image_w)
-    new_w, new_h = int(image_w * scale), int(image_h * scale)
-    resized = cv2.resize(image, (new_w, new_h))
-    orig_resized = resized.copy()
-
-    # Preprocessing
-    gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-    
-    # Remove horizontal lines (e.g., ruled paper)
-    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (400, 1))
-    detected_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
-    gray_no_lines = cv2.subtract(gray, detected_lines)
-    
-    # Edge detection
-    blurred = cv2.GaussianBlur(gray_no_lines, (5, 5), 0)
-    edged = cv2.Canny(blurred, 30, 50)
-    
-    # Find contours
-    contours, _ = cv2.findContours(edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    
-    valid_boxes = []
-    print(f"Found {len(contours)} contours. Looking for up to {top_k} valid boxes...")
-    for c in contours:
-        if len(valid_boxes) >= top_k:
-            break
-        p = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.02 * p, True)
-        
-        if is_valid_box(approx, image_area):
-            print(f"Accepted box #{len(valid_boxes) + 1}, area: {cv2.contourArea(approx):.0f}")
-            # Map corners
-            approx_mapped = mapp(approx)
-            
-            # Compute output size
-            box_ratio = math.sqrt(get_robust_aspect_ratio(approx_mapped))
-            box_length = int(new_h * math.sqrt(box_ratio))
-            pts_dst = np.float32([[0, 0], [box_length, 0], [box_length, new_h], [0, new_h]])
-            
-            # Perspective transform on ORIGINAL RESIZED image
-            M = cv2.getPerspectiveTransform(approx_mapped.astype(np.float32), pts_dst)
-            warped = cv2.warpPerspective(orig_resized, M, (int(new_h * box_ratio), new_h))
-            valid_boxes.append(warped)
-    
-    if not valid_boxes:
-        # Fallback: return full image as single "box"
-        print("WARNING: No valid boxes found. Returning full image as fallback.")
-        return [orig]
-    
-    return valid_boxes
 
 class CVImagePreprocessor:
-    """Production-ready image preprocessor supporting multi-box extraction."""
+    """
+    Image preprocessor for student assessment answer box detection.
+    Implements the contract required by api.py endpoints.
+    """
     
     SUPPORTED_FORMATS = {'.jpg', '.jpeg', '.png'}
+    DEFAULT_OUTPUT_HEIGHT = 800  # Standard height for processed answer boxes
     
-    def load_image_from_bytes(self, image_bytes: bytes) -> cv2.typing.MatLike:
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if image is None:
-            raise CVProcessingError("Failed to decode image bytes")
-        return image
+    def __init__(self):
+        """Initialize preprocessor with default parameters"""
+        pass
     
-    def encode_to_bytes(self, image: cv2.typing.MatLike) -> bytes:
-        success, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        if not success:
-            raise CVProcessingError("Failed to encode processed image")
-        return buffer.tobytes()
-    
-    def brighten(self, image: cv2.typing.MatLike, amount: float = 0.2) -> cv2.typing.MatLike:
-        return cv2.convertScaleAbs(image, alpha=1.0, beta=amount * 255)
-    
-    def adjust_contrast(self, image: cv2.typing.MatLike, amount: float = 1.2) -> cv2.typing.MatLike:
-        return cv2.convertScaleAbs(image, alpha=amount, beta=128 * (1 - amount))
-    
-    def process_assessment_image(self, image_bytes: bytes) -> List[bytes]:
-        """
-        Process image and return **up to 3 candidate cropped regions** as JPEG bytes.
-        If no boxes found, returns [full_image_processed].
-        """
-        image = self.load_image_from_bytes(image_bytes)
-        boxes = find_top_boxes(image, top_k=5)
-        
-        processed_list = []
-        for box in boxes:
-            brightened = self.brighten(box, amount=0.2)
-            contrasted = self.adjust_contrast(brightened, amount=1.2)
-            processed_bytes = self.encode_to_bytes(contrasted)
-            processed_list.append(processed_bytes)
-        
-        return processed_list  # List of 1–3 JPEG byte blobs
+    # ==============================
+    # Core API Methods
+    # ==============================
     
     @staticmethod
     def validate_file_extension(filename: str) -> bool:
-        ext = filename.lower().split('.')[-1]
-        return f".{ext}" in CVImagePreprocessor.SUPPORTED_FORMATS
+        """
+        Validate that file has supported extension.
+        
+        Args:
+            filename: Name of uploaded file
+            
+        Returns:
+            True if extension is supported, False otherwise
+        """
+        if not filename:
+            return False
+        ext = Path(filename).suffix.lower()
+        return ext in CVImagePreprocessor.SUPPORTED_FORMATS
+    
+    def process_assessment_image(self, image_bytes: bytes) -> List[bytes]:
+        """
+        Process raw assessment image and extract answer box regions.
+        
+        API CONTRACT:
+        - Input: raw image bytes (from await file.read())
+        - Output: List[bytes] where each element is a JPEG byte array
+        - Must detect answer boxes and return each as separate processed image
+        - Returns up to 3 candidate regions for manual selection
+        
+        Args:
+            image_bytes: Raw bytes of uploaded image
+            
+        Returns:
+            List of JPEG-encoded byte arrays, one per detected answer box
+            (Returns at least 1 box - full image if no boxes detected)
+            
+        Raises:
+            CVProcessingError: If image processing fails
+        """
+        try:
+            # Load image from bytes
+            image = self._load_image_from_bytes(image_bytes)
+            logger.info(f"Loaded image with shape: {image.shape}")
+            
+            # Detect answer box candidates
+            candidate_boxes = self._detect_answer_box_candidates(image)
+            logger.info(f"Detected {len(candidate_boxes)} candidate answer boxes")
+            
+            # Process each box (brighten, contrast, encode)
+            processed_bytes_list = []
+            for i, box_image in enumerate(candidate_boxes):
+                try:
+                    # Apply enhancements
+                    enhanced = self.brighten(box_image, amount=0.2)
+                    enhanced = self.adjust_contrast(enhanced, amount=1.2)
+                    
+                    # Encode to JPEG bytes
+                    img_bytes = self._encode_to_bytes(enhanced)
+                    processed_bytes_list.append(img_bytes)
+                    
+                    logger.debug(f"Processed box #{i}: {len(img_bytes)} bytes")
+                except Exception as e:
+                    logger.warning(f"Failed to process box #{i}: {e}")
+                    continue
+            
+            # Fallback: if no boxes detected, return full image
+            if not processed_bytes_list:
+                logger.warning("No valid answer boxes detected. Returning full image as fallback.")
+                full_processed = self.brighten(image, amount=0.2)
+                full_processed = self.adjust_contrast(full_processed, amount=1.2)
+                processed_bytes_list.append(self._encode_to_bytes(full_processed))
+            
+            # Limit to 3 boxes max
+            return processed_bytes_list[:3]
+            
+        except CVProcessingError:
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error in process_assessment_image: {e}", exc_info=True)
+            raise CVProcessingError(f"Image processing failed: {str(e)}")
+    
+    def brighten(self, image: np.ndarray, amount: float = 0.2) -> np.ndarray:
+        """
+        Increase image brightness.
+        
+        Args:
+            image: Input image (BGR format)
+            amount: Brightness increase factor (0.0 to 1.0)
+            
+        Returns:
+            Brightened image
+        """
+        if not 0 <= amount <= 1:
+            amount = max(0, min(1, amount))
+        
+        beta = amount * 255
+        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
+    
+    def adjust_contrast(self, image: np.ndarray, amount: float = 1.2) -> np.ndarray:
+        """
+        Adjust image contrast.
+        
+        Args:
+            image: Input image (BGR format)
+            amount: Contrast multiplier (1.0 = no change, >1.0 = increase)
+            
+        Returns:
+            Contrast-adjusted image
+        """
+        if amount < 0.1:
+            amount = 0.1
+        
+        # Calculate beta to maintain brightness balance
+        beta = 128 * (1 - amount)
+        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
+    
+    # ==============================
+    # Internal Processing Methods
+    # ==============================
+    
+    def _load_image_from_bytes(self, image_bytes: bytes) -> np.ndarray:
+        """
+        Convert bytes to OpenCV image.
+        
+        Args:
+            image_bytes: Raw image bytes
+            
+        Returns:
+            OpenCV image (BGR format)
+            
+        Raises:
+            CVProcessingError: If decoding fails
+        """
+        if not image_bytes or len(image_bytes) == 0:
+            raise CVProcessingError("Empty image bytes provided")
+        
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        if image is None:
+            raise CVProcessingError("Failed to decode image bytes - invalid format")
+        
+        if len(image.shape) != 3 or image.shape[2] != 3:
+            raise CVProcessingError(f"Invalid image format: expected BGR, got shape {image.shape}")
+        
+        return image
+    
+    def _encode_to_bytes(self, image: np.ndarray) -> bytes:
+        """
+        Encode OpenCV image to JPEG bytes.
+        
+        Args:
+            image: OpenCV image (BGR format)
+            
+        Returns:
+            JPEG-encoded bytes
+            
+        Raises:
+            CVProcessingError: If encoding fails
+        """
+        if image is None or image.size == 0:
+            raise CVProcessingError("Cannot encode empty image")
+        
+        success, buffer = cv2.imencode(
+            '.jpg', 
+            image, 
+            [int(cv2.IMWRITE_JPEG_QUALITY), 95]
+        )
+        
+        if not success:
+            raise CVProcessingError("Failed to encode image to JPEG")
+        
+        return buffer.tobytes()
+    
+    def _detect_answer_box_candidates(self, image: np.ndarray) -> List[np.ndarray]:
+        """
+        Detect potential answer box regions in the image.
+        
+        Strategy:
+        1. Look for rectangular regions that could contain answers
+        2. Prioritize regions with high contrast (likely handwritten/printed text)
+        3. Return up to 5 candidates sorted by confidence
+        
+        Args:
+            image: Input image (BGR format)
+            
+        Returns:
+            List of cropped/warped answer box images
+        """
+        orig = image.copy()
+        h, w = image.shape[:2]
+        image_area = h * w
+        
+        # Resize for performance while maintaining aspect ratio
+        max_dim = 1200
+        scale = min(max_dim / max(h, w), 1.0)
+        new_w, new_h = int(w * scale), int(h * scale)
+        resized = cv2.resize(image, (new_w, new_h))
+        orig_resized = resized.copy()
+        
+        # Preprocessing pipeline
+        gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+        
+        # Remove horizontal lines (ruled paper, table borders)
+        horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (150, 1))
+        detected_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
+        gray_clean = cv2.subtract(gray, detected_lines)
+        
+        # Edge detection with adaptive parameters
+        blurred = cv2.GaussianBlur(gray_clean, (5, 5), 0)
+        edged = cv2.Canny(blurred, 30, 100)
+        
+        # Find contours
+        contours, _ = cv2.findContours(edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
+        
+        candidate_boxes = []
+        min_area = 0.01 * new_w * new_h  # Minimum 1% of image area
+        max_boxes = 5
+        
+        logger.debug(f"Found {len(contours)} contours, min_area threshold: {min_area:.0f}px")
+        
+        for contour in contours:
+            if len(candidate_boxes) >= max_boxes:
+                break
+            
+            # Approximate contour to polygon
+            perimeter = cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+            
+            # Filter: must be quadrilateral
+            if len(approx) != 4:
+                continue
+            
+            # Filter: minimum area
+            area = cv2.contourArea(approx)
+            if area < min_area:
+                continue
+            
+            # Filter: reasonable aspect ratio (not too skinny)
+            rect = cv2.minAreaRect(approx)
+            box_w, box_h = rect[1]
+            if box_w == 0 or box_h == 0:
+                continue
+            
+            aspect_ratio = max(box_w, box_h) / min(box_w, box_h)
+            if aspect_ratio > 8:  # Too extreme
+                continue
+            
+            # Calculate confidence score based on:
+            # 1. Area (larger = more likely to be answer box)
+            # 2. Aspect ratio (closer to 1-3 = more rectangular)
+            # 3. Edge density within box (more edges = more content)
+            
+            # Extract region and count edges
+            mask = np.zeros_like(gray_clean)
+            cv2.drawContours(mask, [approx], -1, 255, -1)
+            edge_density = np.sum(edged[mask == 255]) / area
+            
+            confidence = (
+                min(area / (0.2 * new_w * new_h), 1.0) * 0.4 +  # Area weight
+                min(max(0, 3 - abs(aspect_ratio - 2)), 1.0) * 0.3 +  # Aspect ratio weight
+                min(edge_density / 100, 1.0) * 0.3  # Edge density weight
+            )
+            
+            logger.debug(f"Box candidate: area={area:.0f}, aspect={aspect_ratio:.2f}, "
+                        f"edges={edge_density:.2f}, confidence={confidence:.3f}")
+            
+            if confidence < 0.3:
+                continue
+            
+            # Warp perspective to get clean rectangular box
+            try:
+                warped = self._warp_perspective_box(orig_resized, approx, new_h)
+                if warped is not None and warped.size > 0:
+                    candidate_boxes.append((confidence, warped))
+            except Exception as e:
+                logger.warning(f"Failed to warp box: {e}")
+                continue
+        
+        # Sort by confidence and extract images
+        candidate_boxes.sort(key=lambda x: x[0], reverse=True)
+        result_boxes = [box for _, box in candidate_boxes]
+        
+        # If no boxes found, return full image as single candidate
+        if not result_boxes:
+            logger.info("No answer boxes detected - using full image")
+            # Resize full image to standard height
+            aspect = w / h
+            out_w = int(self.DEFAULT_OUTPUT_HEIGHT * aspect)
+            full_resized = cv2.resize(orig, (out_w, self.DEFAULT_OUTPUT_HEIGHT))
+            result_boxes.append(full_resized)
+        
+        return result_boxes
+    
+    def _warp_perspective_box(self, image: np.ndarray, pts: np.ndarray, out_height: int) -> Optional[np.ndarray]:
+        """
+        Apply perspective transform to extract a rectangular box.
+        
+        Args:
+            image: Source image
+            pts: 4 corner points of quadrilateral
+            out_height: Desired output height
+            
+        Returns:
+            Warped rectangular image, or None if transform fails
+        """
+        try:
+            # Order points consistently: UL, UR, LR, LL
+            ordered_pts = self._order_points(pts.reshape(4, 2))
+            
+            # Calculate aspect ratio
+            width_top = np.linalg.norm(ordered_pts[0] - ordered_pts[1])
+            width_bottom = np.linalg.norm(ordered_pts[3] - ordered_pts[2])
+            avg_width = (width_top + width_bottom) / 2
+            
+            height_left = np.linalg.norm(ordered_pts[0] - ordered_pts[3])
+            height_right = np.linalg.norm(ordered_pts[1] - ordered_pts[2])
+            avg_height = (height_left + height_right) / 2
+            
+            if avg_height == 0:
+                return None
+            
+            aspect_ratio = avg_width / avg_height
+            out_width = int(out_height * aspect_ratio)
+            
+            # Destination points
+            dst_pts = np.float32([
+                [0, 0],
+                [out_width, 0],
+                [out_width, out_height],
+                [0, out_height]
+            ])
+            
+            # Perspective transform
+            M = cv2.getPerspectiveTransform(ordered_pts.astype(np.float32), dst_pts)
+            warped = cv2.warpPerspective(image, M, (out_width, out_height))
+            
+            return warped
+            
+        except Exception as e:
+            logger.warning(f"Perspective warp failed: {e}")
+            return None
+    
+    def _order_points(self, pts: np.ndarray) -> np.ndarray:
+        """
+        Order 4 points in consistent clockwise order: UL, UR, LR, LL.
+        
+        Args:
+            pts: Array of 4 points (x, y)
+            
+        Returns:
+            Ordered array of points
+        """
+        # Sort by x-coordinate
+        sorted_x = pts[np.argsort(pts[:, 0])]
+        
+        # Get left-most and right-most points
+        left_most = sorted_x[:2]
+        right_most = sorted_x[2:]
+        
+        # Sort left-most by y to get UL and LL
+        left_most_sorted = left_most[np.argsort(left_most[:, 1])]
+        ul, ll = left_most_sorted
+        
+        # Sort right-most by y to get UR and LR
+        right_most_sorted = right_most[np.argsort(right_most[:, 1])]
+        ur, lr = right_most_sorted
+        
+        return np.array([ul, ur, lr, ll], dtype=np.float32)
+    
+    # ==============================
+    # Manual Segmentation Support
+    # ==============================
+    
+    def manual_segment_answer_box(
+        self, 
+        image_bytes: bytes, 
+        points: dict
+    ) -> bytes:
+        """
+        Manually segment answer box using provided corner points.
+        
+        Used by PATCH /api/test_instances/{test_id}/{student_no}/{item_id}
+        
+        Args:
+            image_bytes: Raw image bytes
+            points: Dictionary with ul, ur, lr, ll coordinates
+            
+        Returns:
+            JPEG-encoded bytes of segmented and enhanced answer box
+            
+        Raises:
+            CVProcessingError: If segmentation fails
+        """
+        try:
+            # Validate points
+            required = ["ul", "ur", "lr", "ll"]
+            for corner in required:
+                if corner not in points:
+                    raise CVProcessingError(f"Missing corner point: {corner}")
+                if not all(k in points[corner] for k in ["x", "y"]):
+                    raise CVProcessingError(f"Point {corner} missing x/y coordinates")
+            
+            # Load image
+            image = self._load_image_from_bytes(image_bytes)
+            
+            # Extract points
+            src_pts = np.array([
+                [points["ul"]["x"], points["ul"]["y"]],
+                [points["ur"]["x"], points["ur"]["y"]],
+                [points["lr"]["x"], points["lr"]["y"]],
+                [points["ll"]["x"], points["ll"]["y"]]
+            ], dtype=np.float32)
+            
+            # Calculate output dimensions
+            def calc_aspect(pts):
+                w_top = np.linalg.norm(pts[0] - pts[1])
+                w_bot = np.linalg.norm(pts[3] - pts[2])
+                h_left = np.linalg.norm(pts[0] - pts[3])
+                h_right = np.linalg.norm(pts[1] - pts[2])
+                return (w_top + w_bot) / (h_left + h_right + 1e-5)
+            
+            aspect_ratio = calc_aspect(src_pts)
+            out_height = self.DEFAULT_OUTPUT_HEIGHT
+            out_width = int(out_height * aspect_ratio)
+            
+            # Destination points
+            dst_pts = np.float32([
+                [0, 0],
+                [out_width, 0],
+                [out_width, out_height],
+                [0, out_height]
+            ])
+            
+            # Perspective transform
+            M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+            warped = cv2.warpPerspective(image, M, (out_width, out_height))
+            
+            # Enhance
+            enhanced = self.brighten(warped, amount=0.2)
+            enhanced = self.adjust_contrast(enhanced, amount=1.2)
+            
+            # Encode
+            return self._encode_to_bytes(enhanced)
+            
+        except CVProcessingError:
+            raise
+        except Exception as e:
+            logger.error(f"Manual segmentation failed: {e}", exc_info=True)
+            raise CVProcessingError(f"Manual segmentation failed: {str(e)}")

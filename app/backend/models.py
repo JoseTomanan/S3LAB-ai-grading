@@ -14,16 +14,16 @@ class Student(SQLModel, table=True):
 
 
 class TestInstance(SQLModel, table=True):
-    __tablename__ = "test_instance"  # pyright: ignore[reportAssignmentType]
+    __tablename__ = "test_instance"
     test_id: str = Field(primary_key=True, max_length=100)
     name: str
     section_id: int = Field(foreign_key="section.section_id", index=True)
-    date: str  # Consider DATE type in migration
+    date: str 
     is_done_rendering: bool = False
 
 
 class TestItem(SQLModel, table=True):
-    __tablename__ = "test_item" # pyright: ignore[reportAssignmentType]
+    __tablename__ = "test_item"
     item_id: int = Field(primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     label: str = Field(max_length=50)
