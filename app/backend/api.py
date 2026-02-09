@@ -15,30 +15,8 @@ from pydantic import ValidationError
 
 
 # Local imports
-from models import (
-    Section,
-    Student,
-    TestInstance,
-    TestItem,
-    TestPaperInstance,
-    StudentAnswer
-)
-from schemas import (
-    TestItemSummary,
-    TestItemsResponse,
-    NewTestItemRequest,
-    NewTestItemResponse,
-    UpdateTestItemRequest,
-    FullTestItemResponse,
-    NewTestInstanceRequest,
-    UpdateTestItemSchema,
-    UpdateTestInstanceRequest,
-    TestInstanceResponse,
-    StudentResponse,
-    StudentAnswerRequest,
-    StudentAnswerResponse,
-    StudentAnswerSummary
-)
+from models import *
+from schemas import *
 from database import create_db_and_tables, get_session, engine
 from image_preprocessor import CVImagePreprocessor, CVProcessingError
 
@@ -49,6 +27,7 @@ from image_preprocessor import CVImagePreprocessor, CVProcessingError
 app = FastAPI(
     title="Assessment Processing API",
     description="API for managing test instances, items, and student answer processing",
+    lifespan=create_db_and_tables(),
     version="1.0.0"
 )
 
@@ -64,11 +43,6 @@ app.add_middleware(
 # Temporary directory for processed images
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
-
-# Initialize database tables on startup
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
 
 # ==============================
 # Section Endpoints

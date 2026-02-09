@@ -3,20 +3,18 @@ from typing import Optional
 
 
 class Section(SQLModel, table=True):
-    __tablename__ = "section"
     section_id: int = Field(primary_key=True, index=True)
     section: str = Field(index=True)
 
 
 class Student(SQLModel, table=True):
-    __tablename__ = "student"
     student_no: str = Field(primary_key=True, max_length=50)
     name: str
     section_id: int = Field(foreign_key="section.section_id", index=True)
 
 
 class TestInstance(SQLModel, table=True):
-    __tablename__ = "test_instance"
+    __tablename__ = "test_instance"  # pyright: ignore[reportAssignmentType]
     test_id: str = Field(primary_key=True, max_length=100)
     name: str
     section_id: int = Field(foreign_key="section.section_id", index=True)
@@ -25,7 +23,7 @@ class TestInstance(SQLModel, table=True):
 
 
 class TestItem(SQLModel, table=True):
-    __tablename__ = "test_item"
+    __tablename__ = "test_item" # pyright: ignore[reportAssignmentType]
     item_id: int = Field(primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     label: str = Field(max_length=50)
@@ -35,7 +33,7 @@ class TestItem(SQLModel, table=True):
 
 
 class TestPaperInstance(SQLModel, table=True):
-    __tablename__ = "test_paper"
+    __tablename__ = "test_paper" # pyright: ignore[reportAssignmentType]
     paper_id: int = Field(primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     student_no: str = Field(foreign_key="student.student_no", index=True)
@@ -43,7 +41,7 @@ class TestPaperInstance(SQLModel, table=True):
 
 
 class StudentAnswer(SQLModel, table=True):
-    __tablename__ = "student_answer"
+    __tablename__ = "student_answer" # pyright: ignore[reportAssignmentType]
     answer_id: int = Field(primary_key=True)
     paper_id: int = Field(foreign_key="test_paper.paper_id", index=True)
     item_id: int = Field(foreign_key="test_item.item_id", index=True)
