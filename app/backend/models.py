@@ -14,7 +14,7 @@ class Student(SQLModel, table=True):
 
 
 class TestInstance(SQLModel, table=True):
-    __tablename__ = "test_instance"
+    __tablename__ = "test_instance"  # pyright: ignore[reportAssignmentType]
     test_id: str = Field(primary_key=True, max_length=100)
     name: str
     section_id: int = Field(foreign_key="section.section_id", index=True)
@@ -23,7 +23,7 @@ class TestInstance(SQLModel, table=True):
 
 
 class TestItem(SQLModel, table=True):
-    __tablename__ = "test_item"
+    __tablename__ = "test_item" # pyright: ignore[reportAssignmentType]
     item_id: int = Field(primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     label: str = Field(max_length=50)

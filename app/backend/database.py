@@ -41,10 +41,10 @@ else:
     )
 
 
+
 # ==============================
 # Database Initialization
 # ==============================
-
 def create_db_and_tables():
     """
     Create all tables defined in SQLModel models.
@@ -60,10 +60,10 @@ def drop_all_tables():
     SQLModel.metadata.drop_all(engine)
 
 
+
 # ==============================
 # Session Management
 # ==============================
-
 def get_session() -> Generator[Session, None, None]:
     """
     FastAPI dependency for session injection.
@@ -105,10 +105,10 @@ def get_direct_session() -> Session:
     return Session(engine)
 
 
+
 # ==============================
 # Helper Functions
 # ==============================
-
 def get_engine():
     """
     Return the database engine (for advanced operations like raw SQL).
