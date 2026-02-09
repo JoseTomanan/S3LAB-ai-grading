@@ -30,7 +30,8 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					instances = result.instances;
+					if (result.instances)
+						instances = result.instances;
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
@@ -73,7 +74,7 @@
 						{/if}
 						<h3>{ instance.name }</h3>
 					</span>
-					<h4>{ instance.section } &centerdot; { new Date(instance.date).toLocaleDateString() }</h4>
+					<h4>{ new Date(instance.date).toLocaleDateString() }</h4>
 				</a>
 			{/each}
 		{/if}
