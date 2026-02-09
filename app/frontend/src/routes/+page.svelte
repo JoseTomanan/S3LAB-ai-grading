@@ -30,6 +30,7 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
+					console.log(result);
 					if (result.instances)
 						instances = result.instances;
 					break;
