@@ -20,21 +20,17 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/api/test_instances`,
-				{
-					method: "GET",
-					headers: {'Content-Type': 'application/json',}
-				}
-			);
+						`${API_BASE_URL}/api/test_instances`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',}
+						}
+						);
 
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					// console.log(result);
-					if (result) {
-						// console.log("--> RESULT INSTANCES EXIST.");
-						instances = result;
-					}
+					instances = result ? result : [];
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
