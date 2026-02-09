@@ -23,6 +23,7 @@ client = TestClient(app)
 # ==============================
 
 MOCK_DATA = {
+    
     "sections": [
         {"section_id": 1, "section": "3-Rizal"},
         {"section_id": 2, "section": "3-Aguinaldo"}

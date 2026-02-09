@@ -466,9 +466,11 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 # ==============================
 
 @app.get("/api/test_instances/{test_id}/items")
-def get_test_instance_items(test_id: str, session: Session = Depends(get_session)):
+def get_test_instance_items(test_id: str, session: Session = Depends(get_session), response: Response = None):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
+    
+
     if not instance:
         raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
     
@@ -476,6 +478,12 @@ def get_test_instance_items(test_id: str, session: Session = Depends(get_session
         select(TestItem).where(TestItem.test_id == test_id)
     ).all()
     
+    if not items:
+        response.status_code = status.HTTP_204_NO_CONTENT
+        # raise HTTPException(status_code=204, detail=f"Empty no!!!")
+        return None
+
+
     items_response = [
         {
             "item_id": item.item_id,
@@ -984,7 +992,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 def get_student_answers(
     test_id: str,
     student_no: str,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
 ):
     """Get all answers by a specific student for a test instance"""
     # Verify entities exist
@@ -1019,9 +1027,6 @@ def get_student_answers(
         .where(StudentAnswer.paper_id == paper.paper_id)
         .order_by(StudentAnswer.item_id)
     ).all()
-    
-    if not answers:
-        return []
     
     # Build response with item labels
     summaries = []
