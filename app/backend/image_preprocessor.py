@@ -205,17 +205,6 @@ class CVImagePreprocessor:
     def _detect_answer_box_candidates(self, image: np.ndarray) -> List[np.ndarray]:
         """
         Detect potential answer box regions in the image.
-        
-        Strategy:
-        1. Look for rectangular regions that could contain answers
-        2. Prioritize regions with high contrast (likely handwritten/printed text)
-        3. Return up to 5 candidates sorted by confidence
-        
-        Args:
-            image: Input image (BGR format)
-            
-        Returns:
-            List of cropped/warped answer box images
         """
         orig = image.copy()
         h, w = image.shape[:2]
@@ -236,16 +225,21 @@ class CVImagePreprocessor:
         detected_lines = cv2.morphologyEx(gray, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
         gray_clean = cv2.subtract(gray, detected_lines)
         
-        # Edge detection with adaptive parameters
-        blurred = cv2.GaussianBlur(gray_clean, (5, 5), 0)
-        edged = cv2.Canny(blurred, 30, 100)
+        # NEW: Enhance contrast to make text/boxes more visible
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        gray_enhanced = clahe.apply(gray_clean)
+        
+        # Edge detection with ADJUSTED parameters (more sensitive)
+        blurred = cv2.GaussianBlur(gray_enhanced, (5, 5), 0)
+        edged = cv2.Canny(blurred, 20, 80)  # Lowered thresholds
         
         # Find contours
         contours, _ = cv2.findContours(edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         
         candidate_boxes = []
-        min_area = 0.01 * new_w * new_h  # Minimum 1% of image area
+        # LOWERED min_area threshold (from 1% to 0.3%)
+        min_area = 0.003 * new_w * new_h
         max_boxes = 5
         
         logger.debug(f"Found {len(contours)} contours, min_area threshold: {min_area:.0f}px")
@@ -267,39 +261,35 @@ class CVImagePreprocessor:
             if area < min_area:
                 continue
             
-            # Filter: reasonable aspect ratio (not too skinny)
+            # Filter: reasonable aspect ratio (wider range)
             rect = cv2.minAreaRect(approx)
             box_w, box_h = rect[1]
             if box_w == 0 or box_h == 0:
                 continue
             
             aspect_ratio = max(box_w, box_h) / min(box_w, box_h)
-            if aspect_ratio > 8:  # Too extreme
+            if aspect_ratio > 10:  # Increased from 8
                 continue
             
-            # Calculate confidence score based on:
-            # 1. Area (larger = more likely to be answer box)
-            # 2. Aspect ratio (closer to 1-3 = more rectangular)
-            # 3. Edge density within box (more edges = more content)
-            
-            # Extract region and count edges
+            # Calculate confidence score
             mask = np.zeros_like(gray_clean)
             cv2.drawContours(mask, [approx], -1, 255, -1)
             edge_density = np.sum(edged[mask == 255]) / area
             
             confidence = (
-                min(area / (0.2 * new_w * new_h), 1.0) * 0.4 +  # Area weight
-                min(max(0, 3 - abs(aspect_ratio - 2)), 1.0) * 0.3 +  # Aspect ratio weight
-                min(edge_density / 100, 1.0) * 0.3  # Edge density weight
+                min(area / (0.2 * new_w * new_h), 1.0) * 0.4 +
+                min(max(0, 3 - abs(aspect_ratio - 2)), 1.0) * 0.3 +
+                min(edge_density / 100, 1.0) * 0.3
             )
+            
+            # LOWERED confidence threshold (from 0.3 to 0.2)
+            if confidence < 0.2:
+                continue
             
             logger.debug(f"Box candidate: area={area:.0f}, aspect={aspect_ratio:.2f}, "
                         f"edges={edge_density:.2f}, confidence={confidence:.3f}")
             
-            if confidence < 0.3:
-                continue
-            
-            # Warp perspective to get clean rectangular box
+            # Warp perspective
             try:
                 warped = self._warp_perspective_box(orig_resized, approx, new_h)
                 if warped is not None and warped.size > 0:
@@ -308,14 +298,13 @@ class CVImagePreprocessor:
                 logger.warning(f"Failed to warp box: {e}")
                 continue
         
-        # Sort by confidence and extract images
+        # Sort by confidence
         candidate_boxes.sort(key=lambda x: x[0], reverse=True)
         result_boxes = [box for _, box in candidate_boxes]
         
         # If no boxes found, return full image as single candidate
         if not result_boxes:
             logger.info("No answer boxes detected - using full image")
-            # Resize full image to standard height
             aspect = w / h
             out_w = int(self.DEFAULT_OUTPUT_HEIGHT * aspect)
             full_resized = cv2.resize(orig, (out_w, self.DEFAULT_OUTPUT_HEIGHT))

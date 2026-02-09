@@ -652,6 +652,7 @@ async def process_student_answer_image(
     student_no: str,
     item_id: int,
     file: UploadFile = File(...),
+    selected_box_index: int = Form(0),
     session: Session = Depends(get_session)
 ):
     """Process raw student assessment image through CV pipeline"""
@@ -727,29 +728,95 @@ async def process_student_answer_image(
             detail=f"Unexpected error during image processing: {str(e)}"
         )
     
-    # ===== STORAGE & RESPONSE =====
-    session_id = str(uuid.uuid4())
-    boxes_info = []
+    # Validate selected_box_index
+    if selected_box_index < 0 or selected_box_index >= len(processed_list):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid box index. Must be between 0 and {len(processed_list)-1}"
+        )
     
+    # ===== SAVE SELECTED BOX TO DATABASE =====
+    selected_img_bytes = processed_list[selected_box_index]
+    
+    # Create or update TestPaperInstance
+    paper = session.exec(
+        select(TestPaperInstance).where(
+            TestPaperInstance.test_id == test_id,
+            TestPaperInstance.student_no == student_no
+        )
+    ).first()
+    if not paper:
+        paper = TestPaperInstance(
+            test_id=test_id,
+            student_no=student_no,
+            is_done_rendering=False
+        )
+        session.add(paper)
+        session.commit()
+        session.refresh(paper)
+    
+    # Create or update StudentAnswer
+    answer = session.exec(
+        select(StudentAnswer).where(
+            StudentAnswer.paper_id == paper.paper_id,
+            StudentAnswer.item_id == item_id
+        )
+    ).first()
+    
+    # Generate filename
+    safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}_{selected_box_index}.jpg"
+    safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
+    filepath = TEMP_DIR / safe_filename
+    
+    # Save image file
+    with open(filepath, "wb") as f:
+        f.write(selected_img_bytes)
+    
+    if not answer:
+        answer = StudentAnswer(
+            paper_id=paper.paper_id,
+            item_id=item_id,
+            image_directory=f"/api/temp/{safe_filename}",
+            ai_evaluation="",
+            is_done_rendering=True
+        )
+        session.add(answer)
+    else:
+        answer.image_directory = f"/api/temp/{safe_filename}"
+        answer.is_done_rendering = True
+        session.add(answer)
+    
+    session.commit()
+    
+    # ===== RETURN ALL CANDIDATE BOXES FOR PREVIEW =====
+    boxes_info = []
     for i, img_bytes in enumerate(processed_list):
-        safe_filename = f"{test_id}_{student_no}_{item_id}_{session_id}_{i}.jpg"
-        safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
-        filepath = TEMP_DIR / safe_filename
-        
-        with open(filepath, "wb") as f:
-            f.write(img_bytes)
-        
-        boxes_info.append({
-            "index": i,
-            "image_directory": f"/api/temp/{safe_filename}"
-        })
+        if i == selected_box_index:
+            # Already saved above
+            boxes_info.append({
+                "index": i,
+                "image_directory": f"/api/temp/{safe_filename}",
+                "is_selected": True
+            })
+        else:
+            # Save other candidates temporarily
+            temp_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}_temp_{i}.jpg"
+            temp_filename = "".join(c for c in temp_filename if c.isalnum() or c in "._-")
+            temp_filepath = TEMP_DIR / temp_filename
+            with open(temp_filepath, "wb") as f:
+                f.write(img_bytes)
+            boxes_info.append({
+                "index": i,
+                "image_directory": f"/api/temp/{temp_filename}",
+                "is_selected": False
+            })
     
     return {
-        "image_directory": session_id,
+        "image_directory": f"/api/temp/{safe_filename}",
         "num_boxes": len(processed_list),
+        "selected_box_index": selected_box_index,
         "boxes": boxes_info
     }
-
 
 @app.patch("/api/test_instances/{test_id}/{student_no}/{item_id}")
 async def update_answer_segmentation(
