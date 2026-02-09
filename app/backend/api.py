@@ -17,7 +17,7 @@ from pydantic import ValidationError
 from models import *
 from schemas import *
 from database import create_db_and_tables, get_session, engine
-from image_preprocessor import CVImagePreprocessor, CVProcessingError
+from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 
 
 
@@ -124,7 +124,11 @@ def add_new_student(
     session.commit()
     session.refresh(new_student)
     
-    return StudentResponse(*new_student)
+    return StudentResponse(
+            student_no=new_student.student_no,
+            name=new_student.name,
+            section_id=new_student.section_id,
+            )
 
 
 @app.patch("/api/students/{student_no}", response_model=StudentResponse)
@@ -320,6 +324,8 @@ def edit_test_instance(
         
         # Create new items
         for idx, item_data in enumerate(update.items, start=1):
+            assert item_data.question is not None
+            assert item_data.is_problem_solving is not None
             new_item = TestItem(
                     item_id=idx,  # Sequential within test instance
                     test_id=test_id,
@@ -337,8 +343,8 @@ def edit_test_instance(
     
     # Get updated items
     items = session.exec(
-        select(TestItem).where(TestItem.test_id == test_id)
-    ).all()
+            select(TestItem).where(TestItem.test_id == test_id)
+            ).all()
     
     summary_items = [
             TestItemSummary(
@@ -467,7 +473,11 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 # Test Item Endpoints
 # ==============================
 @app.get("/api/test_instances/{test_id}/items")
-def get_test_instance_items(test_id: str, session: Session = Depends(get_session), response: Response = None):
+def get_test_instance_items(
+            test_id: str,
+            session: Session = Depends(get_session),
+            response: Response = None
+            ):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
 
@@ -676,8 +686,8 @@ async def process_student_answer_image(
     # Verify item exists and belongs to this test
     item = session.exec(
             select(TestItem).where(
-                    TestItem.item_id == item_id,
-                    TestItem.test_id == test_id
+                TestItem.item_id == item_id,
+                TestItem.test_id == test_id
                 )
             ).first()
     
