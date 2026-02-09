@@ -30,9 +30,11 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					console.log(result);
-					if (result.instances)
-						instances = result.instances;
+					// console.log(result);
+					if (result) {
+						// console.log("--> RESULT INSTANCES EXIST.");
+						instances = result;
+					}
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);

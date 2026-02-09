@@ -31,10 +31,9 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					studentItems = result.answers;
+					studentItems = result.answers ? result.answers : [];
 					break;
 				case 204:
-					console.log("--> 204");
 					studentItems = [];
 					break;
 				default:
@@ -55,20 +54,21 @@
 
 			switch (response.status) {
 				case 200:
-				case 204:
-					const result = await response.json();
-					testItems = result.items;
-					for (const testItem of testItems)
-						if (!studentItems.find(si => si.item_id === testItem.item_id))
-							studentItems.push({
-										answer_id: 0,
-										item_id: testItem.item_id,
-										label: testItem.label,
-										student_no: data.student_no,
-										image_directory: "",
-										ai_evaluation: "",
-										is_done_rendering: false,
-										});
+					const resultTwo = await response.json();
+					testItems = resultTwo.items;
+					if (testItems && studentItems) {
+						for (const testItem of testItems)
+							if (!studentItems.find(si => si.item_id === testItem.item_id))
+								studentItems.push({
+											answer_id: 0,
+											item_id: testItem.item_id,
+											label: testItem.label,
+											student_no: data.student_no,
+											image_directory: "",
+											ai_evaluation: "",
+											is_done_rendering: false,
+											});
+					}
 					break;
 				default:
 					alert(`CALL 2: ${response.status} ${response.statusText}`);
