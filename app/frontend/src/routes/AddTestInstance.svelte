@@ -6,11 +6,20 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.ts';
+	import { onMount } from "svelte";
 
 	// svelte-ignore non_reactive_update
 	let newInstanceName: string = "";
 	// svelte-ignore non_reactive_update
 	let newInstanceSection: string = "";
+
+	onMount(async () => {
+		// TODO: fetch sections from GET endpoint
+		try {
+		} catch (e) {
+		} finally {
+		}
+	});
 
 	async function addNewTestInstance(name: string, section: string) {
 		try {
@@ -50,6 +59,7 @@
 					required
 					bind:value={newInstanceName}/>
 	<Label for="section">Section</Label>
+	<!-- TODO: make choosing section dropdown (instead of text) -->
 	<Input id="section" type="text"
 					placeholder="Section..."
 					required
