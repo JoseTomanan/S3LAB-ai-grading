@@ -20,44 +20,40 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch(
+			const responseOne = await fetch(
 						`${API_BASE_URL}/api/test_instances/${data.test_id}/${data.student_no}`,
 						{
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},
 						}
-					);
+						);
 			
-			switch (response.status) {
+			switch (responseOne.status) {
 				case 200:
-					const result = await response.json();
+					const result = await responseOne.json();
 					studentItems = result ? result : [];
 					break;
 				case 204:
 					studentItems = [];
 					break;
 				default:
-					alert(`CALL 1: ${response.status} ${response.statusText}`);
+					alert(`CALL 1: ${responseOne.status} ${responseOne.statusText}`);
 			}
-		} catch(e) {
-			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
-		}
 
-		console.log("--> 1, before item fetch");
-		console.log($state.snapshot(studentItems));
+			console.log("--> 1, before item fetch");
+			console.log($state.snapshot(studentItems));
 
-		try {
-			const response = await fetch(
+			const responseTwo = await fetch(
 						`${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
 						{
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},
 						}
-					);
+						);
 
-			switch (response.status) {
+			switch (responseTwo.status) {
 				case 200:
-					const resultTwo = await response.json();
+					const resultTwo = await responseTwo.json();
 					testItems = resultTwo.items;
 					console.log("--> testItems.");
 					console.log($state.snapshot(testItems));
@@ -76,16 +72,16 @@
 					}
 					break;
 				default:
-					alert(`CALL 2: ${response.status} ${response.statusText}`);
+					alert(`CALL 2: ${responseTwo.status} ${responseTwo.statusText}`);
 			}
-		} catch (e) {
+
+			console.log("--> 2, after item fetch");
+			console.log($state.snapshot(studentItems));
+		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+		} finally {
+			isPageLoading = false;
 		}
-
-		console.log("--> 2, after item fetch");
-		console.log($state.snapshot(studentItems));
-
-		isPageLoading = false;
 	});
 </script>
 
