@@ -1,40 +1,67 @@
 <script lang="ts">
 	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-	import * as Dialog from "$lib/components/ui/dialog/index.js";
+	import { onMount } from "svelte";
+	import type { Section } from "$lib/index.ts";
 
+	import * as Dialog from "$lib/components/ui/dialog/index.js";
+	import * as Select from "$lib/components/ui/select/index.ts";
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.ts';
-	import { onMount } from "svelte";
+
+	let isItemsLoading: boolean = $state(true);
+	let dropdownItems: (Section & {value: boolean})[] = $state([]);
 
 	// svelte-ignore non_reactive_update
 	let newInstanceName: string = "";
 	// svelte-ignore non_reactive_update
-	let newInstanceSection: string = "";
+	let newInstanceSectionId: string = "";
 
 	onMount(async () => {
-		// TODO: fetch sections from GET endpoint
+		// FIXME: remove this once verified working with API endpoint
+		isItemsLoading = true;
 		try {
+			const response = await fetch(
+						`${apiBaseUrl}/api/sections`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',}
+						}
+						);
+
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					dropdownItems = result.sections.map((section: Section) => ({
+								...section,
+								value: true
+								}));
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch (e) {
+			alert("Failed to fetch sections. Check your network connection and try again.");
 		} finally {
+			isItemsLoading = false;
 		}
 	});
 
-	async function addNewTestInstance(name: string, section: string) {
+	async function addNewTestInstance(name: string, section_id: string) {
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances`,
-				{
-					method: "POST",
-					headers: {'Content-Type': 'application/json',},
-					body: JSON.stringify({
-						"name": name,
-						"section": section,
-						"date": new Date().toISOString(),
-					}),
-				}
-			);
+						`${apiBaseUrl}/api/test_instances`,
+						{
+							method: "POST",
+							headers: {'Content-Type': 'application/json',},
+							body: JSON.stringify({
+								"name": name,
+								"section_id": section_id,
+								"date": new Date().toISOString(),
+							}),
+						}
+						);
 
 			if (response.ok) {
 				alert("Addition successful.");
@@ -59,14 +86,25 @@
 					required
 					bind:value={newInstanceName}/>
 	<Label for="section">Section</Label>
-	<!-- TODO: make choosing section dropdown (instead of text) -->
-	<Input id="section" type="text"
-					placeholder="Section..."
-					required
-					bind:value={newInstanceSection}/>
+	<!-- FIXME: remove this once verified working with endpoint -->
+	<Select.Root type="single"
+								name="section"
+								bind:value={newInstanceSectionId}>
+		<Select.Trigger class="w-full text-base">
+			Section...
+		</Select.Trigger>
+		<Select.Content>
+			{#each dropdownItems as item (item.value)}
+				<Select.Item value={item.section_id.toString()}
+											label={item.section_name}>
+					{item.section_name} ({item.section_id})
+				</Select.Item>
+			{/each}
+		</Select.Content>
+	</Select.Root>
 	<Dialog.Footer>
 		<Button variant="outline"
-						onclick={() => addNewTestInstance(newInstanceName, newInstanceSection)}>
+						onclick={() => addNewTestInstance(newInstanceName, newInstanceSectionId)}>
 			Save changes
 	</Button>
 		<Dialog.Description>Note that the name and section cannot be changed after creation.</Dialog.Description>
