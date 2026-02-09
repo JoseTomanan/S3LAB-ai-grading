@@ -17,10 +17,10 @@ import openpyxl
 
 
 class CVImagePreprocessor:
-    """
-    DEPRECATED!!
-    REFER TO: app/backend/functionality/image_preprocessor
-    """
+	"""
+	DEPRECATED!!
+	REFER TO: app/backend/functionality/image_preprocessor
+	"""
 	def load_image(self, image_path: str) -> bytes:
 		"""
 		Load image (unencoded) and return as bytes
@@ -176,10 +176,10 @@ class CVImagePreprocessor:
 
 
 class SheetsExporter:
-    """
-    DEPRECATED!!
-    REFER TO: app/backend/functionality/sheets_exporter.py
-    """
+	"""
+	DEPRECATED!!
+	REFER TO: app/backend/functionality/sheets_exporter.py
+	"""
 	def __init__(self, columns: list[str]):
 		self.columns: list[str] = columns
 		self.sheet_items: dict[str, dict[str,float]] = {}
