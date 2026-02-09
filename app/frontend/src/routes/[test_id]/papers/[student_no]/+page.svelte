@@ -31,7 +31,7 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					studentItems = result.answers ? result.answers : [];
+					studentItems = result ? result : [];
 					break;
 				case 204:
 					studentItems = [];
@@ -42,6 +42,9 @@
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		}
+
+		console.log("--> 1, before item fetch");
+		console.log($state.snapshot(studentItems));
 
 		try {
 			const response = await fetch(
@@ -56,6 +59,8 @@
 				case 200:
 					const resultTwo = await response.json();
 					testItems = resultTwo.items;
+					console.log("--> testItems.");
+					console.log($state.snapshot(testItems));
 					if (testItems && studentItems) {
 						for (const testItem of testItems)
 							if (!studentItems.find(si => si.item_id === testItem.item_id))
@@ -76,6 +81,9 @@
 		} catch (e) {
 			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
 		}
+
+		console.log("--> 2, after item fetch");
+		console.log($state.snapshot(studentItems));
 
 		isPageLoading = false;
 	});
