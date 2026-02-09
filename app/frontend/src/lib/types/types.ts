@@ -1,7 +1,7 @@
 export interface TestInstance {
 	test_id: string;
 	name: string;
-	section: string;
+	section_id: number;
 	date: string;
 	is_done_rendering: boolean;
 }
@@ -33,7 +33,7 @@ export interface TestPaper {
 export interface Student {
 	student_no: string;
 	name: string;
-	section: string;
+	section_id: number;
 }
 
 
