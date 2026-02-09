@@ -56,5 +56,5 @@ export interface StudentAnswer {
 
 export interface Section {
 	section_id: number;
-	section: string;
+	section_name: string;
 }
