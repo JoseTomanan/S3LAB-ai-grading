@@ -70,7 +70,7 @@
 	</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={formItemEARQ} />
 	<Dialog.Footer>
-		<Button variant="secondary" onclick={() => addTestItem()}>
+		<Button variant="outline" onclick={() => addTestItem()}>
 			Add item
 		</Button>
 	</Dialog.Footer>

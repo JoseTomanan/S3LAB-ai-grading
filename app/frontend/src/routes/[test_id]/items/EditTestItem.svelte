@@ -99,7 +99,7 @@
 	<Textarea id="e_a_r_q" rows={6} bind:value={ formTestItem.expected_answer_rubric_questions } required/>
 	<Dialog.Footer>
 		<div class="flex flex-row w-full gap-2">
-			<Button variant="secondary" class="w-4/5"
+			<Button variant="outline" class="w-4/5"
 						onclick={() => editTestItem(formTestItem)}>
 				Save changes
 			</Button>
