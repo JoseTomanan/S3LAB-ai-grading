@@ -10,7 +10,7 @@
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 
 	let isPageLoading: boolean = false;
-	let sections: Section[] = [{section_id: 1, section: "3-DavidAndal"}];
+	let sections: Section[] = [{section_id: 1, section_name: "3-DavidAndal"}];
 	let paginationValues: Section[];
 
 	onMount(async () => {
@@ -36,7 +36,7 @@
 		{:else}
 			{#each paginationValues as section}
 				<a href={`/sections/${section.section_id}`} class="card">
-					<h3>{section.section}</h3>
+					<h3>{section.section_name}</h3>
 					<h4>SectionID: {section.section_id}</h4>
 				</a>
 			{/each}

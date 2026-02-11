@@ -14,6 +14,7 @@
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 	
 	import type { TestInstance, TestItem } from '$lib/types/types.ts';
+	import { Button } from '$lib/components/ui/button/index.ts';
 
 	let isPageLoading: boolean = $state(true);
 
@@ -47,6 +48,13 @@
 		}
 	});
 		
+	async function exportSheets() {
+		// TODO: entire function
+	}
+
+	async function bulkUpload() {
+		// TODO: entire function
+	}
 </script>
 
 
@@ -78,12 +86,16 @@
 			<a class="button-primary" href={`/${data.test_id}/papers`}>
 				Papers
 			</a>
-			<button class="button-primary">
+			<Button variant="default"
+							onclick={() => {}}
+							disabled>
 				<MdiTable class="size-6" />
-			</button>
-			<button class="button-primary">
+			</Button>
+			<Button variant="default"
+							onclick={() => {}}
+							disabled>
 				<MdiPaperAddOutline class="size-6"/>
-			</button>
+			</Button>
 		</span>
 	</div>
 	<div class="px-4">
