@@ -345,14 +345,14 @@ class CVImagePreprocessor:
             aspect_ratio = avg_width / avg_height
             out_width = int(out_height * aspect_ratio)
             
-            # Destination points
-            dst_pts = np.float32([
+            # Destination points explicit array with dtype
+            dst_pts = np.array([
                 [0, 0],
                 [out_width, 0],
                 [out_width, out_height],
                 [0, out_height]
-            ])
-            
+            ], dtype=np.float32)
+
             # Perspective transform
             M = cv2.getPerspectiveTransform(ordered_pts.astype(np.float32), dst_pts)
             warped = cv2.warpPerspective(image, M, (out_width, out_height))
@@ -366,28 +366,24 @@ class CVImagePreprocessor:
     def _order_points(self, pts: np.ndarray) -> np.ndarray:
         """
         Order 4 points in consistent clockwise order: UL, UR, LR, LL.
-        
         Args:
             pts: Array of 4 points (x, y)
-            
         Returns:
-            Ordered array of points
+            Ordered array of shape (4, 2)
         """
         # Sort by x-coordinate
         sorted_x = pts[np.argsort(pts[:, 0])]
-        
         # Get left-most and right-most points
         left_most = sorted_x[:2]
         right_most = sorted_x[2:]
-        
         # Sort left-most by y to get UL and LL
         left_most_sorted = left_most[np.argsort(left_most[:, 1])]
         ul, ll = left_most_sorted
-        
         # Sort right-most by y to get UR and LR
         right_most_sorted = right_most[np.argsort(right_most[:, 1])]
         ur, lr = right_most_sorted
         
+        # creates shape (4, 2) float32 array
         return np.array([ul, ur, lr, ll], dtype=np.float32)
     
     # ==============================
@@ -447,12 +443,12 @@ class CVImagePreprocessor:
             out_width = int(out_height * aspect_ratio)
             
             # Destination points
-            dst_pts = np.float32([
+            dst_pts = np.array([
                 [0, 0],
                 [out_width, 0],
                 [out_width, out_height],
                 [0, out_height]
-            ])
+            ], dtype=np.float32)
             
             # Perspective transform
             M = cv2.getPerspectiveTransform(src_pts, dst_pts)
