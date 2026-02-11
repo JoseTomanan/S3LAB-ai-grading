@@ -16,15 +16,14 @@
 	}>();
 
 	let formTestItem: TestItem = $state({
-		item_id: testItem.item_id,
-		label: testItem.label,
-		question: testItem.question,
-		is_problem_solving: testItem.is_problem_solving,
-		expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
-	});
+				item_id: testItem.item_id,
+				label: testItem.label,
+				question: testItem.question,
+				is_problem_solving: testItem.is_problem_solving,
+				expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
+			});
 
 	async function editTestItem(submittedTestItem: TestItem) {
-		// FIXME: remove once validated workingness
 		if (testItem != submittedTestItem) {
 			try {
 				const formBody = {
@@ -40,6 +39,7 @@
 					`${API_BASE_URL}/api/test_instances/${test_id}/items/${submittedTestItem.item_id}`,
 					{
 						method: "PATCH",
+						headers: {'Content-Type': 'application/json',},
 						body: JSON.stringify(formBody),
 					}
 				);
@@ -47,19 +47,17 @@
 				if (response.ok) {
 					const result = await response.json();
 					alert("Success: "+result.item_id);
+					window.location.reload();
 				} else
 					alert(response.status + response.statusText);
 			} catch (e) {
 				alert("Failed to send POST request.");
-			} finally {
-				window.location.reload();
 			}
 		} else
 			alert("No changes were made.");
 	}
 
 	async function deleteTestItem() {
-		// FIXME: remove once validated workingness
 		try {
 			const response = await fetch(
 					`${API_BASE_URL}/api/test_instances/${test_id}/${formTestItem.item_id}`,
