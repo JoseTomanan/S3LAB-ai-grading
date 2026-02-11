@@ -22,7 +22,7 @@ from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingEr
 
 
 # ==============================
-# App Initialization
+#region App Initialization
 # ==============================
 app = FastAPI(
         title="Assessment Processing API",
@@ -31,7 +31,6 @@ app = FastAPI(
         version="1.0.0"
         )
 
-# CORS middleware
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -40,14 +39,15 @@ app.add_middleware(
         allow_headers=["*"],
         )
 
-# Temporary directory for processed images
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
+
+#endregion
 
 
 
 # ==============================
-# Section Endpoints
+#region Section Endpoints
 # ==============================
 @app.get("/api/sections", response_model=List[dict])
 def get_all_sections(session: Session = Depends(get_session)):
@@ -472,11 +472,12 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers=headers
             )
+#endregion
 
 
 
 # ==============================
-# Test Item Endpoints
+#region Test Item Endpoints
 # ==============================
 @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
 def get_test_instance_items(
@@ -652,11 +653,12 @@ def delete_test_item(
     session.commit()
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+#endregion
 
 
 
 # ==============================
-# Student Answer Processing Endpoints
+#region Student Answer Processing Endpoints
 # ==============================
 @app.post("/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess")
 async def process_student_answer_image(
@@ -1131,11 +1133,12 @@ def get_student_answers(
                     ))
     
     return summaries
+#endregion
 
 
 
 # ==============================
-# Utility Endpoints
+#region Utility Endpoints
 # ==============================
 @app.post("/api/image_preprocess")
 async def image_preprocess(file: UploadFile = File(...)):
@@ -1219,3 +1222,4 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
+#endregion
