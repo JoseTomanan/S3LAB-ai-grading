@@ -65,7 +65,7 @@
 					{#each bigItem.b as smallItem}
 						<span class="flex flex-row items-end justify-between">
 							<p class="truncate text-ellipsis w-fill">
-								({smallItem.item_id}) {smallItem.question}
+								({smallItem.label}) {smallItem.question}
 							</p>
 							<Dialog.Root>
 								<Dialog.Trigger>
