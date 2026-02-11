@@ -37,7 +37,7 @@
 				console.log(formBody);
 				
 				const response = await fetch(
-					`${API_BASE_URL}/api/test_instances/${test_id}/${submittedTestItem.item_id}`,
+					`${API_BASE_URL}/api/test_instances/${test_id}/items/${submittedTestItem.item_id}`,
 					{
 						method: "PATCH",
 						body: JSON.stringify(formBody),
