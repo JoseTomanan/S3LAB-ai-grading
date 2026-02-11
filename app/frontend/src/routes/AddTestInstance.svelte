@@ -11,15 +11,17 @@
 	import { Button } from '$lib/components/ui/button/index.ts';
 
 	let isItemsLoading: boolean = $state(true);
-	let dropdownItems: (Section & {value: boolean})[] = $state([]);
+	let dropdownItems: Section[] = $state([]);
 
 	// svelte-ignore non_reactive_update
 	let newInstanceName: string = "";
-	// svelte-ignore non_reactive_update
-	let newInstanceSectionId: string = "";
+	let newInstanceSectionId: string = $state("");
+
+	const triggerContent = $derived(
+				dropdownItems.find((f) => f.section_id.toString() == newInstanceSectionId)?.section_name ?? "Section..."
+				);
 
 	onMount(async () => {
-		// FIXME: remove this once verified working with API endpoint
 		isItemsLoading = true;
 		try {
 			const response = await fetch(
@@ -33,10 +35,7 @@
 			switch (response.status) {
 				case 200:
 					const result = await response.json();
-					dropdownItems = result.sections.map((section: Section) => ({
-								...section,
-								value: true
-								}));
+					dropdownItems = result;
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
@@ -86,15 +85,14 @@
 					required
 					bind:value={newInstanceName}/>
 	<Label for="section">Section</Label>
-	<!-- FIXME: remove this once verified working with endpoint -->
 	<Select.Root type="single"
 								name="section"
 								bind:value={newInstanceSectionId}>
-		<Select.Trigger class="w-full text-base">
-			Section...
+		<Select.Trigger class="w-full text-base md:text-sm">
+			{triggerContent}
 		</Select.Trigger>
 		<Select.Content>
-			{#each dropdownItems as item (item.value)}
+			{#each dropdownItems as item (item.section_id)}
 				<Select.Item value={item.section_id.toString()}
 											label={item.section_name}>
 					{item.section_name} ({item.section_id})
