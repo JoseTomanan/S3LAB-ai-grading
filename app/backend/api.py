@@ -324,17 +324,17 @@ def edit_test_instance(
         
         # Create new items
         for idx, item_data in enumerate(update.items, start=1):
-            assert item_data.question is not None
-            assert item_data.is_problem_solving is not None
+            question = item_data.question if item_data.question is not None else "Untitled Question"
+            is_problem_solving = item_data.is_problem_solving if item_data.is_problem_solving is not None else False
+
             new_item = TestItem(
-                    item_id=idx,  # Sequential within test instance
-                    test_id=test_id,
-                    label=item_data.label if hasattr(item_data, 'label') else f"Item {idx}",
-                    question=item_data.question,
-                    is_problem_solving=item_data.is_problem_solving,
-                    expected_answer_rubric_questions=item_data.expected_answer_rubric_questions 
-                        if hasattr(item_data, 'expected_answer_rubric_questions') else ""
-                    )
+                item_id=idx,
+                test_id=test_id,
+                label=item_data.label or f"Item {idx}",
+                question=question,
+                is_problem_solving=is_problem_solving,
+                expected_answer_rubric_questions=item_data.expected_answer_rubric_questions or ""
+            )
             session.add(new_item)
     
     session.add(instance)
@@ -474,10 +474,10 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 # ==============================
 @app.get("/api/test_instances/{test_id}/items")
 def get_test_instance_items(
-            test_id: str,
-            session: Session = Depends(get_session),
-            response: Response = None
-            ):
+    test_id: str, 
+    session: Session = Depends(get_session), 
+    response: Optional[Response] = None
+):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
 
@@ -489,8 +489,8 @@ def get_test_instance_items(
             ).all()
     
     if not items:
-        response.status_code = status.HTTP_204_NO_CONTENT
-        # raise HTTPException(status_code=204, detail=f"Empty no!!!")
+        if response is not None:
+            response.status_code = status.HTTP_204_NO_CONTENT
         return None
 
 
@@ -524,21 +524,25 @@ def add_test_item(
     
     # Determine next item_id (max existing + 1)
     max_item = session.exec(
-            select(TestItem)
-            .order_by(TestItem.item_id.desc()) 
-            ).first()
+        select(TestItem)
+        .where(TestItem.test_id == test_id)
+        .order_by(TestItem.item_id.desc())  # type: ignore[union-attr]
+    ).first()
 
     next_item_id = (max_item.item_id + 1) if max_item else 1
 
     # Create new test item
+    question = item.question if item.question is not None else "Untitled Question"
+    is_problem_solving = item.is_problem_solving if item.is_problem_solving is not None else False
+
     new_item = TestItem(
-            item_id=next_item_id,
-            test_id=test_id,
-            label=item.label,
-            question=item.question,
-            is_problem_solving=item.is_problem_solving,
-            expected_answer_rubric_questions=item.expected_answer_rubric_questions
-            )
+        item_id=next_item_id,
+        test_id=test_id,
+        label=item.label or f"Item {next_item_id}",
+        question=question,
+        is_problem_solving=is_problem_solving,
+        expected_answer_rubric_questions=item.expected_answer_rubric_questions or ""
+    )
     session.add(new_item)
     session.commit()
     session.refresh(new_item)
@@ -764,7 +768,9 @@ async def process_student_answer_image(
         session.add(paper)
         session.commit()
         session.refresh(paper)
-    
+
+    assert paper is not None
+
     # Create or update StudentAnswer
     answer = session.exec(
             select(StudentAnswer).where(
@@ -784,18 +790,20 @@ async def process_student_answer_image(
     
     if not answer:
         answer = StudentAnswer(
-                paper_id=paper.paper_id,
-                item_id=item_id,
-                image_directory=f"/api/temp/{safe_filename}",
-                ai_evaluation="",
-                is_done_rendering=True
-                )
+            paper_id=paper.paper_id,
+            item_id=item_id, 
+            image_directory=f"/api/temp/{safe_filename}",
+            ai_evaluation="",
+            is_done_rendering=True
+        )
         session.add(answer)
+        session.commit()
+        session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
         answer.is_done_rendering = True
         session.add(answer)
-    
+
     session.commit()
     
     # ===== RETURN ALL CANDIDATE BOXES FOR PREVIEW =====
@@ -871,11 +879,11 @@ async def update_answer_segmentation(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image content")
         
         src_pts = np.array([
-                [points_data["ul"]["x"], points_data["ul"]["y"]],
-                [points_data["ur"]["x"], points_data["ur"]["y"]],
-                [points_data["lr"]["x"], points_data["lr"]["y"]],
-                [points_data["ll"]["x"], points_data["ll"]["y"]]
-                ], dtype=np.float32)
+            [float(points_data["ul"]["x"]), float(points_data["ul"]["y"])],
+            [float(points_data["ur"]["x"]), float(points_data["ur"]["y"])],
+            [float(points_data["lr"]["x"]), float(points_data["lr"]["y"])],
+            [float(points_data["ll"]["x"]), float(points_data["ll"]["y"])],
+        ], dtype=np.float32)
         
         def calc_aspect(pts):
             w_top = np.linalg.norm(pts[0] - pts[1])
@@ -888,12 +896,12 @@ async def update_answer_segmentation(
         OUT_HEIGHT = 800
         OUT_WIDTH = int(OUT_HEIGHT * aspect_ratio)
         
-        dst_pts = np.float32([
-                [0, 0],
-                [OUT_WIDTH, 0],
-                [OUT_WIDTH, OUT_HEIGHT],
-                [0, OUT_HEIGHT]
-                ])
+        dst_pts = np.array([
+            [0.0, 0.0],
+            [float(OUT_WIDTH), 0.0],
+            [float(OUT_WIDTH), float(OUT_HEIGHT)],
+            [0.0, float(OUT_HEIGHT)]
+        ], dtype=np.float32)
         
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
@@ -937,6 +945,8 @@ async def update_answer_segmentation(
         session.add(paper)
         session.commit()
         session.refresh(paper)
+
+    assert paper is not None, "Paper must exist after creation/lookup"
     
     # Create or update StudentAnswer
     answer = session.exec(
@@ -948,18 +958,20 @@ async def update_answer_segmentation(
     
     if not answer:
         answer = StudentAnswer(
-                paper_id=paper.paper_id,
-                item_id=item_id,
-                image_directory=f"/api/temp/{safe_filename}",
-                ai_evaluation="",
-                is_done_rendering=True
-                )
+            paper_id=paper.paper_id,
+            item_id=item_id, 
+            image_directory=f"/api/temp/{safe_filename}",
+            ai_evaluation="",
+            is_done_rendering=True
+        )
         session.add(answer)
+        session.commit()
+        session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
         answer.is_done_rendering = True
         session.add(answer)
-    
+
     session.commit()
     
     return {"image_directory": f"/api/temp/{safe_filename}"}
@@ -1099,10 +1111,10 @@ def get_student_answers(
     
     # Get all answers for this paper
     answers = session.exec(
-            select(StudentAnswer)
-            .where(StudentAnswer.paper_id == paper.paper_id)
-            .order_by(StudentAnswer.item_id)
-            ).all()
+        select(StudentAnswer)
+        .where(StudentAnswer.paper_id == paper.paper_id)
+        .order_by(StudentAnswer.item_id.asc()) # type: ignore[union-attr]
+    ).all()
     
     # Build response with item labels
     summaries = []
