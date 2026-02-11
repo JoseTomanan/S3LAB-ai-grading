@@ -19,7 +19,7 @@
 
 	let activeTestInstance: TestInstance = $state({
 		name: "",
-		section: "",
+		section_id: -1,
 		date: "",
 		test_id: data.test_id,
 		is_done_rendering: false,
@@ -37,7 +37,7 @@
 
 			const result = await response.json();
 			activeTestInstance.name = result.name;
-			activeTestInstance.section = result.section;
+			activeTestInstance.section_id = result.section_id;
 			activeTestInstance.date = result.date;
 			activeTestInstance.is_done_rendering = result.is_done_rendering;
 		} catch (e) {
@@ -68,7 +68,7 @@
 				TestID:
 				<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
 			</h3>
-			<h3>Section: { activeTestInstance.section }</h3>
+			<h3>SectionID: { activeTestInstance.section_id }</h3>
 			<h3>Date: { activeTestInstance.date ? new Date(activeTestInstance.date).toLocaleDateString() : "" }</h3>
 		</div>
 		<span id="thisOne" class="flex items-center gap-2 justify-end">

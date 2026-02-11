@@ -9,6 +9,8 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+
 class CVProcessingError(Exception):
     """Custom exception for CV processing failures"""
     pass
