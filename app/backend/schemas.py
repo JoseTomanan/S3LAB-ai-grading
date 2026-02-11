@@ -18,11 +18,10 @@ class TestItemsResponse(BaseModel):
 
 class NewTestItemRequest(BaseModel):
     """Request body for POST /items (item_id is generated server-side)"""
-    label: str = Field(..., min_length=1)
-    question: str = Field(..., min_length=1)
-    is_problem_solving: bool
-    expected_answer_rubric_questions: str = Field(..., min_length=1)
-
+    label: str = "Item"
+    question: str = "Untitled Question"
+    is_problem_solving: bool = False
+    expected_answer_rubric_questions: str = ""
 
 class NewTestItemResponse(BaseModel):
     """Response for POST /items (returns full created items)"""

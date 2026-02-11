@@ -14,7 +14,7 @@ class Student(SQLModel, table=True):
 
 
 class TestInstance(SQLModel, table=True):
-    __tablename__ = "test_instance"
+    __tablename__ = "test_instance"   # type: ignore[assignment]
     test_id: str = Field(primary_key=True, max_length=100)
     name: str
     section_id: int = Field(foreign_key="section.section_id", index=True)
@@ -23,7 +23,7 @@ class TestInstance(SQLModel, table=True):
 
 
 class TestItem(SQLModel, table=True):
-    __tablename__ = "test_item"
+    __tablename__ = "test_item"   # type: ignore[assignment]
     item_id: int = Field(primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     label: str = Field(max_length=50)
@@ -33,16 +33,16 @@ class TestItem(SQLModel, table=True):
 
 
 class TestPaperInstance(SQLModel, table=True):
-    __tablename__ = "test_paper" # pyright: ignore[reportAssignmentType]
-    paper_id: int = Field(primary_key=True)
+    __tablename__ = "test_paper"   # type: ignore[assignment]
+    paper_id: int = Field(default=None, primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     student_no: str = Field(foreign_key="student.student_no", index=True)
     is_done_rendering: bool = False
 
 
 class StudentAnswer(SQLModel, table=True):
-    __tablename__ = "student_answer" # pyright: ignore[reportAssignmentType]
-    answer_id: int = Field(primary_key=True)
+    __tablename__ = "student_answer"   # type: ignore[assignment]
+    answer_id: int = Field(default=None, primary_key=True)
     paper_id: int = Field(foreign_key="test_paper.paper_id", index=True)
     item_id: int = Field(foreign_key="test_item.item_id", index=True)
     image_directory: str = Field(default="", max_length=500)
