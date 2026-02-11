@@ -7,6 +7,8 @@ from typing import List, Optional
 
 class TestItemSummary(BaseModel):
     """Response model for GET /items endpoint (minimal fields per contract)"""
+    item_id: int
+    label: str
     question: str
     is_problem_solving: bool
 

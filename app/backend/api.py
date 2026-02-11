@@ -205,6 +205,8 @@ def get_test_instances(session: Session = Depends(get_session)):
         
         summary_items = [
                 TestItemSummary(
+                    item_id=item.item_id,
+                    label=item.label,
                     question=item.question,
                     is_problem_solving=item.is_problem_solving
                 ) for item in items
@@ -240,6 +242,8 @@ def get_test_instance(test_id: str, session: Session = Depends(get_session)):
     
     summary_items = [
             TestItemSummary(
+                item_id=item.item_id,
+                label=item.label,
                 question=item.question,
                 is_problem_solving=item.is_problem_solving
             ) for item in items
@@ -348,6 +352,8 @@ def edit_test_instance(
     
     summary_items = [
             TestItemSummary(
+                item_id=item.item_id,
+                label=item.label,
                 question=item.question,
                 is_problem_solving=item.is_problem_solving
             ) for item in items
@@ -472,39 +478,31 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 # ==============================
 # Test Item Endpoints
 # ==============================
-@app.get("/api/test_instances/{test_id}/items")
+@app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
 def get_test_instance_items(
-    test_id: str, 
-    session: Session = Depends(get_session), 
-    response: Optional[Response] = None
+    test_id: str,
+    session: Session = Depends(get_session),
 ):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
-
     if not instance:
         raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
     
     items = session.exec(
-            select(TestItem).where(TestItem.test_id == test_id)
-            ).all()
-    
-    if not items:
-        if response is not None:
-            response.status_code = status.HTTP_204_NO_CONTENT
-        return None
+        select(TestItem).where(TestItem.test_id == test_id)
+    ).all()
 
+    items_summary = [
+        TestItemSummary(
+            item_id=item.item_id,
+            label=item.label,
+            question=item.question,
+            is_problem_solving=item.is_problem_solving,
+        )
+        for item in items
+    ]
 
-    items_response = [
-            {
-                "item_id": item.item_id,
-                "label": item.label,
-                "question": item.question,
-                "is_problem_solving": item.is_problem_solving,
-                "expected_answer_rubric_questions": item.expected_answer_rubric_questions
-            } for item in items
-            ]
-    
-    return {"test_id": test_id, "items": items_response}
+    return TestItemsResponse(test_id=test_id, items=items_summary)
 
 
 @app.post("/api/test_instances/{test_id}/items", response_model=NewTestItemResponse)
