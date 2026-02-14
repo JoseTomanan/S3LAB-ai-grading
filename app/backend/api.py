@@ -10,6 +10,7 @@ import json
 import numpy as np
 import cv2
 import io
+import re
 import pandas as pd
 from pathlib import Path
 from pydantic import ValidationError
@@ -18,6 +19,7 @@ from models import *
 from schemas import *
 from database import create_db_and_tables, get_session, engine
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
+from functionality.ai_interface import *
 
 
 
@@ -208,7 +210,8 @@ def get_test_instances(session: Session = Depends(get_session)):
                     item_id=item.item_id,
                     label=item.label,
                     question=item.question,
-                    is_problem_solving=item.is_problem_solving
+                    is_problem_solving=item.is_problem_solving,
+                    expected_answer_rubric_questions=item.expected_answer_rubric_questions
                 ) for item in items
                 ]
         
@@ -245,7 +248,8 @@ def get_test_instance(test_id: str, session: Session = Depends(get_session)):
                 item_id=item.item_id,
                 label=item.label,
                 question=item.question,
-                is_problem_solving=item.is_problem_solving
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions
             ) for item in items
             ]
     
@@ -355,7 +359,8 @@ def edit_test_instance(
                 item_id=item.item_id,
                 label=item.label,
                 question=item.question,
-                is_problem_solving=item.is_problem_solving
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions
             ) for item in items
             ]
     
@@ -494,14 +499,15 @@ def get_test_instance_items(
     ).all()
 
     items_summary = [
-        TestItemSummary(
-            item_id=item.item_id,
-            label=item.label,
-            question=item.question,
-            is_problem_solving=item.is_problem_solving,
-        )
-        for item in items
-    ]
+            TestItemSummary(
+                item_id=item.item_id,
+                label=item.label,
+                question=item.question,
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions,
+                )
+            for item in items
+            ]
 
     return TestItemsResponse(test_id=test_id, items=items_summary)
 
@@ -1229,12 +1235,49 @@ async def get_processed_image(filename: str):
 
 
 # ==============================
-#region Private functions
+#region Auxiliary functions
 #   --> by Jose
 # ==============================
-def _evaluate_image(answer: StudentAnswer):
-    # TODO: function
-    ...
+def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)):
+    # TODO: TEST FUNCTION
+    _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
+
+    _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
+    _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
+
+    answer = session.get(StudentAnswer, answer_input.answer_id)
+    assert answer is not None
+
+    image_bytes: bytes = CVImagePreprocessor().load_image(answer.image_directory)
+
+    test_item = session.get(TestItem, answer.item_id)
+    assert test_item is not None
+
+    match test_item.is_problem_solving:
+        case True:
+            rubric_questions = test_item.expected_answer_rubric_questions.split(";")
+            ai_evaluation = ""
+            for rubric in rubric_questions:
+                while True:
+                    response = AIAnswerEvaluator().evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
+                    if response and _VALID_R_Q_RESPONSE(response):
+                        break
+                ai_evaluation += f"{response};"
+            
+            answer.ai_evaluation = ai_evaluation
+    
+        case _:
+            expected_answer = test_item.expected_answer_rubric_questions
+            while True:
+                response = AIAnswerEvaluator().evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
+                if response and _VALID_E_A_RESPONSE(response):
+                    break
+
+            answer.ai_evaluation = response
+
+    session.add(answer)
+    session.commit()
+    session.refresh(answer)
 
 
 
