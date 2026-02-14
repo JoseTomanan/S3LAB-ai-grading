@@ -829,6 +829,9 @@ async def process_student_answer_image(
                 "is_selected": False
             })
     
+    if answer: # from jose
+        _evaluate_image(answer)
+    
     return {
             "image_directory": f"/api/temp/{safe_filename}",
             "num_boxes": len(processed_list),
@@ -973,7 +976,7 @@ async def update_answer_segmentation(
         session.add(answer)
 
     session.commit()
-    
+
     return {"image_directory": f"/api/temp/{safe_filename}"}
 
 
@@ -1222,4 +1225,17 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
+#endregion
+
+
+# ==============================
+#region Private functions
+#   --> by Jose
+# ==============================
+def _evaluate_image(answer: StudentAnswer):
+    # TODO: function
+    ...
+
+
+
 #endregion
