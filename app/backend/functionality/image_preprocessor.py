@@ -149,7 +149,19 @@ class CVImagePreprocessor:
     # ==============================
     # Internal Processing Methods
     # ==============================
-    
+    def load_image(self, image_path: str) -> bytes:
+        """
+        Load image (unencoded) and return as bytes
+        """
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        if image is None:
+            raise ValueError(f"Could not load image from {image_path}")
+        
+        ret, buffer = cv2.imencode('.jpg', image)
+        if not ret:
+            raise ValueError("Failed to encode image")
+        return buffer.tobytes()
+
     def _load_image_from_bytes(self, image_bytes: bytes) -> np.ndarray:
         """
         Convert bytes to OpenCV image.
