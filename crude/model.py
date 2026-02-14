@@ -4,8 +4,8 @@ All object classes
 import csv
 import os
 
-from prompts import *
-from findBox import *
+from .prompts import *
+from .findBox import *
 
 from google import genai
 from google.genai import types
