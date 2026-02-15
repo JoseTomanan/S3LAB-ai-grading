@@ -1231,8 +1231,14 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
+#endregion
 
-@app.post("/api/utility/evaluate_image")
+
+
+# ==============================
+#   ---> FROM JOSE
+#region Auxiliary Functions
+# ==============================
 def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)):
     """ --> Auxiliary function by Jose """
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
