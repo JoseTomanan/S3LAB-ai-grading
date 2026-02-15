@@ -15,9 +15,9 @@ import pandas as pd
 from pathlib import Path
 from pydantic import ValidationError
 
-from models import *
-from schemas import *
-from database import create_db_and_tables, get_session, engine
+from .models import *
+from .schemas import *
+from .database import create_db_and_tables, get_session, engine
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.ai_interface import *
 
@@ -1231,17 +1231,11 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
-#endregion
 
-
-# ==============================
-#region Auxiliary functions
-#   --> by Jose
-# ==============================
+@app.post("/api/utility/evaluate_image")
 def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)):
-    # TODO: TEST FUNCTION
+    """ --> Auxiliary function by Jose """
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
-
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
@@ -1275,10 +1269,10 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
 
             answer.ai_evaluation = response
 
+    answer.is_done_rendering = True
+
     session.add(answer)
     session.commit()
     session.refresh(answer)
-
-
 
 #endregion
