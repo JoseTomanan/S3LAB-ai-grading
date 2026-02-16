@@ -486,9 +486,9 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 # ==============================
 @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
 def get_test_instance_items(
-    test_id: str,
-    session: Session = Depends(get_session),
-):
+            test_id: str,
+            session: Session = Depends(get_session),
+            ):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
     if not instance:
