@@ -1,4 +1,3 @@
-
 """
 Development database seeder.
 Run ONLY in development environment to populate test.db with mock data.
@@ -11,6 +10,8 @@ import sys
 import os
 from pathlib import Path
 
+
+
 # ==============================
 # PATH SETUP (works from any cwd)
 # ==============================
@@ -21,29 +22,29 @@ project_root = backend_dir.parent.parent  # Project root containing 'app'
 # Prioritize project structure imports
 if (project_root / "app" / "backend").exists():
     sys.path.insert(0, str(project_root))
-    from app.backend.database import (
-        engine, 
-        create_db_and_tables, 
-        get_direct_session,
-        ENVIRONMENT
-    )
-    from app.backend.models import (
-        Section, Student, TestInstance, TestItem,
-        TestPaperInstance, StudentAnswer
-    )
+    from database import (
+            engine, 
+            create_db_and_tables, 
+            get_direct_session,
+            ENVIRONMENT
+            )
+    from models import (
+            Section, Student, TestInstance, TestItem,
+            TestPaperInstance, StudentAnswer
+            )
 else:
     # Fallback: try direct backend imports (if run from app/backend)
     sys.path.insert(0, str(backend_dir))
     from database import (
-        engine, 
-        create_db_and_tables, 
-        get_direct_session,
-        ENVIRONMENT
-    )
+            engine, 
+            create_db_and_tables, 
+            get_direct_session,
+            ENVIRONMENT
+            )
     from models import (
-        Section, Student, TestInstance, TestItem,
-        TestPaperInstance, StudentAnswer
-    )
+            Section, Student, TestInstance, TestItem,
+            TestPaperInstance, StudentAnswer
+            )
 
 from sqlmodel import delete
 import warnings
@@ -52,59 +53,61 @@ import warnings
 # MOCK DATA
 # ==============================
 MOCK_DATA = {
-    "sections": [
-        {"section_id": 1, "section": "3-Rizal"},
-        {"section_id": 2, "section": "3-Aguinaldo"}
-    ],
-    "students": [
-        {"student_no": "202160151", "name": "Mohammad Hamdi Tuan", "section_id": 1},
-        {"student_no": "202011111", "name": "Jose Ernesto Tomanan", "section_id": 1},
-        {"student_no": "202022222", "name": "Gabriel Abilla", "section_id": 2},
-        {"student_no": "202033333", "name": "David Salon", "section_id": 2}
-    ],
-    "test_instances": [
-        {
-            "test_id": "3-Rizal_Seatwork-1",
-            "name": "Seatwork-1",
-            "section_id": 1,
-            "date": "2025-11-11",
-            "is_done_rendering": False
-        },
-        {
-            "test_id": "3-Aguinaldo_Quiz-1",
-            "name": "Quiz-1",
-            "section_id": 2,
-            "date": "2026-01-12",
-            "is_done_rendering": False
+        "sections": [
+            {"section_id": 1, "section": "3-Rizal"},
+            {"section_id": 2, "section": "3-Aguinaldo"}
+        ],
+        "students": [
+            {"student_no": "202160151", "name": "Mohammad Hamdi Tuan", "section_id": 1},
+            {"student_no": "202011111", "name": "Jose Ernesto Tomanan", "section_id": 1},
+            {"student_no": "202022222", "name": "Gabriel Abilla", "section_id": 2},
+            {"student_no": "202033333", "name": "David Salon", "section_id": 2}
+        ],
+        "test_instances": [
+            {
+                "test_id": "3-Rizal_Seatwork-1",
+                "name": "Seatwork-1",
+                "section_id": 1,
+                "date": "2025-11-11",
+                "is_done_rendering": False
+            },
+            {
+                "test_id": "3-Aguinaldo_Quiz-1",
+                "name": "Quiz-1",
+                "section_id": 2,
+                "date": "2026-01-12",
+                "is_done_rendering": False
+            }
+        ],
+        "test_items": [
+            {
+                "item_id": 1,
+                "test_id": "3-Rizal_Seatwork-1",
+                "label": "Problem 1",
+                "question": "Solve for x: 2x + 5 = 15",
+                "is_problem_solving": True,
+                "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts);"
+            },
+            {
+                "item_id": 2,
+                "test_id": "3-Rizal_Seatwork-1",
+                "label": "Question 2",
+                "question": "What is the capital of France?",
+                "is_problem_solving": False,
+                "expected_answer_rubric_questions": "Paris (1pt)"
+            },
+            {
+                "item_id": 3,
+                "test_id": "3-Aguinaldo_Quiz-1",
+                "label": "Problem 1",
+                "question": "Calculate the area of a circle with radius 7 cm",
+                "is_problem_solving": True,
+                "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt);"
+            }
+        ]
         }
-    ],
-    "test_items": [
-        {
-            "item_id": 1,
-            "test_id": "3-Rizal_Seatwork-1",
-            "label": "Problem 1",
-            "question": "Solve for x: 2x + 5 = 15",
-            "is_problem_solving": True,
-            "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts);"
-        },
-        {
-            "item_id": 2,
-            "test_id": "3-Rizal_Seatwork-1",
-            "label": "Question 2",
-            "question": "What is the capital of France?",
-            "is_problem_solving": False,
-            "expected_answer_rubric_questions": "Paris (1pt)"
-        },
-        {
-            "item_id": 3,
-            "test_id": "3-Aguinaldo_Quiz-1",
-            "label": "Problem 1",
-            "question": "Calculate the area of a circle with radius 7 cm",
-            "is_problem_solving": True,
-            "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt);"
-        }
-    ]
-}
+
+
 
 # ==============================
 # SEEDING LOGIC
@@ -163,6 +166,8 @@ def seed_dev_database():
         raise
     finally:
         session.close()
+
+
 
 # ==============================
 # CLI EXECUTION
