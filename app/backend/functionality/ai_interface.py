@@ -25,7 +25,7 @@ class AIAnswerEvaluator:
     def evaluate_rubric(self, image_bytes: bytes, question: str, rubric: str):
         return self._send_image_prompt(
                         image_bytes,
-                        f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nPROMPT: {rubric}"
+                        f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nPROMPT: \"{rubric}\": can this be said about the answer?"
                         )
 
     def _send_image_prompt(self, image_bytes: bytes, prompt: str) -> str | None:

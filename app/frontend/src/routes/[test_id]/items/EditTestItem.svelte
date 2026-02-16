@@ -16,50 +16,47 @@
 	}>();
 
 	let formTestItem: TestItem = $state({
-		item_id: testItem.item_id,
-		label: testItem.label,
-		question: testItem.question,
-		is_problem_solving: testItem.is_problem_solving,
-		expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
-	});
+				item_id: testItem.item_id,
+				label: testItem.label,
+				question: testItem.question,
+				is_problem_solving: testItem.is_problem_solving,
+				expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
+			});
 
 	async function editTestItem(submittedTestItem: TestItem) {
-		// FIXME: remove once validated workingness
 		if (testItem != submittedTestItem) {
 			try {
 				const formBody = {
 							label: submittedTestItem.label,
 							question: submittedTestItem.question,
-							is_problem_solving: submittedTestItem.is_problem_solving ? "true" : "false",
 							expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
-						};
+							};
 
 				console.log(formBody);
 				
 				const response = await fetch(
-					`${API_BASE_URL}/api/test_instances/${test_id}/${submittedTestItem.item_id}`,
-					{
-						method: "PATCH",
-						body: JSON.stringify(formBody),
-					}
-				);
+							`${API_BASE_URL}/api/test_instances/${test_id}/items/${submittedTestItem.item_id}`,
+							{
+								method: "PATCH",
+								headers: {'Content-Type': 'application/json',},
+								body: JSON.stringify(formBody),
+							}
+							);
 				
 				if (response.ok) {
 					const result = await response.json();
-					alert("Success: "+result.item_id);
+					alert("Success: " + result.item_id);
+					window.location.reload();
 				} else
 					alert(response.status + response.statusText);
 			} catch (e) {
 				alert("Failed to send POST request.");
-			} finally {
-				window.location.reload();
 			}
 		} else
 			alert("No changes were made.");
 	}
 
 	async function deleteTestItem() {
-		// FIXME: remove once validated workingness
 		try {
 			const response = await fetch(
 					`${API_BASE_URL}/api/test_instances/${test_id}/${formTestItem.item_id}`,
@@ -93,18 +90,20 @@
 	<Textarea id="question" rows={4} bind:value={ formTestItem.question } required/>
 	<Label for="e_a_r_q">
 		{ testItem.is_problem_solving
-					? "Rubric questions (separate with `. `)"
+					? "Rubric questions (separate with `; `)"
 					: "Expected answer"}
 	</Label>
 	<Textarea id="e_a_r_q" rows={6} bind:value={ formTestItem.expected_answer_rubric_questions } required/>
 	<Dialog.Footer>
 		<div class="flex flex-row w-full gap-2">
-			<Button variant="outline" class="w-4/5"
-						onclick={() => editTestItem(formTestItem)}>
+			<Button variant="outline"
+							class="w-4/5"
+							onclick={() => editTestItem(formTestItem)}>
 				Save changes
 			</Button>
-			<Button variant="destructive" class="w-1/5"
-						onclick={() => deleteTestItem()}>
+			<Button variant="destructive"
+							class="w-1/5"
+							onclick={() => deleteTestItem()}>
 				<MdiDelete class="size-6"/>
 			</Button>
 		</div>

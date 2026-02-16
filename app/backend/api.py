@@ -10,14 +10,16 @@ import json
 import numpy as np
 import cv2
 import io
+import re
 import pandas as pd
 from pathlib import Path
 from pydantic import ValidationError
 
-from models import *
-from schemas import *
-from database import create_db_and_tables, get_session, engine
+from .models import *
+from .schemas import *
+from .database import create_db_and_tables, get_session, engine
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
+from functionality.ai_interface import *
 
 # ==============================
 # Preprocessor Configuration
@@ -26,7 +28,7 @@ USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional C
 PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 
 # ==============================
-# App Initialization
+#region App Initialization
 # ==============================
 app = FastAPI(
         title="Assessment Processing API",
@@ -35,7 +37,6 @@ app = FastAPI(
         version="1.0.0"
         )
 
-# CORS middleware
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -44,14 +45,15 @@ app.add_middleware(
         allow_headers=["*"],
         )
 
-# Temporary directory for processed images
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
+
+#endregion
 
 
 
 # ==============================
-# Section Endpoints
+#region Section Endpoints
 # ==============================
 @app.get("/api/sections", response_model=List[dict])
 def get_all_sections(session: Session = Depends(get_session)):
@@ -212,7 +214,8 @@ def get_test_instances(session: Session = Depends(get_session)):
                     item_id=item.item_id,
                     label=item.label,
                     question=item.question,
-                    is_problem_solving=item.is_problem_solving
+                    is_problem_solving=item.is_problem_solving,
+                    expected_answer_rubric_questions=item.expected_answer_rubric_questions
                 ) for item in items
                 ]
         
@@ -249,7 +252,8 @@ def get_test_instance(test_id: str, session: Session = Depends(get_session)):
                 item_id=item.item_id,
                 label=item.label,
                 question=item.question,
-                is_problem_solving=item.is_problem_solving
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions
             ) for item in items
             ]
     
@@ -359,7 +363,8 @@ def edit_test_instance(
                 item_id=item.item_id,
                 label=item.label,
                 question=item.question,
-                is_problem_solving=item.is_problem_solving
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions
             ) for item in items
             ]
     
@@ -476,17 +481,18 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers=headers
             )
+#endregion
 
 
 
 # ==============================
-# Test Item Endpoints
+#region Test Item Endpoints
 # ==============================
 @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
 def get_test_instance_items(
-    test_id: str,
-    session: Session = Depends(get_session),
-):
+            test_id: str,
+            session: Session = Depends(get_session),
+            ):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
     if not instance:
@@ -497,14 +503,15 @@ def get_test_instance_items(
     ).all()
 
     items_summary = [
-        TestItemSummary(
-            item_id=item.item_id,
-            label=item.label,
-            question=item.question,
-            is_problem_solving=item.is_problem_solving,
-        )
-        for item in items
-    ]
+            TestItemSummary(
+                item_id=item.item_id,
+                label=item.label,
+                question=item.question,
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions,
+                )
+            for item in items
+            ]
 
     return TestItemsResponse(test_id=test_id, items=items_summary)
 
@@ -656,11 +663,12 @@ def delete_test_item(
     session.commit()
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+#endregion
 
 
 
 # ==============================
-# Student Answer Processing Endpoints
+#region Student Answer Processing Endpoints
 # ==============================
 @app.post("/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess")
 async def process_student_answer_image(
@@ -835,6 +843,9 @@ async def process_student_answer_image(
                 "is_selected": False
             })
     
+    if answer: # from jose
+        _evaluate_image(answer)
+    
     return {
             "image_directory": f"/api/temp/{safe_filename}",
             "num_boxes": len(processed_list),
@@ -983,7 +994,7 @@ async def update_answer_segmentation(
         session.add(answer)
 
     session.commit()
-    
+
     return {"image_directory": f"/api/temp/{safe_filename}"}
 
 
@@ -1143,11 +1154,12 @@ def get_student_answers(
                     ))
     
     return summaries
+#endregion
 
 
 
 # ==============================
-# Utility Endpoints
+#region Utility Endpoints
 # ==============================
 @app.post("/api/image_preprocess")
 async def image_preprocess(file: UploadFile = File(...)):
@@ -1235,3 +1247,59 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
+#endregion
+
+
+
+# ==============================
+#   ---> FROM JOSE
+#region Auxiliary Functions
+# ==============================
+def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)) -> StudentAnswer:
+    """
+    (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
+    Return value is for testing purposes only.
+    """
+    _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
+    _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
+    _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
+
+    answer = session.get(StudentAnswer, answer_input.answer_id)
+    assert answer is not None
+
+    image_bytes: bytes = CVImagePreprocessor().load_image(answer.image_directory)
+
+    test_item = session.get(TestItem, answer.item_id)
+    assert test_item is not None
+
+    match test_item.is_problem_solving:
+        case True:
+            rubric_questions = test_item.expected_answer_rubric_questions.split(";")
+            ai_evaluation = ""
+            for rubric in rubric_questions:
+                while True:
+                    response = AIAnswerEvaluator().evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
+                    if response and _VALID_R_Q_RESPONSE(response):
+                        break
+                ai_evaluation += f"{response};"
+            
+            answer.ai_evaluation = ai_evaluation
+    
+        case _:
+            expected_answer = test_item.expected_answer_rubric_questions
+            while True:
+                response = AIAnswerEvaluator().evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
+                if response and _VALID_E_A_RESPONSE(response):
+                    break
+
+            answer.ai_evaluation = response
+
+    answer.is_done_rendering = True
+
+    session.add(answer)
+    session.commit()
+    session.refresh(answer)
+
+    return answer
+
+#endregion

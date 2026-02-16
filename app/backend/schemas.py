@@ -11,6 +11,7 @@ class TestItemSummary(BaseModel):
     label: str
     question: str
     is_problem_solving: bool
+    expected_answer_rubric_questions: str
 
 
 class TestItemsResponse(BaseModel):

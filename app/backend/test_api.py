@@ -11,77 +11,79 @@ import functools
 # Add parent directory to path to import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api import app
-from database import engine, create_db_and_tables
-from models import Section, Student, TestInstance, TestItem, TestPaperInstance, StudentAnswer
+from .api import app, _evaluate_image
+from .database import engine, create_db_and_tables
+from .models import *
 
 # Test client
 client = TestClient(app)
 
-# ==============================
-# Mock Data
-# ==============================
 
+
+
+# ==============================
+#region Mock Data
+# ==============================
 MOCK_DATA = {
-    
-    "sections": [
-        {"section_id": 1, "section": "3-Rizal"},
-        {"section_id": 2, "section": "3-Aguinaldo"}
-    ],
-    "students": [
-        {"student_no": "202160151", "name": "Mohammad Hamdi S. Tuan", "section_id": 1},
-        {"student_no": "202160152", "name": "Jose Ernesto Tomanan", "section_id": 1},
-        {"student_no": "202160154", "name": "Ana Manalang", "section_id": 2},
-        {"student_no": "202160155", "name": "Jose Rizal", "section_id": 2}
-    ],
-    "test_instances": [
-        {
-            "test_id": "3-Rizal_Seatwork-1_abc123",
-            "name": "Seatwork-1",
-            "section_id": 1,
-            "date": "2025-11-11",
-            "is_done_rendering": False
-        },
-        {
-            "test_id": "3-Aguinaldo_Quiz-1_def456",
-            "name": "Quiz-1",
-            "section_id": 2,
-            "date": "2026-01-12",
-            "is_done_rendering": False
+        "sections": [
+            {"section_id": 1, "section_name": "3-Rizal"},
+            {"section_id": 2, "section_name": "3-Aguinaldo"}
+            ],
+        "students": [
+            {"student_no": "202160151", "name": "Mohammad Hamdi Tuan", "section_id": 1},
+            {"student_no": "202011111", "name": "Jose Ernesto Tomanan", "section_id": 1},
+            {"student_no": "202022222", "name": "Gabriel Abilla", "section_id": 2},
+            {"student_no": "202033333", "name": "David Salon", "section_id": 2}
+            ],
+        "test_instances": [
+            {
+                "test_id": "3-Rizal_Seatwork-1",
+                "name": "Seatwork-1",
+                "section_id": 1,
+                "date": "2025-11-11",
+                "is_done_rendering": False
+            },
+            {
+                "test_id": "3-Aguinaldo_Quiz-1",
+                "name": "Quiz-1",
+                "section_id": 2,
+                "date": "2026-01-12",
+                "is_done_rendering": False
+            }
+            ],
+        "test_items": [
+            {
+                "item_id": 1,
+                "test_id": "3-Rizal_Seatwork-1",
+                "label": "Problem 1",
+                "question": "Solve for x: 2x + 5 = 15",
+                "is_problem_solving": True,
+                "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts);"
+            },
+            {
+                "item_id": 2,
+                "test_id": "3-Rizal_Seatwork-1",
+                "label": "Question 2",
+                "question": "What is the capital of France?",
+                "is_problem_solving": False,
+                "expected_answer_rubric_questions": "Paris (1pt)"
+            },
+            {
+                "item_id": 3,
+                "test_id": "3-Aguinaldo_Quiz-1",
+                "label": "Problem 1",
+                "question": "Calculate the area of a circle with radius 7 cm",
+                "is_problem_solving": True,
+                "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt);"
+            }
+            ]
         }
-    ],
-    "test_items": [
-        {
-            "item_id": 1,
-            "test_id": "3-Rizal_Seatwork-1_abc123",
-            "label": "Problem 1",
-            "question": "Solve for x: 2x + 5 = 15",
-            "is_problem_solving": True,
-            "expected_answer_rubric_questions": "Correct equation setup (2pts), accurate solution (2pts)"
-        },
-        {
-            "item_id": 2,
-            "test_id": "3-Rizal_Seatwork-1_abc123",
-            "label": "Question 2",
-            "question": "What is the capital of France?",
-            "is_problem_solving": False,
-            "expected_answer_rubric_questions": "Correct answer: Paris (1pt)"
-        },
-        {
-            "item_id": 3,
-            "test_id": "3-Aguinaldo_Quiz-1_def456",
-            "label": "Problem 1",
-            "question": "Calculate the area of a circle with radius 7 cm",
-            "is_problem_solving": True,
-            "expected_answer_rubric_questions": "Correct formula (2pts), substitution (1pt)"
-        }
-    ]
-}
+#endregion
+
 
 # ==============================
-# Test Fixtures
+#region Test Fixtures
 # ==============================
-
 @pytest.fixture(scope="function", autouse=True)
 def setup_database():
     """Setup and teardown database for each test"""
@@ -123,12 +125,12 @@ def setup_database():
     
     # Run test
     yield  
-    
+#endregion
+
 
 # ==============================
-# Helper Functions
+#region Helper Functions
 # ==============================
-
 def create_test_image():
     """Create a simple test image (white square)"""
     import numpy as np
@@ -141,10 +143,12 @@ def create_test_image():
     _, buffer = cv2.imencode('.jpg', img)
     return io.BytesIO(buffer.tobytes())
 
-# ==============================
-# Section Endpoints Tests
-# ==============================
+#endregion
 
+
+# ==============================
+#region Section Endpoints Tests
+# ==============================
 def test_get_all_sections_success():
     """Test GET /api/sections - Success"""
     response = client.get("/api/sections")
@@ -297,11 +301,12 @@ def test_delete_student_not_found():
     data = response.json()
     assert "detail" in data
     assert "student" in data["detail"].lower()
+#endregion
+
 
 # ==============================
-# Test Instance Endpoints Tests
+#region Test Instance Endpoints Tests
 # ==============================
-
 def test_get_test_instances_success():
     """Test GET /api/test_instances - Success"""
     response = client.get("/api/test_instances")
@@ -311,19 +316,19 @@ def test_get_test_instances_success():
     
     assert isinstance(data, list)
     assert len(data) == 2
-    assert data[0]["test_id"] == "3-Rizal_Seatwork-1_abc123"
+    assert data[0]["test_id"] == "3-Rizal_Seatwork-1"
     assert data[0]["name"] == "Seatwork-1"
     assert data[0]["section_id"] == 1
 
 
 def test_get_test_instance_success():
     """Test GET /api/test_instances/{test_id} - Success"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1")
     
     assert response.status_code == 200
     data = response.json()
     
-    assert data["test_id"] == "3-Rizal_Seatwork-1_abc123"
+    assert data["test_id"] == "3-Rizal_Seatwork-1"
     assert data["name"] == "Seatwork-1"
     assert data["section_id"] == 1
     assert len(data["items"]) == 2
@@ -391,14 +396,14 @@ def test_edit_test_instance_success():
     }
     
     response = client.patch(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123",
+        "/api/test_instances/3-Rizal_Seatwork-1",
         json=update_data
     )
     
     assert response.status_code == 200
     data = response.json()
     
-    assert data["test_id"] == "3-Rizal_Seatwork-1_abc123"
+    assert data["test_id"] == "3-Rizal_Seatwork-1"
     assert data["date"] == "2026-01-15"
     assert len(data["items"]) == 1
     assert data["items"][0]["question"] == "New Question 1"
@@ -423,7 +428,7 @@ def test_edit_test_instance_not_found():
 
 def test_delete_test_instance_success():
     """Test DELETE /api/test_instances/{test_id} - Success"""
-    response = client.delete("/api/test_instances/3-Rizal_Seatwork-1_abc123")
+    response = client.delete("/api/test_instances/3-Rizal_Seatwork-1")
     
     assert response.status_code == 204
     assert response.content == b""
@@ -441,12 +446,12 @@ def test_delete_test_instance_not_found():
 
 def test_export_test_results_success():
     """Test GET /api/test_instances/{test_id}/export - Success"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123/export")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1/export")
     
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert "attachment" in response.headers["content-disposition"]
-    assert "3-Rizal_Seatwork-1_abc123_results.xlsx" in response.headers["content-disposition"]
+    assert "3-Rizal_Seatwork-1_results.xlsx" in response.headers["content-disposition"]
 
 
 def test_export_test_results_not_found():
@@ -457,19 +462,20 @@ def test_export_test_results_not_found():
     data = response.json()
     assert "detail" in data
     assert "test instance" in data["detail"].lower()
+#endregion
+
 
 # ==============================
-# Test Item Endpoints Tests
+#region Test Item Endpoints Tests
 # ==============================
-
 def test_get_test_instance_items_success():
     """Test GET /api/test_instances/{test_id}/items - Success"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123/items")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1/items")
     
     assert response.status_code == 200
     data = response.json()
     
-    assert data["test_id"] == "3-Rizal_Seatwork-1_abc123"
+    assert data["test_id"] == "3-Rizal_Seatwork-1"
     assert len(data["items"]) == 2
     assert data["items"][0]["item_id"] == 1
     assert data["items"][0]["label"] == "Problem 1"
@@ -496,7 +502,7 @@ def test_add_test_item_success():
     }
     
     response = client.post(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/items",
+        "/api/test_instances/3-Rizal_Seatwork-1/items",
         json=new_item
     )
     
@@ -539,7 +545,7 @@ def test_edit_test_item_success():
     }
     
     response = client.patch(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/items/1",
+        "/api/test_instances/3-Rizal_Seatwork-1/items/1",
         json=update_data
     )
     
@@ -558,7 +564,7 @@ def test_edit_test_item_not_found():
     }
     
     response = client.patch(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/items/999",
+        "/api/test_instances/3-Rizal_Seatwork-1/items/999",
         json=update_data
     )
     
@@ -570,7 +576,7 @@ def test_edit_test_item_not_found():
 
 def test_delete_test_item_success():
     """Test DELETE /api/test_instances/{test_id}/items/{item_id} - Success"""
-    response = client.delete("/api/test_instances/3-Rizal_Seatwork-1_abc123/items/1")
+    response = client.delete("/api/test_instances/3-Rizal_Seatwork-1/items/1")
     
     assert response.status_code == 204
     assert response.content == b""
@@ -578,23 +584,24 @@ def test_delete_test_item_success():
 
 def test_delete_test_item_not_found():
     """Test DELETE /api/test_instances/{test_id}/items/{item_id} - Item not found"""
-    response = client.delete("/api/test_instances/3-Rizal_Seatwork-1_abc123/items/999")
+    response = client.delete("/api/test_instances/3-Rizal_Seatwork-1/items/999")
     
     assert response.status_code == 404
     data = response.json()
     assert "detail" in data
     assert "test item" in data["detail"].lower()
+#endregion
+
 
 # ==============================
-# Student Answer Processing Tests
+#region Student Answer Processing Tests
 # ==============================
-
 def test_process_student_answer_image_success():
     """Test POST /api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess - Success"""
     test_image = create_test_image()
     
     response = client.post(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/202160151/1/image_preprocess",
+        "/api/test_instances/3-Rizal_Seatwork-1/202160151/1/image_preprocess",
         files={"file": ("test.jpg", test_image, "image/jpeg")}
     )
     
@@ -613,7 +620,7 @@ def test_process_student_answer_image_invalid_file():
     text_file = io.BytesIO(b"This is not an image")
     
     response = client.post(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/202160151/1/image_preprocess",
+        "/api/test_instances/3-Rizal_Seatwork-1/202160151/1/image_preprocess",
         files={"file": ("test.txt", text_file, "text/plain")}
     )
     
@@ -650,7 +657,7 @@ def test_update_answer_segmentation_success():
     }
     
     response = client.patch(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/202160151/1",
+        "/api/test_instances/3-Rizal_Seatwork-1/202160151/1",
         files={"file": ("test.jpg", test_image, "image/jpeg")},
         data={"points": json.dumps(points)}
     )
@@ -673,7 +680,7 @@ def test_update_answer_segmentation_invalid_points():
     }
     
     response = client.patch(
-        "/api/test_instances/3-Rizal_Seatwork-1_abc123/202160151/1",
+        "/api/test_instances/3-Rizal_Seatwork-1/202160151/1",
         files={"file": ("test.jpg", test_image, "image/jpeg")},
         data={"points": json.dumps(invalid_points)}
     )
@@ -686,12 +693,12 @@ def test_update_answer_segmentation_invalid_points():
 
 def test_get_test_paper_statuses_success():
     """Test GET /api/test_instances/{test_id}/statuses - Success"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123/statuses")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1/statuses")
     
     assert response.status_code == 200
     data = response.json()
     
-    assert data["test_id"] == "3-Rizal_Seatwork-1_abc123"
+    assert data["test_id"] == "3-Rizal_Seatwork-1"
     assert "statuses" in data
     assert isinstance(data["statuses"], list)
     assert len(data["statuses"]) == 2
@@ -712,12 +719,12 @@ def test_get_test_paper_statuses_not_found():
 
 def test_get_ai_evaluation_results_success():
     """Test GET /api/test_instances/{test_id}/results - Success"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123/results")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1/results")
     
     assert response.status_code == 200
     data = response.json()
     
-    assert data["test_id"] == "3-Rizal_Seatwork-1_abc123"
+    assert data["test_id"] == "3-Rizal_Seatwork-1"
     assert "evaluations" in data
     assert isinstance(data["evaluations"], list)
     assert len(data["evaluations"]) == 2
@@ -738,7 +745,7 @@ def test_get_ai_evaluation_results_not_found():
 
 def test_get_student_answers_success():
     """Test GET /api/test_instances/{test_id}/{student_no} - Success"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123/202160151")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1/202160151")
     
     assert response.status_code == 200
     data = response.json()
@@ -749,17 +756,18 @@ def test_get_student_answers_success():
 
 def test_get_student_answers_not_found():
     """Test GET /api/test_instances/{test_id}/{student_no} - Student not found"""
-    response = client.get("/api/test_instances/3-Rizal_Seatwork-1_abc123/999999999")
+    response = client.get("/api/test_instances/3-Rizal_Seatwork-1/999999999")
     
     assert response.status_code == 404
     data = response.json()
     assert "detail" in data
     assert "student" in data["detail"].lower()
+#endregion
+
 
 # ==============================
-# Utility Endpoints Tests
+#region Utility Endpoints Tests
 # ==============================
-
 def test_image_preprocess_utility_success():
     """Test POST /api/image_preprocess - Success"""
     test_image = create_test_image()
@@ -790,3 +798,14 @@ def test_image_preprocess_utility_invalid_format():
     data = response.json()
     assert "detail" in data
     assert "unsupported" in data["detail"].lower()
+
+#endregion
+
+
+
+# ==============================
+#   --> FROM JOSE
+#region Auxiliary Functions Tests
+# ==============================
+def test_function_evaluate_image():
+    ...
