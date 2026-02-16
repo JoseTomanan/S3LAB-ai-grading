@@ -1,5 +1,6 @@
+import json
 from sqlmodel import SQLModel, Field
-from typing import Optional
+from typing import List, Optional
 
 
 class Section(SQLModel, table=True):
@@ -48,3 +49,17 @@ class StudentAnswer(SQLModel, table=True):
     image_directory: str = Field(default="", max_length=500)
     ai_evaluation: str = Field(default="")
     is_done_rendering: bool = False
+    scores_json: str = Field(default="[]")
+
+    @property
+    def scores(self) -> List[float]:
+        """Get the list of LLM evaluation scores (e.g., [0.9, 1.0, 0.75])."""
+        return json.loads(self._scores_json)
+
+    @scores.setter
+    def scores(self, value: List[float]) -> None:
+        """Set scores from LLM evaluation; stored as JSON in the database."""
+        if not isinstance(value, list):
+            raise ValueError("scores must be a list of float numbers")
+        # Ensure all elements are float-able
+        self._scores_json = json.dumps([float(x) for x in value])
