@@ -15,17 +15,22 @@ import pandas as pd
 from pathlib import Path
 from pydantic import ValidationError
 
-from .models import *
-from .schemas import *
-from .database import create_db_and_tables, get_session, engine, ENVIRONMENT
+from models import *
+from schemas import *
+from database import create_db_and_tables, get_session, engine, ENVIRONMENT
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.ai_interface import *
 
+
+
 # ==============================
-# Preprocessor Configuration
+#region Preprocessor Configuration
 # ==============================
 USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional CV only
 PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
+
+#endregion
+
 
 # ==============================
 #region App Initialization
@@ -50,6 +55,7 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
 
+
 # ==============================
 # AUTO-SEEDING ON STARTUP (DEV ONLY)
 # ==============================
@@ -71,7 +77,8 @@ async def startup_database_setup():
             print(f"SEEDING FAILED ON STARTUP: {type(e).__name__}: {e}\n")
             # Fail fast since AUTO_SEED was explicitly requested
             raise RuntimeError("Critical: Database seeding failed during startup") from e
-        
+
+
 # ==============================
 #region Section Endpoints
 # ==============================
@@ -502,7 +509,6 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
             headers=headers
             )
 #endregion
-
 
 
 # ==============================
