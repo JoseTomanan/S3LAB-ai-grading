@@ -1255,10 +1255,11 @@ async def get_processed_image(filename: str):
 #   ---> FROM JOSE
 #region Auxiliary Functions
 # ==============================
-def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)) -> StudentAnswer:
+@app.put("/api/function/evaluate_image", response_model=StudentAnswerResponse)
+def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)) -> StudentAnswerResponse:
     """
     (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
-    Return value is for testing purposes only.
+    Temporarily an endpoint for testing purposes.
     """
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
@@ -1284,6 +1285,7 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
                 ai_evaluation += f"{response};"
             
             answer.ai_evaluation = ai_evaluation
+            # TODO: add missing setter for scores = list[float]
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
@@ -1293,6 +1295,7 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
                     break
 
             answer.ai_evaluation = response
+            # TODO: add missing setter for scores = list[float]
 
     answer.is_done_rendering = True
 
@@ -1300,6 +1303,14 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
     session.commit()
     session.refresh(answer)
 
-    return answer
+    return StudentAnswerResponse(
+            answer_id=answer.answer_id,
+            paper_id=answer.paper_id,
+            item_id=answer.item_id,
+            image_directory=answer.image_directory,
+            ai_evaluation=answer.ai_evaluation,
+            is_done_rendering=answer.is_done_rendering
+            # TODO: add missing scores = list[float]
+            )
 
 #endregion
