@@ -1239,8 +1239,11 @@ async def get_processed_image(filename: str):
 #   ---> FROM JOSE
 #region Auxiliary Functions
 # ==============================
-def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)):
-    """ --> Auxiliary function by Jose """
+def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)) -> StudentAnswer:
+    """
+    (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
+    Return value is for testing purposes only.
+    """
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
@@ -1280,5 +1283,7 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
     session.add(answer)
     session.commit()
     session.refresh(answer)
+
+    return answer
 
 #endregion

@@ -11,7 +11,7 @@ import functools
 # Add parent directory to path to import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from .api import app
+from .api import app, _evaluate_image
 from .database import engine, create_db_and_tables
 from .models import *
 
@@ -801,3 +801,11 @@ def test_image_preprocess_utility_invalid_format():
 
 #endregion
 
+
+
+# ==============================
+#   --> FROM JOSE
+#region Auxiliary Functions Tests
+# ==============================
+def test_function_evaluate_image():
+    ...
