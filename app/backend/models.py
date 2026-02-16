@@ -49,15 +49,15 @@ class StudentAnswer(SQLModel, table=True):
     image_directory: str = Field(default="", max_length=500)
     ai_evaluation: str = Field(default="")
     is_done_rendering: bool = False
-    scores_json: str = Field(default="[]")
+    scores: str = Field(default="[]")
 
     @property
-    def scores(self) -> List[float]:
+    def scores_list(self) -> List[float]:
         """Get the list of LLM evaluation scores (e.g., [0.9, 1.0, 0.75])."""
         return json.loads(self._scores_json)
 
-    @scores.setter
-    def scores(self, value: List[float]) -> None:
+    @scores_list.setter
+    def scores_list(self, value: List[float]) -> None:
         """Set scores from LLM evaluation; stored as JSON in the database."""
         if not isinstance(value, list):
             raise ValueError("scores must be a list of float numbers")
