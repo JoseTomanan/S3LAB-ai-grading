@@ -92,16 +92,23 @@
 					bind:value={ formTestItem.label }
 					required />
 	<Label for="question">Question</Label>
-	<Textarea id="question" rows={4} bind:value={ formTestItem.question } required/>
-	<Label for="e_a_r_q">
-		{ testItem.is_problem_solving
-					? "Rubric questions (separate with `; `)"
-					: "Expected answer"}
-	</Label>
-	<Textarea id="e_a_r_q"
-						rows={6}
-						bind:value={ formTestItem.expected_answer_rubric_questions }
-						required />
+	<Textarea id="question"
+					rows={4}
+					bind:value={ formTestItem.question }
+					required />
+	{#if testItem.is_problem_solving}
+		<Label for="r_q">Rubric questions (separate with `; `)</Label>
+		<Textarea id="r_q"
+							rows={6}
+							bind:value={ formTestItem.expected_answer_rubric_questions }
+							required />
+	{:else}
+		<Label for="e_a">Expected answer</Label>
+		<Textarea id="e_a"
+							rows={4}
+							bind:value={ formTestItem.expected_answer_rubric_questions }
+							required />
+	{/if}
 	<Dialog.Footer>
 		<div class="flex flex-row w-full gap-2">
 			<Button variant="outline"
