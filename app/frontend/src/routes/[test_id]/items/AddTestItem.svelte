@@ -56,6 +56,7 @@
 	}
 </script>
 
+
 <Dialog.Content>
 	<Dialog.Header>
 		<Dialog.Title>Add new test item</Dialog.Title>
@@ -89,7 +90,9 @@
 		<div class="space-y-1">
 			{#each formItemRQ as item}
 				<span class="flex flex-row gap-1">
-					<Input id="r_q" class="w-5/6"
+					<Input id="r_q"
+									class="w-5/6"
+									pattern="[^();]*"
 									bind:value={item.question} />
 					<Input id="r_q" class="w-1/6"
 									type="number"
@@ -100,9 +103,12 @@
 	{:else}
 		<Label for="e_a">Expected answer</Label>
 		<span class="flex flex-row gap-1">
-			<Input id="e_a" class="w-5/6"
+			<Input id="e_a"
+							class="w-5/6"
+							pattern="[^();]*"
 							bind:value={formItemEA.question} />
-			<Input id="e_a" class="w-1/6"
+			<Input id="e_a"
+							class="w-1/6"
 							type="number"
 							bind:value={formItemEA.points} />
 		</span>
