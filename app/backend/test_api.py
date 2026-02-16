@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select, delete
+from httpx import Response
 from datetime import datetime
 import io
 import json
@@ -808,4 +809,14 @@ def test_image_preprocess_utility_invalid_format():
 #region Auxiliary Functions Tests
 # ==============================
 def test_function_evaluate_image():
-    ...
+    # FIXME: remove this line once this is tested
+    response: Response = client.put(
+            "/api/function/evaluate_image",
+            json={"answer_id": 1}
+            )
+
+    assert response.status_code == 200
+    
+    data = response.json()
+
+    assert data["is_done_rendering"] == True
