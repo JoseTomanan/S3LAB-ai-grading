@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Response, status, Depends, File, Upl
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 from typing import List, Optional
 
 import uuid
@@ -17,7 +17,7 @@ from pydantic import ValidationError
 
 from .models import *
 from .schemas import *
-from .database import create_db_and_tables, get_session, engine
+from .database import create_db_and_tables, get_session, engine, ENVIRONMENT, get_direct_session 
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.ai_interface import *
 
@@ -33,7 +33,7 @@ PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 app = FastAPI(
         title="Assessment Processing API",
         description="API for managing test instances, items, and student answer processing",
-        lifespan=create_db_and_tables(),
+        # lifespan=create_db_and_tables(),
         version="1.0.0"
         )
 
@@ -50,6 +50,54 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
 
+if ENVIRONMENT == "development" and os.getenv("AUTO_SEED", "false").lower() == "true":
+    print("⚠️  AUTO_SEED ENABLED - Resetting dev database with mock data")
+
+    MOCK_DATA = {
+        "sections": [
+            {"section_id": 1, "section": "3-Rizal"},
+            {"section_id": 2, "section": "3-Aguinaldo"}
+        ],
+        "students": [
+            {"student_no": "202160151", "name": "Mohammad Hamdi Tuan", "section_id": 1},
+            {"student_no": "202011111", "name": "Jose Ernesto Tomanan", "section_id": 1},
+            {"student_no": "202022222", "name": "Gabriel Abilla", "section_id": 2},
+            {"student_no": "202033333", "name": "David Salon", "section_id": 2}
+        ],
+        "test_instances": [
+            {"test_id": "3-Rizal_Seatwork-1", "name": "Seatwork-1", "section_id": 1, "date": "2025-11-11", "is_done_rendering": False},
+            {"test_id": "3-Aguinaldo_Quiz-1", "name": "Quiz-1", "section_id": 2, "date": "2026-01-12", "is_done_rendering": False}
+        ],
+        "test_items": [
+            {"item_id": 1, "test_id": "3-Rizal_Seatwork-1", "label": "Problem 1", "question": "Solve for x: 2x + 5 = 15", "is_problem_solving": True, "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts);"},
+            {"item_id": 2, "test_id": "3-Rizal_Seatwork-1", "label": "Question 2", "question": "What is the capital of France?", "is_problem_solving": False, "expected_answer_rubric_questions": "Paris (1pt)"},
+            {"item_id": 3, "test_id": "3-Aguinaldo_Quiz-1", "label": "Problem 1", "question": "Calculate the area of a circle with radius 7 cm", "is_problem_solving": True, "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt);"}
+        ]
+    }
+
+    def seed_dev_database():
+        session = get_direct_session()
+        try:
+            # Clear tables in reverse FK dependency order
+            for model in [StudentAnswer, TestItem, TestPaperInstance, TestInstance, Student, Section]:
+                session.exec(delete(model))
+            session.commit()
+            
+            # Insert mock data
+            for data in MOCK_DATA["sections"]: session.add(Section(**data))
+            for data in MOCK_DATA["students"]: session.add(Student(**data))
+            for data in MOCK_DATA["test_instances"]: session.add(TestInstance(**data))
+            for data in MOCK_DATA["test_items"]: session.add(TestItem(**data))
+            session.commit()
+            print("DEV DATABASE SEEDED SUCCESSFULLY")
+        except Exception as e:
+            session.rollback()
+            print(f"SEEDING FAILED: {e}")
+            raise
+        finally:
+            session.close()
+
+    seed_dev_database()
 
 
 # ==============================
