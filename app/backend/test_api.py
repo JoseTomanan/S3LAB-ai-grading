@@ -11,9 +11,9 @@ import functools
 # Add parent directory to path to import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from .api import app, _evaluate_image
-from .database import engine, create_db_and_tables
-from .models import *
+from api import app, _evaluate_image
+from database import engine, create_db_and_tables
+from models import *
 
 # Test client
 client = TestClient(app)
@@ -26,8 +26,8 @@ client = TestClient(app)
 # ==============================
 MOCK_DATA = {
         "sections": [
-            {"section_id": 1, "section_name": "3-Rizal"},
-            {"section_id": 2, "section_name": "3-Aguinaldo"}
+            {"section_id": 1, "section": "3-Rizal"},
+            {"section_id": 2, "section": "3-Aguinaldo"}
             ],
         "students": [
             {"student_no": "202160151", "name": "Mohammad Hamdi Tuan", "section_id": 1},

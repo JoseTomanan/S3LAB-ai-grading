@@ -892,7 +892,7 @@ async def process_student_answer_image(
             })
     
     if answer: # from jose
-        _evaluate_image(answer)
+        _evaluate_image(answer.answer_id)
     
     return {
             "image_directory": f"/api/temp/{safe_filename}",
@@ -1304,7 +1304,7 @@ async def get_processed_image(filename: str):
 #region Auxiliary Functions
 # ==============================
 @app.put("/api/function/evaluate_image", response_model=StudentAnswerResponse)
-def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)) -> StudentAnswerResponse:
+def _evaluate_image(answer_id_input: int, session: Session = Depends(get_session)) -> StudentAnswerResponse:
     """
     (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
     Temporarily an endpoint for testing purposes.
@@ -1313,7 +1313,7 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
-    answer = session.get(StudentAnswer, answer_input.answer_id)
+    answer = session.get(StudentAnswer, answer_id_input)
     assert answer is not None
 
     image_bytes: bytes = CVImagePreprocessor().load_image(answer.image_directory)
