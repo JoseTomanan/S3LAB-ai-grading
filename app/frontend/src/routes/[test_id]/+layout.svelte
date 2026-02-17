@@ -1,11 +1,12 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+	import { API_BASE_URL } from '$lib/constants.ts';
 
 	let { data, children }: {data: LayoutData, children: Snippet} = $props();
 
 	import type { LayoutData } from './$types.d.ts';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
+	import ExportSheets from './ExportSheets.svelte';
 
 	import MdiArrowBack from '~icons/mdi/arrow-back';
 	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
@@ -15,6 +16,7 @@
 	
 	import type { TestInstance, TestItem } from '$lib/types/types.ts';
 	import { Button } from '$lib/components/ui/button/index.ts';
+	import * as Dialog from '$lib/components/ui/dialog/index.ts';
 
 	let isPageLoading: boolean = $state(true);
 
@@ -29,12 +31,12 @@
 	onMount(async () => {
 		try {
 			const response = await fetch(
-				`${apiBaseUrl}/api/test_instances/${data.test_id}`,
-				{
-					method: "GET",
-					headers: {'Content-Type': 'application/json',},
-				}
-			);
+						`${API_BASE_URL}/api/test_instances/${data.test_id}`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+						);
 
 			const result = await response.json();
 			activeTestInstance.name = result.name;
@@ -47,10 +49,6 @@
 			isPageLoading = false;
 		}
 	});
-		
-	async function exportSheets() {
-		// TODO: entire function
-	}
 
 	async function bulkUpload() {
 		// TODO: entire function
@@ -86,11 +84,12 @@
 			<a class="button-primary" href={`/${data.test_id}/papers`}>
 				Papers
 			</a>
-			<Button variant="default"
-							onclick={() => {}}
-							disabled>
-				<MdiTable class="size-6" />
-			</Button>
+			<Dialog.Root>
+				<Dialog.Trigger class="button-primary">
+					<MdiTable class="size-6" />
+				</Dialog.Trigger>
+				<ExportSheets test_id={data.test_id}/>
+			</Dialog.Root>
 			<Button variant="default"
 							onclick={() => {}}
 							disabled>
