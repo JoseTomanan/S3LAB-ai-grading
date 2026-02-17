@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Response, status, Depends, File, Upl
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 from typing import List, Optional
 
 import uuid
@@ -15,12 +15,21 @@ import pandas as pd
 from pathlib import Path
 from pydantic import ValidationError
 
-from .models import *
-from .schemas import *
-from .database import create_db_and_tables, get_session, engine
+from models import *
+from schemas import *
+from database import create_db_and_tables, get_session, engine, ENVIRONMENT
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.ai_interface import *
 
+
+
+# ==============================
+#region Preprocessor Configuration
+# ==============================
+USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional CV only
+PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
+
+#endregion
 
 
 # ==============================
@@ -29,7 +38,7 @@ from functionality.ai_interface import *
 app = FastAPI(
         title="Assessment Processing API",
         description="API for managing test instances, items, and student answer processing",
-        lifespan=create_db_and_tables(),
+        # lifespan=create_db_and_tables(),
         version="1.0.0"
         )
 
@@ -46,6 +55,28 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
 
+
+# ==============================
+# AUTO-SEEDING ON STARTUP (DEV ONLY)
+# ==============================
+@app.on_event("startup")
+async def startup_database_setup():
+    """Create tables + conditionally seed dev DB"""
+    # Always create tables first
+    create_db_and_tables()
+    
+    # ONLY seed if explicitly enabled in development
+    if ENVIRONMENT == "development" and os.getenv("AUTO_SEED", "false").lower() == "true":
+        print(f"\nAUTO_SEED ENABLED (ENV={ENVIRONMENT}) - Resetting database with mock data...")
+        try:
+            # Import locally to avoid circular dependencies
+            from .functionality.seed_dev_db import seed_dev_database
+            seed_dev_database()  # Uses safety checks from seed_dev_db.py
+            print("Database seeded successfully on startup\n")
+        except Exception as e:
+            print(f"SEEDING FAILED ON STARTUP: {type(e).__name__}: {e}\n")
+            # Fail fast since AUTO_SEED was explicitly requested
+            raise RuntimeError("Critical: Database seeding failed during startup") from e
 
 
 # ==============================
@@ -480,15 +511,14 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 #endregion
 
 
-
 # ==============================
 #region Test Item Endpoints
 # ==============================
 @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
 def get_test_instance_items(
-    test_id: str,
-    session: Session = Depends(get_session),
-):
+            test_id: str,
+            session: Session = Depends(get_session),
+            ):
     """Get all test items for a specific test instance"""
     instance = session.get(TestInstance, test_id)
     if not instance:
@@ -735,7 +765,11 @@ async def process_student_answer_image(
     
     # ===== PROCESSING =====
     try:
-        preprocessor = CVImagePreprocessor()
+        preprocessor = CVImagePreprocessor(
+            use_paddle_ocr=USE_PADDLE_OCR,
+            paddle_ocr_lang=PADDLE_OCR_LANG,
+            debug_mode=False  # Set to True for debugging during development
+        )
         processed_list = preprocessor.process_assessment_image(contents)
     except CVProcessingError as e:
         raise HTTPException(
@@ -836,7 +870,7 @@ async def process_student_answer_image(
             })
     
     if answer: # from jose
-        _evaluate_image(answer)
+        _evaluate_image(answer.answer_id)
     
     return {
             "image_directory": f"/api/temp/{safe_filename}",
@@ -915,7 +949,11 @@ async def update_answer_segmentation(
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
         
-        preprocessor = CVImagePreprocessor()
+        preprocessor = CVImagePreprocessor(
+            use_paddle_ocr=USE_PADDLE_OCR,
+            paddle_ocr_lang=PADDLE_OCR_LANG,
+            debug_mode=False  # Set to True for debugging during development
+        )
         enhanced = preprocessor.brighten(warped, amount=0.2)
         enhanced = preprocessor.adjust_contrast(enhanced, amount=1.2)
         
@@ -1180,7 +1218,11 @@ async def image_preprocess(file: UploadFile = File(...)):
     
     # Processing
     try:
-        preprocessor = CVImagePreprocessor()
+        preprocessor = CVImagePreprocessor(
+            use_paddle_ocr=USE_PADDLE_OCR,
+            paddle_ocr_lang=PADDLE_OCR_LANG,
+            debug_mode=False  # Set to True for debugging during development
+        )
         processed_list = preprocessor.process_assessment_image(contents)
     except CVProcessingError as e:
         raise HTTPException(
@@ -1239,13 +1281,17 @@ async def get_processed_image(filename: str):
 #   ---> FROM JOSE
 #region Auxiliary Functions
 # ==============================
-def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_session)):
-    """ --> Auxiliary function by Jose """
+@app.put("/api/function/evaluate_image", response_model=StudentAnswerResponse)
+def _evaluate_image(answer_id_input: int, session: Session = Depends(get_session)) -> StudentAnswerResponse:
+    """
+    (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
+    Temporarily an endpoint for testing purposes.
+    """
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
-    answer = session.get(StudentAnswer, answer_input.answer_id)
+    answer = session.get(StudentAnswer, answer_id_input)
     assert answer is not None
 
     image_bytes: bytes = CVImagePreprocessor().load_image(answer.image_directory)
@@ -1265,6 +1311,7 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
                 ai_evaluation += f"{response};"
             
             answer.ai_evaluation = ai_evaluation
+            # TODO: add missing setter for scores = list[float]
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
@@ -1274,11 +1321,22 @@ def _evaluate_image(answer_input: StudentAnswer, session: Session = Depends(get_
                     break
 
             answer.ai_evaluation = response
+            # TODO: add missing setter for scores = list[float]
 
     answer.is_done_rendering = True
 
     session.add(answer)
     session.commit()
     session.refresh(answer)
+
+    return StudentAnswerResponse(
+            answer_id=answer.answer_id,
+            paper_id=answer.paper_id,
+            item_id=answer.item_id,
+            image_directory=answer.image_directory,
+            ai_evaluation=answer.ai_evaluation,
+            is_done_rendering=answer.is_done_rendering
+            # TODO: add missing scores = list[float]
+            )
 
 #endregion
