@@ -95,7 +95,7 @@
 @theme {
   --font-heading: sans-serif, "Jost";
   --font-sans: sans-serif, "Albert Sans";
-  --font-mono: "JetBrains Mono";
+  --font-mono: mono, "JetBrains Mono";
 }
 
 
