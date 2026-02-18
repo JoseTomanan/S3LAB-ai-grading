@@ -1,9 +1,8 @@
 <script lang="ts">
-	const { test_id, student_no, studentItem }: { test_id: string, student_no: string, studentItem: (StudentAnswer & {label: string}) } = $props();
+	const { test_id, student_no }: { test_id: string, student_no: string } = $props();
 	
 	import { API_BASE_URL } from '$lib/constants.ts';
 
-	import type { Student, StudentAnswer } from '$lib/types/types.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -14,7 +13,6 @@
 
 	async function sendImage() {
 		isOperationOngoing = true;
-
 		if (!formFile || formFile.length == 0)
 			return;
 
@@ -22,16 +20,20 @@
     formData.append('file', formFile[0]);
 
 		try {
+			// FIXME: Remove this line once backend reflects change in URI
 			const response = await fetch(
-				`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/${studentItem.item_id}/image_preprocess`,
-				{ method: "POST", body: formData, }
-			);
+						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/image_preprocess`,
+						{ method: "POST", body: formData, }
+						);
 
-			if (response.ok) {
-				alert("Image has been processed and replaced.");
-				window.location.reload();
-			} else
-				alert(response.status + response.statusText);
+			switch (response.status) {
+				case 200:
+					alert("Image has been processed and segmented into the appropriate items.");
+					window.location.reload();
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch(e) {
 			alert("Failed to fetch, check your network connection and try again.\n"+e);
 		} finally {
@@ -42,10 +44,15 @@
 
 
 <Dialog.Content>
-	<Dialog.Title>Send image</Dialog.Title>
-	<Dialog.Description>{test_id} &middot; {student_no} &middot; Item {studentItem.label}</Dialog.Description>
-	<Input id="sendImage" type="file" accept="image/*" bind:files={formFile}/>
-	<Button variant="outline" onclick={() => sendImage()} disabled={!formFile}>
+	<Dialog.Title>Process raw image</Dialog.Title>
+	<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
+	<Input id="sendImage"
+					type="file"
+					accept="image/*"
+					bind:files={formFile}/>
+	<Button variant="outline"
+					onclick={() => sendImage()}
+					disabled={!formFile}>
 		Send for processing
 	</Button>
 	{#if isOperationOngoing}

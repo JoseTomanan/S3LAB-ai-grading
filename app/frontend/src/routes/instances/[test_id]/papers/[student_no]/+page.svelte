@@ -87,7 +87,15 @@
 
 
 <div class="flex flex-col gap-4 overflow-auto">
-	<h2 class="font-semibold">For student {data.student_no}:</h2>
+	<span class="flex flex-row justify-between items-center">
+		<h1>{data.student_no}</h1>
+		<Dialog.Root>
+			<Dialog.Trigger class="button-secondary border-none">
+				<MdiImagePlus class="size-6"/>
+			</Dialog.Trigger>
+			<ProcessImage test_id={data.test_id} student_no={data.student_no} />
+		</Dialog.Root>
+	</span>
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if studentItems.length == 0}
@@ -98,12 +106,6 @@
 				<Label for={studentItem.label} class="flex flex-row justify-between">
 					{studentItem.label}
 					<span class="flex flex-row space-x-1">
-						<Dialog.Root>
-							<Dialog.Trigger class="button-secondary border-none">
-								<MdiImagePlus />
-							</Dialog.Trigger>
-							<ProcessImage test_id={data.test_id} student_no={data.student_no} {studentItem}/>
-						</Dialog.Root>
 						<a href={`/instances/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
 									class="button-secondary border-none">
 							<MdiCrop/>
