@@ -4,5 +4,6 @@
 *.pyc
 
 test.db
+database.db
 
 **/+mainIgnoreable.py
