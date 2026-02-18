@@ -205,6 +205,7 @@
     @apply py-1 px-2;
     @apply rounded;
     @apply bg-card;
+    @apply text-card-foreground;
     @apply border border-border;
   }
 
