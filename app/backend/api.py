@@ -1077,7 +1077,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
 
 @app.get("/api/test_instances/{test_id}/results")
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
-    """Return AI evaluations per contract"""
+    """Return AI evaluations per contract. Constructed by Jose."""
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
@@ -1085,43 +1085,42 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                 detail=f"Test instance '{test_id}' not found"
                 )
     
-    # Get all students in the section
     students = session.exec(
             select(Student).where(Student.section_id == instance.section_id)
             ).all()
 
-    # Build evaluations response
     evaluations = []
     for student in students:
-        # Get all answers for this student/test
         papers = session.exec(
-                select(TestPaperInstance).where(
-                    TestPaperInstance.test_id == test_id,
-                    TestPaperInstance.student_no == student.student_no
-                    )
-                ).all()
+                    select(TestPaperInstance).where(
+                        TestPaperInstance.test_id == test_id,
+                        TestPaperInstance.student_no == student.student_no
+                        )
+                    ).all()
         
         ai_evaluations = []
         for paper in papers:
             answers = session.exec(
-                    select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
-                    ).all()
+                        select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
+                        ).all()
             
             for answer in answers:
-                # NOTE: removed this for now, while below is not fixed.
-                # TODO: add logic for "if not done rendering, call evaluate_image, else let be."
                 #===================EVALUATION CALLS=================
-                # print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-                # evaluate_image(answer.answer_id)
-                # session.refresh(answer)
+                if not answer.is_done_rendering:
+                    print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                    evaluate_image(answer.answer_id)
+                    session.refresh(answer)
                 #===================EVALUATION CALLS=================
 
-                ai_evaluations.append(answer.ai_evaluation if answer.ai_evaluation else "")
+                ai_evaluations.append({
+                            "item_id": answer.item_id,
+                            "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+                            })
         
         evaluations.append({
                 "student_no": student.student_no,
                 "name": student.name,
-                "ai_evaluation": ";".join(ai_evaluations) if ai_evaluations else ""
+                "ai_evaluation": ai_evaluations
                 })
     
     return {
