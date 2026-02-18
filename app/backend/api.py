@@ -70,7 +70,7 @@ async def startup_database_setup():
         print(f"\nAUTO_SEED ENABLED (ENV={ENVIRONMENT}) - Resetting database with mock data...")
         try:
             # Import locally to avoid circular dependencies
-            from .functionality.seed_dev_db import seed_dev_database
+            from functionality.seed_dev_db import seed_dev_database
             seed_dev_database()  # Uses safety checks from seed_dev_db.py
             print("Database seeded successfully on startup\n")
         except Exception as e:
@@ -1074,7 +1074,6 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             "statuses": statuses
             }
 
-
 @app.get("/api/test_instances/{test_id}/results")
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
     """Return AI evaluations per contract. Constructed by Jose."""
@@ -1130,15 +1129,12 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 
 
 @app.get("/api/test_instances/{test_id}/results/{student_no}")
-def get_ai_evaluation_results_per_student(
-    test_id: str,
-    student_no: str,
-    session: Session = Depends(get_session)
-):
+def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: Session = Depends(get_session)):
     """
     Get AI evaluation results for a specific student in a test instance.
     
     Returns AI grading results for a single student's submissions.
+    Constructed by Jose.
     """
     # Verify test instance exists
     instance = session.get(TestInstance, test_id)
@@ -1177,14 +1173,25 @@ def get_ai_evaluation_results_per_student(
         answers = session.exec(
             select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
         ).all()
+        
         for answer in answers:
-            ai_evaluations.append(answer.ai_evaluation if answer.ai_evaluation else "Pending AI evaluation")
+            #===================EVALUATION CALLS=================
+            if not answer.is_done_rendering:
+                print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                evaluate_image(answer.answer_id)
+                session.refresh(answer)
+            #===================EVALUATION CALLS=================
+            
+            ai_evaluations.append({
+                "item_id": answer.item_id,
+                "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+            })
     
     return {
         "test_id": test_id,
         "student_no": student_no,
         "name": student.name,
-        "ai_evaluation": "; ".join(ai_evaluations) if ai_evaluations else "No answers processed"
+        "ai_evaluation": ai_evaluations
     }
 
 @app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
