@@ -4,8 +4,12 @@
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from "svelte";
 	
-	import MdiPaperEditOutline from '~icons/mdi/paper-edit-outline';
+	import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
 	import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
+
+	import * as Dialog from '$lib/components/ui/dialog/index.ts';
+
+	import GetAIEvaluation from './GetAIEvaluation.svelte';
 
 	let isPageLoading: boolean = $state(true);
 	let perStudentStatuses: {student_no: string, name: string, is_done_rendering: boolean}[] = $state([]);
@@ -18,7 +22,7 @@
 							method: "GET",
 							headers: {'Content-Type': 'application/json',},
 						}
-					);
+						);
 
 			switch (response.status) {
 				case 200:
@@ -37,22 +41,31 @@
 </script>
 
 
-<div class="space-y-4">
+<div class="space-y-3">
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if perStudentStatuses.length == 0}
 		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
-		{#each perStudentStatuses as status}
-			<a href={`/${data.test_id}/papers/${status.student_no}`}
-						class="card flex flex-row items-center justify-between">
-				<h3>{status.name}</h3>
-				{#if status.is_done_rendering}
-					<MdiPaperEditOutline class="size-6"/>
-				{:else}
-					<MdiPaperCheckOutline class="size-6"/>
-				{/if}
-			</a>
+		{#each perStudentStatuses as testPaper}
+			<span class="flex flex-row items-center justify-between gap-1">
+				<a href={`/${data.test_id}/papers/${testPaper.student_no}`}
+						class="card flex-1">
+					<h3>{testPaper.name}</h3>
+				</a>
+				<Dialog.Root>
+					<Dialog.Trigger class="button-outline"
+													disabled={!testPaper.is_done_rendering}>
+						{#if testPaper.is_done_rendering}
+							<MdiPaperCheckOutline class="size-6 m-1"/>
+						{:else}
+							<MdiPaperAlertOutline class="size-6 m-1 opacity-50"/>
+						{/if}
+					</Dialog.Trigger>
+					<GetAIEvaluation test_id={data.test_id}
+														student_no={testPaper.student_no}/>
+				</Dialog.Root>
+			</span>
 		{/each}
 	{/if}
 </div>
