@@ -5,4 +5,4 @@
 
 test.db
 
-functionality/+mainIgnoreable.py
+**/+mainIgnoreable.py
