@@ -78,10 +78,10 @@
 			<h3>Date: { activeTestInstance.date ? new Date(activeTestInstance.date).toLocaleDateString() : "" }</h3>
 		</div>
 		<span id="thisOne" class="flex items-center gap-2 justify-end">
-			<a class="button-primary" href={`/${data.test_id}/items`}>
+			<a class="button-primary" href={`/instances/${data.test_id}/items`}>
 				Items
 			</a>
-			<a class="button-primary" href={`/${data.test_id}/papers`}>
+			<a class="button-primary" href={`/instances/${data.test_id}/papers`}>
 				Papers
 			</a>
 			<Dialog.Root>

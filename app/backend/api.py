@@ -57,7 +57,7 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 
 # ==============================
-# AUTO-SEEDING ON STARTUP (DEV ONLY)
+#region AUTO-SEEDING ON STARTUP (DEV ONLY)
 # ==============================
 @app.on_event("startup")
 async def startup_database_setup():
@@ -77,6 +77,8 @@ async def startup_database_setup():
             print(f"SEEDING FAILED ON STARTUP: {type(e).__name__}: {e}\n")
             # Fail fast since AUTO_SEED was explicitly requested
             raise RuntimeError("Critical: Database seeding failed during startup") from e
+#endregion
+
 
 
 # ==============================
@@ -869,9 +871,6 @@ async def process_student_answer_image(
                 "is_selected": False
             })
     
-    if answer: # from jose
-        _evaluate_image(answer.answer_id)
-    
     return {
             "image_directory": f"/api/temp/{safe_filename}",
             "num_boxes": len(processed_list),
@@ -1090,7 +1089,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
     students = session.exec(
             select(Student).where(Student.section_id == instance.section_id)
             ).all()
-    
+
     # Build evaluations response
     evaluations = []
     for student in students:
@@ -1109,12 +1108,20 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                     ).all()
             
             for answer in answers:
-                ai_evaluations.append(answer.ai_evaluation or "Pending AI evaluation")
+                # NOTE: removed this for now, while below is not fixed.
+                # TODO: add logic for "if not done rendering, call evaluate_image, else let be."
+                #===================EVALUATION CALLS=================
+                # print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                # evaluate_image(answer.answer_id)
+                # session.refresh(answer)
+                #===================EVALUATION CALLS=================
+
+                ai_evaluations.append(answer.ai_evaluation if answer.ai_evaluation else "")
         
         evaluations.append({
                 "student_no": student.student_no,
                 "name": student.name,
-                "ai_evaluation": " | ".join(ai_evaluations) if ai_evaluations else "No answers processed"
+                "ai_evaluation": ";".join(ai_evaluations) if ai_evaluations else ""
                 })
     
     return {
@@ -1281,8 +1288,8 @@ async def get_processed_image(filename: str):
 #   ---> FROM JOSE
 #region Auxiliary Functions
 # ==============================
-@app.put("/api/function/evaluate_image", response_model=StudentAnswerResponse)
-def _evaluate_image(answer_id_input: int, session: Session = Depends(get_session)) -> StudentAnswerResponse:
+@app.put("/api/function/evaluate_image")
+def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)):
     """
     (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
     Temporarily an endpoint for testing purposes.
@@ -1294,7 +1301,8 @@ def _evaluate_image(answer_id_input: int, session: Session = Depends(get_session
     answer = session.get(StudentAnswer, answer_id_input)
     assert answer is not None
 
-    image_bytes: bytes = CVImagePreprocessor().load_image(answer.image_directory)
+    actual_image_path = f"temp_cv_output/{answer.image_directory.split("/")[3]}"
+    image_bytes: bytes = CVImagePreprocessor().load_image(actual_image_path)
 
     test_item = session.get(TestItem, answer.item_id)
     assert test_item is not None

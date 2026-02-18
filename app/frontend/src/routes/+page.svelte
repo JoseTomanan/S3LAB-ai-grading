@@ -64,7 +64,7 @@
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
 			{#each paginationValues as instance}
-				<a href={`/${instance.test_id}/items`} class="card">
+				<a href={`/instances/${instance.test_id}/items`} class="card">
 					<span class="flex flex-row items-center gap-1">
 						{#if instance.is_done_rendering}
 							<MdiCheckboxMarkedOutline/>

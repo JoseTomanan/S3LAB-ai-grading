@@ -201,6 +201,14 @@
     @apply border border-border;
 	}
 
+  .button-outline {
+    @apply py-1 px-2;
+    @apply rounded;
+    @apply bg-card;
+    @apply text-card-foreground;
+    @apply border border-border;
+  }
+
 	.card {
 		@apply bg-card;
     @apply text-card-foreground;

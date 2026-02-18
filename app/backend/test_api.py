@@ -12,7 +12,7 @@ import functools
 # Add parent directory to path to import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api import app, _evaluate_image
+from api import app
 from database import engine, create_db_and_tables
 from models import *
 
@@ -94,12 +94,12 @@ def setup_database():
     # Populate with mock data
     with Session(engine) as session:
         # Clear existing data
-        session.exec(delete(StudentAnswer))
-        session.exec(delete(TestItem))
-        session.exec(delete(TestPaperInstance))
-        session.exec(delete(TestInstance))
-        session.exec(delete(Student))
-        session.exec(delete(Section))
+        session.exec(delete(StudentAnswer)) # type: ignore
+        session.exec(delete(TestItem)) # type: ignore
+        session.exec(delete(TestPaperInstance)) # type: ignore
+        session.exec(delete(TestInstance)) # type: ignore
+        session.exec(delete(Student)) # type: ignore
+        session.exec(delete(Section)) # type: ignore
         session.commit()
         
         # Add sections
@@ -805,7 +805,7 @@ def test_image_preprocess_utility_invalid_format():
 
 
 # ==============================
-#   --> FROM JOSE
+#   --> FROM JOSE, TODO: Remove once testing suite for get_ai_evaluation_results is done
 #region Auxiliary Functions Tests
 # ==============================
 def test_function_evaluate_image():

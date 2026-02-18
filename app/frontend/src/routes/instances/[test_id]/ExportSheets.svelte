@@ -22,23 +22,28 @@
 						}
 						);
 			
-			if (response.ok) {
-				const blob = await response.blob();
+			switch (response.status) {
+				case 200:
+					// notice: GPT-generated
+					// TODO: understand logic, verify workingness
+					const blob = await response.blob();
+					const url = window.URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					
+					a.href = url;
+					a.download = 'report.xlsx';
+					document.body.appendChild(a);
+					a.click();
+					
+					window.URL.revokeObjectURL(url);
+					document.body.removeChild(a);
+					break;
 				
-				const url = window.URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				
-				a.href = url;
-				a.download = 'report.xlsx';
-				document.body.appendChild(a);
-				a.click();
-				
-				window.URL.revokeObjectURL(url);
-				document.body.removeChild(a);
-			} else
-				alert(`${response.status} ${response.statusText}`);
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch (e) {
-			alert("There was an error in processing the request. Please try again.");
+			alert("There was an error in processing the request. Please try again.\n"+e);
 			isNotClicked = true;
 		} finally {
 			isLoading = false;
@@ -57,7 +62,7 @@
 	{:else if isLoading}
 		<p>Loading...</p>
 	{:else}
-		<h6>Spreadsheet download has been initialized.</h6>
+		<h6>The report is now being downloaded as <b>report.xlsx</b>.</h6>
 		<p>You may close this dialog.</p>
 	{/if}
 </Dialog.Content>
