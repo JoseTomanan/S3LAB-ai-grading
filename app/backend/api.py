@@ -1108,10 +1108,12 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                     ).all()
             
             for answer in answers:
+                # NOTE: removed this for now, while below is not fixed.
+                # TODO: add logic for "if not done rendering, call evaluate_image, else let be."
                 #===================EVALUATION CALLS=================
-                print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-                evaluate_image(answer.answer_id)
-                session.refresh(answer)
+                # print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                # evaluate_image(answer.answer_id)
+                # session.refresh(answer)
                 #===================EVALUATION CALLS=================
 
                 ai_evaluations.append(answer.ai_evaluation if answer.ai_evaluation else "")
