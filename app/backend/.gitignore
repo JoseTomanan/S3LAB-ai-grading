@@ -2,3 +2,5 @@
 /temp_cv_output/*
 /backend/test_report.txt
 *.pyc
+
+test.db
