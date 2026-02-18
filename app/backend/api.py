@@ -1130,6 +1130,64 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
             }
 
 
+@app.get("/api/test_instances/{test_id}/results/{student_no}")
+def get_ai_evaluation_results_per_student(
+    test_id: str,
+    student_no: str,
+    session: Session = Depends(get_session)
+):
+    """
+    Get AI evaluation results for a specific student in a test instance.
+    
+    Returns AI grading results for a single student's submissions.
+    """
+    # Verify test instance exists
+    instance = session.get(TestInstance, test_id)
+    if not instance:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance with ID '{test_id}' not found"
+        )
+    
+    # Verify student exists
+    student = session.get(Student, student_no)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student with ID '{student_no}' not found"
+        )
+    
+    # Verify student belongs to the test's section
+    if student.section_id != instance.section_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Student '{student_no}' does not belong to section {instance.section_id}"
+        )
+    
+    # Get test paper for this student
+    paper = session.exec(
+        select(TestPaperInstance).where(
+            TestPaperInstance.test_id == test_id,
+            TestPaperInstance.student_no == student_no
+        )
+    ).first()
+    
+    # Collect all AI evaluations for this student
+    ai_evaluations = []
+    if paper:
+        answers = session.exec(
+            select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
+        ).all()
+        for answer in answers:
+            ai_evaluations.append(answer.ai_evaluation if answer.ai_evaluation else "Pending AI evaluation")
+    
+    return {
+        "test_id": test_id,
+        "student_no": student_no,
+        "name": student.name,
+        "ai_evaluation": "; ".join(ai_evaluations) if ai_evaluations else "No answers processed"
+    }
+
 @app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
 def get_student_answers(
             test_id: str,
