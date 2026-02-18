@@ -90,8 +90,8 @@
 	<span class="flex flex-row justify-between items-center">
 		<h1>{data.student_no}</h1>
 		<Dialog.Root>
-			<Dialog.Trigger class="button-secondary border-none">
-				<MdiImagePlus class="size-6"/>
+			<Dialog.Trigger class="button-outline">
+				<MdiImagePlus class="size-6 mx-2"/>
 			</Dialog.Trigger>
 			<ProcessImage test_id={data.test_id} student_no={data.student_no} />
 		</Dialog.Root>
