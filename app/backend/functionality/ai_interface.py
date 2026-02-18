@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 
 from google import genai
 from google.genai import types
@@ -10,6 +11,7 @@ from google.genai import types
 # ================================
 class AIAnswerEvaluator:
     def __init__(self):
+        load_dotenv()
         api_key = os.getenv("GEMINI_API_KEY")
         self.client = genai.Client(api_key=api_key)
 
