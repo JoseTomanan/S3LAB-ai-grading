@@ -1074,6 +1074,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             "statuses": statuses
             }
 
+
 @app.get("/api/test_instances/{test_id}/results")
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
     """Return AI evaluations per contract. Constructed by Jose."""
@@ -1088,7 +1089,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
             select(Student).where(Student.section_id == instance.section_id)
             ).all()
 
-    evaluations = []
+    student_stores = []
     for student in students:
         papers = session.exec(
                     select(TestPaperInstance).where(
@@ -1116,15 +1117,15 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                             "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
                             })
         
-        evaluations.append({
+        student_stores.append({
                 "student_no": student.student_no,
                 "name": student.name,
-                "ai_evaluation": ai_evaluations
+                "evaluations": ai_evaluations
                 })
     
     return {
             "test_id": test_id,
-            "evaluations": evaluations
+            "students": student_stores
             }
 
 
@@ -1191,8 +1192,9 @@ def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: 
         "test_id": test_id,
         "student_no": student_no,
         "name": student.name,
-        "ai_evaluation": ai_evaluations
+        "evaluations": ai_evaluations
     }
+
 
 @app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
 def get_student_answers(
