@@ -4,3 +4,5 @@
 *.pyc
 
 test.db
+
+functionality/+mainIgnoreable.py
