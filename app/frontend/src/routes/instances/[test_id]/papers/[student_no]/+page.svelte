@@ -104,7 +104,7 @@
 							</Dialog.Trigger>
 							<ProcessImage test_id={data.test_id} student_no={data.student_no} {studentItem}/>
 						</Dialog.Root>
-						<a href={`/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
+						<a href={`/instances/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
 									class="button-secondary border-none">
 							<MdiCrop/>
 						</a>

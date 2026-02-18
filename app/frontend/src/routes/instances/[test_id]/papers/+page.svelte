@@ -49,7 +49,7 @@
 	{:else}
 		{#each perStudentStatuses as testPaper}
 			<span class="flex flex-row items-center justify-between gap-1">
-				<a href={`/${data.test_id}/papers/${testPaper.student_no}`}
+				<a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
 						class="card flex-1">
 					<h3>{testPaper.name}</h3>
 				</a>
