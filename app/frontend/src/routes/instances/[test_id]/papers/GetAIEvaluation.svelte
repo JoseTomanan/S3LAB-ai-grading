@@ -33,7 +33,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("Failed to fetch results for given student:\nERROR: "+e);
+			alert("Failed to fetch AI evaluations for given student:\n- ERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}
