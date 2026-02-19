@@ -40,17 +40,17 @@
 </script>
 
 
-<div class="px-4 py-8 flex flex-col gap-4">
+<div class="px-4 py-8 flex flex-col gap-10">
 	<span class="flex flex-row items-center justify-between">
 		<a href="/">
-			<MdiPapersOutline class="size-8"/>
+			<MdiPapersOutline class="size-6"/>
 		</a>
-		<h1>Sections</h1>
-		<button class="button-primary" onclick={() => {}}>
+		<h1 class="italic">Sections</h1>
+		<button class="button-secondary" onclick={() => {}}>
 			<MdiPersonAdd class="size-6"/>
 		</button>
 	</span>
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-4">
 		{#if isPageLoading}
 			<p>Loading...</p>
 		{:else if sections.length == 0}

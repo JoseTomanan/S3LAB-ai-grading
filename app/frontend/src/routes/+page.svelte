@@ -44,10 +44,10 @@
 </script>
 
 
-<div class="px-4 py-8 flex flex-col gap-4">
+<div class="px-4 py-8 flex flex-col gap-10">
 	<span class="flex flex-row items-center justify-between">
 		<a href="/sections">
-			<MdiGoogleClassroom class="size-8"/>
+			<MdiGoogleClassroom class="size-6"/>
 		</a>
 		<h1>Test instances</h1>
 		<Dialog.Root>
@@ -57,7 +57,7 @@
 			<AddTestInstance />
 		</Dialog.Root>
 	</span>
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-4">
 		{#if isPageLoading}
 			<p>Loading...</p>
 		{:else if instances.length == 0}
