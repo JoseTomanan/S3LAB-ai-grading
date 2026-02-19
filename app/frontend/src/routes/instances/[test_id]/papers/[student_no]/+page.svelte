@@ -40,7 +40,6 @@
 					alert(`CALL 1: ${responseOne.status} ${responseOne.statusText}`);
 			}
 
-			console.log("--> 1, before item fetch");
 			console.log($state.snapshot(studentItems));
 
 			const responseTwo = await fetch(
@@ -55,7 +54,6 @@
 				case 200:
 					const resultTwo = await responseTwo.json();
 					testItems = resultTwo.items;
-					console.log("--> testItems.");
 					console.log($state.snapshot(testItems));
 					if (testItems && studentItems) {
 						for (const testItem of testItems)
@@ -74,9 +72,6 @@
 				default:
 					alert(`CALL 2: ${responseTwo.status} ${responseTwo.statusText}`);
 			}
-
-			console.log("--> 2, after item fetch");
-			console.log($state.snapshot(studentItems));
 		} catch(e) {
 			alert("Failed to fetch student answers/test items:\nERROR: "+e);
 		} finally {
