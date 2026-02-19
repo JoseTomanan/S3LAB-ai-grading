@@ -4,8 +4,11 @@
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from "svelte";
 
+	import MdiHeadReload from "~icons/mdi/head-reload";
+
 	import type { EvaluationsResponse, StudentStoresResponse } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
+	import Button from '$lib/components/ui/button/button.svelte';
 
 	let isPageLoading = $state(false);
 	let questionItemEvals: EvaluationsResponse[] = $state([]);
@@ -38,6 +41,10 @@
 			isPageLoading = false;
 		}
 	});
+
+	async function reevaluateItem() {
+		// TODO: function
+	}
 </script>
 
 
@@ -47,20 +54,32 @@
 		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
 	</Dialog.Header>
 	<div class="max-h-[80vh] overflow-auto space-y-2">
-		{#each questionItemEvals as evalItem}
-			<div class="card space-y-1">
-				<h4 class="truncate text-ellipsis w-fill">
-					{evalItem.label}: {evalItem.question}
-				</h4>
-				{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
-					{#if e_a_r_q.length != 0}
-						<span class="flex flex-row justify-between">
-							<h6 class="italic">{e_a_r_q}</h6>
-							<h6 class="font-bold">{GET_EVALS(evalItem)[index]}</h6>
-						</span>
-					{/if}
-				{/each}
-			</div>
-		{/each}
+		{#if questionItemEvals.length == 0}
+			<p>
+				Nothing to see here. Please upload images of student answers first.
+			</p>
+		{:else}
+			{#each questionItemEvals as evalItem}
+				<div class="card space-y-1">
+					<span class="flex flex-row justify-between items-center gap-x-1">
+						<h4 class="truncate text-ellipsis w-fill">
+							{evalItem.label}: {evalItem.question}
+						</h4>
+						<button class="button-secondary px-0 py-0"
+										onclick={() => reevaluateItem()}>
+							<MdiHeadReload />
+						</button>
+					</span>
+					{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
+						{#if e_a_r_q.length != 0}
+							<span class="flex flex-row justify-between">
+								<h6 class="italic">{e_a_r_q}</h6>
+								<h6 class="font-bold">{GET_EVALS(evalItem)[index]}</h6>
+							</span>
+						{/if}
+					{/each}
+				</div>
+			{/each}
+		{/if}
 	</div>
 </Dialog.Content>

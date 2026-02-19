@@ -54,12 +54,11 @@
 					<h3>{testPaper.name}</h3>
 				</a>
 				<Dialog.Root>
-					<Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center"
-													disabled={!testPaper.is_done_rendering}>
+					<Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center">
 						{#if testPaper.is_done_rendering}
 							<MdiPaperCheckOutline class="size-6 my-0.5"/>
 						{:else}
-							<MdiPaperAlertOutline class="size-6 my-0.5 opacity-50"/>
+							<MdiPaperAlertOutline class="size-6 my-0.5"/>
 						{/if}
 					</Dialog.Trigger>
 					<GetAIEvaluation test_id={data.test_id}
