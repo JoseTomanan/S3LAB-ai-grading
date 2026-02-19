@@ -13,6 +13,7 @@
 	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiTable from '~icons/mdi/table';
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
+	import MdiHome from '~icons/mdi/home';
 	
 	import type { TestInstance, TestItem } from '$lib/types/types.ts';
 	import { Button } from '$lib/components/ui/button/index.ts';
@@ -58,22 +59,31 @@
 
 <div class="space-y-8 pb-4">
 	<div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-b border-sidebar-border space-y-4">
-		<span class="flex flex-row items-center gap-4">
-			<button class="p-0 size-8 cursor-pointer" onclick={() => history.back()}>
+		<span class="flex flex-row items-center justify-between">
+			<button class="p-0 size-8 cursor-pointer"
+							onclick={() => history.back()}>
 				<MdiArrowBack class="size-full" />
 			</button>
 			<h1>{ activeTestInstance.name }</h1>
-			{#if activeTestInstance.is_done_rendering}
-				<MdiCheckboxMarkedOutline class="size-6 text-muted-foreground"/>
-			{:else}
-				<MdiCheckboxBlankOutline class="size-6 text-muted-foreground" />
-			{/if}
+			<a href="/">
+				<MdiHome class="size-8 opacity-80" />
+			</a>
 		</span>
 		<div id="change-instance-details">
-			<h3>
-				TestID:
-				<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
-			</h3>
+			<span class="flex justify-between">
+				<h3>
+					TestID:
+					<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
+				</h3>
+				<h3 class="flex gap-0.5">
+					Status:
+					{#if activeTestInstance.is_done_rendering}
+						<MdiCheckboxMarkedOutline class="size-6 opacity-40"/>
+					{:else}
+						<MdiCheckboxBlankOutline class="size-6 opacity-40" />
+					{/if}
+				</h3>
+			</span>
 			<span class="flex justify-between">
 				<h3>
 					Date: {activeTestInstance.date
