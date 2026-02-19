@@ -1112,7 +1112,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                 #===================EVALUATION CALLS=================
                 if not answer.is_done_rendering:
                     print(f"INTERNAL:\tis_done_rendering detected false for {answer.answer_id}.")
-                    evaluate_image(answer.answer_id)
+                    _evaluate_image_logic(answer.answer_id, session)
                     session.refresh(answer)
                 #===================EVALUATION CALLS=================
 
@@ -1192,7 +1192,7 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
             #===================EVALUATION CALLS=================
             # if answer.is_done_rendering == False:
             print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-            evaluate_image(answer.answer_id)
+            _evaluate_image_logic(answer.answer_id, session)
             session.refresh(answer)
             #===================EVALUATION CALLS=================
             
@@ -1359,6 +1359,16 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
+
+
+@app.put("/api/function/evaluate_image")
+async def evaluate_image(answer_id: int, session: Session = Depends(get_session)):
+    """Evaluate image then store to StudentAnswer evaluation result."""
+    return _evaluate_image_logic(
+                answer_id_input=answer_id,
+                session=session
+                )
+
 #endregion
 
 
@@ -1367,12 +1377,7 @@ async def get_processed_image(filename: str):
 #   ---> FROM JOSE
 #region Auxiliary Functions
 # ==============================
-@app.put("/api/function/evaluate_image")
-def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)):
-    """
-    (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
-    Temporarily an endpoint for testing purposes.
-    """
+def _evaluate_image_logic(answer_id_input: int, session: Session):
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
