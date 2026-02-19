@@ -10,10 +10,11 @@ from google.genai import types
 #   Class
 # ================================
 class AIAnswerEvaluator:
-    def __init__(self):
+    def __init__(self, flash: bool = False):
         load_dotenv()
         api_key = os.getenv("GEMINI_API_KEY")
         self.client = genai.Client(api_key=api_key)
+        self.version = "gemini-2.5-flash" if flash else "gemini-2.5-flash-lite"
 
     def get_item_number(self, image_bytes: bytes):
         return self._send_image_prompt(image_bytes, FIND_ITEM_NUMBER_PROMPT)
@@ -35,14 +36,14 @@ class AIAnswerEvaluator:
         Send a chat completion request with the image input
         """
         image_encoded = types.Part.from_bytes(
-                data=image_bytes,
-                mime_type='image/jpeg'
-                )
+                            data=image_bytes,
+                            mime_type='image/jpeg'
+                            )
 
         response = self.client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[image_encoded, prompt]
-                )
+                    model=self.version,
+                    contents=[image_encoded, prompt]
+                    )
 
         return response.text
     
