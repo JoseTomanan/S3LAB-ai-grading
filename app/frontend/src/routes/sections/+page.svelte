@@ -1,5 +1,5 @@
 <script lang="ts">
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+	import { API_BASE_URL } from "$lib/constants.ts";
 
 	import { onMount } from "svelte";
 	import MdiPapersOutline from "~icons/mdi/papers-outline";
@@ -9,11 +9,33 @@
 	import Pagination from "$lib/components/Pagination.svelte";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 
-	let isPageLoading: boolean = false;
-	let sections: Section[] = [{section_id: 1, section_name: "3-DavidAndal"}];
-	let paginationValues: Section[];
+	let isPageLoading: boolean = $state(true);
+	let sections: Section[] = $state([]);
+	let paginationValues: Section[] = $state([]);
 
 	onMount(async () => {
+		try {
+			const response = await fetch(
+						`${API_BASE_URL}/api/sections`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+						);
+
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					sections = result;
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
+		} catch(e) {
+			alert("Failed to fetch sections:\nERROR: "+e);
+		} finally {
+			isPageLoading = false;
+		}
 	});
 </script>
 
@@ -23,7 +45,7 @@
 		<a href="/">
 			<MdiPapersOutline class="size-8"/>
 		</a>
-		<h1>View sections</h1>
+		<h1>Sections</h1>
 		<button class="button-primary" onclick={() => {}}>
 			<MdiPersonAdd class="size-6"/>
 		</button>
@@ -35,7 +57,8 @@
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
 			{#each paginationValues as section}
-				<a href={`/sections/${section.section_id}`} class="card">
+				<a href={`/sections/${section.section_id}`}
+						class="card button-outline">
 					<h3>{section.section_name}</h3>
 					<h4>SectionID: {section.section_id}</h4>
 				</a>
