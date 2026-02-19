@@ -49,14 +49,16 @@
 	<div class="max-h-[80vh] overflow-auto space-y-2">
 		{#each questionItemEvals as evalItem}
 			<div class="card space-y-1">
-				<h4 class="truncate text-ellipsis w-fill opacity-100">
+				<h4 class="truncate text-ellipsis w-fill">
 					{evalItem.label}: {evalItem.question}
 				</h4>
-				{#each GET_E_A_R_Q(evalItem) as _, index}
-					<span class="flex flex-row justify-between">
-						<h6 class="italic">{ GET_E_A_R_Q(evalItem)[index] }</h6>
-						<h6 class="font-bold">{ GET_EVALS(evalItem)[index] }</h6>
-					</span>
+				{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
+					{#if e_a_r_q.length != 0}
+						<span class="flex flex-row justify-between">
+							<h6 class="italic">{e_a_r_q}</h6>
+							<h6 class="font-bold">{GET_EVALS(evalItem)[index]}</h6>
+						</span>
+					{/if}
 				{/each}
 			</div>
 		{/each}
