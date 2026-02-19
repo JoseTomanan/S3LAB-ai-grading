@@ -87,16 +87,16 @@
 				Papers
 			</a>
 			<Dialog.Root>
-				<Dialog.Trigger class="button-primary">
+				<Dialog.Trigger class="button-primary opacity-50">
 					<MdiTable class="size-6" />
 				</Dialog.Trigger>
 				<ExportSheets test_id={data.test_id}/>
 			</Dialog.Root>
-			<Button variant="default"
+			<button class="button-primary opacity-50"
 							onclick={() => {}}
 							disabled>
 				<MdiPaperAddOutline class="size-6"/>
-			</Button>
+			</button>
 		</span>
 	</div>
 	<div class="px-4">
