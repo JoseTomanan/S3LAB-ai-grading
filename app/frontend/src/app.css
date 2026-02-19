@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400");
-
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
@@ -131,7 +129,6 @@
 @theme {
   --font-heading: "Montserrat", sans-serif;
   --font-sans: "SourceSans3", sans-serif;
-  --font-mono: "JetBrains Mono", mono;
 }
 
 
