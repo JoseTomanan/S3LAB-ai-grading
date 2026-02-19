@@ -24,55 +24,63 @@
 			});
 
 	async function editTestItem(submittedTestItem: TestItem) {
-		if (testItem != submittedTestItem) {
-			try {
-				const formBody = {
-							label: submittedTestItem.label,
-							question: submittedTestItem.question,
-							expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
-							};
+		if (testItem == submittedTestItem) {
+			alert("No changes were made.");
+			return;
+		}
 
-				console.log(formBody);
-				
-				const response = await fetch(
-							`${API_BASE_URL}/api/test_instances/${test_id}/items/${submittedTestItem.item_id}`,
-							{
-								method: "PATCH",
-								headers: {'Content-Type': 'application/json',},
-								body: JSON.stringify(formBody),
-							}
-							);
-				
-				if (response.ok) {
+		try {
+			const formBody = {
+						label: submittedTestItem.label,
+						question: submittedTestItem.question,
+						expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
+						};
+
+			console.log(formBody);
+			
+			const response = await fetch(
+						`${API_BASE_URL}/api/test_instances/${test_id}/items/${submittedTestItem.item_id}`,
+						{
+							method: "PATCH",
+							headers: {'Content-Type': 'application/json',},
+							body: JSON.stringify(formBody),
+						}
+						);
+			
+			switch (response.status) {
+				case 200:
 					const result = await response.json();
 					alert("Success: " + result.item_id);
 					window.location.reload();
-				} else
-					alert(response.status + response.statusText);
-			} catch (e) {
-				alert("Failed to edit test item:\n"+e);
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
 			}
-		} else
-			alert("No changes were made.");
+		} catch (e) {
+			alert("Failed to edit test item:\n"+e);
+		}
 	}
 
 	async function deleteTestItem() {
 		try {
 			const response = await fetch(
-					`${API_BASE_URL}/api/test_instances/${test_id}/${formTestItem.item_id}`,
-					{
-						method: "DELETE",
-						headers: {'Content-Type': 'application/json',},
-					}
-				);
-				
-				if (response.ok) {
+						`${API_BASE_URL}/api/test_instances/${test_id}/${formTestItem.item_id}`,
+						{
+							method: "DELETE",
+							headers: {'Content-Type': 'application/json',},
+						}
+						);
+			
+			switch (response.status) {
+				case 200:
 					alert("Delete success.");
 					window.location.reload();
-				} else
-					alert(response.status + response.statusText);
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
 		} catch (e) {
-			alert("Failed; try again.")
+			alert("Failed to delete test item:\n"+e)
 		}
 	}
 </script>
@@ -84,7 +92,7 @@
 			Edit test item {testItem.label}
 		</Dialog.Title>
 		<Dialog.Description>
-			For the questions, please add points per item in parentheses at end, e.g., "Correct setup (1pts)."
+			For expected answer/rubric questions, add points in parentheses at end, e.g., "Correct setup (1pts)."
 		</Dialog.Description>
 	</Dialog.Header>
 	<Label for="label">Label</Label>
@@ -122,5 +130,8 @@
 				<MdiDelete class="size-6"/>
 			</Button>
 		</div>
+		<Dialog.Description>
+			NOTE: Deletion cannot be undone!
+		</Dialog.Description>
 	</Dialog.Footer>
 </Dialog.Content>
