@@ -73,7 +73,7 @@
 						{/if}
 						<h3>{ instance.name }</h3>
 					</span>
-					<h4>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h4>
+					<h5>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h5>
 				</a>
 			{/each}
 		{/if}
