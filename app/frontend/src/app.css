@@ -228,6 +228,14 @@
 }
 
 @layer utilities {
+  .card {
+		@apply bg-card;
+    @apply text-card-foreground;
+		@apply border border-border;
+    @apply px-3;
+    @apply py-1.5;
+	}
+
 	.button-primary {
 		@apply py-1 px-2;
 		@apply rounded;
@@ -240,7 +248,6 @@
 		@apply rounded;
 		@apply bg-secondary;
 		@apply text-secondary-foreground;
-    @apply border border-border;
 	}
 
   .button-outline {
@@ -248,15 +255,6 @@
     @apply rounded;
     @apply bg-card;
     @apply text-card-foreground;
-    @apply border border-border;
+    @apply border-0 ring-2 ring-border;
   }
-
-	.card {
-		@apply bg-card;
-    @apply text-card-foreground;
-		@apply border border-border;
-    @apply px-3;
-    @apply py-1.5;
-    @apply rounded;
-	}
 }
