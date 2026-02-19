@@ -1197,8 +1197,6 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
             assert isinstance(respectiveItem, TestItem)
-            
-            print(answer)
             #===================EVALUATION CALLS=================
             if answer.is_done_rendering == False:
                 print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
