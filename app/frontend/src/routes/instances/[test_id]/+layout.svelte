@@ -74,8 +74,10 @@
 				TestID:
 				<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
 			</h3>
-			<h3>SectionID: { activeTestInstance.section_id }</h3>
-			<h3>Date: { activeTestInstance.date ? new Date(activeTestInstance.date).toLocaleDateString() : "" }</h3>
+			<span class="flex justify-between">
+				<h3>SectionID: { activeTestInstance.section_id }</h3>
+				<h3>Date: { activeTestInstance.date ? new Date(activeTestInstance.date).toLocaleDateString() : "" }</h3>
+			</span>
 		</div>
 		<span id="thisOne" class="flex items-center gap-2 justify-end">
 			<a class="button-primary" href={`/instances/${data.test_id}/items`}>
