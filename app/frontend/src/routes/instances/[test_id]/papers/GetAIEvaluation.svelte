@@ -61,7 +61,7 @@
 		{:else}
 			{#each questionItemEvals as evalItem}
 				<div class="card space-y-1">
-					<span class="flex flex-row justify-between items-center gap-x-1">
+					<span class="flex flex-row justify-between items-center gap-x-2">
 						<h4 class="truncate text-ellipsis w-fill">
 							{evalItem.label}: {evalItem.question}
 						</h4>
@@ -74,7 +74,15 @@
 						{#if e_a_r_q.length != 0}
 							<span class="flex flex-row justify-between">
 								<h6 class="italic">{e_a_r_q}</h6>
-								<h6 class="font-bold">{GET_EVALS(evalItem)[index]}</h6>
+								<!-- UNTESTED. FIXME: Remove this line once verified working -->
+								<!-- TODO: Optimize logic to reduce number of function calls -->
+								{#if GET_EVALS(evalItem).length > index}
+									<h6 class="font-bold">
+										{GET_EVALS(evalItem)[index]}
+									</h6>
+								{:else}
+									<h6>(n/a)</h6>
+								{/if}
 							</span>
 						{/if}
 					{/each}
