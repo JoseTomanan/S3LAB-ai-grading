@@ -86,7 +86,7 @@
 </script>
 
 
-<div class="flex flex-col gap-4 overflow-auto">
+<div class="flex flex-col gap-4 overflow-auto p-0.5">
 	<span class="flex flex-row justify-between items-center">
 		<h1>{data.student_no}</h1>
 		<Dialog.Root>
