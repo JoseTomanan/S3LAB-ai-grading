@@ -58,6 +58,10 @@
 	<Input id="name"
 					placeholder="Name..."
 					bind:value={formName} />
+	<Label id="section">Section</Label>
+	<Input id="section"
+					value={"SECTION_ID "+section_id}
+					disabled/>
 	<Dialog.Footer>
 		<Button variant="outline"
 						onclick={() => addNewStudent()}>
