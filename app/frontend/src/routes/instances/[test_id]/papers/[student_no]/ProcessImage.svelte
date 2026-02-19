@@ -6,14 +6,16 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Label } from '$lib/components/ui/label/index.ts';
 
 	let isOperationOngoing: boolean = $state(false);
 
 	let formFile: FileList | undefined = $state();
+	let paramNumBoxes: number | null = $state(null);
 
 	async function sendImage() {
 		isOperationOngoing = true;
-		if (!formFile || formFile.length == 0)
+		if (!paramNumBoxes || !formFile || formFile.length == 0)
 			return;
 
 		const formData = new FormData();
@@ -22,7 +24,7 @@
 		try {
 			// FIXME: Remove this line once backend reflects change in URI
 			const response = await fetch(
-						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/image_preprocess`,
+						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/image_preprocess?num_boxes=${paramNumBoxes}`,
 						{ method: "POST", body: formData, }
 						);
 
@@ -52,6 +54,10 @@
 					type="file"
 					accept="image/*"
 					bind:files={formFile}/>
+	<Input id="numBoxes"
+					type="number"
+					placeholder="Number of boxes..."
+					bind:value={paramNumBoxes}/>
 	<Button variant="outline"
 					onclick={() => sendImage()}
 					disabled={!formFile}>
