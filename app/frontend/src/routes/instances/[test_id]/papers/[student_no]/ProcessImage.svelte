@@ -44,8 +44,10 @@
 
 
 <Dialog.Content>
-	<Dialog.Title>Process raw image</Dialog.Title>
-	<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
+	<Dialog.Header>
+		<Dialog.Title>Process raw image</Dialog.Title>
+		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
+	</Dialog.Header>
 	<Input id="sendImage"
 					type="file"
 					accept="image/*"
