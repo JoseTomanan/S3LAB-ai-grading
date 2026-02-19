@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400");
 
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
@@ -92,10 +92,46 @@
 }
 
 
+
+/* ============FONTS============ */
+@font-face {
+  font-family: 'SourceSans3';
+  src: url('/fonts/SourceSans3-Regular.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SourceSans3';
+  src: url('/fonts/SourceSans3-Italic.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Regular.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat-Italic.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+
+
 @theme {
-  --font-heading: sans-serif, "Jost";
-  --font-sans: sans-serif, "Albert Sans";
-  --font-mono: mono, "JetBrains Mono";
+  --font-heading: "Montserrat", sans-serif;
+  --font-sans: "SourceSans3", sans-serif;
+  --font-mono: "JetBrains Mono", mono;
 }
 
 
@@ -138,17 +174,26 @@
 }
 
 @layer base {
+  [class*=font-sans] {
+    letter-spacing: -0.02em;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
   
   body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
     @apply bg-background text-foreground;
   }
 
 	h1 {
 		@apply text-2xl;
     @apply text-primary-foreground;
+    @apply font-heading;
 		font-weight: bold;
     text-align: center;
 	}
@@ -164,8 +209,12 @@
 
 	h4 {
 		@apply text-base;
-		@apply opacity-75;
 	}
+
+  h5 {
+    @apply text-base;
+    @apply opacity-80;
+  }
 
 	p {
     @apply text-sm;
