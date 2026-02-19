@@ -8,6 +8,7 @@
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import AddNewStudent from './AddNewStudent.svelte';
+	import EditStudent from './EditStudent.svelte';
 	
 	let isPageLoading = $state(true);
 	let students: Student[] = $state([]);
@@ -66,8 +67,9 @@
 						<Dialog.Trigger class="button-secondary">
 							<MdiEdit class="size-4"/>
 						</Dialog.Trigger>
-						<!-- TODO: EditStudent functionality -->
-						<!-- TODO: delete student call -->
+						<EditStudent section_id={data.section_id}
+													student_no={student.student_no}
+													name={student.name}/>
 					</Dialog.Root>
 				</span>
 				<h5>{student.student_no}</h5>
