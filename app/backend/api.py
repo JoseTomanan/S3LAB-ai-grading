@@ -1111,7 +1111,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 
                 #===================EVALUATION CALLS=================
                 if not answer.is_done_rendering:
-                    print(f"INTERNAL:\tis_done_rendering detected false for {answer.answer_id}.")
+                    print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
                     _evaluate_image_logic(answer.answer_id, session)
                     session.refresh(answer)
                 #===================EVALUATION CALLS=================
@@ -1148,39 +1148,41 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Test instance with ID '{test_id}' not found"
-        )
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance with ID '{test_id}' not found"
+                )
     
     # Verify student exists
     student = session.get(Student, student_no)
     if not student:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student with ID '{student_no}' not found"
-        )
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student with ID '{student_no}' not found"
+                )
     
     # Verify student belongs to the test's section
     if student.section_id != instance.section_id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Student '{student_no}' does not belong to section {instance.section_id}"
-        )
-    
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Student '{student_no}' does not belong to section {instance.section_id}"
+                )
+
     # Get test paper for this student
     paper = session.exec(
-        select(TestPaperInstance).where(
-            TestPaperInstance.test_id == test_id,
-            TestPaperInstance.student_no == student_no
-        )
-    ).first()
+                select(TestPaperInstance)
+                .where(
+                    TestPaperInstance.test_id == test_id,
+                    TestPaperInstance.student_no == student_no
+                    )
+                ).first()
     
     # Collect all AI evaluations for this student
     ai_evaluations = []
     if paper:
         answers = session.exec(
-            select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
-        ).all()
+                        select(StudentAnswer)
+                        .where(StudentAnswer.paper_id == paper.paper_id)
+                        ).all()
         
         for answer in answers:
             respectiveItem = session.exec(
@@ -1190,10 +1192,10 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
             
             print(answer)
             #===================EVALUATION CALLS=================
-            # if answer.is_done_rendering == False:
-            print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-            _evaluate_image_logic(answer.answer_id, session)
-            session.refresh(answer)
+            if answer.is_done_rendering == False:
+                print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                _evaluate_image_logic(answer.answer_id, session)
+                session.refresh(answer)
             #===================EVALUATION CALLS=================
             
             ai_evaluations.append({
