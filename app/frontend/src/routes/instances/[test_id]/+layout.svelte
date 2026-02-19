@@ -74,7 +74,7 @@
 				TestID:
 				<span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
 			</h3>
-			<span class="flex">
+			<span class="flex justify-between">
 				<h3>
 					Date: {activeTestInstance.date
 									? new Date(activeTestInstance.date).toLocaleDateString()
