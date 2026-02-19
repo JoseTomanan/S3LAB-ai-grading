@@ -50,15 +50,11 @@
 	<Dialog.Header>
 		<Dialog.Title>Add new student</Dialog.Title>
 	</Dialog.Header>
-	<Label id="student_no">
-		Student no.
-	</Label>
+	<Label id="student_no">Student number</Label>
 	<Input id="student_no"
 					placeholder="Student number..."
 					bind:value={formStudentNo}/>
-	<Label id="name">
-		Name
-	</Label>
+	<Label id="name">Name</Label>
 	<Input id="name"
 					placeholder="Name..."
 					bind:value={formName} />
@@ -70,5 +66,8 @@
 		{#if isLoading}
 			<p>Loading...</p>
 		{/if}
+		<Dialog.Description>
+			Note that the student number cannot be changed after creation.
+		</Dialog.Description>
 	</Dialog.Footer>
 </Dialog.Content>
