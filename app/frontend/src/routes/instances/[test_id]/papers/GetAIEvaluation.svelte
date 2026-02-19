@@ -10,6 +10,9 @@
 	let isPageLoading = $state(false);
 	let questionItemEvals: EvaluationsResponse[] = $state([]);
 
+	const GET_E_A_R_Q = (i: EvaluationsResponse) => i.expected_answer_rubric_questions.split(';');
+	const GET_EVALS = (i: EvaluationsResponse) => i.ai_evaluation.split(';');
+
 	onMount(async () => {
 		isPageLoading = true;
 		try {
@@ -43,15 +46,27 @@
 		<Dialog.Title>AI evaluation results</Dialog.Title>
 		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
 	</Dialog.Header>
-	<div class="max-h-[80vh] overflow-auto">
+	<div class="max-h-[80vh] overflow-auto space-y-2">
 		{#each questionItemEvals as evalItem}
 			<div class="card space-y-1">
-				<h3>{ evalItem.label }</h3>
-				<h6 class="truncate text-ellipsis w-fill">
-					{ evalItem.question }
-				</h6>
-				{evalItem.expected_answer_rubric_questions}
-				{evalItem.ai_evaluation}
+				<h4 class="truncate text-ellipsis w-fill opacity-100">
+					({evalItem.label}) {evalItem.question}
+				</h4>
+				{#each GET_E_A_R_Q(evalItem) as _, index}
+					<span class="flex flex-row justify-between">
+						<h6 class="italic">{ GET_E_A_R_Q(evalItem)[index] }</h6>
+						<h6 class="font-bold">{ GET_EVALS(evalItem)[index] }</h6>
+					</span>
+				{/each}
+				<!--
+				{#each displayableEARQ as outer, outerIndex}
+					{#each outer as _, innerIndex}
+						<h6>
+							{displayableEARQ[outerIndex][innerIndex]}: {displayableEvals[outerIndex][innerIndex]}
+						</h6>
+					{/each}
+				{/each}
+				-->
 			</div>
 		{/each}
 	</div>
