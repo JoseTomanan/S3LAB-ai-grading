@@ -7,6 +7,7 @@
 	import MdiEdit from "~icons/mdi/edit";
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
+	import AddNewStudent from './AddNewStudent.svelte';
 	
 	let isPageLoading = $state(true);
 	let students: Student[] = $state([]);
@@ -52,7 +53,7 @@
 		<Dialog.Trigger class="button-outline font-medium items-center">
 			(+) Add new student
 		</Dialog.Trigger>
-		<!-- TODO: AddNewStudent functionality -->
+		<AddNewStudent section_id={data.section_id}/>
 	</Dialog.Root>
 	{#if isPageLoading}
 		<p>Loading...</p>
