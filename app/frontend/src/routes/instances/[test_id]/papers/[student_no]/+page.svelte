@@ -78,7 +78,7 @@
 			console.log("--> 2, after item fetch");
 			console.log($state.snapshot(studentItems));
 		} catch(e) {
-			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+			alert("Failed to fetch student answers/test items:\nERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}

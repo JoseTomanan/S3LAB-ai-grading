@@ -45,7 +45,7 @@
 			activeTestInstance.date = result.date;
 			activeTestInstance.is_done_rendering = result.is_done_rendering;
 		} catch (e) {
-			alert("Failed to fetch test details:\n"+e);
+			alert("Failed to fetch test instance details:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}

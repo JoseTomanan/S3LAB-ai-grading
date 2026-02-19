@@ -50,7 +50,7 @@
 				} else
 					alert(response.status + response.statusText);
 			} catch (e) {
-				alert("Failed to send POST request.");
+				alert("Failed to edit test item:\n"+e);
 			}
 		} else
 			alert("No changes were made.");

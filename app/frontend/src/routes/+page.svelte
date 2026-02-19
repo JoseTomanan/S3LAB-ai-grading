@@ -36,7 +36,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("Failed to fetch instances:\n"+e);
+			alert("Failed to fetch test instances:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}

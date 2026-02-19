@@ -41,7 +41,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("Failed to fetch sections. Check your network connection and try again.");
+			alert("Failed to fetch sections.\n"+e);
 		} finally {
 			isItemsLoading = false;
 		}

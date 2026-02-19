@@ -38,7 +38,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+			alert("Failed to fetch test items:\nERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}

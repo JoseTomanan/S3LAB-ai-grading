@@ -35,7 +35,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch(e) {
-			alert("Failed to fetch, check your network connection and try again.\n"+e);
+			alert("Failed to send raw image for processing:\n"+e);
 		} finally {
 			isOperationOngoing = false;
 		}

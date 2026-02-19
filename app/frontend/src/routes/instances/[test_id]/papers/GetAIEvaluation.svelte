@@ -33,7 +33,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+			alert("Failed to fetch results for given student:\nERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}
