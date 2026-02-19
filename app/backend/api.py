@@ -50,6 +50,9 @@ app.add_middleware(
         allow_headers=["*"],
         )
 
+AI_ANSWER_EVALUATOR = AIAnswerEvaluator()
+CV_IMAGE_PREPROCESSOR = CVImagePreprocessor()
+
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
 
@@ -1111,7 +1114,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 
                 #===================EVALUATION CALLS=================
                 if not answer.is_done_rendering:
-                    print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                    print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
                     _evaluate_image_logic(answer.answer_id, session)
                     session.refresh(answer)
                 #===================EVALUATION CALLS=================
@@ -1193,22 +1196,25 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
             print(answer)
             #===================EVALUATION CALLS=================
             if answer.is_done_rendering == False:
-                print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
                 _evaluate_image_logic(answer.answer_id, session)
                 session.refresh(answer)
             #===================EVALUATION CALLS=================
             
             ai_evaluations.append({
-                "item_id": answer.item_id,
-                "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-            })
+                        "item_id": answer.item_id,
+                        "label": respectiveItem.label,
+                        "question": respectiveItem.question,
+                        "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
+                        "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+                        })
     
     return {
         "test_id": test_id,
         "student_no": student_no,
         "name": student.name,
         "evaluations": ai_evaluations
-    }
+        }
 
 
 @app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
@@ -1393,7 +1399,7 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
     assert answer is not None
 
     actual_image_path = f"temp_cv_output/{answer.image_directory.split("/")[3]}"
-    image_bytes: bytes = CVImagePreprocessor().load_image(actual_image_path)
+    image_bytes: bytes = CV_IMAGE_PREPROCESSOR.load_image(actual_image_path)
 
     test_item = session.exec(
                     select(TestItem)
@@ -1406,11 +1412,12 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
             rubric_questions = test_item.expected_answer_rubric_questions.split(";")
             ai_evaluation = ""
             for rubric in rubric_questions:
-                while True:
-                    response = AIAnswerEvaluator().evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
-                    if response and _VALID_R_Q_RESPONSE(response):
-                        break
-                ai_evaluation += f"{response};"
+                if rubric.strip() != "":
+                    while True:
+                        response = AI_ANSWER_EVALUATOR.evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
+                        if response and _VALID_R_Q_RESPONSE(response):
+                            break
+                    ai_evaluation += f"{response};"
             
             answer.ai_evaluation = ai_evaluation
             # TODO: add missing setter for scores = list[float]
@@ -1418,7 +1425,7 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
             while True:
-                response = AIAnswerEvaluator().evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
+                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
 
