@@ -836,14 +836,14 @@ async def process_student_answer_image(
             item_id=item_id, 
             image_directory=f"/api/temp/{safe_filename}",
             ai_evaluation="",
-            is_done_rendering=True
+            is_done_rendering=False
         )
         session.add(answer)
         session.commit()
         session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
-        answer.is_done_rendering = True
+        answer.is_done_rendering = False
         session.add(answer)
 
     session.commit()
@@ -1004,18 +1004,17 @@ async def update_answer_segmentation(
     
     if not answer:
         answer = StudentAnswer(
-            paper_id=paper.paper_id,
-            item_id=item_id, 
-            image_directory=f"/api/temp/{safe_filename}",
-            ai_evaluation="",
-            is_done_rendering=True
-        )
+                    paper_id=paper.paper_id,
+                    item_id=item_id, 
+                    image_directory=f"/api/temp/{safe_filename}",
+                    ai_evaluation="",
+                    is_done_rendering=False,
+                    )
         session.add(answer)
         session.commit()
         session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
-        answer.is_done_rendering = True
         session.add(answer)
 
     session.commit()
@@ -1105,15 +1104,23 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                         ).all()
             
             for answer in answers:
+                respectiveItem = session.exec(
+                                    select(TestItem).where(TestItem.item_id == answer.item_id)
+                                    ).first()
+                assert isinstance(respectiveItem, TestItem)
+
                 #===================EVALUATION CALLS=================
                 if not answer.is_done_rendering:
-                    print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+                    print(f"INTERNAL:\tis_done_rendering detected false for {answer.answer_id}.")
                     evaluate_image(answer.answer_id)
                     session.refresh(answer)
                 #===================EVALUATION CALLS=================
 
                 ai_evaluations.append({
                             "item_id": answer.item_id,
+                            "label": respectiveItem.label,
+                            "question": respectiveItem.question,
+                            "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
                             "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
                             })
         
@@ -1130,7 +1137,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 
 
 @app.get("/api/test_instances/{test_id}/results/{student_no}")
-def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: Session = Depends(get_session)):
+def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session: Session = Depends(get_session)):
     """
     Get AI evaluation results for a specific student in a test instance.
     
@@ -1176,11 +1183,17 @@ def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: 
         ).all()
         
         for answer in answers:
+            respectiveItem = session.exec(
+                                    select(TestItem).where(TestItem.item_id == answer.item_id)
+                                    ).first()
+            assert isinstance(respectiveItem, TestItem)
+            
+            print(answer)
             #===================EVALUATION CALLS=================
-            if not answer.is_done_rendering:
-                print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-                evaluate_image(answer.answer_id)
-                session.refresh(answer)
+            # if answer.is_done_rendering == False:
+            print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+            evaluate_image(answer.answer_id)
+            session.refresh(answer)
             #===================EVALUATION CALLS=================
             
             ai_evaluations.append({
@@ -1364,13 +1377,21 @@ def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
-    answer = session.get(StudentAnswer, answer_id_input)
+    print(f"INTERNAL:\tFunction evaluate_image({answer_id_input}) is being executed...")
+
+    answer = session.exec(
+                    select(StudentAnswer)
+                    .where(StudentAnswer.answer_id == answer_id_input)
+                    ).first()
     assert answer is not None
 
     actual_image_path = f"temp_cv_output/{answer.image_directory.split("/")[3]}"
     image_bytes: bytes = CVImagePreprocessor().load_image(actual_image_path)
 
-    test_item = session.get(TestItem, answer.item_id)
+    test_item = session.exec(
+                    select(TestItem)
+                    .where(TestItem.item_id == answer.item_id)
+                    ).first()
     assert test_item is not None
 
     match test_item.is_problem_solving:
