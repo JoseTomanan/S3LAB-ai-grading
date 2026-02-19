@@ -49,7 +49,7 @@
 		<a href="/sections">
 			<MdiGoogleClassroom class="size-8"/>
 		</a>
-		<h1>View test instances</h1>
+		<h1>Test instances</h1>
 		<Dialog.Root>
 			<Dialog.Trigger class="button-primary">
 				<MdiPaperAddOutline class="size-6"/>
@@ -64,7 +64,8 @@
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
 			{#each paginationValues as instance}
-				<a href={`/instances/${instance.test_id}/items`} class="card">
+				<a href={`/instances/${instance.test_id}/items`}
+						class="card button-outline">
 					<span class="flex flex-row items-center gap-1">
 						{#if instance.is_done_rendering}
 							<MdiCheckboxMarkedOutline/>

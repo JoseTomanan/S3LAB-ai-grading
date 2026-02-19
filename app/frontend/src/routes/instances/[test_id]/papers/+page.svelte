@@ -48,18 +48,18 @@
 		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
 		{#each perStudentStatuses as testPaper}
-			<span class="flex flex-row items-center justify-between gap-1">
+			<span class="flex flex-row items-center justify-between gap-2">
 				<a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-						class="card w-5/6">
+						class="card button-outline w-5/6">
 					<h3>{testPaper.name}</h3>
 				</a>
 				<Dialog.Root>
 					<Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center"
 													disabled={!testPaper.is_done_rendering}>
 						{#if testPaper.is_done_rendering}
-							<MdiPaperCheckOutline class="size-6 my-1"/>
+							<MdiPaperCheckOutline class="size-6 my-0.5"/>
 						{:else}
-							<MdiPaperAlertOutline class="size-6 my-1 opacity-50"/>
+							<MdiPaperAlertOutline class="size-6 my-0.5 opacity-50"/>
 						{/if}
 					</Dialog.Trigger>
 					<GetAIEvaluation test_id={data.test_id}
