@@ -20,6 +20,7 @@ from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.ai_interface import *
+from functionality.sheets_exporter import *
 
 
 
@@ -30,6 +31,7 @@ USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional C
 PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 
 #endregion
+
 
 
 # ==============================
@@ -57,6 +59,7 @@ TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
+
 
 
 # ==============================
@@ -221,6 +224,7 @@ def delete_student(student_no: str, session: Session = Depends(get_session)):
     session.delete(student)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+#endregion
 
 
 
@@ -514,6 +518,7 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
             headers=headers
             )
 #endregion
+
 
 
 # ==============================
@@ -1447,5 +1452,20 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
             is_done_rendering=answer.is_done_rendering
             # TODO: add missing scores = list[float]
             )
+
+
+def _populate_spreadsheet_logic(test_id_input: str, session: Session):
+    test_items = session.exec(
+                            select(TestItem)
+                            .where(TestItem.test_id == test_id_input)
+                            ).all()
+    
+    test_items_labels = [item.label for item in test_items]
+
+    SHEET = SheetsExporter(columns=test_items_labels)
+
+    students = session.exec(select(Student).where())
+    # TODO: complete the rest of the function
+    ...
 
 #endregion
