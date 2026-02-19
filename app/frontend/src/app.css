@@ -174,10 +174,6 @@
 }
 
 @layer base {
-  [class*=font-sans] {
-    letter-spacing: -0.02em;
-  }
-
   * {
     @apply border-border outline-ring/50;
   }
