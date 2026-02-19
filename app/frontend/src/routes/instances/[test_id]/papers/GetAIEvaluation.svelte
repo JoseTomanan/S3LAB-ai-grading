@@ -50,7 +50,7 @@
 		{#each questionItemEvals as evalItem}
 			<div class="card space-y-1">
 				<h4 class="truncate text-ellipsis w-fill opacity-100">
-					({evalItem.label}) {evalItem.question}
+					{evalItem.label}: {evalItem.question}
 				</h4>
 				{#each GET_E_A_R_Q(evalItem) as _, index}
 					<span class="flex flex-row justify-between">
@@ -58,15 +58,6 @@
 						<h6 class="font-bold">{ GET_EVALS(evalItem)[index] }</h6>
 					</span>
 				{/each}
-				<!--
-				{#each displayableEARQ as outer, outerIndex}
-					{#each outer as _, innerIndex}
-						<h6>
-							{displayableEARQ[outerIndex][innerIndex]}: {displayableEvals[outerIndex][innerIndex]}
-						</h6>
-					{/each}
-				{/each}
-				-->
 			</div>
 		{/each}
 	</div>
