@@ -1130,15 +1130,17 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                                     ).first()
                 assert isinstance(respectiveItem, TestItem)
 
+                # NOTE: commented out while API rate limit situation is unresolved.
                 #===================EVALUATION CALLS=================
-                if not answer.is_done_rendering:
-                    print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
-                    _evaluate_image_logic(answer.answer_id, session)
-                    session.refresh(answer)
+                # if not answer.is_done_rendering:
+                #     print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
+                #     _evaluate_image_logic(answer.answer_id, session)
+                #     session.refresh(answer)
                 #===================EVALUATION CALLS=================
 
                 ai_evaluations.append({
                             "item_id": answer.item_id,
+                            "answer_id": answer.answer_id,
                             "label": respectiveItem.label,
                             "question": respectiveItem.question,
                             "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
@@ -1158,7 +1160,10 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 
 
 @app.get("/api/test_instances/{test_id}/results/{student_no}")
-def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session: Session = Depends(get_session)):
+def get_ai_evaluation_results_per_student(
+                test_id: str,
+                student_no: str,
+                session: Session = Depends(get_session)):
     """
     Get AI evaluation results for a specific student in a test instance.
     
@@ -1210,15 +1215,18 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
             assert isinstance(respectiveItem, TestItem)
+
+            # NOTE: commented out while API rate limit situation is unresolved.
             #===================EVALUATION CALLS=================
-            if answer.is_done_rendering == False:
-                print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
-                _evaluate_image_logic(answer.answer_id, session)
-                session.refresh(answer)
+            # if answer.is_done_rendering == False:
+            #     print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
+            #     _evaluate_image_logic(answer.answer_id, session)
+            #     session.refresh(answer)
             #===================EVALUATION CALLS=================
             
             ai_evaluations.append({
                         "item_id": answer.item_id,
+                        "answer_id": answer.answer_id,
                         "label": respectiveItem.label,
                         "question": respectiveItem.question,
                         "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
