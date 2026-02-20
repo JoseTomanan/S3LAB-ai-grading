@@ -42,7 +42,7 @@
 </script>
 
 
-<div class="space-y-3">
+<div class="space-y-3 overflow-clip p-0.5">
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if perStudentStatuses.length == 0}

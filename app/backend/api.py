@@ -33,6 +33,7 @@ USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional C
 PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 
 #endregion
+# ==============================
 
 
 
@@ -61,6 +62,7 @@ TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
+# ==============================
 
 
 
@@ -86,6 +88,7 @@ async def startup_database_setup():
             # Fail fast since AUTO_SEED was explicitly requested
             raise RuntimeError("Critical: Database seeding failed during startup") from e
 #endregion
+# ==============================
 
 
 
@@ -227,6 +230,7 @@ def delete_student(student_no: str, session: Session = Depends(get_session)):
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 #endregion
+# ==============================
 
 
 
@@ -520,6 +524,7 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
             headers=headers
             )
 #endregion
+# ==============================
 
 
 
@@ -736,6 +741,7 @@ def delete_test_item(
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 #endregion
+# ==============================
 
 
 
@@ -1050,6 +1056,8 @@ async def update_answer_segmentation(
         session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
+        answer.ai_evaluation = ""
+        answer.is_done_rendering = False
         session.add(answer)
 
     session.commit()
@@ -1313,6 +1321,7 @@ def get_student_answers(
     
     return summaries
 #endregion
+# ==============================
 
 
 
@@ -1418,6 +1427,7 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
                 )
 
 #endregion
+# ==============================
 
 
 
@@ -1504,3 +1514,4 @@ def _populate_spreadsheet_logic(test_id_input: str, session: Session):
     ...
 
 #endregion
+# ==============================
