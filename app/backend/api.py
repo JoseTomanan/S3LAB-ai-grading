@@ -1377,9 +1377,11 @@ async def get_processed_image(filename: str):
     return FileResponse(filepath, media_type="image/jpeg")
 
 
-@app.put("/api/function/evaluate_image")
-async def evaluate_image(answer_id: int, session: Session = Depends(get_session)):
-    """Evaluate image then store to StudentAnswer evaluation result."""
+@app.patch("/api/answers/{answer_id}/reevaluate")
+async def reevaluate_answer(answer_id: int, session: Session = Depends(get_session)):
+    """Re-evaluate image then store to StudentAnswer evaluation result."""
+    # TODO: 400 handling
+    # TODO: 404 handling
     return _evaluate_image_logic(
                 answer_id_input=answer_id,
                 session=session
