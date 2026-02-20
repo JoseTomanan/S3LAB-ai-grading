@@ -78,7 +78,8 @@ class StudentAnswer(SQLModel, table=True):
     ai_evaluation: str = Field(default="")
     is_done_rendering: bool = False
     scores: str = Field(default="[]")
-
+    detected_item_number: str = Field(default="UNKNOWN", max_length=10)
+    
     # # ======== Relationships ========
     # paper: "TestPaperInstance" = Relationship(back_populates="answers")
     # item: "TestItem" = Relationship(back_populates="answers")

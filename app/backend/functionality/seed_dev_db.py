@@ -10,41 +10,26 @@ import sys
 import os
 from pathlib import Path
 
-
-
 # ==============================
 # PATH SETUP (works from any cwd)
 # ==============================
 script_dir = Path(__file__).resolve().parent
 backend_dir = script_dir.parent  # app/backend
-project_root = backend_dir.parent.parent  # Project root containing 'app'
 
-# Prioritize project structure imports
-if (project_root / "app" / "backend").exists():
-    sys.path.insert(0, str(project_root))
-    from app.backend.database import (
-            engine, 
-            create_db_and_tables, 
-            get_direct_session,
-            ENVIRONMENT
-            )
-    from app.backend.models import (
-            Section, Student, TestInstance, TestItem,
-            TestPaperInstance, StudentAnswer
-            )
-else:
-    # Fallback: try direct backend imports (if run from app/backend)
-    sys.path.insert(0, str(backend_dir))
-    from app.backend.database import (
-            engine, 
-            create_db_and_tables, 
-            get_direct_session,
-            ENVIRONMENT
-            )
-    from app.backend.models import (
-            Section, Student, TestInstance, TestItem,
-            TestPaperInstance, StudentAnswer
-            )
+# Add backend directory to path for consistent imports
+sys.path.insert(0, str(backend_dir))
+
+# Use RELATIVE imports to match api.py (prevents duplicate table definitions)
+from database import (
+    engine,
+    create_db_and_tables,
+    get_direct_session,
+    ENVIRONMENT
+)
+from models import (
+    Section, Student, TestInstance, TestItem,
+    TestPaperInstance, StudentAnswer
+)
 
 from sqlmodel import delete
 import warnings

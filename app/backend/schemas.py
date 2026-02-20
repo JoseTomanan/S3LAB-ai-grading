@@ -120,3 +120,14 @@ class StudentAnswerSummary(BaseModel):
     image_directory: str
     ai_evaluation: str
     is_done_rendering: bool
+
+
+# ==============================
+# Image Preprocessing
+# ==============================
+
+class ProcessedBoxInfo(BaseModel):
+    """Information about a single processed answer box"""
+    index: int
+    image_directory: str
+    item_number: str = "UNKNOWN"  # The encircled number label

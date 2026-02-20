@@ -56,4 +56,20 @@ ANSWER_RUBRIC_PROMPT: str = "You are given an image of a student's handwritten w
 
 COMPARE_EXPECTED_FINAL_ANSWER_PROMPT: str = "You are given an image of a student's handwritten work in response to a math problem. Included in this prompt, preceded by `QUESTION:` is the problem the student is answering. Your task is to evaluate if the student's final answer is the same as the expected final answer (in a new line, preceded by `ANSWER:`). Your answer should be clear and concise, and generated as only `YES` or `NO`. If the student does not have a clear final answer, generate your answer as `UNCLEAR`."
 
-FIND_ITEM_NUMBER_PROMPT: str = "There is an item number indicated on the upper left corner of the image attached. It is encircled and may be written with poor handwriting, and/or have gridlines underneath them. Identify what it is; generate your answer simply (for example, just `2`). If there is no number, generate your answer as `NONE`."
+FIND_ITEM_NUMBER_PROMPT: str = """You are identifying an encircled item number in the TOP-LEFT corner of a student's answer sheet.
+
+IMPORTANT RULES:
+1. Look ONLY at the upper-left corner region
+2. The number is encircled (has a circle around it)
+3. Common numbers are: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+4. Handwriting may be poor - look carefully at the shape
+5. Do NOT confuse similar numbers (1 vs 7, 2 vs 3, 5 vs 6)
+
+EXAMPLES:
+- A single vertical line = 1
+- A curve with horizontal base = 2
+- Two curves stacked = 3
+- Vertical line with horizontal cross = 4
+
+Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
+Do not add any explanation or text."""

@@ -22,6 +22,8 @@ from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingEr
 from functionality.ai_interface import *
 from functionality.sheets_exporter import *
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 # ==============================
@@ -863,7 +865,19 @@ async def process_student_answer_image(
         # Set the first box as the default selected image_directory
         if i == 0:
             default_image_dir = image_dir
-            
+
+            # Extract item number using AI
+            item_number = "UNKNOWN"
+            try:
+                item_number = AI_ANSWER_EVALUATOR.get_item_number(img_bytes)
+                if not item_number or item_number.strip() == "NONE":
+                    item_number = "UNKNOWN"
+                else:
+                    item_number = item_number.strip()
+            except Exception as e:
+                logger.warning(f"Failed to extract item number for box {i}: {e}")
+                item_number = "UNKNOWN"
+
             # Create/Update StudentAnswer for the first box automatically
             answer = session.exec(
                 select(StudentAnswer).where(
@@ -871,29 +885,29 @@ async def process_student_answer_image(
                     StudentAnswer.item_id == item_id
                 )
             ).first()
-            
             if not answer:
                 answer = StudentAnswer(
                     paper_id=paper.paper_id,
                     item_id=item_id,
                     image_directory=image_dir,
                     ai_evaluation="",
-                    # CHANGE 3: Set to False to allow auto-evaluation trigger later
-                    is_done_rendering=False 
+                    is_done_rendering=False,
+                    detected_item_number=item_number
                 )
                 session.add(answer)
             else:
                 answer.image_directory = image_dir
-                # CHANGE 3: Reset to False to re-trigger evaluation if image changed
-                answer.is_done_rendering=False 
+                answer.is_done_rendering = False
+                answer.detected_item_number = item_number
             session.commit()
             session.refresh(answer)
 
         boxes_info.append({
             "index": i,
-            "image_directory": image_dir
+            "image_directory": image_dir,
+            "item_number": item_number
         })
-
+        
     return {
         "image_directory": default_image_dir,
         "num_boxes": len(processed_list),
