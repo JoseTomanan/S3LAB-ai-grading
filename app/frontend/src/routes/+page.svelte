@@ -44,7 +44,7 @@
 </script>
 
 
-<div class="px-4 py-8 flex flex-col gap-10">
+<div class="container gap-8">
 	<span class="flex flex-row items-center justify-between">
 		<a href="/sections">
 			<MdiGoogleClassroom class="size-6"/>

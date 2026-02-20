@@ -228,6 +228,12 @@
 }
 
 @layer utilities {
+  .container {
+    @apply flex flex-col;
+    @apply px-4 py-8;
+    @apply gap-4;
+  }
+
   .card {
 		@apply bg-card;
     @apply text-card-foreground;
@@ -253,6 +259,7 @@
   .button-outline {
     @apply py-1 px-2;
     @apply rounded;
-    @apply border-0 ring-2 ring-border;
+    @apply border-0;
+    @apply ring-2 ring-border;
   }
 }
