@@ -46,7 +46,7 @@
 </script>
 
 
-<div class="space-y-4">
+<div class="space-y-4 overflow-auto p-0.5">
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else}
