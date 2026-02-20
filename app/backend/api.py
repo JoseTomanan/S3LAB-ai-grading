@@ -1131,6 +1131,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 
                 ai_evaluations.append({
                             "item_id": answer.item_id,
+                            "answer_id": answer.answer_id,
                             "label": respectiveItem.label,
                             "question": respectiveItem.question,
                             "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
@@ -1211,6 +1212,7 @@ def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session
             
             ai_evaluations.append({
                         "item_id": answer.item_id,
+                        "answer_id": answer.answer_id,
                         "label": respectiveItem.label,
                         "question": respectiveItem.question,
                         "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
