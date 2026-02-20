@@ -8,7 +8,6 @@
 
 	import type { EvaluationsResponse, StudentStoresResponse } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-	import Button from '$lib/components/ui/button/button.svelte';
 
 	let isPageLoading = $state(false);
 	let questionItemEvals: EvaluationsResponse[] = $state([]);
@@ -42,8 +41,34 @@
 		}
 	});
 
-	async function reevaluateItem() {
-		// TODO: function
+	async function reevaluateAnswer(answer_id: number) {
+		isPageLoading = true;
+		try {
+			const response = await fetch(
+						`${API_BASE_URL}/api/answers/${answer_id}/reevaluate`,
+						{
+							method: "PATCH",
+							headers: {'Content-Type': 'application/json',},
+						}
+						);
+
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					questionItemEvals = questionItemEvals.map(ans => 
+									ans.answer_id === result.answer_id 
+									? { ...ans, ai_evaluation: result.ai_evaluation }
+									: ans
+								);
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
+			}
+		} catch (e) {
+			alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
+		} finally {
+			isPageLoading = false;
+		}
 	}
 </script>
 
@@ -58,6 +83,8 @@
 			<p>
 				Nothing to see here. Please upload images of student answers first.
 			</p>
+		{:else if isPageLoading}
+			<p>Loading...</p>
 		{:else}
 			{#each questionItemEvals as evalItem}
 				<div class="card space-y-1">
@@ -66,7 +93,7 @@
 							{evalItem.label}: {evalItem.question}
 						</h4>
 						<button class="button-secondary px-0 py-0"
-										onclick={() => reevaluateItem()}>
+										onclick={() => reevaluateAnswer(evalItem.answer_id)}>
 							<MdiHeadReload />
 						</button>
 					</span>
