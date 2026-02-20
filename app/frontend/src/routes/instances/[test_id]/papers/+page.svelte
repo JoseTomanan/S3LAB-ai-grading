@@ -4,8 +4,9 @@
 	import { API_BASE_URL } from '$lib/constants.ts';
 	import { onMount } from "svelte";
 	
-	import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
-	import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
+	import MdiPaperOutline from '~icons/mdi/paper-outline';
+	import MdiHeadAlertOutline from '~icons/mdi/head-alert-outline';
+	import MdiHeadCheckOutline from '~icons/mdi/head-check-outline';
 
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
 
@@ -33,7 +34,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch(e) {
-			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+			alert("Failed to fetch test paper statuses:\nERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}
@@ -48,18 +49,19 @@
 		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
 		{#each perStudentStatuses as testPaper}
-			<span class="flex flex-row items-center justify-between gap-1">
+			<span class="flex flex-row items-center justify-between gap-2">
 				<a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-						class="card flex-1">
+						class="card button-outline w-5/6
+										flex flex-row gap-2 items-center">
+					<MdiPaperOutline class="size-6 opacity-75"/>
 					<h3>{testPaper.name}</h3>
 				</a>
 				<Dialog.Root>
-					<Dialog.Trigger class="button-outline"
-													disabled={!testPaper.is_done_rendering}>
+					<Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center">
 						{#if testPaper.is_done_rendering}
-							<MdiPaperCheckOutline class="size-6 m-1"/>
+							<MdiHeadCheckOutline class="size-6 my-0.5"/>
 						{:else}
-							<MdiPaperAlertOutline class="size-6 m-1 opacity-50"/>
+							<MdiHeadAlertOutline class="size-6 my-0.5"/>
 						{/if}
 					</Dialog.Trigger>
 					<GetAIEvaluation test_id={data.test_id}

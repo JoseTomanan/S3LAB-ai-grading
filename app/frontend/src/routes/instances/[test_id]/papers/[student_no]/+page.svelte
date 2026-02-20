@@ -40,7 +40,6 @@
 					alert(`CALL 1: ${responseOne.status} ${responseOne.statusText}`);
 			}
 
-			console.log("--> 1, before item fetch");
 			console.log($state.snapshot(studentItems));
 
 			const responseTwo = await fetch(
@@ -55,7 +54,6 @@
 				case 200:
 					const resultTwo = await responseTwo.json();
 					testItems = resultTwo.items;
-					console.log("--> testItems.");
 					console.log($state.snapshot(testItems));
 					if (testItems && studentItems) {
 						for (const testItem of testItems)
@@ -74,11 +72,8 @@
 				default:
 					alert(`CALL 2: ${responseTwo.status} ${responseTwo.statusText}`);
 			}
-
-			console.log("--> 2, after item fetch");
-			console.log($state.snapshot(studentItems));
 		} catch(e) {
-			alert("Failed to fetch, check your network connection and try again.\nERROR: "+e);
+			alert("Failed to fetch student answers/test items:\nERROR: "+e);
 		} finally {
 			isPageLoading = false;
 		}
@@ -86,8 +81,16 @@
 </script>
 
 
-<div class="flex flex-col gap-4 overflow-auto">
-	<h2 class="font-semibold">For student {data.student_no}:</h2>
+<div class="flex flex-col gap-4 overflow-auto p-0.5">
+	<span class="flex flex-row justify-between items-center">
+		<h1>{data.student_no}</h1>
+		<Dialog.Root>
+			<Dialog.Trigger class="button-outline">
+				<MdiImagePlus class="size-6 mx-2"/>
+			</Dialog.Trigger>
+			<ProcessImage test_id={data.test_id} student_no={data.student_no} />
+		</Dialog.Root>
+	</span>
 	{#if isPageLoading}
 		<p>Loading...</p>
 	{:else if studentItems.length == 0}
@@ -98,12 +101,6 @@
 				<Label for={studentItem.label} class="flex flex-row justify-between">
 					{studentItem.label}
 					<span class="flex flex-row space-x-1">
-						<Dialog.Root>
-							<Dialog.Trigger class="button-secondary border-none">
-								<MdiImagePlus />
-							</Dialog.Trigger>
-							<ProcessImage test_id={data.test_id} student_no={data.student_no} {studentItem}/>
-						</Dialog.Root>
 						<a href={`/instances/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
 									class="button-secondary border-none">
 							<MdiCrop/>

@@ -51,7 +51,7 @@
 			else
 				alert(response.status + response.statusText);
 		} catch (e) {
-			alert("Failed completing operation, check your connection and try again.")
+			alert("Failed to add new test item:\n"+e);
 		}
 	}
 </script>

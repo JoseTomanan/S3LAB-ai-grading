@@ -70,7 +70,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch(e) {
-			alert("Failed to finish, check your network connection and try again.\n"+e);
+			alert("Failed to send points:\n"+e);
 		} finally {
 			isOperationOngoing = false;
 		}

@@ -43,7 +43,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("There was an error in processing the request. Please try again.\n"+e);
+			alert("Failed to export spreadsheet:\n"+e);
 			isNotClicked = true;
 		} finally {
 			isLoading = false;

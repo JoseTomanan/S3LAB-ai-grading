@@ -22,26 +22,26 @@ project_root = backend_dir.parent.parent  # Project root containing 'app'
 # Prioritize project structure imports
 if (project_root / "app" / "backend").exists():
     sys.path.insert(0, str(project_root))
-    from database import (
+    from app.backend.database import (
             engine, 
             create_db_and_tables, 
             get_direct_session,
             ENVIRONMENT
             )
-    from models import (
+    from app.backend.models import (
             Section, Student, TestInstance, TestItem,
             TestPaperInstance, StudentAnswer
             )
 else:
     # Fallback: try direct backend imports (if run from app/backend)
     sys.path.insert(0, str(backend_dir))
-    from database import (
+    from app.backend.database import (
             engine, 
             create_db_and_tables, 
             get_direct_session,
             ENVIRONMENT
             )
-    from models import (
+    from app.backend.models import (
             Section, Student, TestInstance, TestItem,
             TestPaperInstance, StudentAnswer
             )

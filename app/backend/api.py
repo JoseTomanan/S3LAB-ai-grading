@@ -20,6 +20,7 @@ from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.ai_interface import *
+from functionality.sheets_exporter import *
 
 
 
@@ -30,6 +31,7 @@ USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional C
 PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 
 #endregion
+
 
 
 # ==============================
@@ -50,10 +52,14 @@ app.add_middleware(
         allow_headers=["*"],
         )
 
+AI_ANSWER_EVALUATOR = AIAnswerEvaluator()
+CV_IMAGE_PREPROCESSOR = CVImagePreprocessor()
+
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
+
 
 
 # ==============================
@@ -218,11 +224,12 @@ def delete_student(student_no: str, session: Session = Depends(get_session)):
     session.delete(student)
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+#endregion
 
 
 
 # ==============================
-# Test Instance Endpoints
+#region Test Instance Endpoints
 # ==============================
 @app.get("/api/test_instances", response_model=List[TestInstanceResponse])
 def get_test_instances(session: Session = Depends(get_session)):
@@ -511,6 +518,7 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
             headers=headers
             )
 #endregion
+
 
 
 # ==============================
@@ -1009,18 +1017,17 @@ async def update_answer_segmentation(
     
     if not answer:
         answer = StudentAnswer(
-            paper_id=paper.paper_id,
-            item_id=item_id, 
-            image_directory=f"/api/temp/{safe_filename}",
-            ai_evaluation="",
-            is_done_rendering=True
-        )
+                    paper_id=paper.paper_id,
+                    item_id=item_id, 
+                    image_directory=f"/api/temp/{safe_filename}",
+                    ai_evaluation="",
+                    is_done_rendering=False,
+                    )
         session.add(answer)
         session.commit()
         session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
-        answer.is_done_rendering = True
         session.add(answer)
 
     session.commit()
@@ -1079,6 +1086,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             "statuses": statuses
             }
 
+
 @app.get("/api/test_instances/{test_id}/results")
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
     """Return AI evaluations per contract"""
@@ -1093,7 +1101,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
         select(Student).where(Student.section_id == instance.section_id)
     ).all()
 
-    evaluations = []
+    student_stores = []
     for student in students:
         papers = session.exec(
             select(TestPaperInstance).where(
@@ -1111,8 +1119,8 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
             for answer in answers:
                 # Trigger evaluation if not done (Optional logic based on previous context)
                 if not answer.is_done_rendering:
-                    print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-                    evaluate_image(answer.answer_id)
+                    print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
+                    _evaluate_image_logic(answer.answer_id, session)
                     session.refresh(answer)
                 
                 tests_list.append({
@@ -1194,7 +1202,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
 #     }
 
 @app.get("/api/test_instances/{test_id}/results/{student_no}")
-def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: Session = Depends(get_session)):
+def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session: Session = Depends(get_session)):
     """
     Get AI evaluation results for a specific student in a test instance.
     
@@ -1205,59 +1213,69 @@ def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: 
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Test instance with ID '{test_id}' not found"
-        )
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance with ID '{test_id}' not found"
+                )
     
     # Verify student exists
     student = session.get(Student, student_no)
     if not student:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student with ID '{student_no}' not found"
-        )
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student with ID '{student_no}' not found"
+                )
     
     # Verify student belongs to the test's section
     if student.section_id != instance.section_id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Student '{student_no}' does not belong to section {instance.section_id}"
-        )
-    
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Student '{student_no}' does not belong to section {instance.section_id}"
+                )
+
     # Get test paper for this student
     paper = session.exec(
-        select(TestPaperInstance).where(
-            TestPaperInstance.test_id == test_id,
-            TestPaperInstance.student_no == student_no
-        )
-    ).first()
+                select(TestPaperInstance)
+                .where(
+                    TestPaperInstance.test_id == test_id,
+                    TestPaperInstance.student_no == student_no
+                    )
+                ).first()
     
     # Collect all AI evaluations for this student
     ai_evaluations = []
     if paper:
         answers = session.exec(
-            select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
-        ).all()
+                        select(StudentAnswer)
+                        .where(StudentAnswer.paper_id == paper.paper_id)
+                        ).all()
         
         for answer in answers:
+            respectiveItem = session.exec(
+                                    select(TestItem).where(TestItem.item_id == answer.item_id)
+                                    ).first()
+            assert isinstance(respectiveItem, TestItem)
             #===================EVALUATION CALLS=================
-            if not answer.is_done_rendering:
-                print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-                evaluate_image(answer.answer_id)
+            if answer.is_done_rendering == False:
+                print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
+                _evaluate_image_logic(answer.answer_id, session)
                 session.refresh(answer)
             #===================EVALUATION CALLS=================
             
             ai_evaluations.append({
-                "item_id": answer.item_id,
-                "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-            })
+                        "item_id": answer.item_id,
+                        "label": respectiveItem.label,
+                        "question": respectiveItem.question,
+                        "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
+                        "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+                        })
     
     return {
         "test_id": test_id,
         "student_no": student_no,
         "name": student.name,
-        "ai_evaluation": ai_evaluations
-    }
+        "evaluations": ai_evaluations
+        }
+
 
 @app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
 def get_student_answers(
@@ -1409,6 +1427,16 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=404, detail="Processed image not found")
     
     return FileResponse(filepath, media_type="image/jpeg")
+
+
+@app.put("/api/function/evaluate_image")
+async def evaluate_image(answer_id: int, session: Session = Depends(get_session)):
+    """Evaluate image then store to StudentAnswer evaluation result."""
+    return _evaluate_image_logic(
+                answer_id_input=answer_id,
+                session=session
+                )
+
 #endregion
 
 
@@ -1417,23 +1445,26 @@ async def get_processed_image(filename: str):
 #   ---> FROM JOSE
 #region Auxiliary Functions
 # ==============================
-@app.put("/api/function/evaluate_image")
-def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)):
-    """
-    (Auxiliary function by Jose) Evaluate image then store to StudentAnswer evaluation result.
-    Temporarily an endpoint for testing purposes.
-    """
+def _evaluate_image_logic(answer_id_input: int, session: Session):
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
-    answer = session.get(StudentAnswer, answer_id_input)
+    print(f"INTERNAL:\tFunction evaluate_image({answer_id_input}) is being executed...")
+
+    answer = session.exec(
+                    select(StudentAnswer)
+                    .where(StudentAnswer.answer_id == answer_id_input)
+                    ).first()
     assert answer is not None
 
     actual_image_path = f"temp_cv_output/{answer.image_directory.split("/")[3]}"
-    image_bytes: bytes = CVImagePreprocessor().load_image(actual_image_path)
+    image_bytes: bytes = CV_IMAGE_PREPROCESSOR.load_image(actual_image_path)
 
-    test_item = session.get(TestItem, answer.item_id)
+    test_item = session.exec(
+                    select(TestItem)
+                    .where(TestItem.item_id == answer.item_id)
+                    ).first()
     assert test_item is not None
 
     match test_item.is_problem_solving:
@@ -1441,11 +1472,12 @@ def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)
             rubric_questions = test_item.expected_answer_rubric_questions.split(";")
             ai_evaluation = ""
             for rubric in rubric_questions:
-                while True:
-                    response = AIAnswerEvaluator().evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
-                    if response and _VALID_R_Q_RESPONSE(response):
-                        break
-                ai_evaluation += f"{response};"
+                if rubric.strip() != "":
+                    while True:
+                        response = AI_ANSWER_EVALUATOR.evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
+                        if response and _VALID_R_Q_RESPONSE(response):
+                            break
+                    ai_evaluation += f"{response};"
             
             answer.ai_evaluation = ai_evaluation
             # TODO: add missing setter for scores = list[float]
@@ -1453,7 +1485,7 @@ def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
             while True:
-                response = AIAnswerEvaluator().evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
+                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
 
@@ -1475,5 +1507,20 @@ def evaluate_image(answer_id_input: int, session: Session = Depends(get_session)
             is_done_rendering=answer.is_done_rendering
             # TODO: add missing scores = list[float]
             )
+
+
+def _populate_spreadsheet_logic(test_id_input: str, session: Session):
+    test_items = session.exec(
+                            select(TestItem)
+                            .where(TestItem.test_id == test_id_input)
+                            ).all()
+    
+    test_items_labels = [item.label for item in test_items]
+
+    SHEET = SheetsExporter(columns=test_items_labels)
+
+    students = session.exec(select(Student).where())
+    # TODO: complete the rest of the function
+    ...
 
 #endregion

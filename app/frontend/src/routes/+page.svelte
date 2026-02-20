@@ -36,7 +36,7 @@
 					alert(`${response.status} ${response.statusText}`);
 			}
 		} catch (e) {
-			alert("Failed to fetch instances:\n"+e);
+			alert("Failed to fetch test instances:\n"+e);
 		} finally {
 			isPageLoading = false;
 		}
@@ -44,12 +44,12 @@
 </script>
 
 
-<div class="px-4 py-8 flex flex-col gap-4">
+<div class="px-4 py-8 flex flex-col gap-10">
 	<span class="flex flex-row items-center justify-between">
 		<a href="/sections">
-			<MdiGoogleClassroom class="size-8"/>
+			<MdiGoogleClassroom class="size-6"/>
 		</a>
-		<h1>View test instances</h1>
+		<h1>Test instances</h1>
 		<Dialog.Root>
 			<Dialog.Trigger class="button-primary">
 				<MdiPaperAddOutline class="size-6"/>
@@ -57,14 +57,15 @@
 			<AddTestInstance />
 		</Dialog.Root>
 	</span>
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-4">
 		{#if isPageLoading}
 			<p>Loading...</p>
 		{:else if instances.length == 0}
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
 			{#each paginationValues as instance}
-				<a href={`/instances/${instance.test_id}/items`} class="card">
+				<a href={`/instances/${instance.test_id}/items`}
+						class="card button-outline">
 					<span class="flex flex-row items-center gap-1">
 						{#if instance.is_done_rendering}
 							<MdiCheckboxMarkedOutline/>
@@ -73,7 +74,7 @@
 						{/if}
 						<h3>{ instance.name }</h3>
 					</span>
-					<h4>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h4>
+					<h5>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h5>
 				</a>
 			{/each}
 		{/if}
