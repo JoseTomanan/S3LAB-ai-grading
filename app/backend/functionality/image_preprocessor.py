@@ -2394,3 +2394,20 @@ class CVImagePreprocessor:
         except Exception as e:
             logger.error(f"Manual segmentation failed: {e}", exc_info=True)
             raise CVProcessingError(f"Manual segmentation failed: {str(e)}")
+        
+    def crop_top_left_corner(self, image: np.ndarray, width_ratio: float = 0.30, height_ratio: float = 0.25) -> np.ndarray:
+        """
+        Crop top-left corner where encircled item numbers typically appear.
+        
+        Args:
+            image: Input OpenCV image
+            width_ratio: Fraction of width to crop (default: 30%)
+            height_ratio: Fraction of height to crop (default: 25%)
+        
+        Returns:
+            Cropped image region
+        """
+        h, w = image.shape[:2]
+        crop_h = int(h * height_ratio)
+        crop_w = int(w * width_ratio)
+        return image[0:crop_h, 0:crop_w]

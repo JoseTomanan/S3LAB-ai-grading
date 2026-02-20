@@ -869,8 +869,8 @@ async def process_student_answer_image(
             # Extract item number using AI
             item_number = "UNKNOWN"
             try:
-                item_number = AI_ANSWER_EVALUATOR.get_item_number(img_bytes)
-                if not item_number or item_number.strip() == "NONE":
+                item_number = AI_ANSWER_EVALUATOR.get_item_number_ocr(img_bytes)
+                if not item_number or item_number.strip() == "UNKNOWN":
                     item_number = "UNKNOWN"
                 else:
                     item_number = item_number.strip()
@@ -907,7 +907,7 @@ async def process_student_answer_image(
             "image_directory": image_dir,
             "item_number": item_number
         })
-        
+
     return {
         "image_directory": default_image_dir,
         "num_boxes": len(processed_list),
