@@ -1093,113 +1093,61 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Test instance '{test_id}' not found"
-        )
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance '{test_id}' not found"
+                )
     
     students = session.exec(
-        select(Student).where(Student.section_id == instance.section_id)
-    ).all()
+            select(Student).where(Student.section_id == instance.section_id)
+            ).all()
 
     student_stores = []
     for student in students:
         papers = session.exec(
-            select(TestPaperInstance).where(
-                TestPaperInstance.test_id == test_id,
-                TestPaperInstance.student_no == student.student_no
-            )
-        ).all()
+                    select(TestPaperInstance).where(
+                        TestPaperInstance.test_id == test_id,
+                        TestPaperInstance.student_no == student.student_no
+                        )
+                    ).all()
         
-        tests_list = []
+        ai_evaluations = []
         for paper in papers:
             answers = session.exec(
-                select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
-            ).all()
+                        select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
+                        ).all()
             
             for answer in answers:
-                # Trigger evaluation if not done (Optional logic based on previous context)
+                respectiveItem = session.exec(
+                                    select(TestItem).where(TestItem.item_id == answer.item_id)
+                                    ).first()
+                assert isinstance(respectiveItem, TestItem)
+
+                #===================EVALUATION CALLS=================
                 if not answer.is_done_rendering:
                     print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
                     _evaluate_image_logic(answer.answer_id, session)
                     session.refresh(answer)
-                
-                tests_list.append({
-                    "item_id": answer.item_id,
-                    "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-                })
+                #===================EVALUATION CALLS=================
+
+                ai_evaluations.append({
+                            "item_id": answer.item_id,
+                            "label": respectiveItem.label,
+                            "question": respectiveItem.question,
+                            "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
+                            "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+                            })
         
-        evaluations.append({
-            "student_no": student.student_no,
-            "name": student.name,
-            "tests": tests_list
-        })
+        student_stores.append({
+                "student_no": student.student_no,
+                "name": student.name,
+                "evaluations": ai_evaluations
+                })
     
     return {
-        "test_id": test_id,
-        "evaluations": evaluations
-    }
+            "test_id": test_id,
+            "students": student_stores
+            }
 
-#   // Depending on whether test_id is retained in 'Get items of specific test instance' endpoint
-
-# @app.get("/api/test_instances/{test_id}/results")
-# def get_ai_evaluation_results(
-#     test_id: str,
-#     session: Session = Depends(get_session)
-# ):
-#     """Return AI evaluations per contract"""
-#     # Verify test instance exists
-#     instance = session.get(TestInstance, test_id)
-#     if not instance:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail=f"Test instance '{test_id}' not found"
-#         )
-    
-#     # Get all students in the section
-#     students = session.exec(
-#         select(Student).where(Student.section_id == instance.section_id)
-#     ).all()
-    
-#     # Build evaluations response
-#     evaluations = []
-#     for student in students:
-#         # Get all papers for this student
-#         papers = session.exec(
-#             select(TestPaperInstance).where(
-#                 TestPaperInstance.test_id == test_id,
-#                 TestPaperInstance.student_no == student.student_no
-#             )
-#         ).all()
-        
-#         # Collect all item evaluations for this student
-#         tests_list = []
-#         for paper in papers:
-#             answers = session.exec(
-#                 select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
-#             ).all()
-            
-#             for answer in answers:
-#                 # Trigger evaluation if not done
-#                 if not answer.is_done_rendering:
-#                     print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
-#                     evaluate_image(answer.answer_id)
-#                     session.refresh(answer)
-                
-#                 tests_list.append({
-#                     "item_id": answer.item_id,
-#                     "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-#                 })
-        
-#         evaluations.append({
-#             "student_no": student.student_no,
-#             "name": student.name,
-#             "tests": tests_list
-#         })
-    
-#     return {
-#         "test_id": test_id,
-#         "evaluations": evaluations
-#     }
 
 @app.get("/api/test_instances/{test_id}/results/{student_no}")
 def get_ai_evaluation_results_per_student(test_id: str, student_no: str, session: Session = Depends(get_session)):
