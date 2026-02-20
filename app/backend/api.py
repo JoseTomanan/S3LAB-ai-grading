@@ -516,33 +516,67 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 # ==============================
 #region Test Item Endpoints
 # ==============================
-@app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
+# @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
+# def get_test_instance_items(
+#             test_id: str,
+#             session: Session = Depends(get_session),
+#             ):
+#     """Get all test items for a specific test instance"""
+#     instance = session.get(TestInstance, test_id)
+#     if not instance:
+#         raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
+    
+#     items = session.exec(
+#         select(TestItem).where(TestItem.test_id == test_id)
+#     ).all()
+
+#     items_summary = [
+#             TestItemSummary(
+#                 item_id=item.item_id,
+#                 label=item.label,
+#                 question=item.question,
+#                 is_problem_solving=item.is_problem_solving,
+#                 expected_answer_rubric_questions=item.expected_answer_rubric_questions,
+#                 )
+#             for item in items
+#             ]
+
+#     return TestItemsResponse(test_id=test_id, items=items_summary)
+@app.get("/api/test_instances/{test_id}/items")
 def get_test_instance_items(
-            test_id: str,
-            session: Session = Depends(get_session),
-            ):
+    test_id: str,
+    session: Session = Depends(get_session),
+):
     """Get all test items for a specific test instance"""
+    # Verify test instance exists
     instance = session.get(TestInstance, test_id)
     if not instance:
-        raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance '{test_id}' not found"
+        )
     
+    # Get items
     items = session.exec(
         select(TestItem).where(TestItem.test_id == test_id)
     ).all()
-
-    items_summary = [
-            TestItemSummary(
-                item_id=item.item_id,
-                label=item.label,
-                question=item.question,
-                is_problem_solving=item.is_problem_solving,
-                expected_answer_rubric_questions=item.expected_answer_rubric_questions,
-                )
-            for item in items
-            ]
-
-    return TestItemsResponse(test_id=test_id, items=items_summary)
-
+    
+    # Build items list
+    items_list = [
+        {
+            "item_id": item.item_id,
+            "label": item.label,
+            "question": item.question,
+            "is_problem_solving": item.is_problem_solving,
+            "expected_answer_rubric_questions": item.expected_answer_rubric_questions,
+        }
+        for item in items
+    ]
+    
+    return {
+        "test_id": test_id,
+        "items": items_list
+    }
 
 @app.post("/api/test_instances/{test_id}/items", response_model=NewTestItemResponse)
 def add_test_item(
@@ -700,184 +734,155 @@ def delete_test_item(
 # ==============================
 @app.post("/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess")
 async def process_student_answer_image(
-            test_id: str,
-            student_no: str,
-            item_id: int,
-            file: UploadFile = File(...),
-            selected_box_index: int = Form(0),
-            session: Session = Depends(get_session)
-            ):
+    test_id: str,
+    student_no: str,
+    item_id: int,
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session)
+):
     """Process raw student assessment image through CV pipeline"""
     # ===== VALIDATION =====
     # Verify test instance exists
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Test instance '{test_id}' not found"
-                )
-    
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance '{test_id}' not found"
+        )
     # Verify student exists
     student = session.get(Student, student_no)
     if not student:
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Student with ID '{student_no}' not found"
-                )
-    
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student with ID '{student_no}' not found"
+        )
     # Verify item exists and belongs to this test
     item = session.exec(
-            select(TestItem).where(
-                TestItem.item_id == item_id,
-                TestItem.test_id == test_id
-                )
-            ).first()
-    
+        select(TestItem).where(
+            TestItem.item_id == item_id,
+            TestItem.test_id == test_id
+        )
+    ).first()
     if not item:
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Item {item_id} not found in test instance '{test_id}'"
-                )
-    
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Item {item_id} not found in test instance '{test_id}'"
+        )
     # Validate file
     if not file or not file.filename:
         raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No file provided"
-                )
-    
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file provided"
+        )
     if not CVImagePreprocessor.validate_file_extension(file.filename):
         raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
-                )
-    
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
+        )
     try:
         contents = await file.read()
         if len(contents) == 0:
             raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Uploaded file is empty"
-                    )
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty"
+            )
     except Exception as e:
         raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to read file: {str(e)}"
-                )
-    
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to read file: {str(e)}"
+        )
+
     # ===== PROCESSING =====
     try:
         preprocessor = CVImagePreprocessor(
             use_paddle_ocr=USE_PADDLE_OCR,
             paddle_ocr_lang=PADDLE_OCR_LANG,
-            debug_mode=False  # Set to True for debugging during development
+            debug_mode=False
         )
         processed_list = preprocessor.process_assessment_image(contents)
     except CVProcessingError as e:
         raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"CV processing failed: {str(e)}"
-                )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"CV processing failed: {str(e)}"
+        )
     except Exception as e:
         raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error during image processing: {str(e)}"
-                )
-    
-    # Validate selected_box_index
-    if selected_box_index < 0 or selected_box_index >= len(processed_list):
-        raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid box index. Must be between 0 and {len(processed_list)-1}"
-                )
-    
-    # ===== SAVE SELECTED BOX TO DATABASE =====
-    selected_img_bytes = processed_list[selected_box_index]
-    
-    # Create or update TestPaperInstance
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error during image processing: {str(e)}"
+        )
+
+    # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
+    # Create or update TestPaperInstance (metadata only, no specific answer linked yet)
     paper = session.exec(
-            select(TestPaperInstance).where(
-                    TestPaperInstance.test_id == test_id,
-                    TestPaperInstance.student_no == student_no
-                )
-            ).first()
+        select(TestPaperInstance).where(
+            TestPaperInstance.test_id == test_id,
+            TestPaperInstance.student_no == student_no
+        )
+    ).first()
     if not paper:
         paper = TestPaperInstance(
-                test_id=test_id,
-                student_no=student_no,
-                is_done_rendering=False
-                )
+            test_id=test_id,
+            student_no=student_no,
+            is_done_rendering=False
+        )
         session.add(paper)
         session.commit()
         session.refresh(paper)
-
+    
     assert paper is not None
 
-    # Create or update StudentAnswer
-    answer = session.exec(
-            select(StudentAnswer).where(
+    boxes_info = []
+    default_image_dir = ""
+
+    for i, img_bytes in enumerate(processed_list):
+        # Generate filename
+        safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}_{i}.jpg"
+        safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
+        filepath = TEMP_DIR / safe_filename
+        
+        # Save image file
+        with open(filepath, "wb") as f:
+            f.write(img_bytes)
+        
+        image_dir = f"/api/temp/{safe_filename}"
+        
+        # Set the first box as the default selected image_directory
+        if i == 0:
+            default_image_dir = image_dir
+            
+            # Create/Update StudentAnswer for the first box automatically
+            answer = session.exec(
+                select(StudentAnswer).where(
                     StudentAnswer.paper_id == paper.paper_id,
                     StudentAnswer.item_id == item_id
                 )
             ).first()
-    
-    # Generate filename
-    safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}_{selected_box_index}.jpg"
-    safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
-    filepath = TEMP_DIR / safe_filename
-    
-    # Save image file
-    with open(filepath, "wb") as f:
-        f.write(selected_img_bytes)
-    
-    if not answer:
-        answer = StudentAnswer(
-            paper_id=paper.paper_id,
-            item_id=item_id, 
-            image_directory=f"/api/temp/{safe_filename}",
-            ai_evaluation="",
-            is_done_rendering=True
-        )
-        session.add(answer)
-        session.commit()
-        session.refresh(answer)
-    else:
-        answer.image_directory = f"/api/temp/{safe_filename}"
-        answer.is_done_rendering = True
-        session.add(answer)
+            
+            if not answer:
+                answer = StudentAnswer(
+                    paper_id=paper.paper_id,
+                    item_id=item_id,
+                    image_directory=image_dir,
+                    ai_evaluation="",
+                    is_done_rendering=True
+                )
+                session.add(answer)
+            else:
+                answer.image_directory = image_dir
+                answer.is_done_rendering = True
+            session.commit()
+            session.refresh(answer)
 
-    session.commit()
-    
-    # ===== RETURN ALL CANDIDATE BOXES FOR PREVIEW =====
-    boxes_info = []
-    for i, img_bytes in enumerate(processed_list):
-        if i == selected_box_index:
-            # Already saved above
-            boxes_info.append({
-                    "index": i,
-                    "image_directory": f"/api/temp/{safe_filename}",
-                    "is_selected": True
-                    })
-        else:
-            # Save other candidates temporarily
-            temp_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}_temp_{i}.jpg"
-            temp_filename = "".join(c for c in temp_filename if c.isalnum() or c in "._-")
-            temp_filepath = TEMP_DIR / temp_filename
-            with open(temp_filepath, "wb") as f:
-                f.write(img_bytes)
-            boxes_info.append({
-                "index": i,
-                "image_directory": f"/api/temp/{temp_filename}",
-                "is_selected": False
-            })
-    
+        boxes_info.append({
+            "index": i,
+            "image_directory": image_dir
+        })
+
     return {
-            "image_directory": f"/api/temp/{safe_filename}",
-            "num_boxes": len(processed_list),
-            "selected_box_index": selected_box_index,
-            "boxes": boxes_info
-            }
-
+        "image_directory": default_image_dir,
+        "num_boxes": len(processed_list),
+        "boxes": boxes_info
+    }
 
 @app.patch("/api/test_instances/{test_id}/{student_no}/{item_id}")
 async def update_answer_segmentation(
@@ -1076,57 +1081,117 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
 
 @app.get("/api/test_instances/{test_id}/results")
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
-    """Return AI evaluations per contract. Constructed by Jose."""
+    """Return AI evaluations per contract"""
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Test instance '{test_id}' not found"
-                )
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Test instance '{test_id}' not found"
+        )
     
     students = session.exec(
-            select(Student).where(Student.section_id == instance.section_id)
-            ).all()
+        select(Student).where(Student.section_id == instance.section_id)
+    ).all()
 
     evaluations = []
     for student in students:
         papers = session.exec(
-                    select(TestPaperInstance).where(
-                        TestPaperInstance.test_id == test_id,
-                        TestPaperInstance.student_no == student.student_no
-                        )
-                    ).all()
+            select(TestPaperInstance).where(
+                TestPaperInstance.test_id == test_id,
+                TestPaperInstance.student_no == student.student_no
+            )
+        ).all()
         
-        ai_evaluations = []
+        tests_list = []
         for paper in papers:
             answers = session.exec(
-                        select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
-                        ).all()
+                select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
+            ).all()
             
             for answer in answers:
-                #===================EVALUATION CALLS=================
+                # Trigger evaluation if not done (Optional logic based on previous context)
                 if not answer.is_done_rendering:
                     print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
                     evaluate_image(answer.answer_id)
                     session.refresh(answer)
-                #===================EVALUATION CALLS=================
-
-                ai_evaluations.append({
-                            "item_id": answer.item_id,
-                            "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-                            })
+                
+                tests_list.append({
+                    "item_id": answer.item_id,
+                    "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+                })
         
         evaluations.append({
-                "student_no": student.student_no,
-                "name": student.name,
-                "ai_evaluation": ai_evaluations
-                })
+            "student_no": student.student_no,
+            "name": student.name,
+            "tests": tests_list
+        })
     
     return {
-            "test_id": test_id,
-            "evaluations": evaluations
-            }
+        "test_id": test_id,
+        "evaluations": evaluations
+    }
 
+#   // Depending on whether test_id is retained in 'Get items of specific test instance' endpoint
+
+# @app.get("/api/test_instances/{test_id}/results")
+# def get_ai_evaluation_results(
+#     test_id: str,
+#     session: Session = Depends(get_session)
+# ):
+#     """Return AI evaluations per contract"""
+#     # Verify test instance exists
+#     instance = session.get(TestInstance, test_id)
+#     if not instance:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"Test instance '{test_id}' not found"
+#         )
+    
+#     # Get all students in the section
+#     students = session.exec(
+#         select(Student).where(Student.section_id == instance.section_id)
+#     ).all()
+    
+#     # Build evaluations response
+#     evaluations = []
+#     for student in students:
+#         # Get all papers for this student
+#         papers = session.exec(
+#             select(TestPaperInstance).where(
+#                 TestPaperInstance.test_id == test_id,
+#                 TestPaperInstance.student_no == student.student_no
+#             )
+#         ).all()
+        
+#         # Collect all item evaluations for this student
+#         tests_list = []
+#         for paper in papers:
+#             answers = session.exec(
+#                 select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
+#             ).all()
+            
+#             for answer in answers:
+#                 # Trigger evaluation if not done
+#                 if not answer.is_done_rendering:
+#                     print(f"INTERNAL:\tEvaluating image for {answer.answer_id}...")
+#                     evaluate_image(answer.answer_id)
+#                     session.refresh(answer)
+                
+#                 tests_list.append({
+#                     "item_id": answer.item_id,
+#                     "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+#                 })
+        
+#         evaluations.append({
+#             "student_no": student.student_no,
+#             "name": student.name,
+#             "tests": tests_list
+#         })
+    
+#     return {
+#         "test_id": test_id,
+#         "evaluations": evaluations
+#     }
 
 @app.get("/api/test_instances/{test_id}/results/{student_no}")
 def get_ai_evaluation_results_per_student(test_id: str,student_no: str,session: Session = Depends(get_session)):
