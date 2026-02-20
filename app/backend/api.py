@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Response, status, Depends, File, UploadFile, Form, Body
+from fastapi import FastAPI, HTTPException, Response, status, Depends, File, UploadFile, Form, Body, APIRouter, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -740,12 +740,15 @@ def delete_test_item(
 # ==============================
 #region Student Answer Processing Endpoints
 # ==============================
+
+
 @app.post("/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess")
 async def process_student_answer_image(
     test_id: str,
     student_no: str,
     item_id: int,
     file: UploadFile = File(...),
+    num_boxes: Optional[int] = Query(None), 
     session: Session = Depends(get_session)
 ):
     """Process raw student assessment image through CV pipeline"""
@@ -807,7 +810,10 @@ async def process_student_answer_image(
             paddle_ocr_lang=PADDLE_OCR_LANG,
             debug_mode=False
         )
-        processed_list = preprocessor.process_assessment_image(contents)
+        if num_boxes is not None:
+            processed_list = preprocessor.process_assessment_image(contents, num_boxes=num_boxes)
+        else:
+            processed_list = preprocessor.process_assessment_image(contents)
     except CVProcessingError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -872,12 +878,14 @@ async def process_student_answer_image(
                     item_id=item_id,
                     image_directory=image_dir,
                     ai_evaluation="",
-                    is_done_rendering=True
+                    # CHANGE 3: Set to False to allow auto-evaluation trigger later
+                    is_done_rendering=False 
                 )
                 session.add(answer)
             else:
                 answer.image_directory = image_dir
-                answer.is_done_rendering = True
+                # CHANGE 3: Reset to False to re-trigger evaluation if image changed
+                answer.is_done_rendering=False 
             session.commit()
             session.refresh(answer)
 
