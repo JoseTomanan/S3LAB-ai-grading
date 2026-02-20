@@ -1042,6 +1042,8 @@ async def update_answer_segmentation(
         session.refresh(answer)
     else:
         answer.image_directory = f"/api/temp/{safe_filename}"
+        answer.ai_evaluation = ""
+        answer.is_done_rendering = False
         session.add(answer)
 
     session.commit()
