@@ -141,73 +141,73 @@ class CVImagePreprocessor:
         return ext in CVImagePreprocessor.SUPPORTED_FORMATS
     
     def process_assessment_image(self, image_bytes: bytes, num_boxes: Optional[int] = None) -> List[bytes]:
-            """
-            Process raw assessment image and extract answer box regions.
-            API CONTRACT:
-            - Input: raw image bytes (from await file.read())
-            - Output: List[bytes] where each element is a JPEG byte array
-            - Must detect answer boxes and return each as separate processed image
-            - Returns up to 'num_boxes' candidate regions (default 3)
+        """
+        Process raw assessment image and extract answer box regions.
+        API CONTRACT:
+        - Input: raw image bytes (from await file.read())
+        - Output: List[bytes] where each element is a JPEG byte array
+        - Must detect answer boxes and return each as separate processed image
+        - Returns up to 'num_boxes' candidate regions (default 3)
+        
+        Args:
+            image_bytes: Raw bytes of uploaded image
+            num_boxes: Optional maximum number of boxes to return (default: 3)
             
-            Args:
-                image_bytes: Raw bytes of uploaded image
-                num_boxes: Optional maximum number of boxes to return (default: 3)
-                
-            Returns:
-                List of JPEG-encoded byte arrays, one per detected answer box
-                (Returns at least 1 box - full image if no boxes detected)
-            Raises:
-                CVProcessingError: If image processing fails catastrophically
-            """
-            try:
-                # Load image from bytes
-                image = self._load_image_from_bytes(image_bytes)
-                logger.info(f"✓ Loaded image: {image.shape[1]}x{image.shape[0]}px")
-                
-                # Detect answer box candidates (hybrid approach)
-                candidate_boxes = self._detect_answer_box_candidates(image)
-                logger.info(f"✓ Detected {len(candidate_boxes)} candidate answer box(es)")
-                
-                # Process each box (enhancements applied AFTER detection)
-                processed_bytes_list = []
-                for i, box_image in enumerate(candidate_boxes):
-                    try:
-                        # Apply enhancements in optimal order
-                        enhanced = self.brighten(box_image, amount=0.25)
-                        enhanced = self.adjust_contrast(enhanced, amount=1.3)
-                        # CRITICAL FIX: Remove horizontal lines AFTER warp
-                        enhanced = self._remove_horizontal_lines_post_warp(enhanced)
-                        # Deskew with median angle (more robust than mean)
-                        enhanced = self._deskew_image(enhanced, max_angle=15.0)
-                        # Encode to JPEG bytes
-                        img_bytes = self._encode_to_bytes(enhanced)
-                        processed_bytes_list.append(img_bytes)
-                        logger.debug(f"  Processed box #{i+1}: {len(img_bytes):,} bytes")
-                    except Exception as e:
-                        logger.warning(f"Failed to process box #{i+1}: {e}")
-                        continue
-                
-                # Fallback: if no boxes detected, return full image
-                if not processed_bytes_list:
-                    logger.warning("No valid answer boxes detected. Returning full image as fallback.")
-                    full_processed = self.brighten(image, amount=0.25)
-                    full_processed = self.adjust_contrast(full_processed, amount=1.3)
-                    full_processed = self._remove_horizontal_lines_post_warp(full_processed)
-                    full_processed = self._deskew_image(full_processed, max_angle=15.0)
-                    processed_bytes_list.append(self._encode_to_bytes(full_processed))
-                
-                # FIX: Use num_boxes parameter to limit results (default to 3 if None)
-                limit = num_boxes if num_boxes is not None else 3
-                final_boxes = processed_bytes_list[:limit]
-                
-                logger.info(f"Returning {len(final_boxes)} box(es) for manual selection")
-                return final_boxes
-                
-            except CVProcessingError:
-                raise
-            except Exception as e:
-                logger.error(f"✗ Unexpected error in process_assessment_image: {e}", exc_info=True)
-                raise CVProcessingError(f"Image processing failed: {str(e)}")
+        Returns:
+            List of JPEG-encoded byte arrays, one per detected answer box
+            (Returns at least 1 box - full image if no boxes detected)
+        Raises:
+            CVProcessingError: If image processing fails catastrophically
+        """
+        try:
+            # Load image from bytes
+            image = self._load_image_from_bytes(image_bytes)
+            logger.info(f"✓ Loaded image: {image.shape[1]}x{image.shape[0]}px")
+            
+            # Detect answer box candidates (hybrid approach)
+            candidate_boxes = self._detect_answer_box_candidates(image)
+            logger.info(f"✓ Detected {len(candidate_boxes)} candidate answer box(es)")
+            
+            # Process each box (enhancements applied AFTER detection)
+            processed_bytes_list = []
+            for i, box_image in enumerate(candidate_boxes):
+                try:
+                    # Apply enhancements in optimal order
+                    enhanced = self.brighten(box_image, amount=0.25)
+                    enhanced = self.adjust_contrast(enhanced, amount=1.3)
+                    # CRITICAL FIX: Remove horizontal lines AFTER warp
+                    enhanced = self._remove_horizontal_lines_post_warp(enhanced)
+                    # Deskew with median angle (more robust than mean)
+                    enhanced = self._deskew_image(enhanced, max_angle=15.0)
+                    # Encode to JPEG bytes
+                    img_bytes = self._encode_to_bytes(enhanced)
+                    processed_bytes_list.append(img_bytes)
+                    logger.debug(f"  Processed box #{i+1}: {len(img_bytes):,} bytes")
+                except Exception as e:
+                    logger.warning(f"Failed to process box #{i+1}: {e}")
+                    continue
+            
+            # Fallback: if no boxes detected, return full image
+            if not processed_bytes_list:
+                logger.warning("No valid answer boxes detected. Returning full image as fallback.")
+                full_processed = self.brighten(image, amount=0.25)
+                full_processed = self.adjust_contrast(full_processed, amount=1.3)
+                full_processed = self._remove_horizontal_lines_post_warp(full_processed)
+                full_processed = self._deskew_image(full_processed, max_angle=15.0)
+                processed_bytes_list.append(self._encode_to_bytes(full_processed))
+            
+            # FIX: Use num_boxes parameter to limit results (default to 3 if None)
+            limit = num_boxes if num_boxes is not None else 3
+            final_boxes = processed_bytes_list[:limit]
+            
+            logger.info(f"Returning {len(final_boxes)} box(es) for manual selection")
+            return final_boxes
+            
+        except CVProcessingError:
+            raise
+        except Exception as e:
+            logger.error(f"✗ Unexpected error in process_assessment_image: {e}", exc_info=True)
+            raise CVProcessingError(f"Image processing failed: {str(e)}")
 
     def brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
         """Increase image brightness using linear transform."""
