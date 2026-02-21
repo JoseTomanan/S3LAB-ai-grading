@@ -1,6 +1,6 @@
 **/__pycache__/*
 /temp_cv_output/*
-/temp_cv_input/*
+/TEMP/*
 /backend/test_report.txt
 *.pyc
 

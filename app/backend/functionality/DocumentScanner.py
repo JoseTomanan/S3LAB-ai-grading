@@ -1,0 +1,179 @@
+import numpy as np
+import cv2
+import math
+
+
+#region Constants
+NORMAL_SIZE = 2048
+#endregion
+
+
+
+def _mapp(h):
+    h = h.reshape((4, 2))
+    hnew = np.zeros(
+                (4, 2),
+                dtype = np.float32)
+
+    add = h.sum(1)
+    hnew[0] = h[np.argmin(add)]
+    hnew[2] = h[np.argmax(add)]
+
+    diff = np.diff(h,axis = 1)
+    hnew[1] = h[np.argmin(diff)]
+    hnew[3] = h[np.argmax(diff)]
+
+    return hnew
+
+def _get_robust_aspect_ratio(coords):
+    pts = np.array(coords)
+
+    center = np.mean(pts, axis=0)
+
+    angles = np.arctan2(pts[:, 1] - center[1], pts[:, 0] - center[0])
+    pts = pts[np.argsort(angles)]
+    
+    side_a1 = pts[1] - pts[0]
+    side_a2 = pts[3] - pts[2]
+    side_b1 = pts[2] - pts[1]
+    side_b2 = pts[0] - pts[3]
+
+    w = (np.linalg.norm(side_a1) + np.linalg.norm(side_a2)) / 2
+    h = (np.linalg.norm(side_b1) + np.linalg.norm(side_b2)) / 2
+
+    return max(w,h) / min(w,h)
+
+
+
+# ================================
+#region Class
+# ================================
+class DocumentScanner:
+    def load_image(self, image_path: str) -> bytes:
+        """Load image path and return as bytes."""
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        if image is None:
+            raise ValueError(f"Could not load image from {image_path}")
+        
+        ret, buffer = cv2.imencode('.jpg', image)
+        if not ret:
+            raise ValueError("Failed to encode image")
+        return buffer.tobytes()
+
+
+    def brighten(self, image_bytes: bytes, amount: float) -> bytes:
+        """Scale pixel values with (1 + amount). Amount > 0 increases brightness; < 0 decreases it."""
+        image = self._decode_bytes(image_bytes)
+        brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
+        return self._encode_to_bytes(brightened)
+    
+
+    def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
+        """Increase/decrease contrast by given alpha"""
+        image = self._decode_bytes(image_bytes)
+        contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
+        return self._encode_to_bytes(contrasted)
+    
+
+    def save_image(self, image_bytes: bytes, save_path: str) -> None:
+        """Save image to specified path."""
+        with open(save_path, "wb") as f:
+            ret = f.write(image_bytes)
+        if not ret:
+            raise ValueError(f"Failed to save image to {save_path}")
+        print(f"Image saved to {save_path}")
+    
+
+    def scan_page(self,
+                    image_bytes: bytes
+                    ) -> bytes:
+        """Take unscanned image, return scanned image."""
+        image = self._decode_bytes(image_bytes)
+        image_original, image = self._regularize_image(image)
+
+        contours, _ = cv2.findContours(image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        image_good_contour = None
+        for c in contours:
+            p = cv2.arcLength(c, True)
+            approximate = cv2.approxPolyDP(c, 0.02*p, True)
+            if len(approximate) == 4:
+                image_good_contour = approximate
+                break
+
+        if image_good_contour is None:
+            raise ValueError("INFO:\tCould not find document outline.")
+        
+        image_warped = self._warp_from_original(image_good_contour, image_original)
+
+        return self._encode_to_bytes(image_warped)
+    
+
+    #region Private functions
+    def _decode_bytes(self, image_bytes: bytes) -> cv2.typing.MatLike:
+        """Decode bytes into BGR uint8 array"""
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if image is None:
+            raise ValueError("Failed to decode image bytes")
+        return image
+    
+
+    def _encode_to_bytes(self, image_matrix: cv2.typing.MatLike) -> bytes:
+        """Encode BGR uint8 array back to JPEG bytes"""
+        ret, buffer = cv2.imencode('.jpg', image_matrix)
+        if not ret:
+            raise ValueError("Failed to encode image")
+        return buffer.tobytes()
+    
+
+    def _regularize_image(self, image_mat: cv2.typing.MatLike) -> list[cv2.typing.MatLike]:
+        """Step before contour ranking. Resize, greyscale, blur, then canny to reduce noises in image."""
+        h, w, _ = image_mat.shape
+        ratio = w/h
+
+        original_img = cv2.resize(image_mat,
+                                    (int(NORMAL_SIZE*ratio), NORMAL_SIZE)
+                                    )
+        iterated_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+        iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
+        iterated_img = cv2.Canny(iterated_img, 75, 200)
+        
+        return [original_img, iterated_img]
+    
+
+    def _warp_from_original(self, 
+                            screen_contour: cv2.typing.MatLike,
+                            original: cv2.typing.MatLike
+                            ) -> cv2.typing.MatLike:
+        """Take """
+        approximation = _mapp(screen_contour)
+        box_ratio = math.sqrt(_get_robust_aspect_ratio(approximation))
+        box_length = int(NORMAL_SIZE * math.sqrt(box_ratio))
+
+        points = np.float32(np.array([
+                        [0, 0],
+                        [box_length, 0],
+                        [box_length, NORMAL_SIZE],
+                        [0, NORMAL_SIZE]
+                    ]))
+
+        image_transformed = cv2.getPerspectiveTransform(approximation, points) #pyright: ignore
+        image_warped = cv2.warpPerspective(original, image_transformed, (int(NORMAL_SIZE*box_ratio), NORMAL_SIZE))
+
+        return image_warped
+    #endregion
+
+#endregion
+# ================================
+
+
+if __name__ == "__main__":  
+    DOCUMENT_SCANNER = DocumentScanner()
+    
+    image_before = DOCUMENT_SCANNER.load_image("./TEMP/input/testA.jpeg")
+    image_after = DOCUMENT_SCANNER.scan_page(image_before)
+
+    DOCUMENT_SCANNER.save_image(image_after, "./TEMP/output/+test_result.jpg")
