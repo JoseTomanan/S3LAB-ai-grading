@@ -6,4 +6,4 @@
 test.db
 database.db
 
-**/+*.py
+**/+test_*.py
