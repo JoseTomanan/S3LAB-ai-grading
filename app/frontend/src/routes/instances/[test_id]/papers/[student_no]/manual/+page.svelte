@@ -93,6 +93,9 @@
 			Send
 		</Button>
 	</span>
+	{#if isOperationOngoing}
+		<p>Loading...</p>
+	{/if}
 	{#if canvasImageUrl}
 		<Cropper bind:cropper={canvasCropper}
 					src={canvasImageUrl}
@@ -106,8 +109,5 @@
 			<MdiUpload class="h-8 w-full"/>
 			<p>Upload an image to start cropping.</p>
 		</span>
-	{/if}
-	{#if isOperationOngoing}
-		<p>Loading...</p>
 	{/if}
 </div>
