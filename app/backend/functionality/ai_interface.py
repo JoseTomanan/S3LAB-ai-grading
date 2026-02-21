@@ -53,6 +53,7 @@ class AIAnswerEvaluator:
 
 
     # OCR Item Number Label - Hamdi
+    # TODO: segregate; this isn't very SOC of us
     def get_item_number_ocr(self, image_bytes: bytes) -> str:
         """
         Extract item number using traditional OpenCV.
