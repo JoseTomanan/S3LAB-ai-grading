@@ -99,9 +99,10 @@
 					</span>
 					{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
 						{#if e_a_r_q.length != 0}
+							{@const resulting_eval = GET_EVALS(evalItem)[index]}
 							<span class="flex flex-row justify-between">
 								<h6 class="italic">{e_a_r_q}</h6>
-								{#if GET_EVALS(evalItem)[index] != ""}
+								{#if resulting_eval && resulting_eval != ""}
 									<h6 class="font-bold">
 										{GET_EVALS(evalItem)[index]}
 									</h6>
