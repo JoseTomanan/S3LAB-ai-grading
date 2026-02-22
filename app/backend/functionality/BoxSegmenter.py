@@ -1,11 +1,12 @@
 import numpy as np
 import cv2
 from DocumentScanner import DocumentScanner, NORMAL_SIZE
+from ai_interface import AIAnswerEvaluator
 
 
 AREA = NORMAL_SIZE ** 2
-MIN_AREA = AREA * 0.05
-MAX_AREA = AREA * 0.75
+MIN_AREA = AREA * 0.01
+MAX_AREA = AREA * 0.90
 
 
 
@@ -23,7 +24,7 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = self._dilate_edges(image_cannied)
 
         contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         images_good_contours = []
         for c in contours:
             area = cv2.contourArea(c)
@@ -34,11 +35,19 @@ class BoxSegmenter(DocumentScanner):
                     approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
-                    if 0.4 <= aspect_ratio <= 2.5:
+                    if 0.25 <= aspect_ratio <= 4:
                         images_good_contours.append(approximate)
+                    else:
+                        print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+                else:
+                    print(f"INFO:\tFound not box at approximate={approximate}.")
+            else:
+                print(f"INFO:\tDid not pass for area={area}")
 
         if images_good_contours == []:
-            raise ValueError("INFO:\tCould not find any boxes.")
+            raise ValueError("Could not find any boxes.")
+        
+        print(f"INFO:\tResult # of boxes: {len(images_good_contours)}")
         
         images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
         
@@ -55,7 +64,7 @@ class BoxSegmenter(DocumentScanner):
     
     def _dilate_edges(self, image: cv2.typing.MatLike, dilate_size: int = 3) -> cv2.typing.MatLike:
         kernel = np.ones((dilate_size, dilate_size), np.uint8)
-        image_dilated = cv2.dilate(image, kernel, iterations=3)
+        image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
     #endregion
@@ -64,10 +73,11 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     BOX_SEGMENTER = BoxSegmenter()
+    AI_EVALUATOR = AIAnswerEvaluator()
     
-    image_before = BOX_SEGMENTER.load_image("./TEMP/input/unscannedC.jpeg")
-    image_after_scan = BOX_SEGMENTER.scan_page(image_before)
-    images_after_box = BOX_SEGMENTER.get_boxes(image_after_scan, num_boxes=2)
+    image_before = BOX_SEGMENTER.load_image("./TEMP/input/alreadyscannedA.jpg")
+    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=2)
 
     for i in range(len(images_after_box)):
-        BOX_SEGMENTER.save_image(images_after_box[i], f"./TEMP/output/+test_boxed_{i}.jpg")
+        label = AI_EVALUATOR.get_item_number(images_after_box[i])
+        BOX_SEGMENTER.save_image(images_after_box[i], f"./TEMP/output/+test{i}_itemlabel_{label}.jpg")
