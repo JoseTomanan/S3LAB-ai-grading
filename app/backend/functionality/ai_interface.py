@@ -10,9 +10,9 @@ import json
 logger = logging.getLogger(__name__)
 
 
+
 # ================================
-#   Class
-# ================================
+#region   Class
 class AIAnswerEvaluator:
     def __init__(self, flash: bool = False):
         load_dotenv()
@@ -62,12 +62,13 @@ class AIAnswerEvaluator:
                     )
 
         return response.text
+#endregion
+# ================================
     
 
 
 # ================================
-#   Prompts
-# ================================
+#region   Prompts
 ANSWER_RUBRIC_PROMPT: str = "You are given an image of a student's handwritten work in response to a math problem. Included in this prompt, preceded by `QUESTION:` is the problem the student is answering. Your task is to answer a question/questions (in a new line, preceded by `PROMPT:`) based solely on the visual content of the student's work. Your answer should be clear and concise, and directly relate to the image. If a question can be answered with a yes or no, only generate your answer as `YES` or `NO`. Otherwise, generate your answer as raw text, with no prefixes or sentences (e.g. `3x+2=8` or `5`). If multiple questions are given in the prompt, separate your answers for each with `; `."
 
 
@@ -94,3 +95,6 @@ EXAMPLES:
 
 Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
 Do not add any explanation or text."""
+
+#endregion
+# ================================
