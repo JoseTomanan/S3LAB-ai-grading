@@ -14,7 +14,7 @@
 
 	let isPageLoading = $state(false);
 	let testItems: TestItem[] = $state(testItemsContext.items);
-	console.log($state.snapshot(testItems))
+
 	let questionItemEvals: EvaluationsResponse[] = $state([]);
 
 	const GET_E_A_R_Q = (i: EvaluationsResponse) => i.expected_answer_rubric_questions.split(';');
@@ -38,7 +38,6 @@
 	onMount(async () => {
 		isPageLoading = true;
 		REPOPULATE_UNANSWERED_ITEMS();
-		console.log($state.snapshot(questionItemEvals));
 		try {
 			const response = await fetch(
 						`${API_BASE_URL}/api/test_instances/${test_id}/results/${student_no}`,
@@ -103,11 +102,7 @@
 		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
 	</Dialog.Header>
 	<div class="max-h-[80vh] overflow-auto space-y-2">
-		{#if questionItemEvals.length == 0}
-			<p>
-				Nothing to see here. Please upload images of student answers first.
-			</p>
-		{:else if isPageLoading}
+		{#if isPageLoading}
 			<p>Loading...</p>
 		{:else}
 			{#each questionItemEvals as evalItem}
