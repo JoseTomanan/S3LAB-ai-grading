@@ -742,16 +742,17 @@ def delete_test_item(
 
 # ==============================
 #region Student Answer Processing Endpoints
-@app.post("/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess")
+@app.post("/api/test_instances/{test_id}/{student_no}/image_preprocess")
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
-                item_id: int,
                 file: UploadFile = File(...),
                 num_boxes: Optional[int] = Query(None), 
                 session: Session = Depends(get_session)
                 ):
     """Process raw student assessment image through CV pipeline"""
+    print(f"INTERNAL:\tProcess student answer image request has been received.")
+
     # Verify test instance exists
     instance = session.get(TestInstance, test_id)
     if not instance:
@@ -766,18 +767,6 @@ async def process_student_answer_image(
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Student with ID '{student_no}' not found"
-                    )
-    
-    # Verify item exists and belongs to this test
-    item = session.exec(
-                    select(TestItem).where(
-                        TestItem.item_id == item_id,
-                        TestItem.test_id == test_id
-                    )).first()
-    if not item:
-        raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Item {item_id} not found in test instance '{test_id}'"
                     )
     
     # Validate file
@@ -805,26 +794,16 @@ async def process_student_answer_image(
                     )
 
     # ===== PROCESSING =====
-    try:
-        preprocessor = CVImagePreprocessor(
-            use_paddle_ocr=USE_PADDLE_OCR,
-            paddle_ocr_lang=PADDLE_OCR_LANG,
-            debug_mode=False
-        )
-        if num_boxes is not None:
-            processed_list = preprocessor.process_assessment_image(contents, num_boxes=num_boxes)
-        else:
-            processed_list = preprocessor.process_assessment_image(contents)
-    except CVProcessingError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"CV processing failed: {str(e)}"
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error during image processing: {str(e)}"
-        )
+    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
+    BOX_SEGMENTER = BoxSegmenter()
+
+    scanned_page = BOX_SEGMENTER.scan_page(contents)
+    processed_list = BOX_SEGMENTER.get_boxes(
+                            scanned_page,
+                            num_boxes=num_boxes if num_boxes is not None else 3
+                            )
+    
+    print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     # Create or update TestPaperInstance (metadata only, no specific answer linked yet)
@@ -848,9 +827,10 @@ async def process_student_answer_image(
     boxes_info = []
     default_image_dir = ""
 
+    print(f"INTERNAL:\tProceeding to labeling the boxes.")
     for i, img_bytes in enumerate(processed_list):
         # Generate filename
-        safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}_{i}.jpg"
+        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex}_{i}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
         filepath = TEMP_DIR / safe_filename
         
@@ -859,45 +839,57 @@ async def process_student_answer_image(
             f.write(img_bytes)
         
         image_dir = f"/api/temp/{safe_filename}"
-        
-        # Set the first box as the default selected image_directory
-        if i == 0:
-            default_image_dir = image_dir
 
-            # Extract item number using AI
-            item_number = "UNKNOWN"
-            try:
-                item_number = AI_ANSWER_EVALUATOR.get_item_number_ocr(img_bytes)
-                if not item_number or item_number.strip() == "UNKNOWN":
-                    item_number = "UNKNOWN"
-                else:
-                    item_number = item_number.strip()
-            except Exception as e:
-                logger.warning(f"Failed to extract item number for box {i}: {e}")
+        # Extract item number using AI
+        item_number = "UNKNOWN"
+        try:
+            item_number = AI_ANSWER_EVALUATOR.get_item_number(img_bytes)
+            if not item_number or item_number.strip() == "UNKNOWN":
                 item_number = "UNKNOWN"
-
-            # Create/Update StudentAnswer for the first box automatically
-            answer = session.exec(
-                        select(StudentAnswer).where(
-                            StudentAnswer.paper_id == paper.paper_id,
-                            StudentAnswer.item_id == item_id
-                        )).first()
-            if not answer:
-                answer = StudentAnswer(
-                            paper_id=paper.paper_id,
-                            item_id=item_id,
-                            image_directory=image_dir,
-                            ai_evaluation="",
-                            is_done_rendering=False,
-                            detected_item_number=item_number
-                            )
-                session.add(answer)
             else:
-                answer.image_directory = image_dir
-                answer.is_done_rendering = False
-                answer.detected_item_number = item_number
-            session.commit()
-            session.refresh(answer)
+                item_number = item_number.strip()
+        except Exception as e:
+            logger.warning(f"Failed to extract item number for box {i}: {e}")
+            item_number = "UNKNOWN"
+
+        print(f"INTERNAL:\t{i}th detected label = {item_number}")
+
+        test_item = session.exec(
+                        select(TestItem).where(
+                            TestItem.label == item_number,
+                        )).first()
+        
+        if test_item is None:
+            # TODO: fix exception handling
+            raise HTTPException(
+                        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                        detail="Sorry Ma'am di pa tapos",
+                        )
+
+        item_id = test_item.item_id
+        print(f"INTERNAL:\tLabel {item_number} will be stored in {item_id}")
+
+        answer = session.exec(
+                    select(StudentAnswer).where(
+                        StudentAnswer.paper_id == paper.paper_id,
+                        StudentAnswer.item_id == item_id
+                    )).first()
+        if not answer:
+            answer = StudentAnswer(
+                        paper_id=paper.paper_id,
+                        item_id=item_id,
+                        image_directory=image_dir,
+                        ai_evaluation="",
+                        is_done_rendering=False,
+                        detected_item_number=item_number
+                        )
+            session.add(answer) 
+        else:
+            answer.image_directory = image_dir
+            answer.is_done_rendering = False
+            answer.detected_item_number = item_number
+        session.commit()
+        session.refresh(answer)
 
         boxes_info.append({
                     "index": i,
@@ -906,10 +898,10 @@ async def process_student_answer_image(
                     })
 
     return {
-        "image_directory": default_image_dir,
+        "image_directory": image_dir, # FIXME: remove this because it's redundant
         "num_boxes": len(processed_list),
         "boxes": boxes_info
-    }
+        }
 
 @app.patch("/api/test_instances/{test_id}/{student_no}/{item_id}")
 async def update_answer_segmentation(
