@@ -60,7 +60,7 @@
 					bind:files={formFile}/>
 	<Input id="numBoxes"
 					type="number"
-					placeholder="Number of boxes..."
+					placeholder="Number of boxes (default=2)..."
 					bind:value={paramNumBoxes}/>
 	<Button variant="outline"
 					onclick={() => sendImage()}
