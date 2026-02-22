@@ -44,12 +44,15 @@
 				}
 			);
 
-			if (response.ok) {
-				const data = await response.json();
-				alert("Success:" + data.items);
+			switch (response.status) {
+				case 200:
+					const result = await response.json();
+					alert("Success: " + result.items);
+					window.location.reload();
+					break;
+				default:
+					alert(`${response.status} ${response.statusText}`);
 			}
-			else
-				alert(response.status + response.statusText);
 		} catch (e) {
 			alert("Failed to add new test item:\n"+e);
 		}
