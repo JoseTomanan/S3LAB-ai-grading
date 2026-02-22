@@ -126,7 +126,10 @@ class DocumentScanner:
         return buffer.tobytes()
     
 
-    def _regularize_image(self, image_mat: cv2.typing.MatLike) -> list[cv2.typing.MatLike]:
+    def _regularize_image(self,
+                          image_mat: cv2.typing.MatLike,
+                          canny_thresholds: tuple[int,int] = (75, 200),
+                          ) -> list[cv2.typing.MatLike]:
         """Step before contour ranking. Resize, greyscale, blur, then canny to reduce noises in image."""
         h, w, _ = image_mat.shape
         ratio = w/h
@@ -136,7 +139,7 @@ class DocumentScanner:
                                     )
         iterated_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
         iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
-        iterated_img = cv2.Canny(iterated_img, 75, 200)
+        iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
         
         return [original_img, iterated_img]
     
