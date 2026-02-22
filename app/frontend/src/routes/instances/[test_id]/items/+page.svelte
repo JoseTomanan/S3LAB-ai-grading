@@ -1,53 +1,26 @@
 <script lang="ts">
 	const { data } = $props();
-	
-	import { API_BASE_URL } from '$lib/constants.ts';
-	import { onMount } from 'svelte';
+
+	import { getContext } from "svelte";
 	
 	import MdiEditOutline from '~icons/mdi/edit-outline';
 	import MdiPlus from '~icons/mdi/plus';
 	
-	import type { TestInstance, TestItem } from '$lib/index.ts';
+	import type { TestItem, TestItemsContext } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import EditTestItem from './EditTestItem.svelte';
 	import AddTestItem from './AddTestItem.svelte';
 
-	let isPageLoading: boolean = $state(true);
-
-	let allItems: TestItem[] = $state([]);
+	let testItemsContext: TestItemsContext = getContext("testItemsContext");
+	let allItems: TestItem[] = $state(testItemsContext.items);
 
 	let shortFormItems: TestItem[] = $derived(allItems.filter(item => !item.is_problem_solving));
 	let probSolItems: TestItem[] = $derived(allItems.filter(item => item.is_problem_solving));
-	
-	onMount(async () => {
-		try {
-			const response = await fetch(
-						`${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
-						{
-							method: "GET",
-							headers: {'Content-Type': 'application/json',},
-						}
-					);
-
-			switch (response.status) {
-				case 200:
-					const result = await response.json();
-					allItems = result.items;
-					break;
-				default:
-					alert(`${response.status} ${response.statusText}`);
-			}
-		} catch (e) {
-			alert("Failed to fetch test items:\nERROR: "+e);
-		} finally {
-			isPageLoading = false;
-		}
-	});
 </script>
 
 
 <div class="space-y-4 overflow-auto p-0.5">
-	{#if isPageLoading}
+	{#if testItemsContext.isLoading}
 		<p>Loading...</p>
 	{:else}
 		{#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}

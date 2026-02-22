@@ -5,7 +5,7 @@
 
 	import type { LayoutData } from './$types.d.ts';
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import ExportSheets from './ExportSheets.svelte';
 
 	import MdiArrowBack from '~icons/mdi/arrow-back';
@@ -15,11 +15,8 @@
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
 	import MdiHome from '~icons/mdi/home';
 	
-	import type { TestInstance, TestItem } from '$lib/types/types.ts';
-	import { Button } from '$lib/components/ui/button/index.ts';
+	import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
-
-	let isPageLoading: boolean = $state(true);
 
 	let activeTestInstance: TestInstance = $state({
 		name: "",
@@ -29,7 +26,11 @@
 		is_done_rendering: false,
 	});
 
+	let testItemsContext: TestItemsContext = $state({items: [], isLoading: false});
+	setContext("testItemsContext", testItemsContext);
+
 	onMount(async () => {
+		testItemsContext.isLoading = true;
 		try {
 			const response = await fetch(
 						`${API_BASE_URL}/api/test_instances/${data.test_id}`,
@@ -44,10 +45,27 @@
 			activeTestInstance.section_id = result.section_id;
 			activeTestInstance.date = result.date;
 			activeTestInstance.is_done_rendering = result.is_done_rendering;
+
+			const responseTwo = await fetch(
+						`${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
+						{
+							method: "GET",
+							headers: {'Content-Type': 'application/json',},
+						}
+					);
+
+			switch (responseTwo.status) {
+				case 200:
+					const result = await responseTwo.json();
+					testItemsContext.items.push(...result.items);
+					break;
+				default:
+					alert(`${responseTwo.status} ${responseTwo.statusText}`);
+			}
 		} catch (e) {
 			alert("Failed to fetch test instance details:\n"+e);
 		} finally {
-			isPageLoading = false;
+			testItemsContext.isLoading = false;
 		}
 	});
 
