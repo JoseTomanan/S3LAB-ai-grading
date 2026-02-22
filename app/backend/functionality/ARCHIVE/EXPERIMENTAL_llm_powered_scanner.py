@@ -1,4 +1,7 @@
-# class LLMDocumentScanner(DocumentScanner):
+"""
+This belonged to DocumentScanner.py, but moved out because of its experimetal and unworking nature. Can be brought back in desperate times.
+"""
+
 #     def scan_page_using_llm(self, image_bytes: bytes) -> bytes:
 #         """Scan image by sourcing corner coordinates from LLM."""
 #         image = self._decode_bytes(image_bytes)
