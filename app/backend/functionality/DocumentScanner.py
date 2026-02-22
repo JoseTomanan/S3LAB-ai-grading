@@ -93,8 +93,8 @@ class DocumentScanner:
 
         image_good_contour = None
         for c in contours:
-            p = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.02*p, True)
+            perimeter = cv2.arcLength(c, True)
+            approximate = cv2.approxPolyDP(c, 0.02 * perimeter, closed=True)
             if len(approximate) == 4:
                 image_good_contour = approximate
                 break
