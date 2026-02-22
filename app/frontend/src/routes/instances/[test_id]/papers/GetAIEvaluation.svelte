@@ -2,21 +2,43 @@
 	const { test_id, student_no } = $props();
 
 	import { API_BASE_URL } from '$lib/constants.ts';
-	import { onMount } from "svelte";
+	import { getContext, onMount } from "svelte";
 
 	import MdiHeadReload from "~icons/mdi/head-reload";
+	import MdiAlertBoxOutline from "~icons/mdi/alert-box-outline";
 
-	import type { EvaluationsResponse, StudentStoresResponse } from '$lib/index.ts';
+	import type { EvaluationsResponse, StudentStoresResponse, TestItem, TestItemsContext } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 
+	let testItemsContext: TestItemsContext = getContext("testItemsContext");
+
 	let isPageLoading = $state(false);
+	let testItems: TestItem[] = $state(testItemsContext.items);
+	console.log($state.snapshot(testItems))
 	let questionItemEvals: EvaluationsResponse[] = $state([]);
 
 	const GET_E_A_R_Q = (i: EvaluationsResponse) => i.expected_answer_rubric_questions.split(';');
 	const GET_EVALS = (i: EvaluationsResponse) => i.ai_evaluation.split(';');
 
+	const REPOPULATE_UNANSWERED_ITEMS = () => {
+					const evalItemIds = new Set(questionItemEvals.map(e => e.item_id));
+					const unansweredItems = testItems
+									.filter(item => !evalItemIds.has(item.item_id))
+									.map(item => ({
+										answer_id: -1,
+										item_id: item.item_id,
+										label: item.label,
+										question: item.question,
+										expected_answer_rubric_questions: item.expected_answer_rubric_questions,
+										ai_evaluation: "",
+									}));
+					questionItemEvals.push(...unansweredItems);
+				};
+
 	onMount(async () => {
 		isPageLoading = true;
+		REPOPULATE_UNANSWERED_ITEMS();
+		console.log($state.snapshot(questionItemEvals));
 		try {
 			const response = await fetch(
 						`${API_BASE_URL}/api/test_instances/${test_id}/results/${student_no}`,
@@ -30,6 +52,7 @@
 				case 200:
 					const result = await response.json();
 					questionItemEvals = result.evaluations;
+					REPOPULATE_UNANSWERED_ITEMS();
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
@@ -60,6 +83,7 @@
 									? { ...ans, ai_evaluation: result.ai_evaluation }
 									: ans
 								);
+					REPOPULATE_UNANSWERED_ITEMS();
 					break;
 				default:
 					alert(`${response.status} ${response.statusText}`);
@@ -88,27 +112,37 @@
 		{:else}
 			{#each questionItemEvals as evalItem}
 				<div class="card space-y-1">
-					<span class="flex flex-row justify-between items-center gap-x-2">
+					{#if evalItem.answer_id == -1}
 						<h4 class="truncate text-ellipsis w-fill">
 							{evalItem.label}: {evalItem.question}
 						</h4>
-						<button class="button-secondary px-0 py-0"
-										onclick={() => reevaluateAnswer(evalItem.answer_id)}>
-							<MdiHeadReload />
-						</button>
-					</span>
-					{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
-						{#if e_a_r_q.length != 0}
-							{@const answerEval = GET_EVALS(evalItem)[index]}
-							{@const isHasAnswer = answerEval && answerEval != ""}
-							<span class="flex flex-row justify-between">
-								<h6 class="italic">{e_a_r_q}</h6>
-								<h6 class={isHasAnswer ? "font-bold" : ""}>
-									{isHasAnswer ? answerEval : "—"}
-								</h6>
-							</span>
-						{/if}
-					{/each}
+						<h6 class="flex flex-row items-center gap-1">
+							<MdiAlertBoxOutline />
+							This item has no corresponding answer yet.
+						</h6>
+					{:else}
+						<span class="flex flex-row justify-between items-center gap-x-2">
+							<h4 class="truncate text-ellipsis w-fill">
+								{evalItem.label}: {evalItem.question}
+							</h4>
+							<button class="button-secondary px-0 py-0"
+											onclick={() => reevaluateAnswer(evalItem.answer_id)}>
+								<MdiHeadReload />
+							</button>
+						</span>
+						{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
+							{#if e_a_r_q.length != 0}
+								{@const answerEval = GET_EVALS(evalItem)[index]}
+								{@const isHasAnswer = answerEval && answerEval != ""}
+								<span class="flex flex-row justify-between">
+									<h6 class="italic">{e_a_r_q}</h6>
+									<h6 class={isHasAnswer ? "font-bold" : ""}>
+										{isHasAnswer ? answerEval : "—"}
+									</h6>
+								</span>
+							{/if}
+						{/each}
+					{/if}
 				</div>
 			{/each}
 		{/if}
