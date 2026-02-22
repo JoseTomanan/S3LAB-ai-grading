@@ -1,12 +1,12 @@
 import numpy as np
 import cv2
-
-from functionality.DocumentScanner import DocumentScanner, NORMAL_SIZE
+from DocumentScanner import DocumentScanner, NORMAL_SIZE
 
 
 AREA = NORMAL_SIZE ** 2
 MIN_AREA = AREA * 0.05
 MAX_AREA = AREA * 0.75
+
 
 
 # ================================
@@ -20,16 +20,18 @@ class BoxSegmenter(DocumentScanner):
         """Get best boxes (non-overlapping) from the image given. Note that image is expected to have been scanned already."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
+        image_dilated = self._dilate_edges(image_cannied)
 
-        contours, _ = cv2.findContours(image_cannied, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         images_good_contours = []
         for c in contours:
             area = cv2.contourArea(c)
             if MIN_AREA < area < MAX_AREA:
                 perimeter = cv2.arcLength(c, True)
-                approximate = cv2.approxPolyDP(c, 0.15*perimeter, True)
+                approximate = cv2.approxPolyDP(c, 0.06*perimeter, True)
                 if len(approximate == 4):
+                    approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
                     if 0.4 <= aspect_ratio <= 2.5:
@@ -50,9 +52,22 @@ class BoxSegmenter(DocumentScanner):
     #region Auxiliary functions
     def _regularize_forgivingly(self, image_mat: cv2.typing.MatLike) -> list[cv2.typing.MatLike]:
         return self._regularize_image(image_mat, canny_thresholds=(30, 150))
+    
+    def _dilate_edges(self, image: cv2.typing.MatLike, dilate_size: int = 3) -> cv2.typing.MatLike:
+        kernel = np.ones((dilate_size, dilate_size), np.uint8)
+        image_dilated = cv2.dilate(image, kernel, iterations=3)
+        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
+        return image_closed
     #endregion
 #endregion
 
 
 if __name__ == "__main__":
-    ...
+    BOX_SEGMENTER = BoxSegmenter()
+    
+    image_before = BOX_SEGMENTER.load_image("./TEMP/input/unscannedC.jpeg")
+    image_after_scan = BOX_SEGMENTER.scan_page(image_before)
+    images_after_box = BOX_SEGMENTER.get_boxes(image_after_scan, num_boxes=2)
+
+    for i in range(len(images_after_box)):
+        BOX_SEGMENTER.save_image(images_after_box[i], f"./TEMP/output/+test_boxed_{i}.jpg")
