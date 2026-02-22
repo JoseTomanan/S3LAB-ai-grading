@@ -14,9 +14,13 @@
 	let paramNumBoxes: number | null = $state(null);
 
 	async function sendImage() {
-		isOperationOngoing = true;
-		if (!paramNumBoxes || !formFile || formFile.length == 0)
+		if (!formFile || formFile.length == 0)
 			return;
+
+		isOperationOngoing = true;
+
+		if (!paramNumBoxes)
+			paramNumBoxes = 2;
 
 		const formData = new FormData();
     formData.append('file', formFile[0]);
