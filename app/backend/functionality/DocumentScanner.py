@@ -3,10 +3,7 @@ import cv2
 import math
 
 
-#region Constants
 NORMAL_SIZE = 2048
-#endregion
-
 
 
 def _mapp(h):
@@ -148,7 +145,7 @@ class DocumentScanner:
                             screen_contour: cv2.typing.MatLike,
                             original: cv2.typing.MatLike
                             ) -> cv2.typing.MatLike:
-        """Take """
+        """Take given screen contour from original image."""
         approximation = _mapp(screen_contour)
         box_ratio = math.sqrt(_get_robust_aspect_ratio(approximation))
         box_length = int(NORMAL_SIZE * math.sqrt(box_ratio))
