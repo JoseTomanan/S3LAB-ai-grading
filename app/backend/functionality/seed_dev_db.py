@@ -53,14 +53,14 @@ MOCK_DATA = {
                 "test_id": "3-Rizal_Seatwork-1",
                 "name": "Seatwork-1",
                 "section_id": 1,
-                "date": "2025-11-11",
+                "date": "2025-11-11T14:30:00Z",
                 "is_done_rendering": False
             },
             {
                 "test_id": "3-Aguinaldo_Quiz-1",
                 "name": "Quiz-1",
                 "section_id": 2,
-                "date": "2026-01-12",
+                "date": "2026-01-12T14:30:00Z",
                 "is_done_rendering": False
             }
         ],
@@ -68,7 +68,7 @@ MOCK_DATA = {
             {
                 "item_id": 1,
                 "test_id": "3-Rizal_Seatwork-1",
-                "label": "Problem 1",
+                "label": "1",
                 "question": "Solve for x: 2x + 5 = 15",
                 "is_problem_solving": True,
                 "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts);"
@@ -76,7 +76,7 @@ MOCK_DATA = {
             {
                 "item_id": 2,
                 "test_id": "3-Rizal_Seatwork-1",
-                "label": "Question 2",
+                "label": "2",
                 "question": "What is the capital of France?",
                 "is_problem_solving": False,
                 "expected_answer_rubric_questions": "Paris (1pt)"
@@ -84,10 +84,10 @@ MOCK_DATA = {
             {
                 "item_id": 3,
                 "test_id": "3-Aguinaldo_Quiz-1",
-                "label": "Problem 1",
+                "label": "1",
                 "question": "Calculate the area of a circle with radius 7 cm",
                 "is_problem_solving": True,
-                "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt);"
+                "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt)"
             }
         ]
         }
