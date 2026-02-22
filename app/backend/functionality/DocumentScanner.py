@@ -88,7 +88,7 @@ class DocumentScanner:
             perimeter = cv2.arcLength(c, True)
             approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
             if len(approximate) == 4:
-                image_good_contour = approximate
+                image_good_contour = approximate.reshape(4,2)
                 break
 
         if image_good_contour is None:
