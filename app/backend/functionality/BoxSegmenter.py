@@ -75,7 +75,9 @@ if __name__ == "__main__":
     BOX_SEGMENTER = BoxSegmenter()
     AI_EVALUATOR = AIAnswerEvaluator()
     
-    image_before = BOX_SEGMENTER.load_image("./TEMP/input/alreadyscannedA.jpg")
+    image_before_before = BOX_SEGMENTER.load_image("./TEMP/input/testA.jpeg")
+    image_before = BOX_SEGMENTER.scan_page(image_before_before)
+    # image_before = BOX_SEGMENTER.load_image("./TEMP/input/alreadyscannedA.jpg")
     images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=2)
 
     for i in range(len(images_after_box)):
