@@ -605,10 +605,9 @@ def add_test_item(
     
     # Determine next item_id (max existing + 1)
     max_item = session.exec(
-        select(TestItem)
-        .where(TestItem.test_id == test_id)
-        .order_by(TestItem.item_id.desc())  # type: ignore[union-attr]
-    ).first()
+                    select(TestItem)
+                    .order_by(TestItem.item_id.desc())  # type: ignore[union-attr]
+                    ).first()
 
     next_item_id = (max_item.item_id + 1) if max_item else 1
 
