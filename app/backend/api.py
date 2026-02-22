@@ -19,6 +19,7 @@ from models import *
 from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
+from functionality.BoxSegmenter import BoxSegmenter
 from functionality.ai_interface import *
 from functionality.sheets_exporter import *
 
@@ -28,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 # ==============================
 #region Preprocessor Configuration
-# ==============================
 USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional CV only
 PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 
@@ -39,7 +39,6 @@ PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 
 # ==============================
 #region App Initialization
-# ==============================
 app = FastAPI(
         title="Assessment Processing API",
         description="API for managing test instances, items, and student answer processing",
@@ -68,7 +67,6 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 # ==============================
 #region AUTO-SEEDING ON STARTUP (DEV ONLY)
-# ==============================
 @app.on_event("startup")
 async def startup_database_setup():
     """Create tables + conditionally seed dev DB"""
@@ -94,7 +92,6 @@ async def startup_database_setup():
 
 # ==============================
 #region Section Endpoints
-# ==============================
 @app.get("/api/sections", response_model=List[dict])
 def get_all_sections(session: Session = Depends(get_session)):
     """Get all sections"""
@@ -236,7 +233,6 @@ def delete_student(student_no: str, session: Session = Depends(get_session)):
 
 # ==============================
 #region Test Instance Endpoints
-# ==============================
 @app.get("/api/test_instances", response_model=List[TestInstanceResponse])
 def get_test_instances(session: Session = Depends(get_session)):
     """Get all test instances with their items"""
@@ -530,7 +526,6 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 
 # ==============================
 #region Test Item Endpoints
-# ==============================
 # @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
 # def get_test_instance_items(
 #             test_id: str,
@@ -747,69 +742,67 @@ def delete_test_item(
 
 # ==============================
 #region Student Answer Processing Endpoints
-# ==============================
-
-
 @app.post("/api/test_instances/{test_id}/{student_no}/{item_id}/image_preprocess")
 async def process_student_answer_image(
-    test_id: str,
-    student_no: str,
-    item_id: int,
-    file: UploadFile = File(...),
-    num_boxes: Optional[int] = Query(None), 
-    session: Session = Depends(get_session)
-):
+                test_id: str,
+                student_no: str,
+                item_id: int,
+                file: UploadFile = File(...),
+                num_boxes: Optional[int] = Query(None), 
+                session: Session = Depends(get_session)
+                ):
     """Process raw student assessment image through CV pipeline"""
-    # ===== VALIDATION =====
     # Verify test instance exists
     instance = session.get(TestInstance, test_id)
     if not instance:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Test instance '{test_id}' not found"
-        )
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Test instance '{test_id}' not found"
+                    )
+    
     # Verify student exists
     student = session.get(Student, student_no)
     if not student:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student with ID '{student_no}' not found"
-        )
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Student with ID '{student_no}' not found"
+                    )
+    
     # Verify item exists and belongs to this test
     item = session.exec(
-        select(TestItem).where(
-            TestItem.item_id == item_id,
-            TestItem.test_id == test_id
-        )
-    ).first()
+                    select(TestItem).where(
+                        TestItem.item_id == item_id,
+                        TestItem.test_id == test_id
+                    )).first()
     if not item:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Item {item_id} not found in test instance '{test_id}'"
-        )
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Item {item_id} not found in test instance '{test_id}'"
+                    )
+    
     # Validate file
     if not file or not file.filename:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No file provided"
-        )
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No file provided"
+                    )
     if not CVImagePreprocessor.validate_file_extension(file.filename):
         raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
-        )
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
+                )
     try:
         contents = await file.read()
         if len(contents) == 0:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Uploaded file is empty"
-            )
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Uploaded file is empty"
+                        )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to read file: {str(e)}"
-        )
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read file: {str(e)}"
+                    )
 
     # ===== PROCESSING =====
     try:
@@ -836,17 +829,16 @@ async def process_student_answer_image(
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     # Create or update TestPaperInstance (metadata only, no specific answer linked yet)
     paper = session.exec(
-        select(TestPaperInstance).where(
-            TestPaperInstance.test_id == test_id,
-            TestPaperInstance.student_no == student_no
-        )
-    ).first()
+                select(TestPaperInstance).where(
+                    TestPaperInstance.test_id == test_id,
+                    TestPaperInstance.student_no == student_no
+                )).first()
     if not paper:
         paper = TestPaperInstance(
-            test_id=test_id,
-            student_no=student_no,
-            is_done_rendering=False
-        )
+                    test_id=test_id,
+                    student_no=student_no,
+                    is_done_rendering=False
+                    )
         session.add(paper)
         session.commit()
         session.refresh(paper)
@@ -886,20 +878,19 @@ async def process_student_answer_image(
 
             # Create/Update StudentAnswer for the first box automatically
             answer = session.exec(
-                select(StudentAnswer).where(
-                    StudentAnswer.paper_id == paper.paper_id,
-                    StudentAnswer.item_id == item_id
-                )
-            ).first()
+                        select(StudentAnswer).where(
+                            StudentAnswer.paper_id == paper.paper_id,
+                            StudentAnswer.item_id == item_id
+                        )).first()
             if not answer:
                 answer = StudentAnswer(
-                    paper_id=paper.paper_id,
-                    item_id=item_id,
-                    image_directory=image_dir,
-                    ai_evaluation="",
-                    is_done_rendering=False,
-                    detected_item_number=item_number
-                )
+                            paper_id=paper.paper_id,
+                            item_id=item_id,
+                            image_directory=image_dir,
+                            ai_evaluation="",
+                            is_done_rendering=False,
+                            detected_item_number=item_number
+                            )
                 session.add(answer)
             else:
                 answer.image_directory = image_dir
@@ -909,10 +900,10 @@ async def process_student_answer_image(
             session.refresh(answer)
 
         boxes_info.append({
-            "index": i,
-            "image_directory": image_dir,
-            "item_number": item_number
-        })
+                    "index": i,
+                    "image_directory": image_dir,
+                    "item_number": item_number
+                    })
 
     return {
         "image_directory": default_image_dir,
