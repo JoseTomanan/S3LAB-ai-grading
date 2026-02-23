@@ -20,7 +20,7 @@ from functions.box_segmenter import BoxSegmenter
 from functions.document_scanner import DocumentScanner
 from functions.image_modifier import ImageModifier
 
-from routes import sections, students
+from routes import sections, students, utility
 
 from services import *
 
@@ -56,6 +56,7 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 app.include_router(sections.router, prefix="/api/sections", tags=["Sections"])
 app.include_router(students.router, prefix="/api/students", tags=["Students"])
+app.include_router(utility.router, prefix="/api", tags=["Utility"])
 
 
 # ==============================
