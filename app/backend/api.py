@@ -1351,7 +1351,7 @@ def _calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) 
 
         for i, e_a_r_q in enumerate(splitted_e_a_r_q):
             if e_a_r_q.strip() != "":
-                index_start = e_a_r_q.find("(")
+                index_start = e_a_r_q.find("[")
                 index_end = index_start + e_a_r_q[index_start:].find("p")
 
                 print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
