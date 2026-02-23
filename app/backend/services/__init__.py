@@ -117,11 +117,10 @@ def get_total_score(expected_answer_rubric_questions: str, ai_evaluation: str) -
 
     scores = calculate_score(expected_answer_rubric_questions, ai_evaluation)
     splitted_scores = scores.split(";")
-    print(f"INTERNAL:\tOBTAINED SCORES: {scores}")
+    print(f"INTERNAL:\tOBTAINED SCORES: {splitted_scores}")
 
     for s in splitted_scores:
         if s != "":
-            print(f"INTERNAL:\tOBTAINED SCORE: {s}")
             grade, total = s.split("/")
             total_score += int(grade) if float(grade)%1==0 else float(grade)
             max_score += int(total) if float(total)%1==0 else float(total)
@@ -198,6 +197,7 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
     
     for s in students:
         rowKey = s.name
+        print(f"INTERNAL:\tEvaluating {rowKey}...")
         SHEETS_EXPORTER.add_student(rowKey)
         paper = session.exec(
                             select(TestPaperInstance)
@@ -215,12 +215,15 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
         scoresList: dict[str, float|None] = {}
         for testItem in test_items:
             if testItem.item_id in [a.item_id for a in answers]:
-                answer = next((a for a in answers if a.item_id == testItem.item_id), None)
-                if answer and answer.ai_evaluation:
-                    score, _ = get_total_score(testItem.expected_answer_rubric_questions, answer.ai_evaluation)
-                    scoresList[testItem.label] = score
+                _tempList = [a for a in answers if a.item_id == testItem.item_id]
+                respectiveAnswer = _tempList[0] if _tempList else None
+
+                if respectiveAnswer and respectiveAnswer.ai_evaluation:
+                    score, _ = get_total_score(testItem.expected_answer_rubric_questions,
+                                                respectiveAnswer.ai_evaluation)
+                    scoresList[testItem.label] = score if score else 0
                 else:
-                    scoresList[testItem.label] = -9999
+                    scoresList[testItem.label] = None
             else:
                 scoresList[testItem.label] = None
 

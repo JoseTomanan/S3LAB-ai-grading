@@ -21,6 +21,7 @@ class SheetsExporter:
         
         sheet = wb.active
         assert sheet is not None
+        sheet.column_dimensions['A'].width = 25
 
         students_list = list(self.sheet_items.keys())
 
@@ -44,7 +45,7 @@ class SheetsExporter:
                 sheet.cell(
                         row=students_list.index(key_name)+2,
                         column=self.columns.index(item)+2,
-                        value=value if value else ""
+                        value=value if value is not None else ""
                         )
         
         # sheets_directory = f"./static/sheets/{file_name}.xlsx"
