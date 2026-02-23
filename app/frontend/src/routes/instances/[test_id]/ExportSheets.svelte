@@ -31,7 +31,7 @@
 					const a = document.createElement('a');
 					
 					a.href = url;
-					a.download = 'report.xlsx';
+					a.download = `${test_id}.xlsx`;
 					document.body.appendChild(a);
 					a.click();
 					
@@ -62,7 +62,8 @@
 	{:else if isLoading}
 		<p>Loading...</p>
 	{:else}
-		<h6>The report is now being downloaded as <b>report.xlsx</b>.</h6>
-		<p>You may close this dialog.</p>
+		<h4><b>{test_id}.xlsx</b> has been downloaded.</h4>
+		<h6>NOTE: Items with an uploaded image but no evaluation are scored with -9999 for visibility.</h6>
+		<h6>You may close this dialog.</h6>
 	{/if}
 </Dialog.Content>
