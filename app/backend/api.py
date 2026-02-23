@@ -20,6 +20,7 @@ from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
 from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.BoxSegmenter import BoxSegmenter
+from functionality.DocumentScanner import DocumentScanner
 from functionality.ai_interface import *
 from functionality.sheets_exporter import *
 
@@ -52,7 +53,7 @@ app.add_middleware(
         )
 
 AI_ANSWER_EVALUATOR = AIAnswerEvaluator()
-CV_IMAGE_PREPROCESSOR = CVImagePreprocessor()
+DOCUMENT_SCANNER = DocumentScanner()
 
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
@@ -1368,7 +1369,7 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
     assert answer is not None
 
     actual_image_path = f"temp_cv_output/{answer.image_directory.split("/")[3]}"
-    image_bytes: bytes = CV_IMAGE_PREPROCESSOR.load_image(actual_image_path)
+    image_bytes: bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
 
     test_item = session.exec(
                     select(TestItem)
