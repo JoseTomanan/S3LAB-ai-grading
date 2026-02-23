@@ -56,7 +56,7 @@ AI_ANSWER_EVALUATOR = AIAnswerEvaluator()
 DOCUMENT_SCANNER = DocumentScanner()
 IMAGE_MODIFIER = ImageModifier()
 
-TEMP_DIR = Path("temp_cv_output")
+TEMP_DIR = Path("static/images")
 TEMP_DIR.mkdir(exist_ok=True)
 
 #endregion
@@ -1293,7 +1293,7 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
                     ).first()
     assert answer is not None
 
-    actual_image_path = f"temp_cv_output/{answer.image_directory.split("/")[3]}"
+    actual_image_path = f"static/images/{answer.image_directory.split("/")[3]}"
     image_bytes: bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
 
     test_item = session.exec(
