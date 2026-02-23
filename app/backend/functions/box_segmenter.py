@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from functions.DocumentScanner import DocumentScanner, NORMAL_SIZE
+from functions.document_scanner import DocumentScanner, NORMAL_SIZE
 from functions.ai_interface import AIAnswerEvaluator
 
 
