@@ -122,7 +122,7 @@
 				Papers
 			</a>
 			<Dialog.Root>
-				<Dialog.Trigger class="button-primary opacity-50">
+				<Dialog.Trigger class="button-primary">
 					<MdiTable class="size-6" />
 				</Dialog.Trigger>
 				<ExportSheets test_id={data.test_id}/>
