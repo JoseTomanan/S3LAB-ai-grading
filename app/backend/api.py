@@ -1027,12 +1027,11 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             
             if not answer or not answer.is_done_rendering:
                 all_items_processed = False
-                break
 
-            _parsed_scores = _get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
-
-            total_score += _parsed_scores[0]
-            max_score += _parsed_scores[1]
+            else:
+                _parsed_scores = _get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
+                total_score += _parsed_scores[0]
+                max_score += _parsed_scores[1]
 
         statuses.append({
                 "student_no": student.student_no,
