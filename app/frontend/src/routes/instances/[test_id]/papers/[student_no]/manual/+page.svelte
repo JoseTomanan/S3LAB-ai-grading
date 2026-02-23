@@ -97,10 +97,12 @@
 		<p>Loading...</p>
 	{/if}
 	{#if canvasImageUrl}
-		<Cropper bind:cropper={canvasCropper}
-					src={canvasImageUrl}
-					cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
-					/>
+		<div class="flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
+			<Cropper bind:cropper={canvasCropper}
+						src={canvasImageUrl}
+						cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
+						/>
+		</div>
 	{:else if responseImage != ""}
 		<img class="border"
 					src={API_BASE_URL+responseImage} alt="Test item"/>
