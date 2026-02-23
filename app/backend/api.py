@@ -18,11 +18,11 @@ from pydantic import ValidationError
 from models import *
 from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
-from functionality.BoxSegmenter import BoxSegmenter
-from functionality.DocumentScanner import DocumentScanner
-from functionality.ImageModifier import ImageModifier
-from functionality.ai_interface import *
-from functionality.sheets_exporter import *
+from functions.BoxSegmenter import BoxSegmenter
+from functions.DocumentScanner import DocumentScanner
+from functions.ImageModifier import ImageModifier
+from functions.ai_interface import *
+from functions.sheets_exporter import *
 
 
 # ==============================
