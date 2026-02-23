@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlmodel import Session, delete, select
 from typing import List, Optional
@@ -627,7 +626,6 @@ async def process_student_answer_image(
     assert paper is not None
 
     boxes_info = []
-    default_image_dir = ""
 
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
     for i, img_bytes in enumerate(processed_list):
@@ -700,7 +698,6 @@ async def process_student_answer_image(
                     })
 
     return {
-        "image_directory": image_dir, # FIXME: remove this because it's redundant
         "num_boxes": len(processed_list),
         "boxes": boxes_info
         }
@@ -715,9 +712,6 @@ async def update_answer_segmentation(
             session: Session = Depends(get_session)
             ):
     """Update segmentation of student answer with manual points"""
-    # ... [validation code remains unchanged] ...
-    
-    # Validate and parse points JSON (CRITICAL FIX BELOW)
     try:
         points_data = json.loads(points)
         required = ["ul", "ur", "lr", "ll"]
@@ -736,60 +730,11 @@ async def update_answer_segmentation(
                 )
     
     # ===== IMAGE PROCESSING =====
-    try:
-        contents = await file.read()
-        if len(contents) == 0:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded image is empty")
-        
-        nparr = np.frombuffer(contents, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if image is None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image content")
-        
-        src_pts = np.array([
-            [float(points_data["ul"]["x"]), float(points_data["ul"]["y"])],
-            [float(points_data["ur"]["x"]), float(points_data["ur"]["y"])],
-            [float(points_data["lr"]["x"]), float(points_data["lr"]["y"])],
-            [float(points_data["ll"]["x"]), float(points_data["ll"]["y"])],
-        ], dtype=np.float32)
-        
-        def calc_aspect(pts):
-            w_top = np.linalg.norm(pts[0] - pts[1])
-            w_bot = np.linalg.norm(pts[3] - pts[2])
-            h_left = np.linalg.norm(pts[0] - pts[3])
-            h_right = np.linalg.norm(pts[1] - pts[2])
-            return (w_top + w_bot) / (h_left + h_right + 1e-5)
-        
-        aspect_ratio = calc_aspect(src_pts)
-        OUT_HEIGHT = 800
-        OUT_WIDTH = int(OUT_HEIGHT * aspect_ratio)
-        
-        dst_pts = np.array([
-            [0.0, 0.0],
-            [float(OUT_WIDTH), 0.0],
-            [float(OUT_WIDTH), float(OUT_HEIGHT)],
-            [0.0, float(OUT_HEIGHT)]
-        ], dtype=np.float32)
-        
-        M = cv2.getPerspectiveTransform(src_pts, dst_pts)
-        warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
-        
-        enhanced = IMAGE_MODIFIER.brighten(warped, amount=0.2)
-        enhanced = IMAGE_MODIFIER.adjust_contrast(enhanced, amount=1.2)
-        
-        success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        if not success:
-            raise ValueError("Failed to encode processed image")
-        
-        img_bytes = buffer.tobytes()
-    except Exception as e:
-        raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Image segmentation failed: {str(e)}"
-                )
+    contents = await file.read()
+    img_bytes = _crop_image(contents, points_data)
     
     # ===== STORAGE & RESPONSE =====
-    safe_filename = f"segmented_{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
+    safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
     filepath = TEMP_DIR / safe_filename
     
     with open(filepath, "wb") as f:
@@ -797,31 +742,30 @@ async def update_answer_segmentation(
     
     # Create or update TestPaperInstance
     paper = session.exec(
-        select(TestPaperInstance).where(
-            TestPaperInstance.test_id == test_id,
-            TestPaperInstance.student_no == student_no
-        )
-    ).first()
+                select(TestPaperInstance).where(
+                    TestPaperInstance.test_id == test_id,
+                    TestPaperInstance.student_no == student_no
+                )).first()
     
     if not paper:
         paper = TestPaperInstance(
-                test_id=test_id,
-                student_no=student_no,
-                is_done_rendering=False
-                )
+                    test_id=test_id,
+                    student_no=student_no,
+                    is_done_rendering=False
+                    )
         session.add(paper)
         session.commit()
         session.refresh(paper)
 
-    assert paper is not None, "Paper must exist after creation/lookup"
+    assert paper is not None
     
     # Create or update StudentAnswer
     answer = session.exec(
-            select(StudentAnswer).where(
-                StudentAnswer.paper_id == paper.paper_id,
-                StudentAnswer.item_id == item_id
-            )
-            ).first()
+                select(StudentAnswer).where(
+                    StudentAnswer.paper_id == paper.paper_id,
+                    StudentAnswer.item_id == item_id
+                )
+                ).first()
     
     if not answer:
         answer = StudentAnswer(
@@ -1242,6 +1186,52 @@ def _get_total_score(expected_answer_rubric_questions: str, ai_evaluation: str) 
             max_score += int(total) if float(total)%1==0 else float(total)
 
     return total_score, max_score
+
+
+def _crop_image(contents: bytes, points_data: dict):
+    GET_ASPECT_RATIO = lambda pts : \
+                        (np.linalg.norm(pts[0] - pts[1]) + np.linalg.norm(pts[3] - pts[2])) \
+                            / (np.linalg.norm(pts[0] - pts[3]) + np.linalg.norm(pts[1] - pts[2]) + 1e-5)
+
+    if len(contents) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded image is empty")
+    
+    nparr = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    if image is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image content")
+    
+    src_pts = np.array([
+                    [float(points_data["ul"]["x"]), float(points_data["ul"]["y"])],
+                    [float(points_data["ur"]["x"]), float(points_data["ur"]["y"])],
+                    [float(points_data["lr"]["x"]), float(points_data["lr"]["y"])],
+                    [float(points_data["ll"]["x"]), float(points_data["ll"]["y"])],
+                ], dtype=np.float32)
+    
+    aspect_ratio = GET_ASPECT_RATIO(src_pts)
+    OUT_HEIGHT = 800
+    OUT_WIDTH = int(OUT_HEIGHT * aspect_ratio)
+    
+    dst_pts = np.array([
+        [0.0, 0.0],
+        [float(OUT_WIDTH), 0.0],
+        [float(OUT_WIDTH), float(OUT_HEIGHT)],
+        [0.0, float(OUT_HEIGHT)]
+    ], dtype=np.float32)
+    
+    M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+    warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
+    
+    enhanced = IMAGE_MODIFIER.brighten(warped, amount=0.2)
+    enhanced = IMAGE_MODIFIER.adjust_contrast(enhanced, amount=1.2)
+    
+    success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+    if not success:
+        raise ValueError("Failed to encode processed image")
+    
+    img_bytes = buffer.tobytes()
+
+    return img_bytes
 
 
 def _populate_spreadsheet_logic(test_id_input: str, session: Session):
