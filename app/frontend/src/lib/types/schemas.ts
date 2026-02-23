@@ -1,4 +1,4 @@
-export interface EvaluationsResponse {
+export interface GetSpecificEvaluationResponse {
 	item_id: number;
 	answer_id: number,
 	label: string;
@@ -11,5 +11,12 @@ export interface StudentStoresResponse {
 	test_id: string,
 	student_no: string;
 	name: string;
-	evaluations: EvaluationsResponse[];
+	evaluations: GetSpecificEvaluationResponse[];
+}
+
+export interface GetEvaluationsResponse {
+	student_no: string;
+	name: string;
+	is_done_rendering: boolean;
+	total_score: string;
 }

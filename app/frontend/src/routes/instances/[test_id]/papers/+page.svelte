@@ -11,9 +11,10 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
 
 	import GetAIEvaluation from './GetAIEvaluation.svelte';
+	import type { GetEvaluationsResponse } from '$lib/index.ts';
 
 	let isPageLoading: boolean = $state(true);
-	let perStudentStatuses: {student_no: string, name: string, is_done_rendering: boolean}[] = $state([]);
+	let perStudentStatuses: GetEvaluationsResponse[] = $state([]);
 
 	onMount(async () => {
 		try {
@@ -52,9 +53,9 @@
 			<span class="flex flex-row items-center justify-between gap-2">
 				<a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
 						class="card button-outline w-5/6
-										flex flex-row gap-2 items-center">
-					<MdiPaperOutline class="size-6 opacity-75"/>
+										flex flex-row justify-between items-center">
 					<h3>{testPaper.name}</h3>
+					<h4 class="font-light">{testPaper.total_score ?? "·/·"}</h4>
 				</a>
 				<Dialog.Root>
 					<Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center">
