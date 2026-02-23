@@ -23,9 +23,6 @@ from functionality.BoxSegmenter import BoxSegmenter
 from functionality.ai_interface import *
 from functionality.sheets_exporter import *
 
-import logging
-logger = logging.getLogger(__name__)
-
 
 # ==============================
 #region Preprocessor Configuration
@@ -848,7 +845,7 @@ async def process_student_answer_image(
             else:
                 item_number = item_number.strip()
         except Exception as e:
-            logger.warning(f"Failed to extract item number for box {i}: {e}")
+            print(f"INTERNAL:\tFailed to extract item number for box {i}: {e}")
             item_number = "UNKNOWN"
 
         print(f"INTERNAL:\t{i}th detected label = {item_number}")
@@ -1070,27 +1067,36 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
     # Build status response
     statuses = []
     for student in students:
+        total_score = 0
+        max_score = 0
+
         # Check if ALL items have processed answers
         all_items_processed = True
         for item in items:
             answer = session.exec(
-                    select(StudentAnswer)
-                        .join(TestPaperInstance)
-                        .where(
-                            TestPaperInstance.test_id == test_id,
-                            TestPaperInstance.student_no == student.student_no,
-                            StudentAnswer.item_id == item.item_id
-                        )
-                    ).first()
+                        select(StudentAnswer)
+                            .join(TestPaperInstance)
+                            .where(
+                                TestPaperInstance.test_id == test_id,
+                                TestPaperInstance.student_no == student.student_no,
+                                StudentAnswer.item_id == item.item_id
+                            )
+                        ).first()
             
             if not answer or not answer.is_done_rendering:
                 all_items_processed = False
                 break
-        
+
+            _parsed_scores = _get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
+
+            total_score += _parsed_scores[0]
+            max_score += _parsed_scores[1]
+
         statuses.append({
                 "student_no": student.student_no,
                 "name": student.name,
-                "is_done_rendering": all_items_processed
+                "is_done_rendering": all_items_processed,
+                "total_score": f"{total_score}/{max_score}",
                 })
     
     return {
@@ -1170,7 +1176,6 @@ def get_ai_evaluation_results_per_student(
                 session: Session = Depends(get_session)):
     """
     Get AI evaluation results for a specific student in a test instance.
-    
     Returns AI grading results for a single student's submissions.
     Constructed by Jose.
     """
@@ -1228,13 +1233,19 @@ def get_ai_evaluation_results_per_student(
             #     session.refresh(answer)
             #===================EVALUATION CALLS=================
             
+            scores = _calculate_score(
+                                respectiveItem.expected_answer_rubric_questions,
+                                answer.ai_evaluation
+                                )
+            
             ai_evaluations.append({
                         "item_id": answer.item_id,
                         "answer_id": answer.answer_id,
                         "label": respectiveItem.label,
                         "question": respectiveItem.question,
                         "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
-                        "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
+                        "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else "",
+                        "scores": scores,
                         })
     
     return {
@@ -1309,7 +1320,6 @@ def get_student_answers(
 
 # ==============================
 #region Utility Endpoints
-# ==============================
 @app.post("/api/image_preprocess")
 async def image_preprocess(file: UploadFile = File(...)):
     """Process raw student assessment image through CV pipeline (standalone)"""
@@ -1416,7 +1426,6 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
 # ==============================
 #   ---> FROM JOSE
 #region Auxiliary Functions
-# ==============================
 def _evaluate_image_logic(answer_id_input: int, session: Session):
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
@@ -1452,7 +1461,6 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
                     ai_evaluation += f"{response};"
             
             answer.ai_evaluation = ai_evaluation
-            # TODO: add missing setter for scores = list[float]
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
@@ -1462,7 +1470,6 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
                     break
 
             answer.ai_evaluation = response
-            # TODO: add missing setter for scores = list[float]
 
     answer.is_done_rendering = True
 
@@ -1479,6 +1486,49 @@ def _evaluate_image_logic(answer_id_input: int, session: Session):
             is_done_rendering=answer.is_done_rendering
             # TODO: add missing scores = list[float]
             )
+
+
+def _calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> str:
+    scores = ""
+    if ai_evaluation:
+        splitted_e_a_r_q = expected_answer_rubric_questions.split(";")
+        splitted_evals = ai_evaluation.split(";")
+        print(f"INTERNAL:\tCalculating w/ splitted EARQ: {splitted_e_a_r_q}.")
+
+        for i, e_a_r_q in enumerate(splitted_e_a_r_q):
+            if e_a_r_q.strip() != "":
+                index_start = e_a_r_q.find("(")
+                index_end = index_start + e_a_r_q[index_start:].find("p")
+
+                print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
+                print(f"INTERNAL:\t ---> BECOMES {e_a_r_q[index_start+1:index_end]}")
+                
+                points = e_a_r_q[index_start+1 : index_end]
+                if splitted_evals[i] != "":
+                    scores += f"{points}/{points};" if splitted_evals[i] == "YES" \
+                                    else f"0/{points};"
+
+        print(f"INTERNAL:\tScore is {scores}")
+
+    return scores
+
+
+def _get_total_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> tuple[int|float, int|float]:
+    total_score = 0
+    max_score = 0
+
+    scores = _calculate_score(expected_answer_rubric_questions, ai_evaluation)
+    splitted_scores = scores.split(";")
+    print(f"INTERNAL:\tOBTAINED SCORES: {scores}")
+
+    for s in splitted_scores:
+        if s != "":
+            print(f"INTERNAL:\tOBTAINED SCORE: {s}")
+            grade, total = s.split("/")
+            total_score += int(grade) if float(grade)%1==0 else float(grade)
+            max_score += int(total) if float(total)%1==0 else float(total)
+
+    return total_score, max_score
 
 
 def _populate_spreadsheet_logic(test_id_input: str, session: Session):
