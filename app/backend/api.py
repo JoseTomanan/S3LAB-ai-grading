@@ -6,10 +6,7 @@ from typing import List, Optional
 
 import uuid
 import json
-import numpy as np
-import cv2
 import io
-import re
 import pandas as pd
 from pathlib import Path
 
@@ -24,6 +21,8 @@ from functions.document_scanner import DocumentScanner
 from functions.image_modifier import ImageModifier
 
 from routes import sections, students
+
+from services import *
 
 
 
@@ -731,7 +730,7 @@ async def update_answer_segmentation(
     
     # ===== IMAGE PROCESSING =====
     contents = await file.read()
-    img_bytes = _crop_image(contents, points_data)
+    img_bytes = crop_image(contents, points_data)
     
     # ===== STORAGE & RESPONSE =====
     safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
@@ -832,7 +831,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 all_items_processed = False
 
             else:
-                _parsed_scores = _get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
+                _parsed_scores = get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
                 total_score += _parsed_scores[0]
                 max_score += _parsed_scores[1]
 
@@ -961,7 +960,7 @@ def get_ai_evaluation_results_per_student(
                                     ).first()
             assert isinstance(respectiveItem, TestItem)
             
-            scores = _calculate_score(
+            scores = calculate_score(
                                 respectiveItem.expected_answer_rubric_questions,
                                 answer.ai_evaluation
                                 )
@@ -1071,7 +1070,7 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
     """Re-evaluate image then store to StudentAnswer evaluation result."""
     # TODO: 400 handling
     # TODO: 404 handling
-    return _evaluate_image_logic(
+    return evaluate_image_logic(
                 answer_id_input=answer_id,
                 session=session
                 )
@@ -1079,174 +1078,3 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
 #endregion
 # ==============================
 
-
-
-# ==============================
-#region Auxiliary Functions
-def _evaluate_image_logic(answer_id_input: int, session: Session):
-    _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
-    _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
-    _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
-
-    print(f"INTERNAL:\tFunction evaluate_image({answer_id_input}) is being executed...")
-
-    answer = session.exec(
-                    select(StudentAnswer)
-                    .where(StudentAnswer.answer_id == answer_id_input)
-                    ).first()
-    assert answer is not None
-
-    actual_image_path = f"static/images/{answer.image_directory.split("/")[3]}"
-    image_bytes: bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
-
-    test_item = session.exec(
-                    select(TestItem)
-                    .where(TestItem.item_id == answer.item_id)
-                    ).first()
-    assert test_item is not None
-
-    match test_item.is_problem_solving:
-        case True:
-            rubric_questions = test_item.expected_answer_rubric_questions.split(";")
-            ai_evaluation = ""
-            for rubric in rubric_questions:
-                if rubric.strip() != "":
-                    while True:
-                        response = AI_ANSWER_EVALUATOR.evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
-                        if response and _VALID_R_Q_RESPONSE(response):
-                            break
-                    ai_evaluation += f"{response};"
-            
-            answer.ai_evaluation = ai_evaluation
-    
-        case _:
-            expected_answer = test_item.expected_answer_rubric_questions
-            while True:
-                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
-                if response and _VALID_E_A_RESPONSE(response):
-                    break
-
-            answer.ai_evaluation = response
-
-    answer.is_done_rendering = True
-
-    session.add(answer)
-    session.commit()
-    session.refresh(answer)
-
-    return StudentAnswerResponse(
-            answer_id=answer.answer_id,
-            paper_id=answer.paper_id,
-            item_id=answer.item_id,
-            image_directory=answer.image_directory,
-            ai_evaluation=answer.ai_evaluation,
-            is_done_rendering=answer.is_done_rendering
-            # TODO: add missing scores = list[float]
-            )
-
-
-def _calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> str:
-    scores = ""
-    if ai_evaluation:
-        splitted_e_a_r_q = expected_answer_rubric_questions.split(";")
-        splitted_evals = ai_evaluation.split(";")
-        print(f"INTERNAL:\tCalculating w/ splitted EARQ: {splitted_e_a_r_q}.")
-
-        for i, e_a_r_q in enumerate(splitted_e_a_r_q):
-            if e_a_r_q.strip() != "":
-                index_start = e_a_r_q.find("[")
-                index_end = index_start + e_a_r_q[index_start:].find("p")
-
-                print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
-                print(f"INTERNAL:\t ---> BECOMES {e_a_r_q[index_start+1:index_end]}")
-                
-                points = e_a_r_q[index_start+1 : index_end]
-                if splitted_evals[i] != "":
-                    scores += f"{points}/{points};" if splitted_evals[i] == "YES" \
-                                    else f"0/{points};"
-
-        print(f"INTERNAL:\tScore is {scores}")
-
-    return scores
-
-
-def _get_total_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> tuple[int|float, int|float]:
-    total_score = 0
-    max_score = 0
-
-    scores = _calculate_score(expected_answer_rubric_questions, ai_evaluation)
-    splitted_scores = scores.split(";")
-    print(f"INTERNAL:\tOBTAINED SCORES: {scores}")
-
-    for s in splitted_scores:
-        if s != "":
-            print(f"INTERNAL:\tOBTAINED SCORE: {s}")
-            grade, total = s.split("/")
-            total_score += int(grade) if float(grade)%1==0 else float(grade)
-            max_score += int(total) if float(total)%1==0 else float(total)
-
-    return total_score, max_score
-
-
-def _crop_image(contents: bytes, points_data: dict):
-    GET_ASPECT_RATIO = lambda pts : \
-                        (np.linalg.norm(pts[0] - pts[1]) + np.linalg.norm(pts[3] - pts[2])) \
-                            / (np.linalg.norm(pts[0] - pts[3]) + np.linalg.norm(pts[1] - pts[2]) + 1e-5)
-
-    if len(contents) == 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded image is empty")
-    
-    nparr = np.frombuffer(contents, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    if image is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid image content")
-    
-    src_pts = np.array([
-                    [float(points_data["ul"]["x"]), float(points_data["ul"]["y"])],
-                    [float(points_data["ur"]["x"]), float(points_data["ur"]["y"])],
-                    [float(points_data["lr"]["x"]), float(points_data["lr"]["y"])],
-                    [float(points_data["ll"]["x"]), float(points_data["ll"]["y"])],
-                ], dtype=np.float32)
-    
-    aspect_ratio = GET_ASPECT_RATIO(src_pts)
-    OUT_HEIGHT = 800
-    OUT_WIDTH = int(OUT_HEIGHT * aspect_ratio)
-    
-    dst_pts = np.array([
-        [0.0, 0.0],
-        [float(OUT_WIDTH), 0.0],
-        [float(OUT_WIDTH), float(OUT_HEIGHT)],
-        [0.0, float(OUT_HEIGHT)]
-    ], dtype=np.float32)
-    
-    M = cv2.getPerspectiveTransform(src_pts, dst_pts)
-    warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
-    
-    enhanced = IMAGE_MODIFIER.brighten(warped, amount=0.2)
-    enhanced = IMAGE_MODIFIER.adjust_contrast(enhanced, amount=1.2)
-    
-    success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-    if not success:
-        raise ValueError("Failed to encode processed image")
-    
-    img_bytes = buffer.tobytes()
-
-    return img_bytes
-
-
-def _populate_spreadsheet_logic(test_id_input: str, session: Session):
-    test_items = session.exec(
-                            select(TestItem)
-                            .where(TestItem.test_id == test_id_input)
-                            ).all()
-    
-    test_items_labels = [item.label for item in test_items]
-
-    SHEET = SheetsExporter(columns=test_items_labels)
-
-    students = session.exec(select(Student).where())
-    # TODO: complete the rest of the function
-    ...
-
-#endregion
-# ==============================
