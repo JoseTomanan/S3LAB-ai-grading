@@ -7,7 +7,7 @@
 	import MdiHeadReload from "~icons/mdi/head-reload";
 	import MdiAlertBoxOutline from "~icons/mdi/alert-box-outline";
 
-	import type { EvaluationsResponse, StudentStoresResponse, TestItem, TestItemsContext } from '$lib/index.ts';
+	import type { GetSpecificEvaluationResponse, TestItem, TestItemsContext } from '$lib/index.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 
 	let testItemsContext: TestItemsContext = getContext("testItemsContext");
@@ -15,10 +15,11 @@
 	let isPageLoading = $state(false);
 	let testItems: TestItem[] = $state(testItemsContext.items);
 
-	let questionItemEvals: EvaluationsResponse[] = $state([]);
+	let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
 
-	const GET_E_A_R_Q = (i: EvaluationsResponse) => i.expected_answer_rubric_questions.split(';');
-	const GET_EVALS = (i: EvaluationsResponse) => i.ai_evaluation.split(';');
+	const GET_E_A_R_Q = (i: GetSpecificEvaluationResponse) => i.expected_answer_rubric_questions.split(';');
+	const GET_EVALS = (i: GetSpecificEvaluationResponse) => i.ai_evaluation.split(';');
+	const GET_SCORES = (i: GetSpecificEvaluationResponse) => i.scores.split(';');
 
 	const REPOPULATE_UNANSWERED_ITEMS = () => {
 					const evalItemIds = new Set(questionItemEvals.map(e => e.item_id));
@@ -31,6 +32,7 @@
 										question: item.question,
 										expected_answer_rubric_questions: item.expected_answer_rubric_questions,
 										ai_evaluation: "",
+										scores: "",
 									}));
 					questionItemEvals.push(...unansweredItems);
 				};
@@ -127,12 +129,21 @@
 						</span>
 						{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
 							{#if e_a_r_q.length != 0}
+								<!--
 								{@const answerEval = GET_EVALS(evalItem)[index]}
 								{@const isHasAnswer = answerEval && answerEval != ""}
+								-->
+								{@const answerScore = GET_SCORES(evalItem)[index]}
+								{@const isHasScore = answerScore && answerScore != ""}
 								<span class="flex flex-row justify-between">
 									<h6 class="italic">{e_a_r_q}</h6>
+									<!--
 									<h6 class={isHasAnswer ? "font-bold" : ""}>
 										{isHasAnswer ? answerEval : "—"}
+									</h6>
+									-->
+									<h6 class={isHasScore ? "font-bold" : ""}>
+										{isHasScore ? answerScore : "—"}
 									</h6>
 								</span>
 							{/if}

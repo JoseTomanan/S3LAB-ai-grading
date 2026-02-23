@@ -5,6 +5,7 @@ export interface GetSpecificEvaluationResponse {
 	question: string;
 	expected_answer_rubric_questions: string;
 	ai_evaluation: string;
+	scores: string;
 }
 
 export interface StudentStoresResponse {
