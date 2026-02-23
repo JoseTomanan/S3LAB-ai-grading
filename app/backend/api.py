@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Response, status, Depends, File, UploadFile, Form, Body, APIRouter, Query
+from fastapi import FastAPI, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -13,25 +13,18 @@ import io
 import re
 import pandas as pd
 from pathlib import Path
-from pydantic import ValidationError
 
 from models import *
 from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
+
 from functions.ai_interface import AIAnswerEvaluator
 from functions.sheets_exporter import SheetsExporter
 from functions.box_segmenter import BoxSegmenter
 from functions.document_scanner import DocumentScanner
 from functions.image_modifier import ImageModifier
 
-
-# ==============================
-#region Preprocessor Configuration
-USE_PADDLE_OCR = True  # Set to False to disable PaddleOCR and use traditional CV only
-PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
-
-#endregion
-# ==============================
+from routes import sections, students
 
 
 
@@ -63,142 +56,8 @@ TEMP_DIR.mkdir(exist_ok=True)
 # ==============================
 
 
-
-# ==============================
-#region Section Endpoints
-@app.get("/api/sections", response_model=List[dict])
-def get_all_sections(session: Session = Depends(get_session)):
-    """Get all sections"""
-    sections = session.exec(select(Section)).all()
-    return [{"section_id": s.section_id, "section_name": s.section} for s in sections]
-
-
-@app.get("/api/sections/{section_id}", response_model=List[StudentResponse])
-def get_students_in_section(section_id: int, session: Session = Depends(get_session)):
-    """Get all students from a specific section"""
-    section = session.get(Section, section_id)
-    if not section:
-        raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Section with ID {section_id} not found"
-                )
-    
-    # Get students in this section
-    students = session.exec(
-            select(Student).where(Student.section_id == section_id)
-            ).all()
-    
-    return [
-        StudentResponse(
-            student_no=s.student_no,
-            name=s.name,
-            section_id=s.section_id
-        ) for s in students
-        ]
-
-
-@app.post("/api/students", status_code=status.HTTP_201_CREATED)
-def add_new_student(
-                student_data: dict = Body(...),
-                session: Session = Depends(get_session)
-                ):
-    """Add new student (section_id provided in body per contract)"""
-    # Validate required fields per contract
-    required_fields = ["name", "student_no", "section_id"]
-    for field in required_fields:
-        if field not in student_data:
-            raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Missing required field: {field}"
-                    )
-    
-    # Verify section exists FIRST (critical FK validation)
-    section = session.get(Section, student_data["section_id"])
-    if not section:
-        raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Section with ID {student_data['section_id']} not found"
-                )
-    
-    # Check for duplicate student ID
-    existing = session.exec(
-            select(Student).where(Student.student_no == student_data["student_no"])
-            ).first()
-    if existing:
-        raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Student with ID '{student_data['student_no']}' already exists"
-                )
-    
-    new_student = Student(
-            student_no=student_data["student_no"],
-            name=student_data["name"],
-            section_id=student_data["section_id"],
-            )
-    session.add(new_student)
-    session.commit()
-    session.refresh(new_student)
-    
-    return StudentResponse(
-            student_no=new_student.student_no,
-            name=new_student.name,
-            section_id=new_student.section_id,
-            )
-
-
-@app.patch("/api/students/{student_no}", response_model=StudentResponse)
-def edit_student_details(
-                student_no: str,
-                update_data: dict,
-                session: Session = Depends(get_session)
-                ):
-    """Edit student details"""
-    student = session.get(Student, student_no)
-    if not student:
-        raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Student with ID '{student_no}' not found"
-                )
-    
-    if "name" in update_data:
-        student.name = update_data["name"]
-    
-    if "section_id" in update_data:
-        section = session.get(Section, update_data["section_id"])
-        if not section:
-            raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Section with ID {update_data['section_id']} not found"
-                    )
-        student.section_id = update_data["section_id"]
-    
-    session.add(student)
-    session.commit()
-    session.refresh(student)
-    
-    return StudentResponse(
-            student_no=student.student_no,
-            name=student.name,
-            section_id=student.section_id
-            )
-
-
-@app.delete("/api/students/{student_no}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_student(student_no: str, session: Session = Depends(get_session)):
-    """Delete student"""
-    student = session.get(Student, student_no)
-    if not student:
-        raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Student with ID '{student_no}' not found"
-                )
-    
-    session.delete(student)
-    session.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-#endregion
-# ==============================
-
+app.include_router(sections.router, prefix="/api/sections", tags=["Sections"])
+app.include_router(students.router, prefix="/api/students", tags=["Students"])
 
 
 # ==============================
