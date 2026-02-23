@@ -1043,39 +1043,3 @@ def get_student_answers(
     return summaries
 #endregion
 # ==============================
-
-
-
-# ==============================
-#region Utility Endpoints
-@app.get("/api/temp/{filename}")
-async def get_processed_image(filename: str):
-    """Serve processed images from temp directory"""
-    # Security validation
-    if not filename.endswith(".jpg") or ".." in filename:
-        raise HTTPException(status_code=400, detail="Invalid filename")
-    
-    # Allow only alphanumeric + safe characters
-    if not all(c.isalnum() or c in "._-" for c in filename):
-        raise HTTPException(status_code=400, detail="Invalid filename characters")
-    
-    filepath = TEMP_DIR / filename
-    if not filepath.exists():
-        raise HTTPException(status_code=404, detail="Processed image not found")
-    
-    return FileResponse(filepath, media_type="image/jpeg")
-
-
-@app.patch("/api/answers/{answer_id}/reevaluate")
-async def reevaluate_answer(answer_id: int, session: Session = Depends(get_session)):
-    """Re-evaluate image then store to StudentAnswer evaluation result."""
-    # TODO: 400 handling
-    # TODO: 404 handling
-    return evaluate_image_logic(
-                answer_id_input=answer_id,
-                session=session
-                )
-
-#endregion
-# ==============================
-
