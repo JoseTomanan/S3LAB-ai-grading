@@ -284,62 +284,18 @@ def delete_test_instance(test_id: str, session: Session = Depends(get_session)):
 @app.get("/api/test_instances/{test_id}/export")
 def export_test_results(test_id: str, session: Session = Depends(get_session)):
     """Export test results as Excel spreadsheet"""
-    instance = session.get(TestInstance, test_id)
-    if not instance:
-        raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Test instance '{test_id}' not found"
-                )
-    
-    # Get all students in the section
-    students = session.exec(
-            select(Student).where(Student.section_id == instance.section_id)
-            ).all()
-    
-    # Get all test items
-    items = session.exec(
-            select(TestItem).where(TestItem.test_id == test_id)
-            ).all()
-    
-    # Build export data
-    export_data = []
-    for student in students:
-        student_row = {
-                "Student No": student.student_no,
-                "Student Name": student.name
-                }
-        
-        # Add columns for each item
-        for item in items:
-            # Check if answer exists in database
-            answer = session.exec(
-                    select(StudentAnswer)
-                    .join(TestPaperInstance)
-                    .where(
-                        TestPaperInstance.test_id == test_id,
-                        TestPaperInstance.student_no == student.student_no,
-                        StudentAnswer.item_id == item.item_id
-                    )
-                    ).first()
-            
-            student_row[f"Item {item.item_id} ({item.label})"] = (
-                    "Processed" if answer and answer.is_done_rendering else "Pending"
-                    )
-        
-        export_data.append(student_row)
+    workbook = populate_spreadsheet_logic(test_id, session)
     
     # Create DataFrame and Excel file
-    df = pd.DataFrame(export_data)
     output = io.BytesIO()
     
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, sheet_name='Test Results', index=False)
+    workbook.save(output)
     
     output.seek(0)
     
     # Return as downloadable file
     headers = {
-            "Content-Disposition": f"attachment; filename={test_id}_results.xlsx"
+            "Content-Disposition": f"attachment; filename={test_id}.xlsx"
             }
     
     return StreamingResponse(

@@ -4,6 +4,7 @@ from sqlmodel import Session, delete, select
 import numpy as np
 import cv2
 import re
+import openpyxl
 
 from models import *
 from schemas import *
@@ -174,19 +175,58 @@ def crop_image(contents: bytes, points_data: dict):
     return img_bytes
 
 
-def populate_spreadsheet_logic(test_id_input: str, session: Session):
+def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl.Workbook:
     test_items = session.exec(
                             select(TestItem)
                             .where(TestItem.test_id == test_id_input)
                             ).all()
-    
     test_items_labels = [item.label for item in test_items]
 
     SHEETS_EXPORTER = SheetsExporter(columns=test_items_labels)
 
-    students = session.exec(select(Student).where())
-    # TODO: complete the rest of the function
-    ...
+    test_instance = session.exec(
+                            select(TestInstance)
+                            .where(TestInstance.test_id == test_id_input)
+                            ).first()
+    assert test_instance is not None # FIXME: Make this a 400 handling
+    
+    students = session.exec(
+                        select(Student)
+                        .where(Student.section_id == test_instance.section_id)
+                        ).all()
+    assert students is not None
+    
+    for s in students:
+        rowKey = s.name
+        SHEETS_EXPORTER.add_student(rowKey)
+        paper = session.exec(
+                            select(TestPaperInstance)
+                            .where(TestPaperInstance.student_no == s.student_no)
+                            ).first()
+        
+        if paper is None:
+            answers = []
+        else:
+            answers = session.exec(
+                                select(StudentAnswer)
+                                .where(StudentAnswer.paper_id == paper.paper_id)
+                                ).all()
+        
+        scoresList: dict[str, float|None] = {}
+        for testItem in test_items:
+            if testItem.item_id in [a.item_id for a in answers]:
+                answer = next((a for a in answers if a.item_id == testItem.item_id), None)
+                if answer and answer.ai_evaluation:
+                    score, _ = get_total_score(testItem.expected_answer_rubric_questions, answer.ai_evaluation)
+                    scoresList[testItem.label] = score
+                else:
+                    scoresList[testItem.label] = -9999
+            else:
+                scoresList[testItem.label] = None
+
+        SHEETS_EXPORTER.append(rowKey, scoresList)
+
+    return SHEETS_EXPORTER.export_sheet()
 
 #endregion
 # ==============================
