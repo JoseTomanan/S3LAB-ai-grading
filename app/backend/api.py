@@ -39,7 +39,7 @@ PADDLE_OCR_LANG = 'en'  # Language for PaddleOCR ('en', 'ch', 'fr', etc.)
 app = FastAPI(
         title="Assessment Processing API",
         description="API for managing test instances, items, and student answer processing",
-        # lifespan=create_db_and_tables(),
+        lifespan=create_db_and_tables(),
         version="1.0.0"
         )
 
@@ -63,31 +63,6 @@ TEMP_DIR.mkdir(exist_ok=True)
 
 
 # ==============================
-#region AUTO-SEEDING ON STARTUP (DEV ONLY)
-@app.on_event("startup")
-async def startup_database_setup():
-    """Create tables + conditionally seed dev DB"""
-    # Always create tables first
-    create_db_and_tables()
-    
-    # ONLY seed if explicitly enabled in development
-    if ENVIRONMENT == "development" and os.getenv("AUTO_SEED", "false").lower() == "true":
-        print(f"\nAUTO_SEED ENABLED (ENV={ENVIRONMENT}) - Resetting database with mock data...")
-        try:
-            # Import locally to avoid circular dependencies
-            from functionality.seed_dev_db import seed_dev_database
-            seed_dev_database()  # Uses safety checks from seed_dev_db.py
-            print("Database seeded successfully on startup\n")
-        except Exception as e:
-            print(f"SEEDING FAILED ON STARTUP: {type(e).__name__}: {e}\n")
-            # Fail fast since AUTO_SEED was explicitly requested
-            raise RuntimeError("Critical: Database seeding failed during startup") from e
-#endregion
-# ==============================
-
-
-
-# ==============================
 #region Section Endpoints
 @app.get("/api/sections", response_model=List[dict])
 def get_all_sections(session: Session = Depends(get_session)):
@@ -99,7 +74,6 @@ def get_all_sections(session: Session = Depends(get_session)):
 @app.get("/api/sections/{section_id}", response_model=List[StudentResponse])
 def get_students_in_section(section_id: int, session: Session = Depends(get_session)):
     """Get all students from a specific section"""
-    # Verify section exists
     section = session.get(Section, section_id)
     if not section:
         raise HTTPException(
@@ -123,9 +97,9 @@ def get_students_in_section(section_id: int, session: Session = Depends(get_sess
 
 @app.post("/api/students", status_code=status.HTTP_201_CREATED)
 def add_new_student(
-            student_data: dict = Body(...),
-            session: Session = Depends(get_session)
-            ):
+                student_data: dict = Body(...),
+                session: Session = Depends(get_session)
+                ):
     """Add new student (section_id provided in body per contract)"""
     # Validate required fields per contract
     required_fields = ["name", "student_no", "section_id"]
@@ -154,11 +128,10 @@ def add_new_student(
                 detail=f"Student with ID '{student_data['student_no']}' already exists"
                 )
     
-    # Create student with section_id from body (NOT path param)
     new_student = Student(
             student_no=student_data["student_no"],
             name=student_data["name"],
-            section_id=student_data["section_id"]  # Directly from body
+            section_id=student_data["section_id"],
             )
     session.add(new_student)
     session.commit()
@@ -173,10 +146,10 @@ def add_new_student(
 
 @app.patch("/api/students/{student_no}", response_model=StudentResponse)
 def edit_student_details(
-        student_no: str,
-        update_data: dict,  # Parameter name matches usage below
-        session: Session = Depends(get_session)
-        ):
+                student_no: str,
+                update_data: dict,
+                session: Session = Depends(get_session)
+                ):
     """Edit student details"""
     student = session.get(Student, student_no)
     if not student:
@@ -185,12 +158,10 @@ def edit_student_details(
                 detail=f"Student with ID '{student_no}' not found"
                 )
     
-    # Update fields if provided (FIXED: using update_data consistently)
-    if "name" in update_data:  # CORRECTED: was update_
+    if "name" in update_data:
         student.name = update_data["name"]
     
-    if "section_id" in update_data:  # CORRECTED: was update_
-        # Verify section exists
+    if "section_id" in update_data:
         section = session.get(Section, update_data["section_id"])
         if not section:
             raise HTTPException(
@@ -523,32 +494,6 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
 
 # ==============================
 #region Test Item Endpoints
-# @app.get("/api/test_instances/{test_id}/items", response_model=TestItemsResponse, responses={ 404: {"description": "Test instance not found"},})
-# def get_test_instance_items(
-#             test_id: str,
-#             session: Session = Depends(get_session),
-#             ):
-#     """Get all test items for a specific test instance"""
-#     instance = session.get(TestInstance, test_id)
-#     if not instance:
-#         raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
-    
-#     items = session.exec(
-#         select(TestItem).where(TestItem.test_id == test_id)
-#     ).all()
-
-#     items_summary = [
-#             TestItemSummary(
-#                 item_id=item.item_id,
-#                 label=item.label,
-#                 question=item.question,
-#                 is_problem_solving=item.is_problem_solving,
-#                 expected_answer_rubric_questions=item.expected_answer_rubric_questions,
-#                 )
-#             for item in items
-#             ]
-
-#     return TestItemsResponse(test_id=test_id, items=items_summary)
 @app.get("/api/test_instances/{test_id}/items")
 def get_test_instance_items(
     test_id: str,
@@ -1140,14 +1085,6 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                                     ).first()
                 assert isinstance(respectiveItem, TestItem)
 
-                # NOTE: commented out while API rate limit situation is unresolved.
-                #===================EVALUATION CALLS=================
-                # if not answer.is_done_rendering:
-                #     print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
-                #     _evaluate_image_logic(answer.answer_id, session)
-                #     session.refresh(answer)
-                #===================EVALUATION CALLS=================
-
                 ai_evaluations.append({
                             "item_id": answer.item_id,
                             "answer_id": answer.answer_id,
@@ -1224,14 +1161,6 @@ def get_ai_evaluation_results_per_student(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
             assert isinstance(respectiveItem, TestItem)
-
-            # NOTE: commented out while API rate limit situation is unresolved.
-            #===================EVALUATION CALLS=================
-            # if answer.is_done_rendering == False:
-            #     print(f"INTERNAL:\tAttribute is_done_rendering is false for {answer.answer_id}.")
-            #     _evaluate_image_logic(answer.answer_id, session)
-            #     session.refresh(answer)
-            #===================EVALUATION CALLS=================
             
             scores = _calculate_score(
                                 respectiveItem.expected_answer_rubric_questions,
@@ -1258,10 +1187,10 @@ def get_ai_evaluation_results_per_student(
 
 @app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
 def get_student_answers(
-            test_id: str,
-            student_no: str,
-            session: Session = Depends(get_session),
-            ):
+                test_id: str,
+                student_no: str,
+                session: Session = Depends(get_session),
+                ):
     """Get all answers by a specific student for a test instance"""
     # Verify entities exist
     instance = session.get(TestInstance, test_id)
@@ -1424,7 +1353,6 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
 
 
 # ==============================
-#   ---> FROM JOSE
 #region Auxiliary Functions
 def _evaluate_image_logic(answer_id_input: int, session: Session):
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
