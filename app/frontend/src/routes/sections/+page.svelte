@@ -3,7 +3,7 @@
 
 	import { onMount } from "svelte";
 	import MdiPapersOutline from "~icons/mdi/papers-outline";
-	import MdiPersonAdd from "~icons/mdi/person-add";
+	import MdiPeopleAdd from "~icons/mdi/people-add";
 
 	import type { Section, Student } from "$lib/index.ts";
 	import Pagination from "$lib/components/Pagination.svelte";
@@ -47,7 +47,7 @@
 		</a>
 		<h1 class="italic">Sections</h1>
 		<button class="button-secondary" onclick={() => {}}>
-			<MdiPersonAdd class="size-6"/>
+			<MdiPeopleAdd class="size-6"/>
 		</button>
 	</span>
 	<div class="flex flex-col gap-4">

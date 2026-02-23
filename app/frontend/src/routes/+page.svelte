@@ -5,7 +5,7 @@
 	import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
 	import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
 	import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
-	import MdiGoogleClassroom from '~icons/mdi/google-classroom';
+	import MdiPeopleOutline from '~icons/mdi/people-outline';
 	
 	import type { TestInstance } from '$lib/index.ts';
 	
@@ -47,7 +47,7 @@
 <div class="container">
 	<span class="flex flex-row items-center justify-between mb-2">
 		<a href="/sections">
-			<MdiGoogleClassroom class="size-6"/>
+			<MdiPeopleOutline class="size-8"/>
 		</a>
 		<h1>Test instances</h1>
 		<Dialog.Root>
