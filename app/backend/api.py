@@ -718,7 +718,7 @@ async def process_student_answer_image(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="No file provided"
                     )
-    if not DOCUMENT_SCANNER.validate_file_extension(file.filename):
+    if not IMAGE_MODIFIER.validate_file_extension(file.filename):
         raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                 detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"

@@ -1,9 +1,17 @@
 import cv2
 import numpy as np
+from pathlib import Path
 
 
 
 class ImageModifier:
+    def validate_file_extension(self, filename: str) -> bool:
+        """Validate that file extension is allowed"""
+        if not filename or not isinstance(filename, str):
+            return False
+        ext = Path(filename).suffix.lower()
+        return ext in [".jpeg", ".jpg", ".png"]
+    
     def brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
         """Increase image brightness using linear transform"""
         amount = max(0.0, min(1.0, float(amount)))
