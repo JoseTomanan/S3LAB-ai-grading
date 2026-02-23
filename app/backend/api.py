@@ -18,9 +18,9 @@ from pydantic import ValidationError
 from models import *
 from schemas import *
 from database import create_db_and_tables, get_session, engine, ENVIRONMENT
-from functionality.image_preprocessor import CVImagePreprocessor, CVProcessingError
 from functionality.BoxSegmenter import BoxSegmenter
 from functionality.DocumentScanner import DocumentScanner
+from functionality.ImageModifier import ImageModifier
 from functionality.ai_interface import *
 from functionality.sheets_exporter import *
 
@@ -54,6 +54,7 @@ app.add_middleware(
 
 AI_ANSWER_EVALUATOR = AIAnswerEvaluator()
 DOCUMENT_SCANNER = DocumentScanner()
+IMAGE_MODIFIER = ImageModifier()
 
 TEMP_DIR = Path("temp_cv_output")
 TEMP_DIR.mkdir(exist_ok=True)
@@ -717,7 +718,7 @@ async def process_student_answer_image(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="No file provided"
                     )
-    if not CVImagePreprocessor.validate_file_extension(file.filename):
+    if not DOCUMENT_SCANNER.validate_file_extension(file.filename):
         raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                 detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
@@ -914,17 +915,12 @@ async def update_answer_segmentation(
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
         
-        preprocessor = CVImagePreprocessor(
-            use_paddle_ocr=USE_PADDLE_OCR,
-            paddle_ocr_lang=PADDLE_OCR_LANG,
-            debug_mode=False  # Set to True for debugging during development
-        )
-        enhanced = preprocessor.brighten(warped, amount=0.2)
-        enhanced = preprocessor.adjust_contrast(enhanced, amount=1.2)
+        enhanced = IMAGE_MODIFIER.brighten(warped, amount=0.2)
+        enhanced = IMAGE_MODIFIER.adjust_contrast(enhanced, amount=1.2)
         
         success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
         if not success:
-            raise CVProcessingError("Failed to encode processed image")
+            raise ValueError("Failed to encode processed image")
         
         img_bytes = buffer.tobytes()
     except Exception as e:
@@ -1250,76 +1246,6 @@ def get_student_answers(
 
 # ==============================
 #region Utility Endpoints
-@app.post("/api/image_preprocess")
-async def image_preprocess(file: UploadFile = File(...)):
-    """Process raw student assessment image through CV pipeline (standalone)"""
-    # Validation
-    if not file or not file.filename:
-        raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No file provided"
-                )
-    
-    if not CVImagePreprocessor.validate_file_extension(file.filename):
-        raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
-                )
-    
-    try:
-        contents = await file.read()
-        if len(contents) == 0:
-            raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Uploaded file is empty"
-                    )
-    except Exception as e:
-        raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to read file: {str(e)}"
-                )
-    
-    # Processing
-    try:
-        preprocessor = CVImagePreprocessor(
-            use_paddle_ocr=USE_PADDLE_OCR,
-            paddle_ocr_lang=PADDLE_OCR_LANG,
-            debug_mode=False  # Set to True for debugging during development
-        )
-        processed_list = preprocessor.process_assessment_image(contents)
-    except CVProcessingError as e:
-        raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"CV processing failed: {str(e)}"
-                )
-    except Exception as e:
-        raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Unexpected error during image processing: {str(e)}"
-                )
-    
-    # Save to temp files
-    session_id = str(uuid.uuid4())
-    boxes_info = []
-    
-    for i, img_bytes in enumerate(processed_list):
-        filename = f"{session_id}_{i}.jpg"
-        filepath = TEMP_DIR / filename
-        
-        with open(filepath, "wb") as f:
-            f.write(img_bytes)
-        
-        boxes_info.append({
-                "index": i,
-                "image_directory": f"/api/temp/{filename}"
-                })
-    
-    return {
-            "num_boxes": len(processed_list),
-            "boxes": boxes_info
-            }
-
-
 @app.get("/api/temp/{filename}")
 async def get_processed_image(filename: str):
     """Serve processed images from temp directory"""

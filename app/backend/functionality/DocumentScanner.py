@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import math
+from pathlib import Path
 
 
 NORMAL_SIZE = 2048
@@ -100,6 +101,13 @@ class DocumentScanner:
 
 
     #region Image modification functions
+    def validate_file_extension(self, filename: str) -> bool:
+        """Validate that file extension is allowed"""
+        if not filename or not isinstance(filename, str):
+            return False
+        ext = Path(filename).suffix.lower()
+        return ext in [".jpeg", ".jpg", ".png"]
+
     def load_image(self, image_path: str) -> bytes:
         """Load image path and return as bytes."""
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)
