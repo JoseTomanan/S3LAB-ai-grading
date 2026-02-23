@@ -92,7 +92,7 @@
 			Edit test item {testItem.label}
 		</Dialog.Title>
 		<Dialog.Description>
-			For expected answer/rubric questions, add points in parentheses at end, e.g., "Correct setup (1pts)."
+			For expected answer/rubric questions, add points in brackets at end. Example: "Correct setup [1pts]"
 		</Dialog.Description>
 	</Dialog.Header>
 	<Label for="label">Label</Label>
