@@ -63,7 +63,7 @@
 		<p>Loading...</p>
 	{:else}
 		<h4><b>{test_id}.xlsx</b> has been downloaded.</h4>
-		<h6>NOTE: Items with an uploaded image but no evaluation are scored with -9999 for visibility.</h6>
+		<h6>NOTE: Items with no uploaded image/with an uploaded image but no evaluation are not scored.</h6>
 		<h6>You may close this dialog.</h6>
 	{/if}
 </Dialog.Content>
