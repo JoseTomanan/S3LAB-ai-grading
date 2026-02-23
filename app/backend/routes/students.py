@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 #region Endpoints
-@router.post("/api/students", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def add_new_student(
                 student_data: dict = Body(...),
                 session: Session = Depends(get_session)
@@ -61,7 +61,7 @@ def add_new_student(
             )
 
 
-@router.patch("/api/students/{student_no}", response_model=StudentResponse)
+@router.patch("/{student_no}", response_model=StudentResponse)
 def edit_student_details(
                 student_no: str,
                 update_data: dict,
@@ -98,7 +98,7 @@ def edit_student_details(
             )
 
 
-@router.delete("/api/students/{student_no}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{student_no}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_student(student_no: str, session: Session = Depends(get_session)):
     """Delete student"""
     student = session.get(Student, student_no)
