@@ -10,6 +10,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Label } from '$lib/components/ui/label/index.ts';
 
 	let isOperationOngoing: boolean = $state(false);
 
@@ -19,6 +20,7 @@
 
 	function getImageFromComponent(imageDataUrl: string) {
 		const imageFile: File = dataUrlToFile(imageDataUrl, "CAPTURED_IMAGE.jpeg")
+		formFile = undefined;
 		uploadableFile = imageFile;
 	}
 
@@ -62,14 +64,22 @@
 		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
 	</Dialog.Header>
 	<span class="flex flex-row gap-1">
+		<Label for="sendImage"
+						class="w-3/4 button-outline cursor-pointer text-ellipsis truncate">
+			{#if !uploadableFile}
+				<b>Choose an image...</b>
+			{:else}
+				<b>Uploaded image:</b> {uploadableFile ? uploadableFile.name : "None"}
+			{/if}
+		</Label>
 		<Input id="sendImage"
 						type="file"
 						accept="image/*"
-						class="w-3/4"
+						class="w-3/4 hidden"
 						bind:files={formFile}/>
 		<Dialog.Root>
-			<Dialog.Trigger class="button-secondary w-1/4 flex justify-center items-center">
-				<MdiCamera class="size-6 opacity-80"/>
+			<Dialog.Trigger class="button-secondary w-1/4 h-fit flex justify-center items-center">
+				<MdiCamera class="size-6 my-0.5 opacity-80"/>
 			</Dialog.Trigger>
 			<OpenCamera onImageCapture={getImageFromComponent} />
 		</Dialog.Root>
