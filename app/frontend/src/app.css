@@ -271,8 +271,7 @@
   .button-outline {
     @apply py-1 px-2;
     @apply rounded;
-    @apply border-0;
-    @apply ring-2 ring-border;
+    @apply border-2 border-border;
     @apply cursor-pointer;
   }
 }
