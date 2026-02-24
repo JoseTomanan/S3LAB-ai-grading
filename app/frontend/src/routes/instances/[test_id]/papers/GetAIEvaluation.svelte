@@ -80,8 +80,8 @@
 				case 200:
 					const result = await response.json();
 					questionItemEvals = questionItemEvals.map(ans => 
-									ans.answer_id === result.answer_id 
-									? { ...ans, ai_evaluation: result.ai_evaluation }
+									ans.answer_id == result.answer_id 
+									? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
 									: ans
 								);
 					REPOPULATE_UNANSWERED_ITEMS();
@@ -129,19 +129,10 @@
 						</span>
 						{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
 							{#if e_a_r_q.length != 0}
-								<!--
-								{@const answerEval = GET_EVALS(evalItem)[index]}
-								{@const isHasAnswer = answerEval && answerEval != ""}
-								-->
 								{@const answerScore = GET_SCORES(evalItem)[index]}
 								{@const isHasScore = answerScore && answerScore != ""}
 								<span class="flex flex-row justify-between">
 									<h6 class="italic">{e_a_r_q}</h6>
-									<!--
-									<h6 class={isHasAnswer ? "font-bold" : ""}>
-										{isHasAnswer ? answerEval : "—"}
-									</h6>
-									-->
 									<h6 class={isHasScore ? "font-bold" : ""}>
 										{isHasScore ? answerScore : "—"}
 									</h6>
