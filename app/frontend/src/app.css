@@ -247,6 +247,7 @@
 		@apply rounded;
 		@apply bg-primary;
 		@apply text-primary-foreground;
+    @apply cursor-pointer;
 	}
 
 	.button-secondary {
@@ -254,6 +255,7 @@
 		@apply rounded;
 		@apply bg-secondary;
 		@apply text-secondary-foreground;
+    @apply cursor-pointer;
 	}
 
   .button-outline {
@@ -261,5 +263,6 @@
     @apply rounded;
     @apply border-0;
     @apply ring-2 ring-border;
+    @apply cursor-pointer;
   }
 }
