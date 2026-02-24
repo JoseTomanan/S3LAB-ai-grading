@@ -14,7 +14,8 @@
 		"lint": "prettier --check . && eslint ."
 	},
 	"devDependencies": {
-		"@eslint/compat": "^1.4.0",
+		"@cloudparker/easy-camera-svelte": "^2.0.1",
+		"@eslint/compat": "^2.0.2",
 		"@eslint/js": "^9.38.0",
 		"@iconify-json/lucide": "^1.2.86",
 		"@iconify-json/mdi": "^1.2.3",
@@ -31,7 +32,7 @@
 		"@types/node": "^22",
 		"bits-ui": "^2.15.4",
 		"clsx": "^2.1.1",
-		"eslint": "^9.38.0",
+		"eslint": "^10.0.2",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",
 		"globals": "^16.4.0",
