@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
@@ -26,6 +28,17 @@ export function filesToFileList(fileArray: File[]) {
 		console.log("--> It reached here lol")
     return fileArray as unknown as FileList;
 }
+
+export function redownloadFile(file: File) {
+		const url = URL.createObjectURL(file);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = file.name;
+		a.click();
+		URL.revokeObjectURL(url);
+}
+
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, "child"> : T;
