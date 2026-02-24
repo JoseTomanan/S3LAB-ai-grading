@@ -46,10 +46,10 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                     ).first()
     assert test_item is not None
 
+    ai_evaluation = ""
     match test_item.is_problem_solving:
         case True:
             rubric_questions = test_item.expected_answer_rubric_questions.split(";")
-            ai_evaluation = ""
             for rubric in rubric_questions:
                 if rubric.strip() != "":
                     while True:
@@ -57,8 +57,6 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                         if response and _VALID_R_Q_RESPONSE(response):
                             break
                     ai_evaluation += f"{response};"
-            
-            answer.ai_evaluation = ai_evaluation
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
@@ -66,9 +64,13 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                 response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
+            
+            ai_evaluation = response
 
-            answer.ai_evaluation = response
-
+    all_scores = calculate_score(test_item.expected_answer_rubric_questions,
+                                 ai_evaluation)
+    
+    answer.ai_evaluation = ai_evaluation
     answer.is_done_rendering = True
 
     session.add(answer)
@@ -81,8 +83,8 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
             item_id=answer.item_id,
             image_directory=answer.image_directory,
             ai_evaluation=answer.ai_evaluation,
-            is_done_rendering=answer.is_done_rendering
-            # TODO: add missing scores = list[float]
+            is_done_rendering=answer.is_done_rendering,
+            scores=all_scores,
             )
 
 

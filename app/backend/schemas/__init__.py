@@ -111,6 +111,7 @@ class StudentAnswerResponse(BaseModel):
     image_directory: str
     ai_evaluation: str
     is_done_rendering: bool
+    scores: str
 
 class StudentAnswerSummary(BaseModel):
     student_no: str
