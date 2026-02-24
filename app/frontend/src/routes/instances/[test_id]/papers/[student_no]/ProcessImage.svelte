@@ -2,28 +2,38 @@
 	const { test_id, student_no }: { test_id: string, student_no: string } = $props();
 	
 	import { API_BASE_URL } from '$lib/constants.ts';
+	import { dataUrlToFile } from '$lib/utils.ts';
+	import OpenCamera from './OpenCamera.svelte';
+
+	import MdiCamera from "~icons/mdi/camera";
 
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { Label } from '$lib/components/ui/label/index.ts';
 
 	let isOperationOngoing: boolean = $state(false);
 
 	let formFile: FileList | undefined = $state();
 	let paramNumBoxes: number | null = $state(null);
+	let uploadableFile: File | null = $derived(formFile ? formFile[0] : null);
+
+	function getImageFromComponent(imageDataUrl: string) {
+		const imageFile: File = dataUrlToFile(imageDataUrl, "CAPTURED_IMAGE.jpeg")
+		uploadableFile = imageFile;
+	}
 
 	async function sendImage() {
-		if (!formFile || formFile.length == 0)
+		if (!uploadableFile)
 			return;
 
+		console.log(uploadableFile.name);
+		console.log(uploadableFile.size);
 		isOperationOngoing = true;
 
 		const formData = new FormData();
-    formData.append('file', formFile[0]);
+    formData.append('file', uploadableFile);
 
 		try {
-			// FIXME: Remove this line once backend reflects change in URI
 			const response = await fetch(
 						`${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/image_preprocess?num_boxes=${paramNumBoxes ?? 2}`,
 						{ method: "POST", body: formData, }
@@ -51,17 +61,26 @@
 		<Dialog.Title>Process raw image</Dialog.Title>
 		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
 	</Dialog.Header>
-	<Input id="sendImage"
-					type="file"
-					accept="image/*"
-					bind:files={formFile}/>
+	<span class="flex flex-row gap-1">
+		<Input id="sendImage"
+						type="file"
+						accept="image/*"
+						class="w-3/4"
+						bind:files={formFile}/>
+		<Dialog.Root>
+			<Dialog.Trigger class="button-secondary w-1/4 flex justify-center items-center">
+				<MdiCamera class="size-6 opacity-80"/>
+			</Dialog.Trigger>
+			<OpenCamera onImageCapture={getImageFromComponent} />
+		</Dialog.Root>
+	</span>
 	<Input id="numBoxes"
 					type="number"
 					placeholder="Number of boxes (default=2)..."
 					bind:value={paramNumBoxes}/>
 	<Button variant="outline"
 					onclick={() => sendImage()}
-					disabled={!formFile}>
+					disabled={!uploadableFile}>
 		Send for processing
 	</Button>
 	{#if isOperationOngoing}
