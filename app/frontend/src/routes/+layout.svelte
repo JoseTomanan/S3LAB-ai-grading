@@ -10,4 +10,8 @@
 	<title>Grading AI</title>
 </svelte:head>
 
-{@render children()}
+<div class="flex justify-center bg-fixed">
+	<div class="big-container">
+		{@render children()}
+	</div>
+</div>

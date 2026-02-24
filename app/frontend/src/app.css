@@ -183,6 +183,16 @@
     @apply bg-background text-foreground;
   }
 
+  .big-container {
+    @apply w-full;
+    @apply max-w-7xl;
+    @apply 2xl:max-w-6xl;
+    @apply xl:max-w-5xl;
+    @apply lg:max-w-4xl;
+    @apply md:max-w-2xl;
+    @apply sm:w-full;
+  }
+
 	h1 {
 		@apply text-2xl;
     @apply text-primary-foreground;
