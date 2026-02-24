@@ -81,7 +81,7 @@
 </script>
 
 
-<div class="flex flex-col gap-4 overflow-auto p-0.5">
+<div class="flex flex-col gap-4 p-0.5">
 	<span class="flex flex-row justify-between items-center">
 		<h1>{data.student_no}</h1>
 		<Dialog.Root>
@@ -96,6 +96,8 @@
 	{:else if studentItems.length == 0}
 		<p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 	{:else}
+		<div class="overflow-y-auto space-y-2">
+		<!-- TODO: Make this scrollable (!!) -->
 		{#each studentItems as studentItem}
 			<div class="card space-y-1">
 				<Label for={studentItem.label} class="flex flex-row justify-between">
@@ -118,5 +120,6 @@
 				</div>
 			</div>
 		{/each}
+		</div>
 	{/if}
 </div>
