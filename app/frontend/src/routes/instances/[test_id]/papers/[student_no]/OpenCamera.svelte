@@ -21,6 +21,7 @@
 				};
 
 	const returnImage = () => {
+					// redownloadFile(dataUrlToFile(capturedImage, "camera input.jpeg"));
 					onImageCapture(capturedImage);
 				};
 </script>
@@ -30,7 +31,8 @@
 		<Dialog.Title>Capture image</Dialog.Title>
 		<EasyCamera bind:this={cameraInstance}
 								useAudio={false}
-								width={400} />
+								width={720}
+								style="width: 100%; height: 100%;" />
 		<Button variant="outline"
 							onclick={handleImage}
 							class="px-4 py-2">
@@ -40,7 +42,7 @@
 		<Dialog.Title>Preview image</Dialog.Title>
 		<img src={capturedImage}
 					alt="Captured preview"
-					class="w-[400px] rounded-lg ring-4 ring-border shadow" />
+					class="w-full rounded-lg ring-4 ring-border shadow" />
 		<Dialog.Close>
 			<button class="button-outline"
 								onclick={returnImage}>
