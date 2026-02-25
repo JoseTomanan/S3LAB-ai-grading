@@ -18,9 +18,7 @@
 	let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
 
 	const GET_E_A_R_Q = (i: GetSpecificEvaluationResponse) => i.expected_answer_rubric_questions.split(';');
-	const GET_EVALS = (i: GetSpecificEvaluationResponse) => i.ai_evaluation.split(';');
 	const GET_SCORES = (i: GetSpecificEvaluationResponse) => i.scores.split(';');
-
 	const REPOPULATE_UNANSWERED_ITEMS = () => {
 					const evalItemIds = new Set(questionItemEvals.map(e => e.item_id));
 					const unansweredItems = testItems
@@ -108,6 +106,7 @@
 			<p>Loading...</p>
 		{:else}
 			{#each questionItemEvals as evalItem}
+				{@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
 				<div class="card space-y-1">
 					{#if evalItem.answer_id == -1}
 						<h4 class="truncate text-ellipsis w-fill">
@@ -127,7 +126,7 @@
 								<MdiHeadReload />
 							</button>
 						</span>
-						{#each GET_E_A_R_Q(evalItem) as e_a_r_q, index}
+						{#each e_a_r_qs as e_a_r_q, index}
 							{#if e_a_r_q.length != 0}
 								{@const answerScore = GET_SCORES(evalItem)[index]}
 								{@const isHasScore = answerScore && answerScore != ""}
