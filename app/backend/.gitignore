@@ -1,6 +1,9 @@
 **/__pycache__/*
 /TEMP/*
+
 /static/images/*
+!/static/images/.gitkeep
+
 /backend/test_report.txt
 *.pyc
 
