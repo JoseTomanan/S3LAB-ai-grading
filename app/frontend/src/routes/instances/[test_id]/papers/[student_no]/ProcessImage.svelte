@@ -63,19 +63,22 @@
 		<Dialog.Title>Process raw image</Dialog.Title>
 		<Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
 	</Dialog.Header>
-	<span class="flex flex-row gap-1">
+	<div class="flex flex-row gap-1 min-w-0">
 		<Label for="sendImage"
-						class="w-3/4 button-outline cursor-pointer text-ellipsis truncate">
-			{#if !uploadableFile}
-				<b>Choose an image...</b>
-			{:else}
-				<b>Uploaded image:</b> {uploadableFile ? uploadableFile.name : "None"}
-			{/if}
+						class="grow button-outline flex flex-row items-center min-w-0 font-medium">
+			<span class="shrink-0 whitespace-nowrap">
+				{uploadableFile
+						? "Uploaded image:"
+						: "Choose an image..." }
+			</span>
+			<span class="truncate min-w-0">
+				{uploadableFile ? uploadableFile.name : ""}
+			</span>
 		</Label>
 		<Input id="sendImage"
 						type="file"
 						accept="image/*"
-						class="w-3/4 hidden"
+						class="hidden"
 						bind:files={formFile}/>
 		<Dialog.Root>
 			<Dialog.Trigger class="button-secondary w-1/4 h-fit flex justify-center items-center">
@@ -83,7 +86,7 @@
 			</Dialog.Trigger>
 			<OpenCamera onImageCapture={getImageFromComponent} />
 		</Dialog.Root>
-	</span>
+	</div>
 	<Input id="numBoxes"
 					type="number"
 					placeholder="Number of boxes (default=2)..."
