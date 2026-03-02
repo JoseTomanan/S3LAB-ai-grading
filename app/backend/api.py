@@ -11,10 +11,10 @@ from models import *
 from schemas import *
 from database import create_db_and_tables, get_session
 
-from functions.ai_interface import AIAnswerEvaluator
-from functions.box_segmenter import BoxSegmenter
-from functions.document_scanner import DocumentScanner
-from functions.image_modifier import ImageModifier
+from services.ai_interface import AIAnswerEvaluator
+from services.box_segmenter import BoxSegmenter
+from services.document_scanner import DocumentScanner
+from services.image_modifier import ImageModifier
 
 from routers import sections, students, utility, test_instances, test_items
 

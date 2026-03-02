@@ -9,11 +9,11 @@ import openpyxl
 from models import *
 from schemas import *
 
-from functions.ai_interface import AIAnswerEvaluator
-from functions.sheets_exporter import SheetsExporter
-from functions.box_segmenter import BoxSegmenter
-from functions.document_scanner import DocumentScanner
-from functions.image_modifier import ImageModifier
+from services.ai_interface import AIAnswerEvaluator
+from services.sheets_exporter import SheetsExporter
+from services.box_segmenter import BoxSegmenter
+from services.document_scanner import DocumentScanner
+from services.image_modifier import ImageModifier
 
 
 AI_ANSWER_EVALUATOR = AIAnswerEvaluator()

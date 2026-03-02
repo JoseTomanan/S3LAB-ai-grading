@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
-from functions.document_scanner import DocumentScanner, NORMAL_SIZE
-from functions.ai_interface import AIAnswerEvaluator
+from services.document_scanner import DocumentScanner, NORMAL_SIZE
+from services.ai_interface import AIAnswerEvaluator
 
 
 AREA = NORMAL_SIZE ** 2
