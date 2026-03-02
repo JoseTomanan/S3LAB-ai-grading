@@ -16,7 +16,7 @@ from functions.box_segmenter import BoxSegmenter
 from functions.document_scanner import DocumentScanner
 from functions.image_modifier import ImageModifier
 
-from routes import sections, students, utility, test_instances, test_items
+from routers import sections, students, utility, test_instances, test_items
 
 from services import *
 
