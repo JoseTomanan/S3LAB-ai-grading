@@ -16,9 +16,9 @@ from services.box_segmenter import BoxSegmenter
 from services.document_scanner import DocumentScanner
 from services.image_modifier import ImageModifier
 
-from routers import sections, students, utility, test_instances, test_items
+from services.utility import *
 
-from services import *
+from routers import sections, students, utility, test_instances, test_items
 
 
 
