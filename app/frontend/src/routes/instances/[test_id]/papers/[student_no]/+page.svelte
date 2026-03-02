@@ -43,7 +43,7 @@
       console.log($state.snapshot(studentItems));
 
       const responseTwo = await fetch(
-            `${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
+            `${API_BASE_URL}/api/test_items/${data.test_id}/items`,
             {
               method: "GET",
               headers: {'Content-Type': 'application/json',},
