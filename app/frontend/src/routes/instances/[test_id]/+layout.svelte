@@ -47,7 +47,7 @@
       activeTestInstance.is_done_rendering = result.is_done_rendering;
 
       const responseTwo = await fetch(
-            `${API_BASE_URL}/api/test_instances/${data.test_id}/items`,
+            `${API_BASE_URL}/api/test_items/${data.test_id}/items`,
             {
               method: "GET",
               headers: {'Content-Type': 'application/json',},

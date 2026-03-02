@@ -31,7 +31,7 @@
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/test_instances/${test_id}/items`,
+        `${API_BASE_URL}/api/test_items/${test_id}/items`,
         {
           method: "POST",
           headers: {'Content-Type': 'application/json',},

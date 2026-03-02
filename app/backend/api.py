@@ -58,7 +58,7 @@ app.include_router(test_instances.router, prefix="/api/test_instances", tags=["T
 
 # ==============================
 #region Test Item Endpoints
-@app.get("/api/test_instances/{test_id}/items")
+@app.get("/api/test_items/{test_id}/items")
 def get_test_instance_items(
             test_id: str,
             session: Session = Depends(get_session),
@@ -94,7 +94,7 @@ def get_test_instance_items(
         "items": items_list
     }
 
-@app.post("/api/test_instances/{test_id}/items", response_model=NewTestItemResponse)
+@app.post("/api/test_items/{test_id}/items", response_model=NewTestItemResponse)
 def add_test_item(
             test_id: str,
             item: NewTestItemRequest,
@@ -146,7 +146,7 @@ def add_test_item(
             ])
 
 
-@app.patch("/api/test_instances/{test_id}/items/{item_id}", response_model=FullTestItemResponse)
+@app.patch("/api/test_items/{test_id}/items/{item_id}", response_model=FullTestItemResponse)
 def edit_test_item(
             test_id: str,
             item_id: int,
@@ -194,7 +194,7 @@ def edit_test_item(
             )
 
 
-@app.delete("/api/test_instances/{test_id}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/api/test_items/{test_id}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_test_item(
             test_id: str,
             item_id: int,
