@@ -53,13 +53,15 @@ TEMP_DIR.mkdir(exist_ok=True)
 app.include_router(test_instances.router, prefix="/api/test_instances", tags=["Test Instances"])
 app.include_router(test_items.router, prefix="/api/test_items", tags=["Test Items"])
 app.include_router(students.router, prefix="/api/students", tags=["Students"])
+# TODO: Rename student answer endpoints to have `student_answers` prefix
+# TODO: Add router for student answers
 app.include_router(sections.router, prefix="/api/sections", tags=["Sections"])
 app.include_router(utility.router, prefix="/api", tags=["Utility"])
 
 
 # ==============================
 #region Student Answer Processing Endpoints
-@app.post("/api/test_instances/{test_id}/{student_no}/image_preprocess")
+@app.post("/api/student_answers/{test_id}/{student_no}/image_preprocess")
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
@@ -218,7 +220,7 @@ async def process_student_answer_image(
         "boxes": boxes_info
         }
 
-@app.patch("/api/test_instances/{test_id}/{student_no}/{item_id}")
+@app.patch("/api/student_answers/{test_id}/{student_no}/{item_id}")
 async def update_answer_segmentation(
             test_id: str,
             student_no: str,
@@ -305,7 +307,7 @@ async def update_answer_segmentation(
     return {"image_directory": f"/api/temp/{safe_filename}"}
 
 
-@app.get("/api/test_instances/{test_id}/statuses")
+@app.get("/api/student_answers/{test_id}/statuses")
 def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session)):
     """Return per-student rendering status for a test instance"""
     instance = session.get(TestInstance, test_id)
@@ -365,7 +367,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             }
 
 
-@app.get("/api/test_instances/{test_id}/results")
+@app.get("/api/student_answers/{test_id}/results")
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
     """Return AI evaluations per contract"""
     instance = session.get(TestInstance, test_id)
@@ -421,7 +423,7 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
             }
 
 
-@app.get("/api/test_instances/{test_id}/results/{student_no}")
+@app.get("/api/student_answers/{test_id}/results/{student_no}")
 def get_ai_evaluation_results_per_student(
                 test_id: str,
                 student_no: str,
@@ -500,7 +502,7 @@ def get_ai_evaluation_results_per_student(
         }
 
 
-@app.get("/api/test_instances/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
+@app.get("/api/student_answers/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
 def get_student_answers(
                 test_id: str,
                 student_no: str,
