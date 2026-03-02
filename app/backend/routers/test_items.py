@@ -5,7 +5,7 @@ from models import *
 from schemas import *
 from database import get_session
 
-from services import *
+from services.utility import *
 
 
 
