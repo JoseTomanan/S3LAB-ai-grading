@@ -1,21 +1,17 @@
 from fastapi import FastAPI, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
 from sqlmodel import Session, delete, select
 from typing import List, Optional
 
 import uuid
 import json
-import io
-import pandas as pd
 from pathlib import Path
 
 from models import *
 from schemas import *
-from database import create_db_and_tables, get_session, engine, ENVIRONMENT
+from database import create_db_and_tables, get_session
 
 from functions.ai_interface import AIAnswerEvaluator
-from functions.sheets_exporter import SheetsExporter
 from functions.box_segmenter import BoxSegmenter
 from functions.document_scanner import DocumentScanner
 from functions.image_modifier import ImageModifier
@@ -64,9 +60,9 @@ app.include_router(test_instances.router, prefix="/api/test_instances", tags=["T
 #region Test Item Endpoints
 @app.get("/api/test_instances/{test_id}/items")
 def get_test_instance_items(
-    test_id: str,
-    session: Session = Depends(get_session),
-):
+            test_id: str,
+            session: Session = Depends(get_session),
+            ):
     """Get all test items for a specific test instance"""
     # Verify test instance exists
     instance = session.get(TestInstance, test_id)
