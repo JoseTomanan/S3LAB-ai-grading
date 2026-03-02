@@ -16,6 +16,7 @@ from services.utility import *
 
 
 router = APIRouter()
+TEMP_DIR = Path("static/images")
 
 
 # ==============================
