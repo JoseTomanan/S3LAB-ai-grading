@@ -1,58 +1,58 @@
 <script lang="ts">
-	const { data } = $props();
+  const { data } = $props();
 
-	import { getContext } from "svelte";
-	
-	import MdiEditOutline from '~icons/mdi/edit-outline';
-	import MdiPlus from '~icons/mdi/plus';
-	
-	import type { TestItem, TestItemsContext } from '$lib/index.ts';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import EditTestItem from './EditTestItem.svelte';
-	import AddTestItem from './AddTestItem.svelte';
+  import { getContext } from "svelte";
+  
+  import MdiEditOutline from '~icons/mdi/edit-outline';
+  import MdiPlus from '~icons/mdi/plus';
+  
+  import type { TestItem, TestItemsContext } from '$lib/index.ts';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import EditTestItem from './EditTestItem.svelte';
+  import AddTestItem from './AddTestItem.svelte';
 
-	let testItemsContext: TestItemsContext = getContext("testItemsContext");
-	let allItems: TestItem[] = $state(testItemsContext.items);
+  let testItemsContext: TestItemsContext = getContext("testItemsContext");
+  let allItems: TestItem[] = $state(testItemsContext.items);
 
-	let shortFormItems: TestItem[] = $derived(allItems.filter(item => !item.is_problem_solving));
-	let probSolItems: TestItem[] = $derived(allItems.filter(item => item.is_problem_solving));
+  let shortFormItems: TestItem[] = $derived(allItems.filter(item => !item.is_problem_solving));
+  let probSolItems: TestItem[] = $derived(allItems.filter(item => item.is_problem_solving));
 </script>
 
 
 <div class="space-y-4 overflow-auto p-0.5">
-	{#if testItemsContext.isLoading}
-		<p>Loading...</p>
-	{:else}
-		{#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
-			<div class="card p-2">
-				<span class="flex flex-row items-center w-full justify-between">
-					<h3>{ bigItem.a }</h3>
-					<Dialog.Root>
-						<Dialog.Trigger>
-							<MdiPlus class="size-8"/>
-						</Dialog.Trigger>
-						<AddTestItem test_id={data.test_id} />
-					</Dialog.Root>
-				</span>
-				<div class="ml-4">
-					{#each bigItem.b as smallItem}
-						<span class="flex flex-row items-end justify-between">
-							<p class="truncate text-ellipsis w-fill">
-								({smallItem.label}) {smallItem.question}
-							</p>
-							<Dialog.Root>
-								<Dialog.Trigger>
-									<MdiEditOutline class="size-4"/>
-								</Dialog.Trigger>
-								<EditTestItem testItem={smallItem} test_id={data.test_id}/>
-							</Dialog.Root>
-						</span>
-					{/each}
-					{#if bigItem.b.length == 0}
-						<p class="italic">Nothing to see here. If this is a mistake, check your network connection.</p>
-					{/if}
-				</div>
-			</div>
-		{/each}
-	{/if}
+  {#if testItemsContext.isLoading}
+    <p>Loading...</p>
+  {:else}
+    {#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
+      <div class="card p-2">
+        <span class="flex flex-row items-center w-full justify-between">
+          <h3>{ bigItem.a }</h3>
+          <Dialog.Root>
+            <Dialog.Trigger>
+              <MdiPlus class="size-8"/>
+            </Dialog.Trigger>
+            <AddTestItem test_id={data.test_id} />
+          </Dialog.Root>
+        </span>
+        <div class="ml-4">
+          {#each bigItem.b as smallItem}
+            <span class="flex flex-row items-end justify-between">
+              <p class="truncate text-ellipsis w-fill">
+                ({smallItem.label}) {smallItem.question}
+              </p>
+              <Dialog.Root>
+                <Dialog.Trigger>
+                  <MdiEditOutline class="size-4"/>
+                </Dialog.Trigger>
+                <EditTestItem testItem={smallItem} test_id={data.test_id}/>
+              </Dialog.Root>
+            </span>
+          {/each}
+          {#if bigItem.b.length == 0}
+            <p class="italic">Nothing to see here. If this is a mistake, check your network connection.</p>
+          {/if}
+        </div>
+      </div>
+    {/each}
+  {/if}
 </div>
