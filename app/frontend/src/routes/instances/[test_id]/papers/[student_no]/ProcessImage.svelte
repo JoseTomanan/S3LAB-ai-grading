@@ -37,7 +37,7 @@
 
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/test_instances/${test_id}/${student_no}/image_preprocess?num_boxes=${paramNumBoxes ?? 2}`,
+            `${API_BASE_URL}/api/student_answers/${test_id}/${student_no}/image_preprocess?num_boxes=${paramNumBoxes ?? 2}`,
             { method: "POST", body: formData, }
             );
 

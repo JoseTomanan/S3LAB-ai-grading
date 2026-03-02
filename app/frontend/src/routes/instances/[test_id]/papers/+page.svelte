@@ -18,7 +18,7 @@
   onMount(async () => {
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/test_instances/${data.test_id}/statuses`,
+            `${API_BASE_URL}/api/student_answers/${data.test_id}/statuses`,
             {
               method: "GET",
               headers: {'Content-Type': 'application/json',},

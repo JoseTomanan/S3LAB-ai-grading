@@ -40,7 +40,7 @@
     REPOPULATE_UNANSWERED_ITEMS();
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/test_instances/${test_id}/results/${student_no}`,
+            `${API_BASE_URL}/api/student_answers/${test_id}/results/${student_no}`,
             {
               method: "GET",
               headers: {'Content-Type': 'application/json',},
