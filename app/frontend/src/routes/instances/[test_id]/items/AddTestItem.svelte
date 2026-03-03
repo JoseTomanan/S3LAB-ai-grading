@@ -11,6 +11,8 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { Textarea } from '$lib/components/ui/textarea/index.ts';
 
+  let isOperationOngoing: boolean = $state(false);
+
   let formItemLabel: string = $state("");
   let formItemQuestion: string = $state("");
   let formItemIsProblemSolving: boolean = $state(false);
@@ -20,6 +22,8 @@
   let submittableEARQ: string = "";
 
   async function addTestItem() {
+    isOperationOngoing = true;
+
     if (formItemIsProblemSolving) {
       for (const item of formItemRQ) {
         if (item.points != 0)
@@ -55,6 +59,8 @@
       }
     } catch (e) {
       alert("Failed to add new test item:\n"+e);
+    } finally {
+      isOperationOngoing = false;
     }
   }
 </script>
@@ -118,8 +124,9 @@
   {/if}
   <Dialog.Footer>
     <Button variant="outline"
+            disabled={isOperationOngoing}
             onclick={() => addTestItem()}>
-      Add item
+      {isOperationOngoing ? "Adding..." : "Add item"}
     </Button>
   </Dialog.Footer>
 </Dialog.Content>

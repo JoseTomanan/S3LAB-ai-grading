@@ -102,10 +102,8 @@
     <Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
   </Dialog.Header>
   <div class="max-h-[80vh] overflow-auto space-y-2">
-    {#if isPageLoading}
-      <p>Loading...</p>
-    {:else}
       {#each questionItemEvals as evalItem}
+        {@const buttonOpacity = isPageLoading ? "opacity-50" : "opacity-100"}
         {@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
         <div class="card space-y-1">
           {#if evalItem.answer_id == -1}
@@ -121,8 +119,9 @@
               <h4 class="truncate text-ellipsis w-fill">
                 {evalItem.label}: {evalItem.question}
               </h4>
-              <button class="button-secondary px-0 py-0"
-                      onclick={() => reevaluateAnswer(evalItem.answer_id)}>
+              <button class={`${buttonOpacity} button-secondary px-0 py-0`}
+                      onclick={() => reevaluateAnswer(evalItem.answer_id)}
+                      disabled={isPageLoading}>
                 <MdiHeadReload />
               </button>
             </span>
@@ -141,6 +140,5 @@
           {/if}
         </div>
       {/each}
-    {/if}
   </div>
 </Dialog.Content>

@@ -93,11 +93,10 @@
           bind:value={paramNumBoxes}/>
   <Button variant="outline"
           onclick={() => sendImage()}
-          disabled={!uploadableFile}>
-    Send for processing
+          disabled={!uploadableFile || isOperationOngoing}>
+    {isOperationOngoing
+      ? "Send for processing"
+      : "Sending..."}
   </Button>
-  {#if isOperationOngoing}
-    <p>Loading...</p>
-  {/if}
 </Dialog.Content>
 

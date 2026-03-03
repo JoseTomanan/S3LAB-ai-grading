@@ -53,15 +53,15 @@
 
 
 <Dialog.Content>
-  {#if isNotClicked}
+  {#if isNotClicked || !isLoading}
     <h4>Click below to export test:</h4>
     <Button variant="outline"
-            onclick={() => {exportSheets()}}>
-      Download spreadsheet
+            onclick={() => {exportSheets()}}
+            disabled={isLoading}>
+      {isLoading
+        ? "Downloading..."
+        : "Download spreadsheet"}
     </Button>
-  {:else if isLoading}
-    <p>Loading...</p>
-  {:else}
     <h4><b>{test_id}.xlsx</b> has been downloaded.</h4>
     <h6>NOTE: Items with no uploaded image/with an uploaded image but no evaluation are not scored.</h6>
     <h6>You may close this dialog.</h6>
