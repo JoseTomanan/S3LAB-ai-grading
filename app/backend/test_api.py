@@ -12,7 +12,7 @@ import functools
 # Add parent directory to path to import app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api import app
+from main import app
 from database import engine, create_db_and_tables
 from models import *
 
