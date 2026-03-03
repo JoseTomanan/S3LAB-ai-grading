@@ -95,8 +95,8 @@
           onclick={() => sendImage()}
           disabled={!uploadableFile || isOperationOngoing}>
     {isOperationOngoing
-      ? "Send for processing"
-      : "Sending..."}
+      ? "Sending..."
+      : "Send for processing"}
   </Button>
 </Dialog.Content>
 

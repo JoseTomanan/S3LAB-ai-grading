@@ -24,8 +24,6 @@
       
       switch (response.status) {
         case 200:
-          // notice: GPT-generated
-          // TODO: understand logic, verify workingness
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -53,7 +51,7 @@
 
 
 <Dialog.Content>
-  {#if isNotClicked || !isLoading}
+  {#if isNotClicked && !isLoading}
     <h4>Click below to export test:</h4>
     <Button variant="outline"
             onclick={() => {exportSheets()}}
@@ -62,6 +60,7 @@
         ? "Downloading..."
         : "Download spreadsheet"}
     </Button>
+  {:else}
     <h4><b>{test_id}.xlsx</b> has been downloaded.</h4>
     <h6>NOTE: Items with no uploaded image/with an uploaded image but no evaluation are not scored.</h6>
     <h6>You may close this dialog.</h6>
