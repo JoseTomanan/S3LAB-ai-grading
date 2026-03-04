@@ -26,13 +26,17 @@
         };
 </script>
 
+
 <Dialog.Content class="flex flex-col gap-4 items-center w-full h-full">
   {#if !isHasCaptured}
     <Dialog.Title>Capture image</Dialog.Title>
-    <EasyCamera bind:this={cameraInstance}
-                useAudio={false}
-                width={720}
-                style="width: 100%; height: 100%;" />
+    <div class="w-full min-h-0 flex justify-center items-center overflow-hidden
+            [&_video]:object-contain [&_video]:max-w-full [&_video]:max-h-full">
+      <EasyCamera bind:this={cameraInstance}
+                  useAudio={false}
+                  width={720}
+                  style="width: 100%; max-height: 100%; object-fit: contain;" />
+    </div>
     <Button variant="outline"
               onclick={handleImage}
               class="px-4 py-2">
@@ -42,7 +46,7 @@
     <Dialog.Title>Preview image</Dialog.Title>
     <img src={capturedImage}
           alt="Captured preview"
-          class="w-full rounded-lg ring-4 ring-border shadow" />
+          class="max-w-full max-h-full w-auto h-auto object-contain rounded-lg ring-4 ring-border shadow" />
     <Dialog.Close>
       <button class="button-outline"
                 onclick={returnImage}>
