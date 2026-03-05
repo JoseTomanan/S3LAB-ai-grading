@@ -27,12 +27,12 @@
     {/each}
   {:else}
     {#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
-      <div class="card p-2">
+      <div class="card p-2 space-y-1">
         <span class="flex flex-row items-center w-full justify-between">
           <h3>{ bigItem.a }</h3>
           <Dialog.Root>
-            <Dialog.Trigger>
-              <MdiPlus class="size-8"/>
+            <Dialog.Trigger class="button-secondary">
+              <MdiPlus class="h-6 w-auto"/>
             </Dialog.Trigger>
             <AddTestItem test_id={data.test_id} />
           </Dialog.Root>
