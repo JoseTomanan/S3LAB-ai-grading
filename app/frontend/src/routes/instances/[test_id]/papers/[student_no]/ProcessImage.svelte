@@ -63,9 +63,9 @@
     <Dialog.Title>Process raw image</Dialog.Title>
     <Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
   </Dialog.Header>
-  <div class="flex flex-row gap-1 min-w-0">
+  <div class="flex flex-row gap-2 min-w-0">
     <Label for="sendImage"
-            class="grow button-outline flex flex-row items-center min-w-0 font-medium">
+            class="flex-1 button-outline flex flex-row items-center min-w-0 font-medium">
       <span class="shrink-0 whitespace-nowrap">
         {uploadableFile
             ? "Uploaded image:"
@@ -90,7 +90,8 @@
   <Input id="numBoxes"
           type="number"
           placeholder="Number of boxes (default=2)..."
-          bind:value={paramNumBoxes}/>
+          bind:value={paramNumBoxes}
+      />
   <Button variant="outline"
           onclick={() => sendImage()}
           disabled={!uploadableFile || isOperationOngoing}>

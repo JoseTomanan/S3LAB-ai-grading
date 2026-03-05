@@ -94,8 +94,8 @@
   }
 
   .card {
-		@apply bg-card;
-    @apply text-card-foreground;
+    background-color: var(--card);
+    color: var(--card-foreground);
     @apply rounded-xs;
 		@apply border border-border;
     @apply px-3;
@@ -103,25 +103,28 @@
 	}
 
 	.button-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
 		@apply py-1 px-2;
 		@apply rounded;
-		@apply bg-primary;
-		@apply text-primary-foreground;
+    @apply shadow-xs;
     @apply cursor-pointer;
 	}
 
 	.button-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
 		@apply py-1 px-2;
 		@apply rounded;
-		@apply bg-secondary;
-		@apply text-secondary-foreground;
+    @apply shadow-xs;
     @apply cursor-pointer;
 	}
 
   .button-outline {
     @apply py-1 px-2;
     @apply rounded;
-    @apply border-2 border-border;
+    @apply shadow-xs;
+    @apply ring-2 ring-border border-0;
     @apply cursor-pointer;
   }
 }
