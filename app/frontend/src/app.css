@@ -40,15 +40,16 @@
 
 	h1 {
 		@apply text-2xl;
-    @apply text-primary-foreground;
-    @apply font-heading;
+    font-family: var(--font-heading);
+    letter-spacing: -0.05em;
 		font-weight: bold;
     text-align: center;
 	}
 
 	h2 {
 		@apply text-xl;
-    @apply text-primary-foreground;
+    font-family: var(--font-heading);
+    letter-spacing: -0.05em;
 	}
 
 	h3 {
