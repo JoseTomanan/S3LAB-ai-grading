@@ -13,7 +13,7 @@
   import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
   import MdiTable from '~icons/mdi/table';
   import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
-  import MdiHome from '~icons/mdi/home';
+  import MdiHome from '~icons/mdi/home-outline';
   
   import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
@@ -76,16 +76,15 @@
 
 
 <div class="space-y-8 pb-4">
-  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-b border-sidebar-border space-y-4">
+  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-sidebar-border space-y-4 shadow-sm">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
         <MdiArrowBack class="size-full" />
       </button>
       <h1>{ activeTestInstance.name }</h1>
-      <a href="/"
-          class="button-outline">
-        <MdiHome class="size-6" />
+      <a href="/">
+        <MdiHome class="size-7 opacity-85" />
       </a>
     </span>
     <div id="change-instance-details">
