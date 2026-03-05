@@ -12,6 +12,7 @@
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import { Label } from '$lib/components/ui/label/index.js';
   import ProcessImage from './ProcessImage.svelte';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 
   let isPageLoading: boolean = $state(true);
 
@@ -92,7 +93,9 @@
     </Dialog.Root>
   </span>
   {#if isPageLoading}
-    <p>Loading...</p>
+    {#each { length: 3 } as _}
+      <Skeleton class="h-20 w-full grayscale-100 rounded-none"/>
+    {/each}
   {:else if studentItems.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
   {:else}
@@ -104,7 +107,7 @@
           {studentItem.label}
           <span class="flex flex-row space-x-1">
             <a href={`/instances/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
-                  class="button-outline bg-white">
+                  class="button-outline">
               <MdiCrop/>
             </a>
           </span>

@@ -10,6 +10,7 @@
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import EditTestItem from './EditTestItem.svelte';
   import AddTestItem from './AddTestItem.svelte';
+	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
   let allItems: TestItem[] = $state(testItemsContext.items);
@@ -21,7 +22,9 @@
 
 <div class="space-y-4 overflow-auto p-0.5">
   {#if testItemsContext.isLoading}
-    <p>Loading...</p>
+    {#each { length: 2 } as _}
+      <Skeleton class="h-24 w-full grayscale-100 rounded-none"/>
+    {/each}
   {:else}
     {#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
       <div class="card p-2">

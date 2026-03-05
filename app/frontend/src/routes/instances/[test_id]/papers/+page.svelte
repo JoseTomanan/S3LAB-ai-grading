@@ -11,6 +11,7 @@
 
   import GetAIEvaluation from './GetAIEvaluation.svelte';
   import type { GetEvaluationsResponse } from '$lib/index.ts';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 
   let isPageLoading: boolean = $state(true);
   let perStudentStatuses: GetEvaluationsResponse[] = $state([]);
@@ -44,7 +45,9 @@
 
 <div class="space-y-3 overflow-clip p-0.5">
   {#if isPageLoading}
-    <p>Loading...</p>
+    {#each { length: 3 } as _}
+      <Skeleton class="h-10 w-full grayscale-100"/>
+    {/each}
   {:else if perStudentStatuses.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
   {:else}

@@ -9,6 +9,7 @@
 
   import type { GetSpecificEvaluationResponse, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
+	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
@@ -102,6 +103,11 @@
     <Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
   </Dialog.Header>
   <div class="max-h-[80vh] overflow-auto space-y-2">
+    {#if isPageLoading}
+      {#each { length: 3 } as _}
+        <Skeleton class="h-12 w-full grayscale-100 rounded-none"/>
+      {/each}
+    {:else}
       {#each questionItemEvals as evalItem}
         {@const buttonOpacity = isPageLoading ? "opacity-50" : "opacity-100"}
         {@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
@@ -140,5 +146,6 @@
           {/if}
         </div>
       {/each}
+    {/if}
   </div>
 </Dialog.Content>

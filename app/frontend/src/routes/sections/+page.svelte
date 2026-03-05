@@ -8,6 +8,7 @@
 	import type { Section, Student } from "$lib/index.ts";
 	import Pagination from "$lib/components/Pagination.svelte";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
+	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
 
 	let isPageLoading: boolean = $state(true);
 	let sections: Section[] = $state([]);
@@ -52,7 +53,9 @@
 	</span>
 	<div class="flex flex-col gap-4">
 		{#if isPageLoading}
-			<p>Loading...</p>
+      {#each { length: 2 } as _}
+        <Skeleton class="h-16 w-full grayscale-100"/>
+      {/each}
 		{:else if sections.length == 0}
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
 		{:else}
