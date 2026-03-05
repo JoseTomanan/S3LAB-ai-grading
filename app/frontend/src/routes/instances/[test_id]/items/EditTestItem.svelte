@@ -23,6 +23,14 @@
         expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
       });
 
+  let isWantsToDelete = $state(false);
+  $effect(() => {
+    formTestItem.label;
+    formTestItem.question;
+    formTestItem.expected_answer_rubric_questions;
+    isWantsToDelete = false;
+  });
+
   async function editTestItem(submittedTestItem: TestItem) {
     if (testItem == submittedTestItem) {
       alert("No changes were made.");
@@ -118,20 +126,25 @@
               required />
   {/if}
   <Dialog.Footer>
-    <div class="flex flex-row w-full gap-2">
+    <div class="flex flex-row w-full gap-1.5">
       <Button variant="outline"
-              class="w-4/5"
+              class="flex-1"
               onclick={() => editTestItem(formTestItem)}>
         Save changes
       </Button>
-      <Button variant="destructive"
-              class="w-1/5"
-              onclick={() => deleteTestItem()}>
-        <MdiDelete class="size-6"/>
-      </Button>
+      {#if !isWantsToDelete}
+        <Button variant="destructive"
+                class="w-1/6"
+                onclick={() => {isWantsToDelete = true;}}>
+          <MdiDelete class="size-6"/>
+        </Button>
+      {:else}
+        <Button variant="destructive"
+              class="flex-1"
+              onclick={deleteTestItem}>
+          CONFIRM DELETE (cannot be undone!)
+        </Button>
+      {/if}
     </div>
-    <Dialog.Description>
-      NOTE: Deletion cannot be undone!
-    </Dialog.Description>
   </Dialog.Footer>
 </Dialog.Content>
