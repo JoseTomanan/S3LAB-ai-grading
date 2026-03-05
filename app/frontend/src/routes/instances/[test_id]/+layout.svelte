@@ -115,10 +115,12 @@
       </span>
     </div>
     <span id="thisOne" class="flex items-center gap-2 justify-end">
-      <a class="button-primary" href={`/instances/${data.test_id}/items`}>
+      <a class="button-primary font-medium"
+          href={`/instances/${data.test_id}/items`}>
         Items
       </a>
-      <a class="button-primary" href={`/instances/${data.test_id}/papers`}>
+      <a class="button-primary font-medium"
+          href={`/instances/${data.test_id}/papers`}>
         Papers
       </a>
       <Dialog.Root>
