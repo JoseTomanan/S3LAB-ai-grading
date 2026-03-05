@@ -1,6 +1,7 @@
 @theme {
-  --font-heading: "Montserrat", sans-serif;
+  --font-heading: "SourceSans3", sans-serif;
   --font-sans: "SourceSans3", sans-serif;
+  --font-mono: monospace;
 
   --radius: 0.625rem;
   --background: oklch(1 0 0);                 /* absolute white */
