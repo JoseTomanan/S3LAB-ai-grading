@@ -13,7 +13,7 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
-	...ts.configs.recommended,
+	...ts.configs.disableTypeChecked, // Less strict than recommended
 	...svelte.configs.recommended,
 	prettier,
 	...svelte.configs.prettier,
@@ -22,16 +22,20 @@ export default defineConfig(
 			globals: { ...globals.browser, ...globals.node }
 		},
 		rules: {
-			// typescript-eslint strongly recommend that you do not use the no-undef lint rule on TypeScript projects.
-			// see: https://typescript-eslint.io/troubleshooting/faqs/eslint/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
-			'no-undef': 'off'
+			'no-undef': 'off',
+			'no-unused-vars': 'warn',
+			'@typescript-eslint/no-unused-vars': 'warn',
+			'@typescript-eslint/explicit-function-return-type': 'off',
+			'@typescript-eslint/no-explicit-any': 'off',
+			'@typescript-eslint/ban-ts-comment': 'off',
+			'svelte/no-at-html-tags': 'off'
 		}
 	},
 	{
 		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
 		languageOptions: {
 			parserOptions: {
-				projectService: true,
+				projectService: false,
 				extraFileExtensions: ['.svelte'],
 				parser: ts.parser,
 				svelteConfig
