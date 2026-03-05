@@ -85,7 +85,7 @@
   <span class="flex flex-row justify-between items-center">
     <h1>{data.student_no}</h1>
     <Dialog.Root>
-      <Dialog.Trigger class="button-outline">
+      <Dialog.Trigger class="button-secondary">
         <MdiImagePlus class="size-6 mx-2"/>
       </Dialog.Trigger>
       <ProcessImage test_id={data.test_id} student_no={data.student_no} />
@@ -104,7 +104,7 @@
           {studentItem.label}
           <span class="flex flex-row space-x-1">
             <a href={`/instances/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
-                  class="button-secondary border-none">
+                  class="button-outline bg-white">
               <MdiCrop/>
             </a>
           </span>
