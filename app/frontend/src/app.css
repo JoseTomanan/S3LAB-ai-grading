@@ -96,6 +96,7 @@
   .card {
 		@apply bg-card;
     @apply text-card-foreground;
+    @apply rounded-xs;
 		@apply border border-border;
     @apply px-3;
     @apply py-1.5;
