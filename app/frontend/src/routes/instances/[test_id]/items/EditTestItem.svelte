@@ -126,7 +126,7 @@
               required />
   {/if}
   <Dialog.Footer>
-    <div class="flex flex-row w-full gap-1.5">
+    <div class="flex flex-wrap w-full gap-1.5">
       <Button variant="outline"
               class="flex-1"
               onclick={() => editTestItem(formTestItem)}>
