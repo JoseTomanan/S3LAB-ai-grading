@@ -76,7 +76,7 @@
 
 
 <div class="space-y-8 pb-4">
-  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-b md:border-l md:border-r border-sidebar-border space-y-4">
+  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-b shadow-xs border-sidebar-border space-y-4">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
