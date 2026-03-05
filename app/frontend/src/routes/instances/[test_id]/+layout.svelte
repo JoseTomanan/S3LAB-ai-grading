@@ -9,8 +9,6 @@
   import ExportSheets from './ExportSheets.svelte';
 
   import MdiArrowBack from '~icons/mdi/arrow-back';
-  import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
-  import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
   import MdiTable from '~icons/mdi/table';
   import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
   import MdiHome from '~icons/mdi/home-outline';
@@ -76,7 +74,7 @@
 
 
 <div class="space-y-8 pb-4">
-  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 border-sidebar-border space-y-4 shadow-sm">
+  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 shadow-sm shadow-sidebar-border space-y-4">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
@@ -90,15 +88,14 @@
     <div id="change-instance-details">
       <span class="flex justify-between">
         <h3>
-          TestID:
-          <span class="font-mono text-sm">{ activeTestInstance.test_id }</span>
+          TestID: {activeTestInstance.test_id}
         </h3>
-        <h3 class="flex gap-0.5">
+        <h3 class="flex gap-1">
           Status:
           {#if activeTestInstance.is_done_rendering}
-            <MdiCheckboxMarkedOutline class="size-6 opacity-40"/>
+            &check;
           {:else}
-            <MdiCheckboxBlankOutline class="size-6 opacity-40" />
+            &cross;
           {/if}
         </h3>
       </span>
@@ -109,8 +106,7 @@
                   : "" }
         </h3>
         <h3>
-          SectionID:
-          <span class="font-mono text-sm">{ activeTestInstance.section_id }</span>
+          SectionID: { activeTestInstance.section_id }
         </h3>
       </span>
     </div>
