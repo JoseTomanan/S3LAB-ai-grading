@@ -7,7 +7,7 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
-  <title>Grading AI</title>
+  <title>Llamath</title>
 </svelte:head>
 
 <div class="flex justify-center bg-fixed">
