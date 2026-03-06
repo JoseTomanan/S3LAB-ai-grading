@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { API_BASE_URL } from '$lib/constants.ts';
-
   let { data, children }: {data: LayoutData, children: Snippet} = $props();
 
   import type { LayoutData } from './$types.d.ts';
@@ -32,36 +30,8 @@
   onMount(async () => {
     testItemsContext.isLoading = true;
     try {
-      const response = await fetch(
-            `${API_BASE_URL}/api/test_instances/${data.test_id}`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',},
-            }
-            );
-
-      const result = await response.json();
-      activeTestInstance.name = result.name;
-      activeTestInstance.section_id = result.section_id;
-      activeTestInstance.date = result.date;
-      activeTestInstance.is_done_rendering = result.is_done_rendering;
-
-      const responseTwo = await fetch(
-            `${API_BASE_URL}/api/test_items/${data.test_id}/items`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',},
-            }
-          );
-
-      switch (responseTwo.status) {
-        case 200:
-          const result = await responseTwo.json();
-          testItemsContext.items.push(...result.items);
-          break;
-        default:
-          alert(`${responseTwo.status} ${responseTwo.statusText}`);
-      }
+      activeTestInstance = data.test_instance!;
+      testItemsContext.items.push(...data.test_items!);
     } catch (e) {
       alert("Failed to fetch test instance details:\n"+e);
     } finally {
