@@ -1,11 +1,14 @@
 <script lang="ts">
-  import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  let { filename = $bindable() } = $props();
 
-  // TODO: everything else
+	import { Input } from './ui/input/index.ts';
+  import * as Dialog from '$lib/components/ui/dialog/index.ts';
 </script>
 
 
 <Dialog.Content>
-  <h4>Rename file</h4>
-  <!-- TODO: everything else -->
+  <Dialog.Description>Rename file (please keep the file extension):</Dialog.Description>
+  <Input type="text"
+          bind:value={filename}
+          placeholder="Student no..." />
 </Dialog.Content>
