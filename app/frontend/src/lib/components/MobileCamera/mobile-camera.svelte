@@ -304,13 +304,33 @@
 
 <div class="qrcode-sanner-container">
   <video id="camera-video"
-          class="camera-video hidden"
+          class="camera-video"
           bind:this={videoRef}
-          {width} {height} muted>
+          {width} {height} muted playsinline>
     <track kind="captions" />
   </video>
   <canvas id="camera-canvas"
             class="camera-canvas"
-            {style} bind:this={canvasRef} {width} {height}
+            style={style}
+            bind:this={canvasRef} {width} {height}
   ></canvas>
 </div>
+
+
+<style>
+  .qrcode-sanner-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  .camera-video {
+    display: none;
+  }
+
+  .camera-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* preserves aspect ratio */
+    display: block;
+  }
+</style>
