@@ -3,6 +3,8 @@
   --font-sans: "SourceSans3", sans-serif;
   --font-mono: monospace;
 
+  --breakpoint-xs: 480px;
+
   --radius: 0.5rem;
 
   --background: oklch(1 0 0);
