@@ -29,10 +29,10 @@
     {#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
       <div class="card p-2 space-y-1">
         <span class="flex flex-row items-center w-full justify-between">
-          <h3>{ bigItem.a }</h3>
+          <h4 class="font-semibold">{ bigItem.a }</h4>
           <Dialog.Root>
             <Dialog.Trigger class="button-secondary">
-              <MdiPlus class="h-6 w-auto"/>
+              <MdiPlus class="size-5"/>
             </Dialog.Trigger>
             <AddTestItem test_id={data.test_id} />
           </Dialog.Root>
