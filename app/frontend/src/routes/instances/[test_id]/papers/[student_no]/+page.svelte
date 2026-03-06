@@ -82,12 +82,12 @@
 </script>
 
 
-<div class="flex flex-col gap-4 p-0.5">
+<div class="flex flex-col gap-3">
   <span class="flex flex-row justify-between items-center">
     <h1>{data.student_no}</h1>
     <Dialog.Root>
       <Dialog.Trigger class="button-secondary">
-        <MdiImagePlus class="size-6 mx-2"/>
+        <MdiImagePlus class="size-5 mx-2"/>
       </Dialog.Trigger>
       <ProcessImage test_id={data.test_id} student_no={data.student_no} />
     </Dialog.Root>

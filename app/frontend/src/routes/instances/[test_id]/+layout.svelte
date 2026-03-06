@@ -74,7 +74,7 @@
 </script>
 
 
-<div class="space-y-8 pb-4">
+<div class="space-y-7 pb-4">
   <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow-sm shadow-sidebar-border space-y-3">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
