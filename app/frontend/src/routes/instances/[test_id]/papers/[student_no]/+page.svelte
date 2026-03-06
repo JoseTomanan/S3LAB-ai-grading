@@ -116,7 +116,7 @@
           {#if studentItem.image_directory == ""}
             <MdiPaperOff class="size-8 opacity-50" />
           {:else}
-            <img class="size-fill max-h-[25vh]"
+            <img class="size-fill md:max-w-1/2"
                   src={`${API_BASE_URL}${studentItem.image_directory}`}
                   alt={studentItem.label}/>
           {/if}
