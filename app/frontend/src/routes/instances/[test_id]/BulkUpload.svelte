@@ -4,6 +4,7 @@
   const { test_id } = $props();
 
   import IconCheck from "~icons/mdi/check";
+  import IconAlert from "~icons/mdi/alert";
   import IconSend from "~icons/mdi/send";
   import IconPerson from "~icons/mdi/person";
 
@@ -15,14 +16,11 @@
 
   let files: File[] = $state([]);
   let previews: {name: string, url: string}[] = $state([]);
+  
   let isOperationStarted: boolean = $state(false);
 
-  // Map<index: number, requestStatus: boolean>
-  let renderStatuses: Map<number, boolean> = $state(new Map());
-
-  $effect(() => {
-    console.log(renderStatuses);
-  });
+  let resStatusCodes: Map<number, number> = $state(new Map());
+  $effect(() => console.log(resStatusCodes));
 
   function handleFiles(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -31,26 +29,31 @@
 
     const selected = Array.from(input.files);
     files = selected;
-    previews = selected.map(f => ({
-      name: f.name,
-      url: URL.createObjectURL(f)
-    }));
+    previews = selected.map(f => (
+          { name: f.name, url: URL.createObjectURL(f) }
+        ));
 
-    const newStatuses = new Map<number, boolean>();
-    previews.forEach((_, idx) => newStatuses.set(idx, false));
-    renderStatuses = newStatuses;
+    previews.forEach((_, idx) => resStatusCodes.set(idx, -1));
   }
 
   async function bulkUpload() {
     isOperationStarted = true;
-    console.log(renderStatuses);
 
-    let idx = 0;
-    for (const [key, value] of renderStatuses) {
-      console.log(key);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      renderStatuses = new Map(renderStatuses.set(key, true));
-      idx++;
+    try {
+      /**
+       * TODO: replace placeholder with actual code
+       * Two possible implementations:
+       *  - fetch students from section first, then compare filenames to student numbers client-side
+       *  - just throw everything into the API and wait for response status code
+       */
+      const keys = Array.from(resStatusCodes.keys());
+      for (let i=0; i<keys.length; ++i)
+        setTimeout(() => {
+          const key = keys[i];
+          resStatusCodes = new Map(resStatusCodes.set(key, i==1 ? 501 : 200));
+        }, 1500 * i);
+    } catch (e) {
+      console.log("Bulk upload operation failed:\n"+e);
     }
   }
 </script>
@@ -60,13 +63,12 @@
   <Input type="file"
           multiple
           accept="image/*"
-          class="w-11/12"
           onchange={handleFiles}
           disabled={isOperationStarted}
       />
   {#if files.length == 0}
     <Dialog.Description>
-      Make sure files are named with student number, e.g., "202011111.jpeg".
+      For convenience, name files according to student number, e.g., "202011111.jpeg".
     </Dialog.Description>
   
   {:else if !isOperationStarted}
@@ -86,7 +88,7 @@
         </Button>
       </Dialog.Header>
       <div class="flex flex-row items-center overflow-x-auto gap-x-1
-              -mx-5 px-5 pt-1 pb-2 shadow-sm
+              -mx-5 px-5 pt-1 pb-2
               border-b-2 border-t-2 border-border"
            style="scrollbar-gutter: stable; overflow-y: hidden;">
         {#each previews as p}
@@ -101,9 +103,11 @@
                 <Dialog.Trigger class="max-w-full flex flex-row gap-1 items-center truncate px-1.5 mb-1 bg-white/80 backdrop-blur-md 
                                     hover:underline cursor-pointer">
                   <IconPerson class="size-3"/>
-                  <h4 class="text-left w-fit truncate">
-                    {supposedId}
-                  </h4>
+                  {#if supposedId}
+                    <h4 class="text-left w-fit truncate">{supposedId}</h4>
+                  {:else}
+                    <h5 class="italic">Add name...</h5>
+                  {/if}
                 </Dialog.Trigger>
                 <BulkUploadRename
                       filename={supposedId}
@@ -118,10 +122,13 @@
   {:else}
     <div class="flex flex-col space-y-1">
       {#each previews as p, idx}
+        {@const statusCode = resStatusCodes.get(idx)}
         <span class="flex flex-row justify-start items-center gap-x-1.5">
-          <span class="mr-1">
-            {#if renderStatuses.get(idx)}
+          <span>
+            {#if statusCode == 200}
               <IconCheck class="size-5"/>
+            {:else if statusCode == 501}
+              <IconAlert class="size-5" />
             {:else}
               <Spinner class="size-5"/>
             {/if}
