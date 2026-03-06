@@ -16,7 +16,11 @@
 
   let formFile: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
-  let uploadableFile: File | null = $derived(formFile ? formFile[0] : null);
+  let uploadableFile: File | null = $state(null);
+  $effect(() => {
+    if (formFile)
+      uploadableFile = formFile[0];
+  });
 
   function getImageFromComponent(imageDataUrl: string) {
     const imageFile: File = dataUrlToFile(imageDataUrl, "CAPTURED_IMAGE.jpeg")
@@ -66,8 +70,8 @@
   <div class="flex flex-row gap-2 min-w-0">
     <Label for="sendImage"
             class="flex-1 border-2 border-outline pl-2 rounded
-                flex flex-row items-center min-w-0 font-medium">
-      <span class="shrink-0 whitespace-nowrap text-base">
+                flex flex-row items-center min-w-0 font-medium shadow-xs">
+      <span class="shrink-0 whitespace-nowrap text-sm">
         {uploadableFile
             ? "Uploaded image:"
             : "Choose an image..." }
