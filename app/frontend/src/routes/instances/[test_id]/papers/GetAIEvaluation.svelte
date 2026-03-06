@@ -118,7 +118,8 @@
             </h4>
             <h6 class="flex flex-row items-center gap-1">
               <MdiAlertBoxOutline />
-              This item has no corresponding answer yet.
+              <!-- This item has no corresponding answer yet. -->
+              Student has no uploaded answer yet.
             </h6>
           {:else}
             <span class="flex flex-row justify-between items-center gap-x-2">

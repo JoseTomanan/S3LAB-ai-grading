@@ -14,8 +14,6 @@
 
 
 <Dialog.Content>
-  <Dialog.Header>
-    <Dialog.Title>Upload images</Dialog.Title>
-  </Dialog.Header>
+  <h4>Upload images</h4>
   <!-- TODO: everything else -->
 </Dialog.Content>
