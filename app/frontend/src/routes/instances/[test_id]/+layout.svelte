@@ -55,7 +55,7 @@
     </span>
     <Separator/>
     <div id="change-instance-details"
-          class="*:flex *:justify-between [&>*>h4]:font-medium [&>*>h4]:opacity-85">
+          class="*:flex *:justify-between [&>*>h4]:font-medium [&>*>h4]:opacity-85 [&>*>h4]:leading-5">
       <span>
         <h4>
           TestID: {activeTestInstance.test_id}
@@ -71,9 +71,10 @@
       </span>
       <span>
         <h4>
-          Date: {activeTestInstance.date
-                  ? new Date(activeTestInstance.date).toLocaleDateString()
-                  : "" }
+          Date:
+          {activeTestInstance.date
+            ? new Date(activeTestInstance.date).toLocaleDateString()
+            : "" }
         </h4>
         <h4>
           SectionID: { activeTestInstance.section_id }
