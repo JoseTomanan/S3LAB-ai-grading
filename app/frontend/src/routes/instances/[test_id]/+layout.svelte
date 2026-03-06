@@ -7,11 +7,12 @@
   import type { Snippet } from 'svelte';
   import { onMount, setContext } from 'svelte';
   import ExportSheets from './ExportSheets.svelte';
+	import BulkUpload from './BulkUpload.svelte';
 
-  import MdiArrowBack from '~icons/mdi/arrow-back';
-  import MdiTable from '~icons/mdi/table';
-  import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
-  import MdiHome from '~icons/mdi/home-outline';
+  import IconBack from '~icons/mdi/arrow-back';
+  import IconTable from '~icons/mdi/table';
+  import IconUpload from '~icons/mdi/tray-upload';
+  import IconHome from '~icons/mdi/home-outline';
   
   import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
@@ -67,10 +68,6 @@
       testItemsContext.isLoading = false;
     }
   });
-
-  async function bulkUpload() {
-    // TODO: entire function
-  }
 </script>
 
 
@@ -79,11 +76,11 @@
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
-        <MdiArrowBack class="size-full" />
+        <IconBack class="size-full" />
       </button>
       <h1>{ activeTestInstance.name }</h1>
       <a href="/">
-        <MdiHome class="size-7 opacity-85" />
+        <IconHome class="size-7 opacity-85" />
       </a>
     </span>
     <Separator/>
@@ -128,15 +125,16 @@
       <span>
         <Dialog.Root>
           <Dialog.Trigger class="button-primary">
-            <MdiTable class="size-6" />
+            <IconTable class="size-6" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
-        <button class="button-primary opacity-50"
-                onclick={() => {}}
-                disabled>
-          <MdiPaperAddOutline class="size-6"/>
-        </button>
+        <Dialog.Root>
+          <Dialog.Trigger class="button-primary">
+            <IconUpload class="size-6"/>
+          </Dialog.Trigger>
+          <BulkUpload test_id={data.test_id} />
+        </Dialog.Root>
       </span>
     </div>
   </div>
