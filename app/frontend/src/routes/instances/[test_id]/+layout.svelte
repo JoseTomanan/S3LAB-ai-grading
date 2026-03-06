@@ -85,8 +85,9 @@
         <MdiHome class="size-7 opacity-85" />
       </a>
     </span>
-    <div id="change-instance-details">
-      <span class="flex justify-between">
+    <div id="change-instance-details"
+          class="*:flex *:justify-between [&>*>h3]:font-medium">
+      <span>
         <h3>
           TestID: {activeTestInstance.test_id}
         </h3>
@@ -99,7 +100,7 @@
           {/if}
         </h3>
       </span>
-      <span class="flex justify-between">
+      <span>
         <h3>
           Date: {activeTestInstance.date
                   ? new Date(activeTestInstance.date).toLocaleDateString()
