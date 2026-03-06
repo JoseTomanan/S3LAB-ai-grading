@@ -88,33 +88,33 @@
     </span>
     <Separator/>
     <div id="change-instance-details"
-          class="*:flex *:justify-between [&>*>h3]:font-medium">
+          class="*:flex *:justify-between [&>*>h4]:font-medium [&>*>h4]:opacity-85">
       <span>
-        <h3>
+        <h4>
           TestID: {activeTestInstance.test_id}
-        </h3>
-        <h3 class="flex gap-1">
+        </h4>
+        <h4 class="flex gap-1">
           Status:
           {#if activeTestInstance.is_done_rendering}
             &check;
           {:else}
             &cross;
           {/if}
-        </h3>
+        </h4>
       </span>
       <span>
-        <h3>
+        <h4>
           Date: {activeTestInstance.date
                   ? new Date(activeTestInstance.date).toLocaleDateString()
                   : "" }
-        </h3>
-        <h3>
+        </h4>
+        <h4>
           SectionID: { activeTestInstance.section_id }
-        </h3>
+        </h4>
       </span>
     </div>
     <div id="thisOne"
-          class="flex items-center justify-between *:space-x-1 [&>*>a]:font-semibold">
+          class="flex items-center justify-between *:space-x-1 [&>*>a]:font-medium">
       <span>
         <a class="button-primary"
             href={`/instances/${data.test_id}/items`}>
