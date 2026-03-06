@@ -15,6 +15,7 @@
   
   import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
+	import { Separator } from '$lib/components/ui/separator/index.ts';
 
   let activeTestInstance: TestInstance = $state({
     name: "",
@@ -74,7 +75,7 @@
 
 
 <div class="space-y-8 pb-4">
-  <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow-sm shadow-sidebar-border space-y-4">
+  <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow-sm shadow-sidebar-border space-y-3">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
@@ -85,6 +86,7 @@
         <MdiHome class="size-7 opacity-85" />
       </a>
     </span>
+    <Separator/>
     <div id="change-instance-details"
           class="*:flex *:justify-between [&>*>h3]:font-medium">
       <span>
@@ -111,28 +113,32 @@
         </h3>
       </span>
     </div>
-    <span id="thisOne"
-          class="flex items-center gap-2 justify-end [&>a]:font-semibold">
-      <a class="button-primary"
-          href={`/instances/${data.test_id}/items`}>
-        Items
-      </a>
-      <a class="button-primary"
-          href={`/instances/${data.test_id}/papers`}>
-        Papers
-      </a>
-      <Dialog.Root>
-        <Dialog.Trigger class="button-primary">
-          <MdiTable class="size-6" />
-        </Dialog.Trigger>
-        <ExportSheets test_id={data.test_id}/>
-      </Dialog.Root>
-      <button class="button-primary opacity-50"
-              onclick={() => {}}
-              disabled>
-        <MdiPaperAddOutline class="size-6"/>
-      </button>
-    </span>
+    <div id="thisOne"
+          class="flex items-center justify-between *:space-x-1 [&>*>a]:font-semibold">
+      <span>
+        <a class="button-primary"
+            href={`/instances/${data.test_id}/items`}>
+          Items
+        </a>
+        <a class="button-primary"
+            href={`/instances/${data.test_id}/papers`}>
+          Papers
+        </a>
+      </span>
+      <span>
+        <Dialog.Root>
+          <Dialog.Trigger class="button-primary">
+            <MdiTable class="size-6" />
+          </Dialog.Trigger>
+          <ExportSheets test_id={data.test_id}/>
+        </Dialog.Root>
+        <button class="button-primary opacity-50"
+                onclick={() => {}}
+                disabled>
+          <MdiPaperAddOutline class="size-6"/>
+        </button>
+      </span>
+    </div>
   </div>
   <div class="px-4">
     {@render children()}
