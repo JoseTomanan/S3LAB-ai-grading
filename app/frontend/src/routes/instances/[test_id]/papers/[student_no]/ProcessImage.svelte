@@ -65,8 +65,9 @@
   </Dialog.Header>
   <div class="flex flex-row gap-2 min-w-0">
     <Label for="sendImage"
-            class="flex-1 button-outline flex flex-row items-center min-w-0 font-medium">
-      <span class="shrink-0 whitespace-nowrap">
+            class="flex-1 border-2 border-outline pl-2 rounded
+                flex flex-row items-center min-w-0 font-medium">
+      <span class="shrink-0 whitespace-nowrap text-base">
         {uploadableFile
             ? "Uploaded image:"
             : "Choose an image..." }
@@ -81,8 +82,8 @@
             class="hidden"
             bind:files={formFile}/>
     <Dialog.Root>
-      <Dialog.Trigger class="button-secondary w-1/4 h-fit flex justify-center items-center">
-        <MdiCamera class="size-6 my-0.5 opacity-80"/>
+      <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
+        <MdiCamera class="size-6 opacity-80"/>
       </Dialog.Trigger>
       <OpenCamera onImageCapture={getImageFromComponent} />
     </Dialog.Root>
