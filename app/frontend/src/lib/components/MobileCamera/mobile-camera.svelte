@@ -303,16 +303,14 @@
 
 
 <div class="qrcode-sanner-container">
-  <video id="camera-video" class="camera-video" bind:this={videoRef} {width} {height} muted>
+  <video id="camera-video"
+          class="camera-video hidden"
+          bind:this={videoRef}
+          {width} {height} muted>
     <track kind="captions" />
   </video>
-  <canvas id="camera-canvas" class="camera-canvas" {style} bind:this={canvasRef} {width} {height}
+  <canvas id="camera-canvas"
+            class="camera-canvas"
+            {style} bind:this={canvasRef} {width} {height}
   ></canvas>
 </div>
-
-
-<style>
-  .camera-video {
-    display: none;
-  }
-</style>
