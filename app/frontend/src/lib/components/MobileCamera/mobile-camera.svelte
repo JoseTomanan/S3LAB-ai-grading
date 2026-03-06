@@ -102,11 +102,12 @@
     }
   };
 
+  // ============ MODIFIED ============
   export const captureImage = async (isImageData?: boolean): Promise<ImageData | string | null> => {
     let imageData: any = null;
     if (ctx && canvasRef && isOpened) {
       if (isImageData) {
-        imageData = ctx.getImageData(0, 0, width, height);
+        imageData = ctx.getImageData(0, 0, canvasRef.width, canvasRef.height);
       } else {
         imageData = canvasRef.toDataURL();
       }
@@ -191,13 +192,21 @@
     onResume && onResume();
   };
 
+  // ============ MODIFIED ============
   const initCamera = async () => {
     if (videoRef && canvasRef) {
       ctx = canvasRef.getContext('2d', { willReadFrequently: true })!;
-      videoRef.addEventListener('canplay', () => {
+      
+      videoRef.addEventListener('loadedmetadata', () => {
         // ratio = videoRef.videoHeight / videoRef.videoWidth;
         // adjustResolution(width);
         // ctx.drawImage(videoRef, 0, 0, width, height);
+        canvasRef.width = videoRef!.videoWidth;
+        canvasRef.height = videoRef!.videoHeight;
+        width = videoRef!.videoWidth;
+      });
+
+      videoRef.addEventListener('canplay', () => {
         handleOpen();
         drawCanvas();
       });
@@ -211,37 +220,22 @@
     }
   };
 
+  // ============ MODIFIED ============
   const openCamera = (deviceId?: string) => {
     if (isOpened) {
       closeCamera();
     }
 
-    let constraints: any = { video: true, audio: useAudio };
-
-    if (deviceId) {
-      constraints = {
-        video: {
-          deviceId: deviceId
-        },
-        audio: useAudio
-      };
-    } else {
-      if (useFrontCamera && frontCamera) {
-        constraints = {
-          video: {
-            deviceId: frontCamera.deviceId
-          },
-          audio: useAudio
-        };
-      } else if (rearCamera) {
-        constraints = {
-          video: {
-            deviceId: rearCamera.deviceId
-          },
-          audio: useAudio
-        };
-      }
+    const baseVideo = {
+      facingMode: useFrontCamera ? "user" : "environment",
+      width: { min: 720 },
+      height: { min: 720 }
     }
+
+    let constraints: any = {
+      video: deviceId ? {deviceId: deviceId, ...baseVideo} : baseVideo,
+      audio: useAudio
+    };
 
     navigator.mediaDevices
       .getUserMedia(constraints)
@@ -271,20 +265,23 @@
     }
   };
 
+  // ============ MODIFIED ============
   const drawCanvas = () => {
-    if (videoRef && canvasRef && width && height && isOpened) {
+    if (videoRef && canvasRef && isOpened) {
+      const w = canvasRef.width;
+      const h = canvasRef.height;
       if (!isPause) {
         if (stream) {
           if (mirrorDisplay) {
             // flip image | mirror image
             ctx.scale(-1, 1);
-            ctx.drawImage(videoRef, -width, 0, width, height);
+            ctx.drawImage(videoRef, -w, 0, w, h);
             ctx.scale(-1, 1);
           } else {
-            ctx.drawImage(videoRef, 0, 0, width, height);
+            ctx.drawImage(videoRef, 0, 0, w, h);
           }
           if (needFrames) {
-            onFrame && onFrame(ctx.getImageData(0, 0, width, height));
+            onFrame && onFrame(ctx.getImageData(0, 0, w, h));
           }
         }
       }
@@ -312,7 +309,7 @@
   <canvas id="camera-canvas"
             class="camera-canvas"
             style={style}
-            bind:this={canvasRef} {width} {height}
+            bind:this={canvasRef}
   ></canvas>
 </div>
 
@@ -320,7 +317,7 @@
 <style>
   .qrcode-sanner-container {
     width: 100%;
-    height: 100%;
+    height: auto;
   }
 
   .camera-video {
@@ -329,7 +326,7 @@
 
   .camera-canvas {
     width: 100%;
-    height: 100%;
+    height: auto;
     object-fit: contain; /* preserves aspect ratio */
     display: block;
   }
