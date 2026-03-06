@@ -74,7 +74,7 @@
 
 
 <div class="space-y-8 pb-4">
-  <div class="bg-sidebar text-sidebar-foreground px-4 py-8 shadow-sm shadow-sidebar-border space-y-4">
+  <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow-sm shadow-sidebar-border space-y-4">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
@@ -111,12 +111,13 @@
         </h3>
       </span>
     </div>
-    <span id="thisOne" class="flex items-center gap-2 justify-end">
-      <a class="button-primary font-medium"
+    <span id="thisOne"
+          class="flex items-center gap-2 justify-end [&>a]:font-semibold">
+      <a class="button-primary"
           href={`/instances/${data.test_id}/items`}>
         Items
       </a>
-      <a class="button-primary font-medium"
+      <a class="button-primary"
           href={`/instances/${data.test_id}/papers`}>
         Papers
       </a>
