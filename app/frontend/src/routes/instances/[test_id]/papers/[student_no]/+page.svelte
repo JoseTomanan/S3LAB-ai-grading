@@ -2,83 +2,20 @@
   const { data } = $props();
 
   import { API_BASE_URL } from '$lib/constants.ts';
-  import { onMount } from 'svelte';
 
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';
 
-  import type { TestItem, StudentAnswer } from '$lib/index.ts';
+  import type { StudentAnswer } from '$lib/index.ts';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import { Label } from '$lib/components/ui/label/index.js';
   import ProcessImage from './ProcessImage.svelte';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 
-  let isPageLoading: boolean = $state(true);
+  if (!data.student_items)
+    throw new Error("Student items failed to load");
 
-  let studentItems: (StudentAnswer & {label: string})[] = $state([]);
-  let testItems: TestItem[] = $state([]);
-
-  onMount(async () => {
-    try {
-      const responseOne = await fetch(
-            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',},
-            }
-            );
-      
-      switch (responseOne.status) {
-        case 200:
-          const result = await responseOne.json();
-          studentItems = result ? result : [];
-          break;
-        case 204:
-          studentItems = [];
-          break;
-        default:
-          alert(`CALL 1: ${responseOne.status} ${responseOne.statusText}`);
-      }
-
-      console.log($state.snapshot(studentItems));
-
-      const responseTwo = await fetch(
-            `${API_BASE_URL}/api/test_items/${data.test_id}/items`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',},
-            }
-            );
-
-      switch (responseTwo.status) {
-        case 200:
-          const resultTwo = await responseTwo.json();
-          testItems = resultTwo.items;
-          console.log($state.snapshot(testItems));
-          if (testItems && studentItems) {
-            for (const testItem of testItems)
-              if (!studentItems.find(si => si.item_id === testItem.item_id))
-                studentItems.push({
-                      answer_id: 0,
-                      item_id: testItem.item_id,
-                      label: testItem.label,
-                      student_no: data.student_no,
-                      image_directory: "",
-                      ai_evaluation: "",
-                      is_done_rendering: false,
-                      });
-          }
-          break;
-        default:
-          alert(`CALL 2: ${responseTwo.status} ${responseTwo.statusText}`);
-      }
-    } catch(e) {
-      alert("Failed to fetch student answers/test items:\nERROR: "+e);
-    } finally {
-      isPageLoading = false;
-    }
-  });
+  let studentItems: (StudentAnswer & {label: string})[] = $state(data.student_items);
 </script>
 
 
@@ -92,15 +29,10 @@
       <ProcessImage test_id={data.test_id} student_no={data.student_no} />
     </Dialog.Root>
   </span>
-  {#if isPageLoading}
-    {#each { length: 3 } as _}
-      <Skeleton class="h-20 w-full grayscale-100 rounded-none"/>
-    {/each}
-  {:else if studentItems.length == 0}
+  {#if studentItems.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
   {:else}
     <div class="overflow-y-auto space-y-2">
-    <!-- TODO: Make this scrollable (!!) -->
     {#each studentItems as studentItem}
       <div class="card space-y-1">
         <Label for={studentItem.label} class="flex flex-row justify-between">
