@@ -133,17 +133,15 @@
         Save changes
       </Button>
       {#if !isWantsToDelete}
-        <Button variant="destructive"
-                class="w-1/6"
+        <button class="button-destructive w-1/6"
                 onclick={() => {isWantsToDelete = true;}}>
-          <MdiDelete class="size-6"/>
-        </Button>
+          <MdiDelete class="size-6 mx-auto"/>
+        </button>
       {:else}
-        <Button variant="destructive"
-              class="flex-1"
+        <button class="button-destructive flex-1 text-sm"
               onclick={deleteTestItem}>
-          CONFIRM DELETE (cannot be undone!)
-        </Button>
+          CONFIRM DELETE
+        </button>
       {/if}
     </div>
   </Dialog.Footer>
