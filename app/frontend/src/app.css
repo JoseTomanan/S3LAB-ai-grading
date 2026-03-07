@@ -124,4 +124,17 @@
     @apply ring-2 ring-border border-0;
     @apply cursor-pointer;
   }
+  
+  .button-destructive {
+    background-color: var(--destructive);
+    color: var(--color-white);
+    font-weight: 500;
+    @apply py-1 px-2;
+    @apply rounded;
+    @apply shadow-xs;
+    @apply cursor-pointer;
+  }
+  .button-destructive:hover {
+    opacity: 80%;
+  }
 }
