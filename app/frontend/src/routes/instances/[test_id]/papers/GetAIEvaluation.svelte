@@ -11,14 +11,17 @@
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+	import { Item } from '$lib/components/ui/dropdown-menu/index.ts';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
   let isPageLoading = $state(false);
-  let isRequestLoading = $state(false);
   let testItems: TestItem[] = $state(testItemsContext.items);
 
   let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
+
+  let isRequestOngoings: Map<number, boolean> = $state(new Map());
+  $effect(() => console.log(isRequestOngoings));
 
   const GET_E_A_R_Q = (i: GetSpecificEvaluationResponse) => i.expected_answer_rubric_questions.split(';');
   const GET_SCORES = (i: GetSpecificEvaluationResponse) => i.scores.split(';');
@@ -36,6 +39,7 @@
                     scores: "",
                   }));
           questionItemEvals.push(...unansweredItems);
+          unansweredItems.forEach(i => isRequestOngoings.set(i.answer_id, false));
         };
 
   onMount(async () => {
@@ -67,7 +71,7 @@
   });
 
   async function reevaluateAnswer(answer_id: number) {
-    isRequestLoading = true;
+    isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
       const response = await fetch(
             `${API_BASE_URL}/api/answers/${answer_id}/reevaluate`,
@@ -93,7 +97,7 @@
     } catch (e) {
       alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
     } finally {
-      isRequestLoading = false;
+      isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
   }
 </script>
@@ -111,8 +115,6 @@
       {/each}
     {:else}
       {#each questionItemEvals.slice().sort((a, b) => a.label.localeCompare(b.label)) as evalItem}
-        {@const buttonOpacity = isRequestLoading ? "opacity-50" : "opacity-100"}
-        {@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
         <div class="card space-y-1">
           {#if evalItem.answer_id == -1}
             <h4 class="truncate text-ellipsis w-fill">
@@ -120,15 +122,17 @@
             </h4>
             <h6 class="flex flex-row items-center gap-1">
               <MdiAlertBoxOutline />
-              <!-- This item has no corresponding answer yet. -->
               Student has no uploaded answer yet.
             </h6>
+
           {:else}
+            {@const isRequestLoading = isRequestOngoings.get(evalItem.answer_id)}
+            {@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
             <span class="flex flex-row justify-between items-center gap-x-2">
               <h4 class="truncate text-ellipsis w-fill">
                 {evalItem.label}: {evalItem.question}
               </h4>
-              <button class={`${buttonOpacity} button-secondary px-0 py-0`}
+              <button class={`${isRequestLoading ? "opacity-50" : "opacity-100"} button-secondary px-0 py-0`}
                       onclick={() => reevaluateAnswer(evalItem.answer_id)}
                       disabled={isRequestLoading}>
                 <MdiHeadReload />
@@ -140,9 +144,13 @@
                 {@const isHasScore = answerScore && answerScore != ""}
                 <span class="flex flex-row justify-between items-center">
                   <h6 class="italic">{e_a_r_q}</h6>
-                  <h6 class={isHasScore ? "font-bold" : ""}>
-                    {isHasScore ? answerScore : "—"}
-                  </h6>
+                  {#if isRequestLoading}
+                    <Spinner class="size-4" />
+                  {:else}
+                    <h6 class={isHasScore ? "font-bold" : ""}>
+                      {isHasScore ? answerScore : "—"}
+                    </h6>
+                  {/if}
                 </span>
               {/if}
             {/each}
