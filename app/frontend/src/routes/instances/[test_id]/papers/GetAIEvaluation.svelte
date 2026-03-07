@@ -10,10 +10,12 @@
   import type { GetSpecificEvaluationResponse, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
+	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
   let isPageLoading = $state(false);
+  let isRequestLoading = $state(false);
   let testItems: TestItem[] = $state(testItemsContext.items);
 
   let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
@@ -65,7 +67,7 @@
   });
 
   async function reevaluateAnswer(answer_id: number) {
-    isPageLoading = true;
+    isRequestLoading = true;
     try {
       const response = await fetch(
             `${API_BASE_URL}/api/answers/${answer_id}/reevaluate`,
@@ -91,7 +93,7 @@
     } catch (e) {
       alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
     } finally {
-      isPageLoading = false;
+      isRequestLoading = false;
     }
   }
 </script>
@@ -108,8 +110,8 @@
         <Skeleton class="h-12 w-full grayscale-100 rounded-none"/>
       {/each}
     {:else}
-      {#each questionItemEvals as evalItem}
-        {@const buttonOpacity = isPageLoading ? "opacity-50" : "opacity-100"}
+      {#each questionItemEvals.slice().sort((a, b) => a.label.localeCompare(b.label)) as evalItem}
+        {@const buttonOpacity = isRequestLoading ? "opacity-50" : "opacity-100"}
         {@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
         <div class="card space-y-1">
           {#if evalItem.answer_id == -1}
@@ -128,7 +130,7 @@
               </h4>
               <button class={`${buttonOpacity} button-secondary px-0 py-0`}
                       onclick={() => reevaluateAnswer(evalItem.answer_id)}
-                      disabled={isPageLoading}>
+                      disabled={isRequestLoading}>
                 <MdiHeadReload />
               </button>
             </span>
@@ -136,7 +138,7 @@
               {#if e_a_r_q.length != 0}
                 {@const answerScore = GET_SCORES(evalItem)[index]}
                 {@const isHasScore = answerScore && answerScore != ""}
-                <span class="flex flex-row justify-between">
+                <span class="flex flex-row justify-between items-center">
                   <h6 class="italic">{e_a_r_q}</h6>
                   <h6 class={isHasScore ? "font-bold" : ""}>
                     {isHasScore ? answerScore : "—"}
