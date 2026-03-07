@@ -63,15 +63,8 @@
             <MdiPaperAlertOutline class="size-5"/>
           {/if}
         </a>
-        <Dialog.Root>
-          <Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center">
-            <h4 class="font-semibold opacity-80 tracking-wide">
-              {testPaper.total_score ?? "·/·"}
-            </h4>
-          </Dialog.Trigger>
-          <GetAIEvaluation test_id={data.test_id}
-                            student_no={testPaper.student_no}/>
-        </Dialog.Root>
+        <GetAIEvaluation test_id={data.test_id}
+                          student_no={testPaper.student_no}/>
       </span>
     {/each}
   {/if}

@@ -100,8 +100,39 @@
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
   }
+
+  const totalScore: string = $derived((() => {
+    let sumNumerator = 0;
+    let sumDenominator = 0;
+
+    for (const evalItem of questionItemEvals) {
+      const scores = GET_SCORES(evalItem);
+      for (const score of scores) {
+        if (typeof score === "string" && score.includes("/")) {
+          const [num, denom] = score.split("/");
+          const n = parseFloat(num);
+          const d = parseFloat(denom);
+          if (!isNaN(n))
+            sumNumerator += n;
+          if (!isNaN(d))
+            sumDenominator += d;
+        }
+      }
+    }
+
+    if (sumNumerator === 0 && sumDenominator === 0)
+      return "·/·";
+    return `${sumNumerator}/${sumDenominator}`;
+  })());
 </script>
 
+
+<Dialog.Root>
+  <Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center">
+    <h4 class="font-semibold opacity-80 tracking-wide">
+      {totalScore ?? "n/a"}
+    </h4>
+  </Dialog.Trigger>
 
 <Dialog.Content>
   <Dialog.Header>
@@ -160,3 +191,5 @@
     {/if}
   </div>
 </Dialog.Content>
+
+</Dialog.Root>
