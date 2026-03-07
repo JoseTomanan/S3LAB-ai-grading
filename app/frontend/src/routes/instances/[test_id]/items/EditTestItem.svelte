@@ -9,6 +9,7 @@
   import { Label } from '$lib/components/ui/label/index.js';
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import { Input } from '$lib/components/ui/input/index.ts';
+	import SafeDelete from '$lib/components/SafeDelete.svelte';
 
   let { testItem, test_id } = $props<{
     testItem: TestItem,
@@ -132,17 +133,9 @@
               onclick={() => editTestItem(formTestItem)}>
         Save changes
       </Button>
-      {#if !isWantsToDelete}
-        <button class="button-destructive w-1/6"
-                onclick={() => {isWantsToDelete = true;}}>
-          <MdiDelete class="size-6 mx-auto"/>
-        </button>
-      {:else}
-        <button class="button-destructive flex-1 text-sm"
-              onclick={deleteTestItem}>
-          CONFIRM DELETE
-        </button>
-      {/if}
+      <SafeDelete toggle={isWantsToDelete}
+                  onDelete={deleteTestItem}
+                  />
     </div>
   </Dialog.Footer>
 </Dialog.Content>

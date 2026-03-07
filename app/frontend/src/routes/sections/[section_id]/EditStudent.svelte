@@ -13,6 +13,7 @@
   import { Label } from '$lib/components/ui/label/index.ts';
   
   import type { Section } from '$lib/index.ts';
+	import SafeDelete from '$lib/components/SafeDelete.svelte';
 
   let isSectionsLoading = $state(false);
   let dropdownSections: Section[] = $state([]);
@@ -109,6 +110,10 @@
               onclick={() => editStudent()}>
         Save changes
       </Button>
+      <SafeDelete toggle={isWantsToDelete}
+                  onDelete={deleteStudent}
+                  />
+      <!--
       {#if !isWantsToDelete}
         <button class="button-destructive"
                   onclick={() => isWantsToDelete = true}>
@@ -120,6 +125,7 @@
           Confirm delete
         </button>
       {/if}
+      -->
     </div>
   </Dialog.Footer>
 </Dialog.Content>
