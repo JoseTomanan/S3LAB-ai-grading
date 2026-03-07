@@ -54,7 +54,7 @@
     {#each perStudentStatuses as testPaper}
       <span class="flex flex-row items-center justify-between gap-2">
         <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-            class="flex-1 button-outline bg-card
+            class="flex-1 button-outline
                     flex flex-row justify-between items-center">
           <h4>{testPaper.name}</h4>
           {#if testPaper.is_done_rendering}

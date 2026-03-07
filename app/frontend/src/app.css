@@ -118,6 +118,8 @@
 	}
 
   .button-outline {
+    background-color: var(--card);
+    color: var(--card-foreground);
     @apply py-1 px-2;
     @apply rounded;
     @apply shadow-xs;
