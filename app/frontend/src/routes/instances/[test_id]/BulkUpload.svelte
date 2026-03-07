@@ -87,10 +87,10 @@
           <IconSend class="size-4" />
         </Button>
       </Dialog.Header>
+      <div class="border-b-2 border-t-2 border-border">
       <div class="flex flex-row items-center overflow-x-auto gap-x-1
-              -mx-5 px-5 pt-1 pb-2
-              border-b-2 border-t-2 border-border"
-           style="scrollbar-gutter: stable; overflow-y: hidden;">
+              -mx-6 px-6 pt-1 pb-2"
+           style="scrollbar-gutter: stable; overflow-y: hidden; scrollbar-color: var(--secondary) transparent;">
         {#each previews as p}
           {@const supposedId = p.name.substring(0, p.name.lastIndexOf('.'))}
           {@const fileExtension = p.name.substring(p.name.lastIndexOf('.'))}
@@ -116,6 +116,7 @@
             </span>
           </div>
         {/each}
+      </div>
       </div>
     </div>
   
