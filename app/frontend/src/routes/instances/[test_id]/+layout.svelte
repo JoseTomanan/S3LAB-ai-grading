@@ -115,7 +115,7 @@
       </span>
     </div>
   </div>
-  <div class="px-4">
+  <div class="px-4 pb-6">
     {#if navigating.to}
       <!--  largely untested; 
         FIXME: remove this once verified that this is actually working -->
