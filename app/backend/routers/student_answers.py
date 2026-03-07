@@ -108,7 +108,7 @@ async def process_student_answer_image(
     boxes_info = []
 
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
-    for i, img_bytes in enumerate(processed_list):
+    for i, img_bytes in enumerate[bytes](processed_list):
         # Generate filename
         safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex}_{i}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
@@ -166,6 +166,7 @@ async def process_student_answer_image(
             session.add(answer) 
         else:
             answer.image_directory = image_dir
+            answer.ai_evaluation=""
             answer.is_done_rendering = False
             answer.detected_item_number = item_number
         session.commit()
