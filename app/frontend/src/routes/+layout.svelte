@@ -16,9 +16,9 @@
   <div class="big-container">
     {@render children()}
   </div>
-  {#if navigating.to}
-    <footer class="fixed bottom-0 left-0 w-full flex items-start z-50 p-1">
+  <footer class="fixed bottom-0 left-0 w-full flex items-start z-50 p-1">
+    {#if navigating.to}
       <Spinner class="size-8 text-chart-3"/>
-    </footer>
-  {/if}
+    {/if}
+  </footer>
 </div>
