@@ -77,10 +77,12 @@ async def process_student_answer_image(
     BOX_SEGMENTER = BoxSegmenter()
 
     scanned_page = BOX_SEGMENTER.scan_page(contents)
-    processed_list = BOX_SEGMENTER.get_boxes(
+    segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(
                             scanned_page,
                             num_boxes=num_boxes if num_boxes is not None else 3
                             )
+    
+    processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
     
     print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
 

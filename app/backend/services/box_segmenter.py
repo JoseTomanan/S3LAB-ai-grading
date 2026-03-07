@@ -1,3 +1,4 @@
+from pickletools import bytes8
 import numpy as np
 import cv2
 from services.document_scanner import DocumentScanner, NORMAL_SIZE
@@ -24,6 +25,9 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = self._dilate_edges(image_cannied)
 
         contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # TODO: use parameter num_boxes
+        # ^^right now it is just getting lost in translation lol
 
         images_good_contours = []
         for c in contours:
@@ -57,6 +61,13 @@ class BoxSegmenter(DocumentScanner):
 
         return [self._encode_to_bytes(image) for image in images_warped]
 
+    def beautify_scan(self, image_bytes: bytes) -> bytes:
+        array = self._load_array(image_bytes)
+        img = self._adjust_contrast(
+                            self._brighten(array, amount=0.25),
+                            amount=1.3
+                            )
+        return self._unload_array(img)
 
     #region Auxiliary functions
     def _regularize_forgivingly(self, image_mat: cv2.typing.MatLike) -> list[cv2.typing.MatLike]:
@@ -67,6 +78,29 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
+
+    def _load_array(self, image_bytes: bytes) -> np.ndarray:
+        """Convert bytes to OpenCV image with validation"""
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        return image
+
+    def _unload_array(self, image: np.ndarray) -> bytes:
+        """Encode OpenCV image to high-quality JPEG bytes."""
+        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+        return buffer.tobytes()
+
+    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
+        """Increase image brightness using linear transform"""
+        amount = max(0.0, min(1.0, float(amount)))
+        beta = amount * 255
+        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
+    
+    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
+        """Adjust image contrast with brightness compensation"""
+        amount = max(0.1, float(amount))
+        beta = 128 * (1 - amount)
+        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
     #endregion
 #endregion
 
