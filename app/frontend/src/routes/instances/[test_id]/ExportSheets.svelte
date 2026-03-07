@@ -52,7 +52,7 @@
 
 <Dialog.Content>
   {#if isNotClicked && !isLoading}
-    <h4>Click below to export test:</h4>
+    <Dialog.Description>Click below to export spreadsheet.</Dialog.Description>
     <Button variant="outline"
             onclick={() => {exportSheets()}}
             disabled={isLoading}>
