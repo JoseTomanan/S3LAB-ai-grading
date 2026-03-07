@@ -1,9 +1,11 @@
 <script lang="ts">
   let { data, children }: {data: LayoutData, children: Snippet} = $props();
 
+  import { page } from '$app/state';
   import type { LayoutData } from './$types.d.ts';
   import type { Snippet } from 'svelte';
   import { onMount, setContext } from 'svelte';
+
   import ExportSheets from './ExportSheets.svelte';
 	import BulkUpload from './BulkUpload.svelte';
 
@@ -15,6 +17,9 @@
   import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
+
+  const isRouteItems = $derived(page.route.id!.includes('/items'));
+  const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
   let activeTestInstance: TestInstance = $state({
     name: "",
@@ -41,8 +46,8 @@
 </script>
 
 
-<div class="space-y-7 pb-4">
-  <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow-sm shadow-sidebar-border space-y-3">
+<div class="space-y-7 pb-3">
+  <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow shadow-sidebar-border space-y-3">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
@@ -55,7 +60,7 @@
     </span>
     <Separator/>
     <div id="change-instance-details"
-          class="*:flex *:justify-between [&>*>h4]:font-medium [&>*>h4]:opacity-85 [&>*>h4]:leading-5">
+          class="space-y-1 *:flex *:justify-between [&>*>h4]:font-normal [&>*>h4]:opacity-85 [&>*>h4]:leading-none">
       <span>
         <h4>
           TestID: {activeTestInstance.test_id}
@@ -82,13 +87,13 @@
       </span>
     </div>
     <div id="thisOne"
-          class="flex items-center justify-between *:space-x-1 [&>*>a]:font-medium">
+          class="flex items-center justify-between *:space-x-1 [&>span>a]:font-medium [&>span>a]:underline-offset-3">
       <span>
-        <a class="button-primary"
+        <a class={`button-primary ${isRouteItems ? "underline" : ""}`}
             href={`/instances/${data.test_id}/items`}>
           Items
         </a>
-        <a class="button-primary"
+        <a class={`button-primary ${isRoutePapers ? "underline" : ""}`}
             href={`/instances/${data.test_id}/papers`}>
           Papers
         </a>
