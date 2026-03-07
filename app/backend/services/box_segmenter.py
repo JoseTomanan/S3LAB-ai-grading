@@ -35,7 +35,7 @@ class BoxSegmenter(DocumentScanner):
                     approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
-                    if 0.25 <= aspect_ratio <= 4:
+                    if 0.25 <= aspect_ratio <= 8:
                         images_good_contours.append(approximate)
                     else:
                         print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
