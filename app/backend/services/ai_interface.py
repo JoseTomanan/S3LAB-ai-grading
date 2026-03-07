@@ -14,11 +14,12 @@ logger = logging.getLogger(__name__)
 # ================================
 #region   Class
 class AIAnswerEvaluator:
-    def __init__(self, flash: bool = False):
+    def __init__(self):
         load_dotenv()
         api_key = os.getenv("GEMINI_API_KEY")
         self.client = genai.Client(api_key=api_key)
-        self.version = "gemini-2.5-flash" if flash else "gemini-2.5-flash-lite"
+        self.pro_version = "gemini-2.5-pro"
+        self.flash_version = "gemini-2.5-flash"
 
     def get_item_number(self, image_bytes: bytes):
         return self._send_image_prompt(image_bytes, FIND_ITEM_NUMBER_PROMPT)
@@ -47,7 +48,7 @@ class AIAnswerEvaluator:
             logger.error(f"Failed to parse corner coordinates: {response}")
             return None
 
-    def _send_image_prompt(self, image_bytes: bytes, prompt: str) -> str | None:
+    def _send_image_prompt(self, image_bytes: bytes, prompt: str, is_flash: bool = True) -> str | None:
         """
         Send a chat completion request with the image input
         """
@@ -57,7 +58,7 @@ class AIAnswerEvaluator:
                             )
 
         response = self.client.models.generate_content(
-                    model=self.version,
+                    model=self.flash_version if is_flash else self.pro_version,
                     contents=[image_encoded, prompt]
                     )
 
