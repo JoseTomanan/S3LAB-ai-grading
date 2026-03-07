@@ -1,7 +1,7 @@
 <script lang="ts">
   let { data, children }: {data: LayoutData, children: Snippet} = $props();
 
-  import { page } from '$app/state';
+  import { navigating, page } from '$app/state';
   import type { LayoutData } from './$types.d.ts';
   import type { Snippet } from 'svelte';
   import { onMount, setContext } from 'svelte';
@@ -17,6 +17,7 @@
   import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
@@ -115,6 +116,12 @@
     </div>
   </div>
   <div class="px-4">
-    {@render children()}
+    {#if navigating.to}
+      <!--  largely untested; 
+        FIXME: remove this once verified that this is actually working -->
+      <Skeleton class="grayscale-50 w-full h-64 rounded-none"/>
+    {:else}
+      {@render children()}
+    {/if}
   </div>
 </div>
