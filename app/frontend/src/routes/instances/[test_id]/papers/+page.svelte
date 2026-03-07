@@ -54,9 +54,9 @@
     {#each perStudentStatuses as testPaper}
       <span class="flex flex-row items-center justify-between gap-2">
         <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-            class="card button-outline w-5/6
+            class="flex-1 button-outline bg-card
                     flex flex-row justify-between items-center">
-          <h3>{testPaper.name}</h3>
+          <h4>{testPaper.name}</h4>
           {#if testPaper.is_done_rendering}
             <MdiPaperCheckOutline class="size-5"/>
           {:else}
@@ -65,7 +65,9 @@
         </a>
         <Dialog.Root>
           <Dialog.Trigger class="w-1/6 button-outline flex items-center justify-center">
-            <h3 class="font-semibold opacity-75">{testPaper.total_score ?? "·/·"}</h3>
+            <h4 class="font-semibold opacity-80 tracking-wide">
+              {testPaper.total_score ?? "·/·"}
+            </h4>
           </Dialog.Trigger>
           <GetAIEvaluation test_id={data.test_id}
                             student_no={testPaper.student_no}/>

@@ -39,7 +39,7 @@
         </span>
         <div class="ml-4">
           {#each bigItem.b as smallItem}
-            <span class="flex flex-row items-end justify-between">
+            <span class="flex flex-row items-center justify-between">
               <p class="truncate text-ellipsis w-fill">
                 ({smallItem.label}) {smallItem.question}
               </p>
