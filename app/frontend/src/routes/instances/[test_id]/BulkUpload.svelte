@@ -1,10 +1,16 @@
 <script lang="ts">
   import { API_BASE_URL } from '$lib/constants.ts';
+	import { onMount } from 'svelte';
 
-  const { test_id } = $props();
+  const { test_id, section_id } = $props();
+
+  const GET_NAME_ONLY = (s: string) => s.substring(0, s.lastIndexOf('.'));
+  const GET_EXTENSION_ONLY = (s: string) => s.substring(s.lastIndexOf('.'));
+  const IS_IN_STUDENTS = (x: string) => students.some(s => s.student_no == x)
 
   import IconCheck from "~icons/mdi/check";
-  import IconAlert from "~icons/mdi/alert";
+  import IconExclamation from "~icons/mdi/exclamation-thick";
+  import IconNotFound from "~icons/mdi/account-question-outline";
   import IconSend from "~icons/mdi/send";
   import IconPerson from "~icons/mdi/person";
 
@@ -13,45 +19,69 @@
 	import { Input } from '$lib/components/ui/input/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import BulkUploadRename from './BulkUploadRename.svelte';
+	import type { Student } from '$lib/index.ts';
 
-  let files: File[] = $state([]);
-  let previews: {name: string, url: string}[] = $state([]);
+  type FileRecord = {
+    file: File;
+    name: string;
+    url: string;
+    statusCode: number;
+  };
   
   let isOperationStarted: boolean = $state(false);
+  let formFiles: FileList | undefined = $state();
+  let formFileRecords: FileRecord[] = $state([]);
+  let students: Student[] = $state([]);
 
-  let resStatusCodes: Map<number, number> = $state(new Map());
-  $effect(() => console.log(resStatusCodes));
 
-  function handleFiles(e: Event) {
-    const input = e.target as HTMLInputElement;
-    if (!input.files)
+  onMount(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/sections/${section_id}`);
+      const results = await response.json();
+      students = results;
+    } catch (e) {
+      console.log("Failed to fetch students for this section.");
+    }
+  });
+
+
+  function handleFiles() {
+    if (!formFiles || formFiles.length == 0)
       return;
 
-    const selected = Array.from(input.files);
-    files = selected;
-    previews = selected.map(f => (
-          { name: f.name, url: URL.createObjectURL(f) }
-        ));
-
-    previews.forEach((_, idx) => resStatusCodes.set(idx, -1));
+    formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
+    formFileRecords = Array.from(formFiles).map(f => ({
+      tempId: crypto.randomUUID(),
+      file: f,
+      name: f.name,
+      url: URL.createObjectURL(f),
+      statusCode: -1
+    }));
   }
 
   async function bulkUpload() {
     isOperationStarted = true;
-
     try {
-      /**
-       * TODO: replace placeholder with actual code
-       * Two possible implementations:
-       *  - fetch students from section first, then compare filenames to student numbers client-side
-       *  - just throw everything into the API and wait for response status code
-       */
-      const keys = Array.from(resStatusCodes.keys());
-      for (let i=0; i<keys.length; ++i)
-        setTimeout(() => {
-          const key = keys[i];
-          resStatusCodes = new Map(resStatusCodes.set(key, i==1 ? 501 : 200));
-        }, 1500 * i);
+      for (const p of formFileRecords) {
+        console.log(p);
+        const activeStudentNo = GET_NAME_ONLY(p.name);
+
+        if (!IS_IN_STUDENTS(activeStudentNo)) {
+          p.statusCode = 404;
+          continue;
+        }
+        
+        (async () => {
+          const formData = new FormData();
+          formData.append('file', p.file);
+          const response = await fetch(
+                `${API_BASE_URL}/api/student_answers/${test_id}/${activeStudentNo}/image_preprocess`,
+                { method: "POST", body: formData, }
+              );
+          console.log(`${p.name}: ${response.status}`);
+          p.statusCode = response.status;
+        })();
+      }
     } catch (e) {
       console.log("Bulk upload operation failed:\n"+e);
     }
@@ -63,10 +93,11 @@
   <Input type="file"
           multiple
           accept="image/*"
+          bind:files={formFiles}
           onchange={handleFiles}
           disabled={isOperationStarted}
       />
-  {#if files.length == 0}
+  {#if !formFiles}
     <Dialog.Description>
       For convenience, name files according to student number, e.g., "202011111.jpeg".
     </Dialog.Description>
@@ -79,7 +110,7 @@
             Image preview
           </Dialog.Title>
           <Dialog.Description>
-            Uploaded {files.length} images
+            Uploaded {formFileRecords.length} images
           </Dialog.Description>
         </span>
         <Button variant="secondary"
@@ -88,26 +119,28 @@
         </Button>
       </Dialog.Header>
       <div class="border-b-2 border-t-2 border-border">
-      <div class="flex flex-row items-center overflow-x-auto gap-x-1
-              -mx-6 px-6 pt-1 pb-2"
-           style="scrollbar-gutter: stable; overflow-y: hidden; scrollbar-color: var(--secondary) transparent;">
-        {#each previews as p}
-          {@const supposedId = p.name.substring(0, p.name.lastIndexOf('.'))}
-          {@const fileExtension = p.name.substring(p.name.lastIndexOf('.'))}
+      <div class="flex flex-row items-center overflow-x-auto gap-x-1 -mx-6 px-6 pt-1 pb-3"
+              style="scrollbar-gutter: stable; scrollbar-color: var(--secondary) transparent;">
+        {#each formFileRecords as p}
+          {@const supposedId = GET_NAME_ONLY(p.name)}
+          {@const fileExtension = GET_EXTENSION_ONLY(p.name)}
+          
           <div class="relative flex flex-col justify-end min-w-full sm:min-w-3/4 h-auto gap-y-0.5">
             <img src={p.url}
                   class="aspect-auto block"
                   alt={p.name} />
-            <span class="absolute bottom-0 left-0 w-full flex flex-row pl-2">
+            <span class="absolute bottom-0 left-0 w-full flex flex-row px-2">
               <Dialog.Root>
-                <Dialog.Trigger class="max-w-full flex flex-row gap-1 items-center truncate px-1.5 mb-1 bg-white/80 backdrop-blur-md 
+                <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center truncate px-1.5 mb-1 bg-white/80 backdrop-blur-md 
                                     hover:underline cursor-pointer">
-                  <IconPerson class="size-3"/>
-                  {#if supposedId}
-                    <h4 class="text-left w-fit truncate">{supposedId}</h4>
+                  {#if IS_IN_STUDENTS(supposedId)}
+                    <IconPerson class="size-4"/>
                   {:else}
-                    <h5 class="italic">Add name...</h5>
+                    <IconNotFound class="size-4" />
                   {/if}
+                  <h4 class="text-left w-fit truncate">
+                    {supposedId ? supposedId : "Add student no..."}
+                  </h4>
                 </Dialog.Trigger>
                 <BulkUploadRename
                       filename={supposedId}
@@ -122,16 +155,19 @@
   
   {:else}
     <div class="flex flex-col space-y-1">
-      {#each previews as p, idx}
-        {@const statusCode = resStatusCodes.get(idx)}
+      {#each formFileRecords as p}
         <span class="flex flex-row justify-start items-center gap-x-1.5">
           <span>
-            {#if statusCode == 200}
+            {#if p.statusCode == 200}
               <IconCheck class="size-5"/>
-            {:else if statusCode == 501}
-              <IconAlert class="size-5" />
+            {:else if p.statusCode == 404}
+              <IconNotFound class="size-5" />
+            {:else if p.statusCode == 501}
+              <IconExclamation class="size-5" />
+            {:else if p.statusCode == -1}
+              <Spinner class="text-primary size-4"/>
             {:else}
-              <Spinner class="size-5"/>
+              <span class="font-mono -tracking-[0.08em]">{p.statusCode}</span>
             {/if}
           </span>
           <h4 class="truncate w-fit">{p.name}</h4>
