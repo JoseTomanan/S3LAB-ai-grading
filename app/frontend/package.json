@@ -14,7 +14,6 @@
 		"lint": "prettier --check . && eslint ."
 	},
 	"devDependencies": {
-		"@cloudparker/easy-camera-svelte": "^2.0.1",
 		"@eslint/compat": "^2.0.2",
 		"@eslint/js": "^9.38.0",
 		"@iconify-json/lucide": "^1.2.86",
@@ -54,6 +53,7 @@
 	},
 	"dependencies": {
 		"cookie": "^1.1.1",
-		"fabric": "^7.1.0"
+		"fabric": "^7.1.0",
+		"svelte-5-french-toast": "^2.0.6"
 	}
 }
