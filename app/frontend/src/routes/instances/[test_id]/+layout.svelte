@@ -19,6 +19,11 @@
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 
+  if (!data.test_instance)
+    throw new Error("Test instance not loaded.");
+  if (!data.test_items)
+    throw new Error("Test items not loaded.");
+
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
@@ -110,7 +115,8 @@
           <Dialog.Trigger class="button-primary">
             <IconUpload class="size-6"/>
           </Dialog.Trigger>
-          <BulkUpload test_id={data.test_id} />
+          <BulkUpload test_id={data.test_id}
+                      section_id={data.test_instance!.section_id}/>
         </Dialog.Root>
       </span>
     </div>
