@@ -11,7 +11,6 @@
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
-	import { Item } from '$lib/components/ui/dropdown-menu/index.ts';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
@@ -142,6 +141,7 @@
       {#each { length: 3 } as _}
         <Skeleton class="h-12 w-full grayscale-100 rounded-none"/>
       {/each}
+    
     {:else}
       {#each questionItemEvals.slice().sort((a, b) => a.label.localeCompare(b.label)) as evalItem}
         <div class="card space-y-1">
@@ -159,7 +159,7 @@
             {@const e_a_r_qs = GET_E_A_R_Q(evalItem)}
             <span class="flex flex-row justify-between items-center gap-x-2">
               <h4 class="truncate text-ellipsis w-fill">
-                {evalItem.label}: {evalItem.question}
+                ({evalItem.label}) {evalItem.question}
               </h4>
               <button class={`${isRequestLoading ? "opacity-50" : "opacity-100"} button-secondary px-0 py-0`}
                       onclick={() => reevaluateAnswer(evalItem.answer_id)}
@@ -174,11 +174,11 @@
                 <span class="flex flex-row justify-between items-center">
                   <h6 class="italic">{e_a_r_q}</h6>
                   {#if isRequestLoading}
-                    <Spinner class="size-4" />
+                      <Spinner class="text-chart-3 size-4" />
                   {:else}
-                    <h6 class={isHasScore ? "font-bold" : ""}>
-                      {isHasScore ? answerScore : "—"}
-                    </h6>
+                      <h6 class="font-bold">
+                        {isHasScore ? answerScore : "—"}
+                      </h6>
                   {/if}
                 </span>
               {/if}
