@@ -19,9 +19,7 @@
   let testItems: TestItem[] = $state(testItemsContext.items);
 
   let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
-
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
-  $effect(() => console.log(isRequestOngoings));
 
   const GET_E_A_R_Q = (i: GetSpecificEvaluationResponse) => i.expected_answer_rubric_questions.split(';');
   const GET_SCORES = (i: GetSpecificEvaluationResponse) => i.scores.split(';');
