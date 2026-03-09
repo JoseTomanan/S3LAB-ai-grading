@@ -437,17 +437,33 @@ def get_student_answers(
     return summaries
 
 
-@router.delete("/{answer_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{item_id}/{student_no}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_student_answer(
-                answer_id: int,
+                item_id: int,
+                student_no: str,
                 session: Session = Depends(get_session),
                 ):
     """Delete a single student answer and its associated image file, if any."""
-    answer = session.get(StudentAnswer, answer_id)
+    # Find the TestPaperInstance for this student and test paper (by student_no)
+    paper = session.exec(
+                select(TestPaperInstance)
+                .where(TestPaperInstance.student_no == student_no)
+                ).first()
+    if not paper:
+        raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Test paper for student_no '{student_no}' not found"
+                    )
+
+    # Now find the StudentAnswer by (item_id, paper_id)
+    answer = session.exec(
+                select(StudentAnswer)
+                .where(StudentAnswer.item_id == item_id, StudentAnswer.paper_id == paper.paper_id)
+                ).first()
     if not answer:
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Student answer with ID '{answer_id}' not found"
+                    detail=f"Student answer with item_id '{item_id}' and student_no '{student_no}' not found"
                     )
 
     # Best-effort cleanup of the stored image file
