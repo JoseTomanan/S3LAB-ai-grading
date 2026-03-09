@@ -40,15 +40,16 @@
 </script>
 
 
-<div class="px-4 py-8 flex flex-col gap-4">
+<div class="px-4 py-8 flex flex-col gap-3">
 	<span class="flex flex-row space-x-4 mb-4">
 		<a href="/sections"
-				class="font-bold button-outline">
+				class="font-bold button-outline h-fit">
 			&middot;&middot;&middot;
 		</a>
-		<h1 class="align-left">
-			From SECTION_ID {data.section_id}
-		</h1>
+    <span class="*:leading-5.5">
+      <h1 class="align-left">Class List</h1>
+      <h6>SECTION_ID {data.section_id}</h6>
+    </span>
 	</span>
 	<Dialog.Root>
 		<Dialog.Trigger class="button-outline font-medium items-center">
