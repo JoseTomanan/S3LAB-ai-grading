@@ -6,15 +6,29 @@
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';
+  import MdiDelete from "~icons/mdi/delete";
 
   import type { StudentAnswer } from '$lib/index.ts';
-  import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import { Label } from '$lib/components/ui/label/index.js';
+	import SafeDelete from '$lib/components/SafeDelete.svelte';
 
   if (!data.student_items)
     throw new Error("Student items failed to load");
 
   let studentItems: (StudentAnswer & {label: string})[] = $state(data.student_items);
+
+  let isWantsToDelete: boolean = $state(false);
+
+  async function deleteAnswer(answer_id: number) {
+    const response = await fetch(`${API_BASE_URL}/api/student_answers/${answer_id}`, { method: "DELETE" });
+    switch (response.status) {
+      case 204:
+        alert(`Deletion of ${answer_id} successful.`);
+        break;
+      default:
+        alert(`${response.status} ${response.statusText}`);
+    }
+  }
 </script>
 
 
@@ -37,7 +51,11 @@
       <div class="card space-y-1">
         <Label for={studentItem.label} class="flex flex-row justify-between">
           {studentItem.label}
-          <span class="flex flex-row space-x-1">
+          <span class="flex flex-row space-x-1.5">
+            <SafeDelete toggle={isWantsToDelete}
+                        onDelete={() => deleteAnswer(studentItem.answer_id)}
+                        size={4}
+                        />
             <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
                   class="button-outline">
               <MdiCrop/>
