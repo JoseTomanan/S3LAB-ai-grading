@@ -73,13 +73,29 @@ class AIAnswerEvaluator:
 
 # ================================
 #region   Prompts
-ANSWER_RUBRIC_PROMPT: str = "You are given an image of a student's handwritten work in response to a math problem. Included in this prompt, preceded by `QUESTION:` is the problem the student is answering. Your task is to answer a question/questions (in a new line, preceded by `PROMPT:`) based solely on the visual content of the student's work. Your answer should be clear and concise, and directly relate to the image. If a question can be answered with a yes or no, only generate your answer as `YES` or `NO`. Otherwise, generate your answer as raw text, with no prefixes or sentences (e.g. `3x+2=8` or `5`). If multiple questions are given in the prompt, separate your answers for each with `; `."
+ANSWER_RUBRIC_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
+Included in this prompt, preceded by `QUESTION:` is the problem the student is answering.
+Your task is to answer a question/questions (in a new line, preceded by `PROMPT:`) based solely on the visual content of the student's work.
+Your answer should be clear and concise, and directly relate to the image.
+If a question can be answered with a yes or no, only generate your answer as `YES` or `NO`.
+Otherwise, generate your answer as raw text, with no prefixes or sentences (e.g. `3x+2=8` or `5`).
+If multiple questions are given in the prompt, separate your answers for each with `; `."""
 
 
-COMPARE_EXPECTED_FINAL_ANSWER_PROMPT: str = "You are given an image of a student's handwritten work in response to a math problem. Included in this prompt, preceded by `QUESTION:` is the problem the student is answering. Your task is to evaluate if the student's final answer is the same as the expected final answer (in a new line, preceded by `ANSWER:`). Your answer should be clear and concise, and generated as only `YES` or `NO`. If the student does not have a clear final answer, generate your answer as `UNCLEAR`."
+COMPARE_EXPECTED_FINAL_ANSWER_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
+Included in this prompt, preceded by `QUESTION:` is the problem the student is answering.
+Your task is to evaluate if the student's final answer is the same as the expected final answer (in a new line, preceded by `ANSWER:`).
+Your answer should be clear and concise, and generated as only `YES` or `NO`.
+If the student does not have a clear final answer, generate your answer as `UNCLEAR`."""
 
 
-DETECT_CORNERS_PROMPT = "You are analyzing an image of a document/page that may be skewed or rotated.  Identify the 4 corners of the document's rectangular boundary.\nReturn ONLY a JSON array with 4 coordinate pairs in this EXACT order: [[x_top_left, y_top_left], [x_top_right, y_top_right], [x_bottom_right, y_bottom_right], [x_bottom_left, y_bottom_left]].\nWhere (0,0) is the top-left of the image. Use integers only. \nExample: [[10, 15], [590, 12], [595, 470], [5, 475]]"
+DETECT_CORNERS_PROMPT = """You are analyzing an image of a document/page that may be skewed or rotated.
+Identify the 4 corners of the document's rectangular boundary.
+Return ONLY a JSON array with 4 coordinate pairs in this EXACT order:
+[[x_top_left, y_top_left], [x_top_right, y_top_right], [x_bottom_right, y_bottom_right], [x_bottom_left, y_bottom_left]]
+
+Where (0,0) is the top-left of the image. Use integers only.
+Example: [[10, 15], [590, 12], [595, 470], [5, 475]]"""
 
 
 FIND_ITEM_NUMBER_PROMPT: str = """You are identifying an encircled item number in the TOP-LEFT corner of a student's answer sheet.
@@ -99,6 +115,7 @@ EXAMPLES:
 
 Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
 Do not add any explanation or text."""
+
 
 FIND_NEAREST_ITEM_NUMBER_PROMPT: callable[[list[str]], str] = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
 
