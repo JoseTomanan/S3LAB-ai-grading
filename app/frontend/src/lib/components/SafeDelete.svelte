@@ -9,7 +9,7 @@
     <IconDelete class={`size-${size} mx-auto`} />
   </button>
 {:else}
-  <button class="button-destructive text-sm"
+  <button class="button-destructive {size <= 5 ? "text-xs" : "text-sm"}"
           onclick={onDelete}>
     Confirm delete
   </button>
