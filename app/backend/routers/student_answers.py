@@ -84,24 +84,9 @@ async def process_student_answer_image(
     print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    paper = session.exec(
-                select(TestPaperInstance).where(
-                    TestPaperInstance.test_id == test_id,
-                    TestPaperInstance.student_no == student_no
-                )).first()
-    if not paper:
-        paper = TestPaperInstance(
-                    test_id=test_id,
-                    student_no=student_no,
-                    is_done_rendering=False
-                    )
-        session.add(paper)
-        session.commit()
-        session.refresh(paper)
-
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
-    boxes_info = _label_save_boxes(test_id, student_no, paper, processed_list, session)
-    _commit_boxes(boxes_info, paper, session)
+    boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
+    _commit_boxes(boxes_info, test_id, student_no, session)
 
     return {
         "num_boxes": len(processed_list),
@@ -496,7 +481,7 @@ def _label_save_boxes(
                 paper: TestPaperInstance,
                 processed_list: list[bytes],
                 session: Session
-                ):
+                ) -> dict:
     boxes_info = []
     for i, img_bytes in enumerate[bytes](processed_list):
         # Extract item number using AI
@@ -551,9 +536,25 @@ def _label_save_boxes(
 
 def _commit_boxes(
                 boxes_info: list[dict], # TODO: add type safety
-                paper: TestPaperInstance,
+                test_id: str,
+                student_no: str,
                 session: Session
-                ):
+                ) -> None:
+    paper = session.exec(
+                select(TestPaperInstance).where(
+                    TestPaperInstance.test_id == test_id,
+                    TestPaperInstance.student_no == student_no
+                )).first()
+    if not paper:
+        paper = TestPaperInstance(
+                    test_id=test_id,
+                    student_no=student_no,
+                    is_done_rendering=False
+                    )
+        session.add(paper)
+        session.commit()
+        session.refresh(paper)
+
     for box in boxes_info:
         image_dir = box["image_directory"]
         item_number = box["item_number"]
