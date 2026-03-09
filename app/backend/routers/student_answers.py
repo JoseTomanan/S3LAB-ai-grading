@@ -462,78 +462,8 @@ def _label_save_commit_boxes(
                 processed_list: list[bytes],
                 session: Session
                 ):
-    boxes_info = []
-    for i, img_bytes in enumerate[bytes](processed_list):
-        # Extract item number using AI
-        test_item_labels = [ti.label
-                    for ti in session.exec(
-                        select(TestItem).where(
-                            TestItem.test_id == test_id
-                    )) if ti.label is not None]
-
-        try:
-            item_number = AI_ANSWER_EVALUATOR.get_nearest_item_number(img_bytes, test_item_labels)
-            if not item_number or item_number.strip() == "NONE":
-                item_number = "NONE"
-            else:
-                item_number = item_number.strip()
-        except Exception as e:
-            print(f"INTERNAL:\tFailed to extract item number for box {i}: {e}")
-            item_number = "NONE"
-
-        print(f"INTERNAL:\t{i}th detected label = {item_number}")
-
-        test_item = session.exec(
-                        select(TestItem).where(
-                            TestItem.label == item_number,
-                        )).first()
-        
-        if test_item is None:
-            raise Exception("This is not supposed to happen. Read your code again.")
-
-        item_id = test_item.item_id
-        print(f"INTERNAL:\tLabel {item_number} will be stored in {item_id}")
-
-        # Generate filename
-        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex}_{i}.jpg"
-        safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
-        filepath = TEMP_DIR / safe_filename
-        
-        # Save image file
-        with open(filepath, "wb") as f:
-            f.write(img_bytes)
-        
-        image_dir = f"/api/temp/{safe_filename}"
-
-        answer = session.exec(
-                    select(StudentAnswer).where(
-                        StudentAnswer.paper_id == paper.paper_id,
-                        StudentAnswer.item_id == item_id
-                    )).first()
-        if not answer:
-            answer = StudentAnswer(
-                        paper_id=paper.paper_id,
-                        item_id=item_id,
-                        image_directory=image_dir,
-                        ai_evaluation="",
-                        is_done_rendering=False,
-                        detected_item_number=item_number
-                        )
-            session.add(answer) 
-        else:
-            answer.image_directory = image_dir
-            answer.ai_evaluation=""
-            answer.is_done_rendering = False
-            answer.detected_item_number = item_number
-        session.commit()
-        session.refresh(answer)
-
-        boxes_info.append({
-                    "index": i,
-                    "image_directory": image_dir,
-                    "item_number": item_number
-                    })
-    
+    boxes_info_step1 = _label_save_boxes(test_id, student_no, paper, processed_list, session)
+    boxes_info = _commit_boxes(boxes_info_step1, paper, session)
     return boxes_info
 
 
