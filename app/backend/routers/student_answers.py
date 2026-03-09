@@ -532,9 +532,12 @@ def _commit_boxes(
                 session: Session
                 ):
     for box in boxes_info:
-        item_id = box.test_item.item_id
-        image_dir = box.image_directory
-        item_number = box.item_number
+        image_dir = box["image_directory"]
+        item_number = box["item_number"]
+        item_id = session.exec(
+                        select(TestItem).where(
+                            TestItem.label == item_number,
+                        )).first().item_id
         
         answer = session.exec(
                     select(StudentAnswer).where(
