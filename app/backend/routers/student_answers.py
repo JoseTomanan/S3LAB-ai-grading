@@ -100,8 +100,8 @@ async def process_student_answer_image(
         session.refresh(paper)
 
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
-    boxes_info_step1 = _label_save_boxes(test_id, student_no, paper, processed_list, session)
-    boxes_info = _commit_boxes(boxes_info_step1, paper, session)
+    boxes_info = _label_save_boxes(test_id, student_no, paper, processed_list, session)
+    _commit_boxes(boxes_info, paper, session)
 
     return {
         "num_boxes": len(processed_list),
