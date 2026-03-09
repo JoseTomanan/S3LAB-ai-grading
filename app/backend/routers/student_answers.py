@@ -100,7 +100,8 @@ async def process_student_answer_image(
         session.refresh(paper)
 
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
-    boxes_info = _label_save_commit_boxes(test_id, student_no, paper, processed_list, session)
+    boxes_info_step1 = _label_save_boxes(test_id, student_no, paper, processed_list, session)
+    boxes_info = _commit_boxes(boxes_info_step1, paper, session)
 
     return {
         "num_boxes": len(processed_list),
@@ -489,18 +490,6 @@ def delete_student_answer(
 
 # ==============================
 #region Auxiliary functions    
-def _label_save_commit_boxes(
-                test_id: str,
-                student_no: str,
-                paper: TestPaperInstance,
-                processed_list: list[bytes],
-                session: Session
-                ):
-    boxes_info_step1 = _label_save_boxes(test_id, student_no, paper, processed_list, session)
-    boxes_info = _commit_boxes(boxes_info_step1, paper, session)
-    return boxes_info
-
-
 def _label_save_boxes(
                 test_id: str,
                 student_no: str,
