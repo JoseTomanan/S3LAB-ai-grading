@@ -23,6 +23,9 @@ class AIAnswerEvaluator:
 
     def get_item_number(self, image_bytes: bytes):
         return self._send_image_prompt(image_bytes, FIND_ITEM_NUMBER_PROMPT)
+
+    def get_nearest_item_number(self, image_bytes: bytes, label_choices: list[str]):
+        return self._send_image_prompt(image_bytes, FIND_NEAREST_ITEM_NUMBER_PROMPT(label_choices))
     
     def evaluate_expected_answer(self, image_bytes: bytes, question: str, answer: str):
         return self._send_image_prompt(
@@ -96,6 +99,26 @@ EXAMPLES:
 
 Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
 Do not add any explanation or text."""
+
+FIND_NEAREST_ITEM_NUMBER_PROMPT: callable[[list[str]], str] = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
+
+IMPORTANT RULES:
+1. Select ONLY from the following choices: {l.split(',')}
+2. Look ONLY at the upper-left corner region
+3. The label is encircled (has a circle around it)
+4. Common labels are numbers (e.g., 1, 2, 3, 4, 5), or numbers followed by a letter (e.g., 1a, 1b, 1c, 2a, 2b, 2c)
+5. Handwriting may be poor - look carefully at the shape
+6. Do NOT confuse similar numbers (1 vs 7, 2 vs 3, 5 vs 6)
+
+EXAMPLES:
+- A single vertical line = 1
+- A curve with horizontal base = 2
+- Two curves stacked = 3
+- Vertical line with horizontal cross = 4
+
+Generate ONLY the label (e.g., `2`); choose the closest label possible depending on the given list.
+Do not add any explanation or text."""
+
 
 #endregion
 # ================================
