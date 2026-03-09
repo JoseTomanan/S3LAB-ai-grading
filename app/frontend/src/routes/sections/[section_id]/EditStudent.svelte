@@ -36,13 +36,7 @@
   onMount(async () => {
     isSectionsLoading = true;
     try {
-      const response = await fetch(
-            `${API_BASE_URL}/api/sections`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',}
-            }
-            );
+      const response = await fetch(`${API_BASE_URL}/api/sections/`);
 
       switch (response.status) {
         case 200:
