@@ -20,7 +20,10 @@
 
 <div class="flex flex-col gap-3">
   <span class="flex flex-row justify-between items-center">
-    <h1>{data.student_no}</h1>
+    <span class="flex flex-wrap items-baseline gap-x-4 [&>h5]:opacity-60">
+      <h1>Test answers</h1>
+      <h5>{data.student_no}</h5>
+    </span>
     <a class="button-secondary"
         href="/instances/{data.test_id}/papers/{data.student_no}/process">
       <MdiImagePlus class="size-5 mx-2"/>
