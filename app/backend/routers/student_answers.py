@@ -449,6 +449,40 @@ def get_student_answers(
                     ))
     
     return summaries
+
+
+@router.delete("/{answer_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_student_answer(
+                answer_id: int,
+                session: Session = Depends(get_session),
+                ):
+    """Delete a single student answer and its associated image file, if any."""
+    answer = session.get(StudentAnswer, answer_id)
+    if not answer:
+        raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Student answer with ID '{answer_id}' not found"
+                    )
+
+    # Best-effort cleanup of the stored image file
+    image_path = None
+    if answer.image_directory:
+        # Stored as something like "/api/temp/<filename>"
+        filename = answer.image_directory.split("/")[-1]
+        if filename:
+            image_path = TEMP_DIR / filename
+
+    session.delete(answer)
+    session.commit()
+
+    if image_path is not None and image_path.exists():
+        try:
+            image_path.unlink()
+        except Exception:
+            # Do not fail the API call if file deletion fails
+            pass
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 #endregion
 
 
