@@ -120,7 +120,7 @@ Do not add any explanation or text."""
 FIND_NEAREST_ITEM_NUMBER_PROMPT = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
 
 IMPORTANT RULES:
-1. Select ONLY from the following choices: {l.split(',')}
+1. Select ONLY from the following choices: {l}
 2. Look ONLY at the upper-left corner region
 3. The label is encircled (has a circle around it)
 4. Common labels are numbers (e.g., 1, 2, 3, 4, 5), or numbers followed by a letter (e.g., 1a, 1b, 1c, 2a, 2b, 2c)
