@@ -43,7 +43,8 @@
 </script>
 
 
-<div class="space-y-3 overflow-clip p-0.5">
+<div class="space-y-3 overflow-visible">
+  <h1 class="text-left">Test papers</h1>
   {#if isPageLoading}
     {#each { length: 3 } as _}
       <Skeleton class="h-10 w-full grayscale-100"/>

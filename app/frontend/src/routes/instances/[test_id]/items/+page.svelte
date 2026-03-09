@@ -20,7 +20,8 @@
 </script>
 
 
-<div class="space-y-4 overflow-auto p-0.5">
+<div class="space-y-4 overflow-visible">
+  <h1 class="text-left">Test items</h1>
   {#if testItemsContext.isLoading}
     {#each { length: 2 } as _}
       <Skeleton class="h-24 w-full grayscale-100 rounded-none"/>
