@@ -117,7 +117,7 @@ Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
 Do not add any explanation or text."""
 
 
-FIND_NEAREST_ITEM_NUMBER_PROMPT: callable[[list[str]], str] = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
+FIND_NEAREST_ITEM_NUMBER_PROMPT = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
 
 IMPORTANT RULES:
 1. Select ONLY from the following choices: {l.split(',')}
