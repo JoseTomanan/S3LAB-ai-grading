@@ -1,6 +1,6 @@
 <script lang="ts">
-  const { test_id, student_no }: { test_id: string, student_no: string } = $props();
-  
+  const { data } = $props();
+
   import { API_BASE_URL } from '$lib/constants.ts';
   import { dataUrlToFile } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
@@ -11,8 +11,12 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
+	import { noSSR } from 'next/dynamic.js';
+
 
   let isOperationOngoing: boolean = $state(false);
+  let isForCommitment: boolean = $state(false);
+
 
   let formFile: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
@@ -41,7 +45,7 @@
 
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/student_answers/${test_id}/${student_no}/image_preprocess?num_boxes=${paramNumBoxes ?? 2}`,
+            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/image_preprocess?num_boxes=${paramNumBoxes ?? 2}`,
             { method: "POST", body: formData, }
             );
 
@@ -62,11 +66,11 @@
 </script>
 
 
-<Dialog.Content>
-  <Dialog.Header>
-    <Dialog.Title>Process raw image</Dialog.Title>
-    <Dialog.Description>{test_id} &middot; {student_no}</Dialog.Description>
-  </Dialog.Header>
+<div class="flex flex-col gap-y-2">
+  <span class="flex flex-row justify-between items-baseline">
+    <h1>Process raw image</h1>
+    <h6>Student no. {data.student_no}</h6>
+  </span>
   <div class="flex flex-row gap-2 min-w-0">
     <Label for="sendImage"
             class="flex-1 border-2 border-outline pl-2 rounded
@@ -104,5 +108,5 @@
       ? "Sending..."
       : "Send for processing"}
   </Button>
-</Dialog.Content>
+</div>
 

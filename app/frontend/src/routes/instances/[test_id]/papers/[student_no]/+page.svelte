@@ -10,7 +10,6 @@
   import type { StudentAnswer } from '$lib/index.ts';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import { Label } from '$lib/components/ui/label/index.js';
-  import ProcessImage from './ProcessImage.svelte';
 
   if (!data.student_items)
     throw new Error("Student items failed to load");
@@ -22,12 +21,10 @@
 <div class="flex flex-col gap-3">
   <span class="flex flex-row justify-between items-center">
     <h1>{data.student_no}</h1>
-    <Dialog.Root>
-      <Dialog.Trigger class="button-secondary">
-        <MdiImagePlus class="size-5 mx-2"/>
-      </Dialog.Trigger>
-      <ProcessImage test_id={data.test_id} student_no={data.student_no} />
-    </Dialog.Root>
+    <a class="button-secondary"
+        href="/instances/{data.test_id}/papers/{data.student_no}/process">
+      <MdiImagePlus class="size-5 mx-2"/>
+    </a>
   </span>
   {#if studentItems.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
@@ -38,7 +35,7 @@
         <Label for={studentItem.label} class="flex flex-row justify-between">
           {studentItem.label}
           <span class="flex flex-row space-x-1">
-            <a href={`/instances/${data.test_id}/papers/${data.student_no}/manual?item_id=${studentItem.item_id}`} 
+            <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
                   class="button-outline">
               <MdiCrop/>
             </a>
