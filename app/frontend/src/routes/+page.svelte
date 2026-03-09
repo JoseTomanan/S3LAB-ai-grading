@@ -20,13 +20,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(
-            `${API_BASE_URL}/api/test_instances`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',}
-            }
-            );
+      const response = await fetch(`${API_BASE_URL}/api/test_instances`);
 
       switch (response.status) {
         case 200:
