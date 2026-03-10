@@ -33,55 +33,11 @@ async def process_student_answer_image(
                 session: Session = Depends(get_session)
                 ):
     """Process raw student assessment image through CV pipeline"""
-    instance = session.get(TestInstance, test_id)
-    if not instance:
-        raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Test instance '{test_id}' not found"
-                    )
-    
-    student = session.get(Student, student_no)
-    if not student:
-        raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Student with ID '{student_no}' not found"
-                    )
-    
-    if not file or not file.filename:
-        raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No file provided"
-                    )
-    if not IMAGE_MODIFIER.validate_file_extension(file.filename):
-        raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
-                )
-    try:
-        contents = await file.read()
-        if len(contents) == 0:
-            raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Uploaded file is empty"
-                        )
-    except Exception as e:
-        raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to read file: {str(e)}"
-                    )
+    await _validate_request(test_id, student_no, session)
+    contents = await _validate_file(file)
 
     print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
-
-    # ======== DOCUMENT SCANNING ========
-    DOCUMENT_SCANNER = DocumentScanner()
-    scanned_page = DOCUMENT_SCANNER.scan_page(contents)
-
-    # ======== BOX SEGMENTING ========
-    BOX_SEGMENTER = BoxSegmenter()
-    segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
-    processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
-    
-    print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
+    processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
@@ -89,9 +45,9 @@ async def process_student_answer_image(
     _commit_boxes(boxes_info, test_id, student_no, session)
 
     return {
-        "num_boxes": len(processed_list),
-        "boxes": boxes_info,
-        }
+            "num_boxes": len(processed_list),
+            "boxes": boxes_info,
+            }
 
 
 @router.post("/{test_id}/{student_no}/label_save_boxes")
@@ -103,79 +59,19 @@ async def scan_then_label_save_boxes(
                 session: Session = Depends(get_session)
                 ):
     """Process raw student assessment image through CV pipeline"""
-    instance = session.get(TestInstance, test_id)
-    if not instance:
-        raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Test instance '{test_id}' not found"
-                    )
-    
-    student = session.get(Student, student_no)
-    if not student:
-        raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Student with ID '{student_no}' not found"
-                    )
-    
-    if not file or not file.filename:
-        raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No file provided"
-                    )
-    if not IMAGE_MODIFIER.validate_file_extension(file.filename):
-        raise HTTPException(
-                    status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                    detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
-                    )
-    try:
-        contents = await file.read()
-        if len(contents) == 0:
-            raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Uploaded file is empty"
-                        )
-    except Exception as e:
-        raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to read file: {str(e)}"
-                    )
+    await _validate_request(test_id, student_no, session)
+    contents = await _validate_file(file)
 
     print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
-
-    # ======== DOCUMENT SCANNING ========
-    DOCUMENT_SCANNER = DocumentScanner()
-    scanned_page = DOCUMENT_SCANNER.scan_page(contents)
-
-    # ======== BOX SEGMENTING ========
-    BOX_SEGMENTER = BoxSegmenter()
-    segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
-    processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
-    
-    print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
-
-    # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    paper = session.exec(
-                select(TestPaperInstance).where(
-                    TestPaperInstance.test_id == test_id,
-                    TestPaperInstance.student_no == student_no
-                )).first()
-    if not paper:
-        paper = TestPaperInstance(
-                    test_id=test_id,
-                    student_no=student_no,
-                    is_done_rendering=False
-                    )
-        session.add(paper)
-        session.commit()
-        session.refresh(paper)
+    processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
 
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
 
     return {
-        "num_boxes": len(processed_list),
-        "boxes": boxes_info,
-        }
+            "num_boxes": len(processed_list),
+            "boxes": boxes_info,
+            }
 
 
 @router.post("/{test_id}/{student_no}/commit_boxes")
@@ -608,6 +504,39 @@ def delete_student_answer(
 
 # ==============================
 #region Auxiliary functions    
+async def _validate_request(test_id: str, student_no: str, session: Session):
+    if not session.get(TestInstance, test_id):
+        raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
+    if not session.get(Student, student_no):
+        raise HTTPException(status_code=404, detail=f"Student with ID '{student_no}' not found")
+
+
+async def _validate_file(file: UploadFile) -> bytes:
+    if not file or not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    if not IMAGE_MODIFIER.validate_file_extension(file.filename):
+        raise HTTPException(status_code=415, detail=f"Unsupported file format. Got: {file.filename}")
+    contents = await file.read()
+    if len(contents) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+    return contents
+
+
+async def _scan_and_segment(contents: bytes, num_boxes: int) -> list[bytes]:
+    # ======== DOCUMENT SCANNING ========
+    DOCUMENT_SCANNER = DocumentScanner()
+    scanned_page = DOCUMENT_SCANNER.scan_page(contents)
+
+    # ======== BOX SEGMENTING ========
+    BOX_SEGMENTER = BoxSegmenter()
+    segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
+    processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+    
+    print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
+
+    return processed_list
+
+
 def _label_save_boxes(
                 test_id: str,
                 student_no: str,
