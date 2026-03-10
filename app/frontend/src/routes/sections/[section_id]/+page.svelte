@@ -68,9 +68,9 @@
 						<Dialog.Trigger class="button-secondary">
 							<MdiEdit class="size-4"/>
 						</Dialog.Trigger>
-						<EditStudent section_id={data.section_id}
+						<EditStudent bind:section_id={data.section_id}
 													student_no={student.student_no}
-													name={student.name}/>
+													bind:name={student.name}/>
 					</Dialog.Root>
 				</span>
 				<h5>{student.student_no}</h5>

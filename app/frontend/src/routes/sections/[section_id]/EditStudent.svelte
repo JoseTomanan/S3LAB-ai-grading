@@ -2,7 +2,7 @@
   import { API_BASE_URL } from '$lib/constants.ts';
   import { onMount } from 'svelte';
 
-  const { section_id, student_no, name } = $props();
+  let { section_id = $bindable(), student_no, name = $bindable() } = $props();
 
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import * as Select from "$lib/components/ui/select/index.ts";
@@ -19,7 +19,7 @@
 
   let isRequestLoading = $state(false);
 
-  let formName: string = $state(name);
+  let formName: string = $state(name.slice());
   let formSectionId: string = $state(section_id.toString())
 
   let isWantsToDelete: boolean = $state(false);
@@ -74,7 +74,9 @@
       switch (response.status) {
         case 200:
           alert("Student updated successfully!");
-          window.location.reload();
+          // window.location.reload();
+          name = formName;
+          section_id = Number(formSectionId);
           break;
         default:
           alert(`${response.status} ${response.statusText}`);
@@ -94,7 +96,8 @@
       switch (response.status) {
         case 204:
           alert("Student deleted successfully!");
-          window.location.reload();
+          section_id = -1;
+          // window.location.reload();
           break;
         default:
           alert(`${response.status} ${response.statusText}`);
