@@ -180,22 +180,24 @@
     </Button>
 
   {:else}
-    <h3>Review segmentation</h3>
-    <div class="flex flex-row w-full">
+    <div class="flex flex-row w-full gap-x-1">
       <Button variant="outline"
+              class="flex-1"
               onclick={() => validateAndCommit(true)}>
-        Accept
+        Accept segmentation
       </Button>
-      <button class="button-destructive"
+      <button class="button-destructive text-sm"
               onclick={() => validateAndCommit(false)}>
         Discard
       </button>
     </div>
     
     {#each supposedScans as supposedScan}
-      <div class="">
-        <h4>{supposedScan.item_number}</h4>
-        <img class=""
+      <div class="relative border border-border">
+        <h4 class="absolute inset-0 bg-white/80">
+          {supposedScan.item_number}
+        </h4>
+        <img class="block"
               src={`${API_BASE_URL}${supposedScan.image_directory}`}
               alt={supposedScan.item_number}
               />
