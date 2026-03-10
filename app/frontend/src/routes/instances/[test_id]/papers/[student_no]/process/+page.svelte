@@ -27,7 +27,7 @@
 
   let isAskingForValidation: boolean = $state(false);
 
-  let supposedScans: string[] = $state([]);
+  let supposedScans: {index: number, image_directory: string, item_number: string}[] = $state([]);
 
 
   function getImageFromComponent(imageDataUrl: string) {
@@ -79,11 +79,55 @@
     const formData = new FormData();
     formData.append('file', uploadableFile);
 
-    // TODO: rest of function
+    try {
+      const response = await fetch(
+            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
+            { method: "POST", body: formData, }
+            );
+
+      switch (response.status) {
+        case 200:
+          const result = await response.json();
+          console.log(result);
+          supposedScans = result.boxes ?? [];
+          isAskingForValidation = true;
+          break;
+        default:
+          alert(`${response.status} ${response.statusText}`);
+      }
+    } catch(e) {
+      alert("Failed to send raw image for processing:\n"+e);
+    } finally {
+      isOperationOngoing = false;
+    }
   }
 
   async function validateAndCommit(accept: boolean) {
-    // TODO: function
+    if (accept) {
+      console.log(supposedScans);
+
+      const response = await fetch(
+            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
+            {
+              method: "POST",
+              headers: {'Content-Type': 'application/json',},
+              body: JSON.stringify({
+                "boxes": supposedScans,
+              }),
+            }
+          );
+      switch (response.status) {
+        case 200:
+          alert("Review has been accepted.");
+          window.location.reload();
+          break;
+        default:
+          alert(`${response.status} ${response.statusText}`);
+      }
+      return;
+    }
+
+    // TODO: handle the otherwise case
   }
 </script>
 
@@ -91,7 +135,7 @@
 <div class="flex flex-col gap-y-2">
   <span class="flex flex-row justify-between items-baseline [&>h5]:opacity-60">
     <h1>Process image</h1>
-    <h5>Student no. {data.student_no}</h5>
+    <h5>For {data.student_no}</h5>
   </span>
   {#if isAskingForValidation === false}
     <div class="flex flex-row gap-2 min-w-0">
@@ -136,18 +180,27 @@
     </Button>
 
   {:else}
-    <h3>Scanned document</h3>
-    <img src=""
-          alt="Scanned document"
-          />
-    <h3>Detected labels:</h3>
-    <h5>haha</h5>
-    <div class="w-full">
-      <Button variant="outline"></Button>
-      <button class="button-destructive">
+    <h3>Review segmentation</h3>
+    <div class="flex flex-row w-full">
+      <Button variant="outline"
+              onclick={() => validateAndCommit(true)}>
+        Accept
+      </Button>
+      <button class="button-destructive"
+              onclick={() => validateAndCommit(false)}>
         Discard
       </button>
     </div>
+    
+    {#each supposedScans as supposedScan}
+      <div class="">
+        <h4>{supposedScan.item_number}</h4>
+        <img class=""
+              src={`${API_BASE_URL}${supposedScan.image_directory}`}
+              alt={supposedScan.item_number}
+              />
+      </div>
+    {/each}
   {/if}
 </div>
 
