@@ -8,7 +8,7 @@ from models import *
 from schemas import *
 from database import create_db_and_tables, get_session
 
-from services.utility import *
+from logic.utility import *
 
 from routers import sections, students, test_instances, test_items, student_answers
 

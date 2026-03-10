@@ -1,8 +1,8 @@
 from pickletools import bytes8
 import numpy as np
 import cv2
-from services.document_scanner import DocumentScanner, NORMAL_SIZE
-from services.ai_interface import AIAnswerEvaluator
+from logic.document_scanner import DocumentScanner, NORMAL_SIZE
+from logic.ai_interface import AIAnswerEvaluator
 
 
 AREA = NORMAL_SIZE ** 2
