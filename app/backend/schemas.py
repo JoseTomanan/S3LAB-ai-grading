@@ -125,10 +125,12 @@ class StudentAnswerSummary(BaseModel):
     ai_evaluation: str
     is_done_rendering: bool
 
-class CommitBoxesRequest(BaseModel):
+class BoxesItem(BaseModel):
     index: int
     image_directory: str
     item_number: str
+class CommitBoxesRequest(BaseModel):
+    boxes: list[BoxesItem]
 #endregion
 # ==============================
 
