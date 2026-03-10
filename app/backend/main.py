@@ -25,7 +25,10 @@ app = FastAPI(
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
+        # The allow_credentials parameter controls whether browsers are allowed to send credentials 
+        # (such as cookies, authorization headers, or TLS client certificates) along with cross-origin requests.
+        # Here, we set it to False so that credentials will not be accepted in CORS requests.
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
         )
