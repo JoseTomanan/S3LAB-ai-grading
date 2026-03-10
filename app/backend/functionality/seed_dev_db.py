@@ -10,9 +10,10 @@ import sys
 import os
 from pathlib import Path
 
+
+
 # ==============================
-# PATH SETUP (works from any cwd)
-# ==============================
+#region PATH SETUP (works from any cwd)
 script_dir = Path(__file__).resolve().parent
 backend_dir = script_dir.parent  # app/backend
 
@@ -33,18 +34,22 @@ from models import (
 
 from sqlmodel import delete
 import warnings
+#endregion
+# ==============================
+
+
 
 # ==============================
-# MOCK DATA
-# ==============================
+#region MOCK DATA
 MOCK_DATA = {
         "sections": [
             {"section_id": 1, "section": "3-Rizal"},
             {"section_id": 2, "section": "3-Aguinaldo"}
         ],
         "students": [
-            {"student_no": "202160151", "name": "Mohammad Hamdi Tuan", "section_id": 1},
-            {"student_no": "202011111", "name": "Jose Ernesto Tomanan", "section_id": 1},
+            {"student_no": "201900000", "name": "Matthew McConaughey", "section_id": 1},
+            {"student_no": "201911111", "name": "Ricci Paolo Rivero", "section_id": 1},
+            {"student_no": "201922222", "name": "Riccinho Riverinho", "section_id": 1},
             {"student_no": "202022222", "name": "Gabriel Abilla", "section_id": 2},
             {"student_no": "202033333", "name": "David Salon", "section_id": 2}
         ],
@@ -82,21 +87,38 @@ MOCK_DATA = {
                 "expected_answer_rubric_questions": "Paris [1pt]"
             },
             {
+                "item_id": 5,
+                "test_id": "3-Rizal_Seatwork-1",
+                "label": "2b",
+                "question": "What is the full name of the Filipino national hero?",
+                "is_problem_solving": False,
+                "expected_answer_rubric_questions": "Jose Protacio Rizal Mercado y Alonso Realonda [1pt]"
+            },
+            {
                 "item_id": 3,
                 "test_id": "3-Aguinaldo_Quiz-1",
                 "label": "1",
+                "question": "What is the result of 1/2 + 1/3?",
+                "is_problem_solving": False,
+                "expected_answer_rubric_questions": "5/6 [2pt]"
+            },
+            {
+                "item_id": 4,
+                "test_id": "3-Aguinaldo_Quiz-1",
+                "label": "2",
                 "question": "Calculate the area of a circle with radius 7 cm",
                 "is_problem_solving": True,
                 "expected_answer_rubric_questions": "Correct formula [2pts]; Correct substitution [1pt]"
             }
         ]
         }
+#endregion
+# ==============================
 
 
 
 # ==============================
-# SEEDING LOGIC
-# ==============================
+#region SEEDING LOGIC
 def seed_dev_database():
     """Reset database and insert mock development data"""
     # SAFETY CHECK: Block production seeding
@@ -151,12 +173,11 @@ def seed_dev_database():
         raise
     finally:
         session.close()
-
-
-
+#endregion
 # ==============================
-# CLI EXECUTION
-# ==============================
+
+
+
 if __name__ == "__main__":
     try:
         seed_dev_database()
