@@ -12,10 +12,10 @@ from models import *
 from schemas import *
 from database import get_session
 
-from services.box_segmenter import BoxSegmenter
-from services.document_scanner import DocumentScanner
+from logic.box_segmenter import BoxSegmenter
+from logic.document_scanner import DocumentScanner
 
-from services.utility import *
+from logic.utility import *
 
 
 router = APIRouter()
@@ -92,6 +92,123 @@ async def process_student_answer_image(
         "num_boxes": len(processed_list),
         "boxes": boxes_info,
         }
+
+
+@router.post("/{test_id}/{student_no}/label_save_boxes")
+async def scan_then_label_save_boxes(
+                test_id: str,
+                student_no: str,
+                file: UploadFile = File(...),
+                num_boxes: Optional[int] = Query(None), 
+                session: Session = Depends(get_session)
+                ):
+    """Process raw student assessment image through CV pipeline"""
+    instance = session.get(TestInstance, test_id)
+    if not instance:
+        raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Test instance '{test_id}' not found"
+                    )
+    
+    student = session.get(Student, student_no)
+    if not student:
+        raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Student with ID '{student_no}' not found"
+                    )
+    
+    if not file or not file.filename:
+        raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No file provided"
+                    )
+    if not IMAGE_MODIFIER.validate_file_extension(file.filename):
+        raise HTTPException(
+                    status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                    detail=f"Unsupported file format. Allowed: .jpg, .jpeg, .png. Got: {file.filename}"
+                    )
+    try:
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Uploaded file is empty"
+                        )
+    except Exception as e:
+        raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read file: {str(e)}"
+                    )
+
+    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
+
+    # ======== DOCUMENT SCANNING ========
+    DOCUMENT_SCANNER = DocumentScanner()
+    scanned_page = DOCUMENT_SCANNER.scan_page(contents)
+
+    # ======== BOX SEGMENTING ========
+    BOX_SEGMENTER = BoxSegmenter()
+    segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
+    processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+    
+    print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
+
+    # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
+    paper = session.exec(
+                select(TestPaperInstance).where(
+                    TestPaperInstance.test_id == test_id,
+                    TestPaperInstance.student_no == student_no
+                )).first()
+    if not paper:
+        paper = TestPaperInstance(
+                    test_id=test_id,
+                    student_no=student_no,
+                    is_done_rendering=False
+                    )
+        session.add(paper)
+        session.commit()
+        session.refresh(paper)
+
+    print(f"INTERNAL:\tProceeding to labeling the boxes.")
+    boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
+
+    return {
+        "num_boxes": len(processed_list),
+        "boxes": boxes_info,
+        }
+
+
+@router.post("/{test_id}/{student_no}/commit_boxes")
+async def commit_boxes_endpoint(
+                test_id: str,
+                student_no: str,
+                request_body: CommitBoxesRequest,
+                session: Session = Depends(get_session)
+                ):
+    test_exists = session.exec(
+                    select(TestPaperInstance)
+                    .where(TestPaperInstance.test_id == test_id)
+                    ).first()
+    if not test_exists:
+        raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Test with ID '{test_id}' not found"
+                    )
+
+    student_exists = session.exec(
+                        select(Student)
+                        .where(Student.student_no == student_no)
+                        ).first()
+    if not student_exists:
+        raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Student with student_no '{student_no}' not found"
+                    )
+    
+    boxes_info = [box.model_dump() for box in request_body.boxes]
+    _commit_boxes(boxes_info, test_id, student_no, session)
+
+    return Response(status_code=200)
 
 
 @router.patch("/{test_id}/{student_no}/{item_id}")
