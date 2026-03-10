@@ -494,10 +494,9 @@ def delete_student_answer(
 def _label_save_boxes(
                 test_id: str,
                 student_no: str,
-                paper: TestPaperInstance,
                 processed_list: list[bytes],
                 session: Session
-                ) -> dict:
+                ) -> list[dict]:
     boxes_info = []
     for i, img_bytes in enumerate[bytes](processed_list):
         # Extract item number using AI
