@@ -4,13 +4,12 @@
 
   const { section_id, student_no, name } = $props();
 
-  import MdiDelete from "~icons/mdi/delete";
-
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import * as Select from "$lib/components/ui/select/index.ts";
   import Button from '$lib/components/ui/button/button.svelte';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
+	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   
   import type { Section } from '$lib/index.ts';
 	import SafeDelete from '$lib/components/SafeDelete.svelte';
@@ -18,7 +17,8 @@
   let isSectionsLoading = $state(false);
   let dropdownSections: Section[] = $state([]);
 
-  let isLoading = $state(false);
+  let isRequestLoading = $state(false);
+
   let formName: string = $state(name);
   let formSectionId: string = $state(section_id.toString())
 
@@ -54,15 +54,56 @@
   });
 
   async function editStudent() {
-    if (formName == name) {
+    if (formName == name && formSectionId == section_id.toString()) {
       alert("No changes were made.");
       return;
     }
-    // TODO: function
+    isRequestLoading = true;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/students/${student_no}`, {
+        method: "PATCH",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formName,
+          section_id: parseInt(formSectionId),
+        })
+      });
+
+      switch (response.status) {
+        case 200:
+          alert("Student updated successfully!");
+          window.location.reload();
+          break;
+        default:
+          alert(`${response.status} ${response.statusText}`);
+      }
+    } catch (e) {
+      alert("Failed to edit student: " + e);
+    } finally {
+      isRequestLoading = false;
+    }
   }
 
   async function deleteStudent() {
-    // TODO: function
+    isRequestLoading = true;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/students/${student_no}`, {method: "DELETE",});
+
+      switch (response.status) {
+        case 204:
+          alert("Student deleted successfully!");
+          window.location.reload();
+          break;
+        default:
+          alert(`${response.status} ${response.statusText}`);
+      }
+    } catch (e) {
+      alert("Failed to delete student: " + e);
+    } finally {
+      isRequestLoading = false;
+    }
   }
 </script>
 
@@ -84,8 +125,8 @@
   <Select.Root type="single"
                 name="section"
                 bind:value={formSectionId}>
-    <Select.Trigger class="w-full text-base md:text-sm" disabled={isLoading}>
-      {isLoading ? "Loading..." : triggerContent}
+    <Select.Trigger class="w-full text-base md:text-sm" disabled={isSectionsLoading}>
+      {isSectionsLoading ? "Loading..." : triggerContent}
     </Select.Trigger>
     <Select.Content>
       {#each dropdownSections as s (s.section_id)}
@@ -100,9 +141,12 @@
     <div class="flex flex-wrap gap-x-1 w-full">
       <Button variant="outline"
               class="flex-1"
-              disabled={isLoading}
+              disabled={isRequestLoading}
               onclick={() => editStudent()}>
-        Save changes
+        {isRequestLoading ? "Saving..." : "Save changes"}
+        {#if isRequestLoading}
+          <Spinner />
+        {/if}
       </Button>
       <SafeDelete toggle={isWantsToDelete}
                   onDelete={deleteStudent}
