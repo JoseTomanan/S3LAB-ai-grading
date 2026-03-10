@@ -133,7 +133,8 @@
 
 
 <div class="flex flex-col gap-y-2">
-  <span class="flex flex-row justify-between items-baseline [&>h5]:opacity-60">
+  <span class="flex flex-row justify-between items-baseline
+            [&>h1]:font-semibold [&>h5]:opacity-60">
     <h1>Process image</h1>
     <h5>For {data.student_no}</h5>
   </span>

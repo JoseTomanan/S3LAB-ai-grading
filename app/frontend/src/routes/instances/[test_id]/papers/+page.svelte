@@ -44,7 +44,7 @@
 
 
 <div class="space-y-3 overflow-visible">
-  <h1 class="text-left">Test papers</h1>
+  <h1 class="text-left font-semibold">Test papers</h1>
   {#if isPageLoading}
     {#each { length: 3 } as _}
       <Skeleton class="h-10 w-full grayscale-100"/>

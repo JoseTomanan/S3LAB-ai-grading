@@ -79,7 +79,7 @@
 
 
 <div class="flex flex-col space-y-2">
-  <h2 class="font-bold">Manually crop image</h2>
+  <h1 class="text-left font-semibold">Manually crop image</h1>
   <h6>{data.test_id} &middot; {data.student_no} &middot; ITEM_ID {item_id}</h6>
   <span class="flex flex-row space-x-1 w-full">
     <Input id="croppable"
