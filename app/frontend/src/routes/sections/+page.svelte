@@ -38,10 +38,6 @@
 
 <div class="container">
 	<span class="flex flex-row items-center justify-between mb-4">
-		<button class="button-secondary" onclick={() => {}}>
-			<MdiPeopleAdd class="size-6"/>
-		</button>
-		<h1 class="italic">Sections</h1>
     <span class="flex flex-row gap-x-2">
       <a href="/">
         <IconHome class="size-6"/>
@@ -50,6 +46,10 @@
         <MdiPapersOutline class="size-6"/>
       </a>
     </span>
+		<h1 class="italic">Sections</h1>
+		<button class="button-secondary" onclick={() => {}}>
+			<MdiPeopleAdd class="size-6"/>
+		</button>
 	</span>
 	<div class="flex flex-col gap-3">
 		{#if isPageLoading}

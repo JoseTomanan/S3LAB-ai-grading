@@ -42,13 +42,6 @@
 
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
-    <Dialog.Root>
-      <Dialog.Trigger class="button-primary">
-        <MdiPaperAddOutline class="size-6"/>
-      </Dialog.Trigger>
-      <AddTestInstance />
-    </Dialog.Root>
-    <h1>Test instances</h1>
     <span class="flex flex-row gap-x-2">
       <a href="/">
         <IconHome class="size-6"/>
@@ -57,6 +50,13 @@
         <MdiPeopleOutline class="size-6"/>
       </a>
     </span>
+    <h1>Test instances</h1>
+    <Dialog.Root>
+      <Dialog.Trigger class="button-primary">
+        <MdiPaperAddOutline class="size-6"/>
+      </Dialog.Trigger>
+      <AddTestInstance />
+    </Dialog.Root>
   </span>
   <div class="flex flex-col gap-3">
     {#if isPageLoading}
