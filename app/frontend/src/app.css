@@ -94,7 +94,7 @@
     background-color: var(--card);
     color: var(--card-foreground);
     @apply rounded-xs;
-		@apply border border-border/50;
+		@apply border border-border/20;
     @apply px-3;
     @apply py-1.5;
 	}
@@ -123,7 +123,7 @@
     @apply py-1 px-2;
     @apply rounded;
     @apply shadow-xs;
-    @apply ring-2 ring-border border-0;
+    @apply ring ring-border border-0;
     @apply cursor-pointer;
   }
   
