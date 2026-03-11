@@ -6,6 +6,7 @@
   import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
   import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
   import MdiPeopleOutline from '~icons/mdi/people-outline';
+  import IconHome from '~icons/mdi/home-outline';
   
   import type { TestInstance } from '$lib/index.ts';
   
@@ -40,19 +41,24 @@
 
 
 <div class="container">
-  <span class="flex flex-row items-center justify-between mb-2">
-    <a href="/sections">
-      <MdiPeopleOutline class="size-8"/>
-    </a>
-    <h1>Test instances</h1>
+  <span class="flex flex-row items-center justify-between mb-4">
     <Dialog.Root>
       <Dialog.Trigger class="button-primary">
         <MdiPaperAddOutline class="size-6"/>
       </Dialog.Trigger>
       <AddTestInstance />
     </Dialog.Root>
+    <h1>Test instances</h1>
+    <span class="flex flex-row gap-x-2">
+      <a href="/">
+        <IconHome class="size-6"/>
+      </a>
+      <a href="/sections">
+        <MdiPeopleOutline class="size-6"/>
+      </a>
+    </span>
   </span>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-3">
     {#if isPageLoading}
       {#each { length: 2 } as _}
         <Skeleton class="h-16 w-full grayscale-100"/>

@@ -4,6 +4,7 @@
 	import { onMount } from "svelte";
 	import MdiPapersOutline from "~icons/mdi/papers-outline";
 	import MdiPeopleAdd from "~icons/mdi/people-add";
+  import IconHome from '~icons/mdi/home-outline';
 
 	import type { Section, Student } from "$lib/index.ts";
 	import Pagination from "$lib/components/Pagination.svelte";
@@ -36,16 +37,21 @@
 
 
 <div class="container">
-	<span class="flex flex-row items-center justify-between mb-2">
-		<a href="/">
-			<MdiPapersOutline class="size-6"/>
-		</a>
-		<h1 class="italic">Sections</h1>
+	<span class="flex flex-row items-center justify-between mb-4">
 		<button class="button-secondary" onclick={() => {}}>
 			<MdiPeopleAdd class="size-6"/>
 		</button>
+		<h1 class="italic">Sections</h1>
+    <span class="flex flex-row gap-x-2">
+      <a href="/">
+        <IconHome class="size-6"/>
+      </a>
+      <a href="/instances">
+        <MdiPapersOutline class="size-6"/>
+      </a>
+    </span>
 	</span>
-	<div class="flex flex-col gap-4">
+	<div class="flex flex-col gap-3">
 		{#if isPageLoading}
       {#each { length: 2 } as _}
         <Skeleton class="h-16 w-full grayscale-100"/>
