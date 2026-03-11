@@ -15,7 +15,7 @@
 
 
 <div class="flex justify-center bg-fixed">
-  <div class="big-container">
+  <div class="app">
     {@render children()}
   </div>
   <span class="fixed bottom-0 left-0 w-full flex space-x-2 items-center justify-end z-50 font-semibold p-2">
