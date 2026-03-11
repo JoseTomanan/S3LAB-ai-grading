@@ -26,9 +26,6 @@ class BoxSegmenter(DocumentScanner):
 
         contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # TODO: use parameter num_boxes
-        # ^^right now it is just getting lost in translation lol
-
         images_good_contours = []
         for c in contours:
             area = cv2.contourArea(c)
@@ -52,12 +49,14 @@ class BoxSegmenter(DocumentScanner):
             raise ValueError("Could not find any boxes.")
         
         print(f"INFO:\tResult # of boxes: {len(images_good_contours)}")
-        
         images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
         
         images_warped = []
         for image in images_good_contours:
             images_warped.append(self._warp_from_original(image, image_original))
+            if len(images_warped) >= num_boxes:
+                print(f"INFO:\tTop {num_boxes} have already been taken. Breaking loop")
+                break
 
         return [self._encode_to_bytes(image) for image in images_warped]
 
