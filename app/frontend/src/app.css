@@ -185,7 +185,7 @@
   .button-outline {
     background-color: var(--card);
     color: var(--card-foreground);
-    text-align: center;
+    /* text-align: center; */
     font-weight: 500;
     @apply py-1 px-2;
     @apply rounded;
@@ -197,7 +197,7 @@
   .button-destructive {
     background-color: var(--destructive);
     color: var(--color-white);
-    text-align: center;
+    /* text-align: center; */
     font-weight: 500;
     @apply py-1 px-2;
     @apply rounded;
