@@ -53,7 +53,7 @@
 
 
 <!-- <div> -->
-  <nav class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow shadow-sidebar-border space-y-3">
+  <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-3">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
