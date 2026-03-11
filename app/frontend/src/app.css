@@ -14,8 +14,75 @@
 @import './lib/styles/theme.css';
 
 /* ============RESPONSIVENESS============ */
-@import './lib/styles/responsiveness.css';
+@theme {
+  --breakpoint-xs: 480px;
+}
 
+.app {
+  width: 100%;
+  padding: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  padding-inline: 1rem;
+  padding-block: 1.5rem;
+}
+
+/* 2xl (Widescreen monitors) */
+@media (max-width: 1536px) {
+  .container {
+    max-width: 1280px;
+  }
+  nav {
+    width: 100%;
+  }
+}
+
+/* xl (Modern laptops, desktops) */
+@media (max-width: 1280px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+/* lg (Laptops) */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+/* md (Tablets) */
+@media (max-width: 768px) {
+  .container,
+  footer,
+  main {
+    max-width: 640px;
+  }
+}
+
+/* sm (Big phones, mini-tablets) */
+@media (max-width: 640px) {
+  .container,
+  footer,
+  nav,
+  main {
+    width: 100%;
+  }
+}
+
+/* xs (Phones) */
+@media (max-width: 475px) {
+  .container,
+  footer,
+  nav,
+  main {
+    width: 100%;
+  }
+}
 
 /* ============BASE============ */
 @layer base {

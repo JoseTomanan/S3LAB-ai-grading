@@ -52,8 +52,8 @@
 </script>
 
 
-<div class="space-y-7 pb-3">
-  <div class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow shadow-sidebar-border space-y-3">
+<!-- <div> -->
+  <nav class="bg-sidebar text-sidebar-foreground p-4 pt-8 shadow shadow-sidebar-border space-y-3">
     <span class="flex flex-row items-center justify-between">
       <button class="p-0 size-8 cursor-pointer"
               onclick={() => history.back()}>
@@ -120,8 +120,8 @@
         </Dialog.Root>
       </span>
     </div>
-  </div>
-  <div class="px-4 pb-6">
+  </nav>
+  <div class="container -mt-4">
     {#if navigating.to}
       <!--  largely untested; 
         FIXME: remove this once verified that this is actually working -->
@@ -130,4 +130,4 @@
       {@render children()}
     {/if}
   </div>
-</div>
+<!-- </div> -->
