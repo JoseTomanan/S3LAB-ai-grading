@@ -1,10 +1,8 @@
 @theme {
-  --font-heading: "Montserrat", sans-serif;
-  --font-sans: "SourceSans3", sans-serif;
-  --font-mono: monospace;
-
   --breakpoint-xs: 480px;
+}
 
+@theme {
   --radius: 0.5rem;
 
   --background: oklch(1 0 0);

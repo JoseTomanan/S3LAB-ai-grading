@@ -1,3 +1,11 @@
+@theme {
+  --font-heading: "Montserrat", sans-serif;
+  --font-sans: "SourceSans3", sans-serif;
+  --font-mono: monospace;
+}
+
+
+/* ============ Imports ============ */
 @font-face {
   font-family: 'SourceSans3';
   src: url('/fonts/SourceSans3-Regular.woff2') format('woff2'); 
