@@ -20,7 +20,7 @@
 </script>
 
 
-<div class="space-y-4 overflow-visible">
+<div class="space-y-3 overflow-visible">
   <h1 class="text-left font-semibold">Test items</h1>
   {#if testItemsContext.isLoading}
     {#each { length: 2 } as _}
@@ -38,9 +38,9 @@
             <AddTestItem test_id={data.test_id} />
           </Dialog.Root>
         </span>
-        <div class="ml-4">
+        <div class="ml-2">
           {#each bigItem.b as smallItem}
-            <span class="flex flex-row items-center justify-between">
+            <span class="flex flex-row items-center justify-between gap-x-0.5">
               <p class="truncate text-ellipsis w-fill">
                 ({smallItem.label}) {smallItem.question}
               </p>
