@@ -163,41 +163,63 @@
 	.button-primary {
     background-color: var(--primary);
     color: var(--primary-foreground);
+    text-align: center;
+    font-weight: 500;
 		@apply py-1 px-2;
 		@apply rounded;
     @apply shadow-xs;
-    @apply cursor-pointer;
+    cursor: pointer;
 	}
 
 	.button-secondary {
     background-color: var(--secondary);
     color: var(--secondary-foreground);
+    text-align: center;
+    font-weight: 500;
 		@apply py-1 px-2;
 		@apply rounded;
     @apply shadow-xs;
-    @apply cursor-pointer;
+    cursor: pointer;
 	}
 
   .button-outline {
     background-color: var(--card);
     color: var(--card-foreground);
+    text-align: center;
+    font-weight: 500;
     @apply py-1 px-2;
     @apply rounded;
     @apply shadow-xs;
     @apply ring ring-border border-0;
-    @apply cursor-pointer;
+    cursor: pointer;
   }
   
   .button-destructive {
     background-color: var(--destructive);
     color: var(--color-white);
+    text-align: center;
     font-weight: 500;
     @apply py-1 px-2;
     @apply rounded;
     @apply shadow-xs;
-    @apply cursor-pointer;
+    cursor: pointer;
   }
   .button-destructive:hover {
     opacity: 80%;
   }
+}
+
+/* ============ANIMATIONS============ */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.slow-spin {
+  animation: spin 15s linear infinite;
+  display: inline-block;
 }
