@@ -74,19 +74,36 @@ def _get_robust_aspect_ratio(coords):
 # ================================
 class DocumentScanner:
     def scan_page(self,
-                    image_bytes: bytes
+                    image_bytes: bytes,
+                    debug: bool = False,
                     ) -> bytes:
         """Take unscanned image, return scanned image."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_image(image)
+        if debug:
+            self.save_image(
+                        self._encode_to_bytes(image_cannied),
+                        "./TEMP/output/DEBUG_CANNY.jpg"
+                        )
 
         contours, _ = cv2.findContours(image_cannied, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
 
         image_good_contour = None
-        for c in contours:
+        for i, c in enumerate(contours):
             perimeter = cv2.arcLength(c, True)
             approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            if debug:
+                debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
+                cv2.drawContours(debug_img, [approximate], -1, (0, 255, 0), 3)
+                cv2.putText(
+                            debug_img, f"verts={len(approximate)} area={cv2.contourArea(c):.0f}",
+                            (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
+                            )
+                self.save_image(
+                            self._encode_to_bytes(debug_img),
+                            f"./TEMP/output/DEBUG_CONTOUR_{i}.jpg"
+                            )
             if len(approximate) == 4:
                 image_good_contour = approximate.reshape(4,2)
                 break
@@ -167,6 +184,9 @@ class DocumentScanner:
                                     (int(NORMAL_SIZE*ratio), NORMAL_SIZE)
                                     )
         iterated_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+        #### unstable, removed temporarily; FIXME: make fail-safe
+        # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        # iterated_img = clahe.apply(iterated_img)
         iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
         iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
         
