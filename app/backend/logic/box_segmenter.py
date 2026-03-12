@@ -1,19 +1,18 @@
-from pickletools import bytes8
 import numpy as np
 import cv2
 from logic.document_scanner import DocumentScanner, NORMAL_SIZE
 from logic.ai_interface import AIAnswerEvaluator
 
 
+
 AREA = NORMAL_SIZE ** 2
+print(f"INFO:\tArea threshold: {AREA}")
 MIN_AREA = AREA * 0.01
 MAX_AREA = AREA * 0.90
 
 
 
-# ================================
 #region Class
-# ================================
 class BoxSegmenter(DocumentScanner):
     def get_boxes(self, 
                     image_bytes: bytes,
@@ -24,7 +23,16 @@ class BoxSegmenter(DocumentScanner):
         image_original, image_cannied = self._regularize_forgivingly(image)
         image_dilated = self._dilate_edges(image_cannied)
 
+        ##### unstable, nabibiktima kahit handdrawn lines on white paper. 
+        ##### FIXME: make fail-safe
+        # image_dilated = self._filter_only_handdrawn_lines(image_dilated)
+        self.save_image(
+                    self._encode_to_bytes(image_dilated),
+                    "./TEMP/output/DEBUG_handdrawnlinesfiltered.jpg"
+                    )
+
         contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         images_good_contours = []
         for c in contours:
@@ -77,6 +85,20 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
+   
+    def _filter_only_handdrawn_lines(self, image: cv2.typing.MatLike, h_kernel_length: int = 60) -> cv2.typing.MatLike:
+        """Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content."""
+        # Detect horizontal lines: open with a wide horizontal kernel.
+        # Only structures wider than h_kernel_length survive — i.e. ruled lines.
+        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+        horizontal_lines = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
+
+        # Dilate the detected ruled lines slightly to ensure full removal
+        cleanup_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        ruled_lines = cv2.dilate(horizontal_lines, cleanup_kernel, iterations=1)
+
+        # Subtract ruled lines from the edge image
+        return cv2.subtract(image, ruled_lines)
 
     def _load_array(self, image_bytes: bytes) -> np.ndarray:
         """Convert bytes to OpenCV image with validation"""
@@ -105,14 +127,30 @@ class BoxSegmenter(DocumentScanner):
 
 
 if __name__ == "__main__":
+    # ================ DEFINITIONS ================
+    FILENAME = "testWhiteB.jpeg"
+    
+
+    # ================ ACTUAL TEST ================
+    GET_INPUT = lambda x : f"./TEMP/input/{x}"
+    GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
+    _onlyfilename = FILENAME.split(".")[0]
     BOX_SEGMENTER = BoxSegmenter()
     AI_EVALUATOR = AIAnswerEvaluator()
     
-    image_before_before = BOX_SEGMENTER.load_image("./TEMP/input/testA.jpeg")
-    image_before = BOX_SEGMENTER.scan_page(image_before_before)
-    # image_before = BOX_SEGMENTER.load_image("./TEMP/input/alreadyscannedA.jpg")
+    image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
+
+    BOX_SEGMENTER.save_image(
+                image_before,
+                GET_OUTPUT(f"{_onlyfilename}_scan.jpg"),
+                )
+    
     images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=2)
 
     for i in range(len(images_after_box)):
-        label = AI_EVALUATOR.get_item_number(images_after_box[i])
-        BOX_SEGMENTER.save_image(images_after_box[i], f"./TEMP/output/+test{i}_itemlabel_{label}.jpg")
+        label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
+        BOX_SEGMENTER.save_image(
+                    images_after_box[i],
+                    GET_OUTPUT(f"{_onlyfilename}_box{i}_item{label}.jpg")
+                    )
