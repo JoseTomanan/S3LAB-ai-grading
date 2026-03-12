@@ -80,15 +80,6 @@ class DocumentScanner:
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_image(image)
         
-        # Filter contours by area, then close
-        contours_raw, _ = cv2.findContours(image_cannied, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        mask = np.zeros_like(image_cannied)
-        for c in contours_raw:
-            if cv2.arcLength(c, False) > 100:
-                cv2.drawContours(mask, [c], -1, 255, 2)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
-        image_cannied = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_cannied),
@@ -198,6 +189,14 @@ class DocumentScanner:
                             .apply(iterated_img)    # CLAHE
         iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
         iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
+        
+        contours_raw, _ = cv2.findContours(iterated_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        mask = np.zeros_like(iterated_img)
+        for c in contours_raw:
+            if cv2.arcLength(c, False) > 100:
+                cv2.drawContours(mask, [c], -1, 255, 2)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
+        iterated_img = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         
         return [original_img, iterated_img]
     
