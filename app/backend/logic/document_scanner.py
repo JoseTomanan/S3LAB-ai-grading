@@ -224,9 +224,21 @@ class DocumentScanner:
 
 
 if __name__ == "__main__":  
+    # ================ DEFINITIONS ================
+    FILENAME = "testB.jpg"
+    GET_INPUT = lambda x : f"./TEMP/input/{x}"
+    GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
+    
+
+    # ================ ACTUAL TEST ================
+    _onlyfilename = FILENAME.split(".")[0]
+    
     DOCUMENT_SCANNER = DocumentScanner()
     
-    image_before = DOCUMENT_SCANNER.load_image("./TEMP/input/unscannedC.jpeg")
-    image_after = DOCUMENT_SCANNER.scan_page(image_before)
+    image_before = DOCUMENT_SCANNER.load_image(GET_INPUT(FILENAME))
+    image_after = DOCUMENT_SCANNER.scan_page(image_before, debug=True)
 
-    DOCUMENT_SCANNER.save_image(image_after, "./TEMP/output/+test_result.jpg")
+    DOCUMENT_SCANNER.save_image(
+                    image_after,
+                    GET_OUTPUT(f"{_onlyfilename}_scan.jpg")
+                    )
