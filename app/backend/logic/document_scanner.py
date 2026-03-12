@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import math
 
 
 NORMAL_SIZE = 2048
@@ -80,6 +79,16 @@ class DocumentScanner:
         """Take unscanned image, return scanned image."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_image(image)
+        
+        # Filter contours by area, then close
+        contours_raw, _ = cv2.findContours(image_cannied, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        mask = np.zeros_like(image_cannied)
+        for c in contours_raw:
+            if cv2.arcLength(c, False) > 100:
+                cv2.drawContours(mask, [c], -1, 255, 2)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
+        image_cannied = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_cannied),
@@ -93,11 +102,12 @@ class DocumentScanner:
         for i, c in enumerate(contours):
             perimeter = cv2.arcLength(c, True)
             approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            
             if debug:
                 debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
                 cv2.drawContours(debug_img, [approximate], -1, (0, 255, 0), 3)
-                cv2.putText(
-                            debug_img, f"verts={len(approximate)} area={cv2.contourArea(c):.0f}",
+                cv2.putText(debug_img,
+                            f"verts={len(approximate)} area={cv2.contourArea(c):.0f}",
                             (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
                             )
                 self.save_image(
@@ -184,9 +194,8 @@ class DocumentScanner:
                                     (int(NORMAL_SIZE*ratio), NORMAL_SIZE)
                                     )
         iterated_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-        #### unstable, removed temporarily; FIXME: make fail-safe
-        # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        # iterated_img = clahe.apply(iterated_img)
+        iterated_img = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8,8)) \
+                            .apply(iterated_img)    # CLAHE
         iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
         iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
         
