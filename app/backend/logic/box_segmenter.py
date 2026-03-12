@@ -6,7 +6,6 @@ from logic.ai_interface import AIAnswerEvaluator
 
 
 AREA = NORMAL_SIZE ** 2
-print(f"INFO:\tArea threshold: {AREA}")
 MIN_AREA = AREA * 0.01
 MAX_AREA = AREA * 0.90
 
@@ -135,17 +134,12 @@ if __name__ == "__main__":
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     _onlyfilename = FILENAME.split(".")[0]
+    
     BOX_SEGMENTER = BoxSegmenter()
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-
-    BOX_SEGMENTER.save_image(
-                image_before,
-                GET_OUTPUT(f"{_onlyfilename}_scan.jpg"),
-                )
-    
     images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=2)
 
     for i in range(len(images_after_box)):
