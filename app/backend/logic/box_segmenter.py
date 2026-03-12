@@ -27,7 +27,7 @@ class BoxSegmenter(DocumentScanner):
         # image_dilated = self._filter_only_handdrawn_lines(image_dilated)
         self.save_image(
                     self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG_handdrawnlinesfiltered.jpg"
+                    "./TEMP/output/DEBUG_regularize_dilate.jpg"
                     )
 
         contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -39,7 +39,7 @@ class BoxSegmenter(DocumentScanner):
             if MIN_AREA < area < MAX_AREA:
                 perimeter = cv2.arcLength(c, True)
                 approximate = cv2.approxPolyDP(c, 0.06*perimeter, True)
-                if len(approximate == 4):
+                if len(approximate) == 4:
                     approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
@@ -139,8 +139,8 @@ if __name__ == "__main__":
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=2)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before)
+    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3)
 
     for i in range(len(images_after_box)):
         label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
