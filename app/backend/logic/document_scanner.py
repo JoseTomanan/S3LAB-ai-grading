@@ -182,6 +182,10 @@ class DocumentScanner:
         iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
         iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
         
+        #### This block finds external contours in the canny-processed image, filters out small contours
+        #### (by arc length), draws the remaining contours onto a mask, and then applies a morphological 
+        #### closing operation to fill small holes/gaps in the mask. The result is a cleaner binary image 
+        #### emphasizing large prominent edges and shapes, which is useful for robust contour detection later.
         contours_raw, _ = cv2.findContours(iterated_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         mask = np.zeros_like(iterated_img)
         for c in contours_raw:
@@ -232,7 +236,7 @@ class DocumentScanner:
 
 if __name__ == "__main__":  
     # ================ DEFINITIONS ================
-    FILENAME = "testB.jpg"
+    FILENAME = "testRuledB.jpg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
