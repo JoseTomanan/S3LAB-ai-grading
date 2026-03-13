@@ -23,9 +23,6 @@ class BoxSegmenter(DocumentScanner):
         image_original, image_cannied = self._regularize_forgivingly(image)
         image_dilated = self._dilate_edges(image_cannied)
 
-        ##### unstable, nabibiktima kahit handdrawn lines on white paper. 
-        ##### FIXME: make fail-safe
-        # image_dilated = self._filter_only_handdrawn_lines(image_dilated)
         self.save_image(
                     self._encode_to_bytes(image_dilated),
                     "./TEMP/output/DEBUG_regularize_dilate.jpg"
@@ -87,7 +84,10 @@ class BoxSegmenter(DocumentScanner):
         return image_closed
    
     def _filter_only_handdrawn_lines(self, image: MatLike, h_kernel_length: int = 60) -> MatLike:
-        """Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content."""
+        """
+        Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
+        Currently unstable, nabibiktima kahit handdrawn lines on white paper. FIXME: make fail-safe
+        """
         # Detect horizontal lines: open with a wide horizontal kernel.
         # Only structures wider than h_kernel_length survive — i.e. ruled lines.
         h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
