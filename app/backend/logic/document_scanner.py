@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+from cv2.typing import MatLike
 
 NORMAL_SIZE = 2048
 
@@ -70,7 +70,6 @@ def _get_robust_aspect_ratio(coords):
 
 # ================================
 #region Class
-# ================================
 class DocumentScanner:
     def scan_page(self,
                     image_bytes: bytes,
@@ -95,12 +94,7 @@ class DocumentScanner:
             approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
             
             if debug:
-                debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
-                cv2.drawContours(debug_img, [approximate], -1, (0, 255, 0), 3)
-                cv2.putText(debug_img,
-                            f"verts={len(approximate)} area={cv2.contourArea(c):.0f}",
-                            (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
-                            )
+                debug_img = self._highlight_contours(image_cannied, approximate, c)
                 self.save_image(
                             self._encode_to_bytes(debug_img),
                             f"./TEMP/output/DEBUG_CONTOUR_{i}.jpg"
@@ -155,7 +149,7 @@ class DocumentScanner:
 
 
     #region Private functions
-    def _decode_bytes(self, image_bytes: bytes) -> cv2.typing.MatLike:
+    def _decode_bytes(self, image_bytes: bytes) -> MatLike:
         """Decode bytes into BGR uint8 array"""
         nparr = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -164,19 +158,17 @@ class DocumentScanner:
             raise ValueError("Failed to decode image bytes")
         return image
     
-
-    def _encode_to_bytes(self, image_matrix: cv2.typing.MatLike) -> bytes:
+    def _encode_to_bytes(self, image_matrix: MatLike) -> bytes:
         """Encode BGR uint8 array back to JPEG bytes"""
         ret, buffer = cv2.imencode('.jpg', image_matrix)
         if not ret:
             raise ValueError("Failed to encode image")
         return buffer.tobytes()
     
-
     def _regularize_image(self,
-                          image_mat: cv2.typing.MatLike,
+                          image_mat: MatLike,
                           canny_thresholds: tuple[int,int] = (75, 200),
-                          ) -> list[cv2.typing.MatLike]:
+                          ) -> list[MatLike]:
         """Step before contour ranking. Resize, greyscale, blur, then canny to reduce noises in image."""
         h, w, _ = image_mat.shape
         ratio = w/h
@@ -200,11 +192,7 @@ class DocumentScanner:
         
         return [original_img, iterated_img]
     
-
-    def _warp_from_original(self, 
-                            screen_contour: cv2.typing.MatLike,
-                            original: cv2.typing.MatLike
-                            ) -> cv2.typing.MatLike:
+    def _warp_from_original(self, screen_contour: MatLike, original: MatLike) -> MatLike:
         """Take given screen contour from original image."""
         approximation = _mapp(screen_contour)
         box_ratio = _get_robust_aspect_ratio(approximation)
@@ -225,6 +213,17 @@ class DocumentScanner:
                                 )
 
         return image_warped
+
+    def _highlight_contours(image_cannied: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
+        """FOR DEBUGGING; Highlight contours and add detected # of verts."""
+        debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(debug_img, [approxPolyDpResult], -1, (0, 255, 0), 3)
+        cv2.putText(debug_img,
+                    f"verts={len(approxPolyDpResult)} area={cv2.contourArea(contour):.0f}",
+                    (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
+                    )
+        return debug_img
+
     #endregion
 
 #endregion
