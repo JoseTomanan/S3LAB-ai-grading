@@ -16,7 +16,8 @@ MAX_AREA = AREA * 0.90
 class BoxSegmenter(DocumentScanner):
     def get_boxes(self, 
                     image_bytes: bytes,
-                    num_boxes: int
+                    num_boxes: int,
+                    debug: bool = False,
                     ) -> list[bytes]:
         """Get best boxes (non-overlapping) from the image given. Note that image is expected to have been scanned already."""
         image = self._decode_bytes(image_bytes)
@@ -25,28 +26,36 @@ class BoxSegmenter(DocumentScanner):
 
         self.save_image(
                     self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG_regularize_dilate.jpg"
+                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
                     )
 
-        contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(image_dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         images_good_contours = []
-        for c in contours:
+        for i, c in enumerate(contours):
             area = cv2.contourArea(c)
             if MIN_AREA < area < MAX_AREA:
                 perimeter = cv2.arcLength(c, True)
                 approximate = cv2.approxPolyDP(c, 0.06*perimeter, True)
-                if len(approximate) == 4:
+                
+                if debug:
+                    debug_img = self._highlight_contours(image_cannied, approximate, c)
+                    self.save_image(
+                                self._encode_to_bytes(debug_img),
+                                f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
+                                )
+                if 4 <= len(approximate) <= 10:
                     approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
                     if 0.25 <= aspect_ratio <= 8:
+                        print(f"INFO:\tAccepted and stored contour {i}")
                         images_good_contours.append(approximate)
                     else:
                         print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
                 else:
-                    print(f"INFO:\tFound not box at approximate={approximate}.")
+                    print(f"INFO:\tFound non-box at approxPolyDP of contour {i}")
             else:
                 print(f"INFO:\tDid not pass for area={area}")
 
@@ -128,7 +137,7 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledB.jpeg"
+    FILENAME = "testRuledA_absurd.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -141,10 +150,10 @@ if __name__ == "__main__":
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
-    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3)
+    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
     for i in range(len(images_after_box)):
-        label=""
+        label="X"
         # label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
         BOX_SEGMENTER.save_image(
                     images_after_box[i],
