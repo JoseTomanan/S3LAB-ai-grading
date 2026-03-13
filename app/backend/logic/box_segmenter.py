@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from cv2.typing import MatLike
 from logic.document_scanner import DocumentScanner, NORMAL_SIZE
 from logic.ai_interface import AIAnswerEvaluator
 
@@ -76,16 +77,16 @@ class BoxSegmenter(DocumentScanner):
         return self._unload_array(img)
 
     #region Auxiliary functions
-    def _regularize_forgivingly(self, image_mat: cv2.typing.MatLike) -> list[cv2.typing.MatLike]:
+    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
         return self._regularize_image(image_mat, canny_thresholds=(30, 150))
     
-    def _dilate_edges(self, image: cv2.typing.MatLike, dilate_size: int = 3) -> cv2.typing.MatLike:
+    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
         kernel = np.ones((dilate_size, dilate_size), np.uint8)
         image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
    
-    def _filter_only_handdrawn_lines(self, image: cv2.typing.MatLike, h_kernel_length: int = 60) -> cv2.typing.MatLike:
+    def _filter_only_handdrawn_lines(self, image: MatLike, h_kernel_length: int = 60) -> MatLike:
         """Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content."""
         # Detect horizontal lines: open with a wide horizontal kernel.
         # Only structures wider than h_kernel_length survive — i.e. ruled lines.
@@ -127,23 +128,24 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testWhiteB.jpeg"
+    FILENAME = "testRuledB.jpeg"
+    GET_INPUT = lambda x : f"./TEMP/input/{x}"
+    GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
 
     # ================ ACTUAL TEST ================
-    GET_INPUT = lambda x : f"./TEMP/input/{x}"
-    GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     _onlyfilename = FILENAME.split(".")[0]
     
     BOX_SEGMENTER = BoxSegmenter()
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
     images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3)
 
     for i in range(len(images_after_box)):
-        label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
+        label=""
+        # label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
         BOX_SEGMENTER.save_image(
                     images_after_box[i],
                     GET_OUTPUT(f"{_onlyfilename}_box{i}_item{label}.jpg")
