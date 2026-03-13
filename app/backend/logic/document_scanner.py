@@ -214,7 +214,7 @@ class DocumentScanner:
 
         return image_warped
 
-    def _highlight_contours(image_cannied: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
+    def _highlight_contours(self, image_cannied: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
         """FOR DEBUGGING; Highlight contours and add detected # of verts."""
         debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(debug_img, [approxPolyDpResult], -1, (0, 255, 0), 3)
