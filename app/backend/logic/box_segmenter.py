@@ -39,14 +39,13 @@ class BoxSegmenter(DocumentScanner):
             if MIN_AREA < area < MAX_AREA:
                 perimeter = cv2.arcLength(c, True)
                 approximate = cv2.approxPolyDP(c, 0.06*perimeter, True)
-                
-                if debug:
-                    debug_img = self._highlight_contours(image_cannied, approximate, c)
-                    self.save_image(
-                                self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
-                                )
                 if 4 <= len(approximate) <= 10:
+                    if debug:
+                        debug_img = self._highlight_contours(image_cannied, approximate, c)
+                        self.save_image(
+                                    self._encode_to_bytes(debug_img),
+                                    f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
+                                    )
                     approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
@@ -141,7 +140,7 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledA_absurd.jpeg"
+    FILENAME = "testRuledB.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -161,5 +160,5 @@ if __name__ == "__main__":
         # label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
         BOX_SEGMENTER.save_image(
                     images_after_box[i],
-                    GET_OUTPUT(f"{_onlyfilename}_box{i}_item{label}.jpg")
+                    GET_OUTPUT(f"{_onlyfilename}/box{i}_item{label}.jpg")
                     )
