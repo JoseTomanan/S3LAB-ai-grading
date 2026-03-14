@@ -1,4 +1,5 @@
 import pathlib
+from typing import Callable
 import numpy as np
 import cv2
 from cv2.typing import MatLike
@@ -171,6 +172,7 @@ class DocumentScanner:
     def _regularize_image(self,
                           image_mat: MatLike,
                           canny_thresholds: tuple[int,int] = (75, 200),
+                          additional_pre_canny_step: Callable[MatLike, MatLike] = None
                           ) -> list[MatLike]:
         """Step before contour ranking. Resize, greyscale, blur, then canny to reduce noises in image."""
         h, w, _ = image_mat.shape
@@ -183,6 +185,8 @@ class DocumentScanner:
         iterated_img = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8,8)) \
                             .apply(iterated_img)    # CLAHE
         iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
+        if additional_pre_canny_step is not None:
+            iterated_img = additional_pre_canny_step(iterated_img)
         iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
         
         #### This block finds external contours in the canny-processed image, filters out small contours
