@@ -14,11 +14,7 @@ MAX_AREA = AREA * 0.90
 
 #region Class
 class BoxSegmenter(DocumentScanner):
-    def get_boxes(self, 
-                    image_bytes: bytes,
-                    num_boxes: int,
-                    debug: bool = False,
-                    ) -> list[bytes]:
+    def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False,) -> list[bytes]:
         """Get best boxes (non-overlapping) from the image given. Note that image is expected to have been scanned already."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
@@ -188,7 +184,7 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledB.jpeg"
+    FILENAME = "testRuledDottedA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
