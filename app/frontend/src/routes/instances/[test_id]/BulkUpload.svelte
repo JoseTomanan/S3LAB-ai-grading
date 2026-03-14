@@ -19,14 +19,7 @@
 	import { Input } from '$lib/components/ui/input/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import BulkUploadRename from './BulkUploadRename.svelte';
-	import type { Student } from '$lib/index.ts';
-
-  type FileRecord = {
-    file: File;
-    name: string;
-    url: string;
-    statusCode: number;
-  };
+	import type { FileRecord, Student } from '$lib/index.ts';
   
   let isOperationStarted: boolean = $state(false);
   let formFiles: FileList | undefined = $state();

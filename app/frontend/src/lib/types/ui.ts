@@ -11,6 +11,13 @@ export interface CropData {
 	originalHeight: number;
 }
 
+export type FileRecord = {
+  file: File;
+  name: string;
+  url: string;
+  statusCode: number;
+};
+
 // ============ CONTEXT ============
 export interface TestItemsContext {
 	items: TestItem[];
