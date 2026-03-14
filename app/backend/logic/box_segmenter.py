@@ -44,7 +44,7 @@ class BoxSegmenter(DocumentScanner):
                     debug_img = self._highlight_contours(image_cannied, approximate, c)
                     self.save_image(
                                 self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
+                                f"./TEMP/output/DEBUG_contour_box{i}.jpg"
                                 )
                 if 4 <= len(approximate) <= 10:
                     hull = cv2.convexHull(c)
@@ -87,6 +87,19 @@ class BoxSegmenter(DocumentScanner):
 
     #region Auxiliary functions
     def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
+        def _pre_canny(i: MatLike) -> MatLike:
+            ruled_line_mask = cv2.inRange(i, 20, 80)
+            h_kernel_length = int(NORMAL_SIZE*0.30)
+            horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+            ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
+            self.save_image(
+                    self._encode_to_bytes(ruled_line_mask),
+                    "./TEMP/output/DEBUG_horizontal_candidates.jpg"
+                    )
+            return cv2.subtract(i, ruled_line_mask)
+
+        # return self._regularize_image(image_mat, (30, 150), _pre_canny)
+
         return self._regularize_image(image_mat, canny_thresholds=(30, 150))
     
     def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
