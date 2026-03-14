@@ -22,7 +22,7 @@ class BoxSegmenter(DocumentScanner):
         """Get best boxes (non-overlapping) from the image given. Note that image is expected to have been scanned already."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
-        image_cannied = self._filter_only_handdrawn_lines(image_cannied)    # FIXME: experimental extra step
+        # image_cannied = self._filter_only_handdrawn_lines(image_cannied)    # FIXME: experimental extra step
         image_dilated = self._dilate_edges(image_cannied)
 
         self.save_image(
@@ -39,13 +39,14 @@ class BoxSegmenter(DocumentScanner):
             if MIN_AREA < area < MAX_AREA:
                 perimeter = cv2.arcLength(c, True)
                 approximate = cv2.approxPolyDP(c, 0.06*perimeter, True)
+                
+                if debug:
+                    debug_img = self._highlight_contours(image_cannied, approximate, c)
+                    self.save_image(
+                                self._encode_to_bytes(debug_img),
+                                f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
+                                )
                 if 4 <= len(approximate) <= 10:
-                    if debug:
-                        debug_img = self._highlight_contours(image_cannied, approximate, c)
-                        self.save_image(
-                                    self._encode_to_bytes(debug_img),
-                                    f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
-                                    )
                     approximate = approximate.reshape(4,2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
@@ -103,14 +104,39 @@ class BoxSegmenter(DocumentScanner):
         # Detect horizontal lines: open with a wide horizontal kernel.
         # Only structures wider than h_kernel_length survive — i.e. ruled lines.
         h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
-        horizontal_lines = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
+        horizontal_candidates = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
 
-        # Dilate the detected ruled lines slightly to ensure full removal
+        self.save_image(
+                    self._encode_to_bytes(horizontal_candidates),
+                    "./TEMP/output/DEBUG_horizontal_candidates.jpg"
+                    )
+
+        # Use HoughLinesP to validate: only accept near-perfect horizontal lines
+        lines = cv2.HoughLinesP(horizontal_candidates, rho=1, theta=np.pi / 180, threshold=80,
+                                minLineLength=int(NORMAL_SIZE * 0.30),
+                                maxLineGap=10)
+
+        # Filter to only near-perfect horizontal lines (angle < 1 degree)
+        strict_lines = []
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            angle = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
+            if angle < 1.0:
+                strict_lines.append((x1, y1, x2, y2))
+
+        #### Validate even spacing: ruled lines should be evenly spaced
+        # y_positions = sorted(set(y1 for x1, y1, x2, y2 in strict_lines))
+        # gaps = [y_positions[i+1] - y_positions[i] for i in range(len(y_positions)-1)]
+        # median_gap = np.median(gaps)
+
+        ruled_mask = np.zeros_like(image)
+        for x1, y1, x2, y2 in strict_lines:
+            cv2.line(ruled_mask, (x1, y1), (x2, y2), 255, 3)
+
         cleanup_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        ruled_lines = cv2.dilate(horizontal_lines, cleanup_kernel, iterations=1)
+        ruled_mask = cv2.dilate(ruled_mask, cleanup_kernel, iterations=1)
 
-        # Subtract ruled lines from the edge image
-        return cv2.subtract(image, ruled_lines)
+        return cv2.subtract(image, ruled_mask)
 
     def _load_array(self, image_bytes: bytes) -> np.ndarray:
         """Convert bytes to OpenCV image with validation"""
