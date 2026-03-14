@@ -19,7 +19,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import type { FileRecord } from '$lib/index.ts';
 
-  import { rotateImage } from '$lib/utils.ts';
+  import { rotateImage, flipImage } from '$lib/utils.ts';
 
 
   let isOperationOngoing: boolean = $state(false);
@@ -62,8 +62,14 @@
   async function handleRotateCommand(isCw: boolean) {
     if (!formFileRecord)
       return;
-
     const recordResponse = await rotateImage(formFileRecord, isCw);
+    formFileRecord = recordResponse;
+  }
+
+  async function handleFlipCommand(isFlipHorizontally: boolean) {
+    if (!formFileRecord)
+      return;
+    const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
     formFileRecord = recordResponse;
   }
 
@@ -140,9 +146,8 @@
   {#if isAskingForValidation === false}
     <div class="flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-              class="flex-1 border-2 border-outline pl-2 rounded
-                  flex flex-row items-center min-w-0 font-medium shadow-xs">
-        <span class="shrink-0 whitespace-nowrap text-sm">
+              class="button-outline flex-1">
+        <span class="shrink-0 whitespace-nowrap text-sm pl-1">
           {formFileRecord
             ? "Uploaded image:"
             : "Choose an image..." }
@@ -158,7 +163,7 @@
               onchange={handleFile}
               bind:files={formFile}/>
       <Dialog.Root>
-        <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
+        <Dialog.Trigger class="button-outline w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
         </Dialog.Trigger>
         <OpenCamera onImageCapture={getImageFromComponent} />
@@ -179,34 +184,31 @@
         <Spinner />
       {/if}
     </Button>
-    {#if !formFileRecord}
-      <div class="card flex flex-col items-center justify-center relative">
+    <div class="card flex flex-col items-center justify-center relative">
+      {#if !formFileRecord}
         <IconImagePreview class="size-12 opacity-60"/>
         <h4 class="opacity-60">Uploaded image will be shown here.</h4>
-      </div>
-    {:else}
-      <div class="relative">
+      {:else}
         <img src={formFileRecord.url}
               alt="Uploaded file preview"
+              class="md:max-w-3/4 lg:max-w-2/3"
               />
-        <span class="flex flex-row gap-x-1 absolute top-0 right-0 mt-1 mr-2 w-fit h-fit">
+        <span class="flex flex-col gap-y-1 absolute top-2 right-2 size-fit">
           <button onclick={() => handleRotateCommand(true)} class="button-secondary" >
             <IconRotateCW />
           </button>
           <button onclick={() => handleRotateCommand(false)} class="button-secondary" >
             <IconRotateCCW />
           </button>
-          <button class="button-secondary"
-                    onclick={() => {}}>
+          <button onclick={() => handleFlipCommand(true)} class="button-secondary" >
             <IconFlipHorizontally />
           </button>
-          <button class="button-secondary"
-                    onclick={() => {}}>
+          <button onclick={() => handleFlipCommand(false)} class="button-secondary" >
             <IconFlipVertically />
           </button>
         </span>
-      </div>
-    {/if}
+      {/if}
+    </div>
 
   {:else}
     <div class="flex flex-row w-full gap-x-1">
@@ -223,7 +225,7 @@
     
     {#each supposedScans as supposedScan}
       <div class="relative border border-border">
-        <h4 class="absolute inset-0 bg-white/80">
+        <h4 class="absolute left-2 top-2 bg-white/80">
           {supposedScan.item_number}
         </h4>
         <img class="block"

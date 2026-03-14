@@ -37,7 +37,7 @@ export function redownloadFile(file: File) {
 		URL.revokeObjectURL(url);
 }
 
-export { rotateImage } from "./utils/image_functions.ts";
+export { rotateImage, flipImage } from "./utils/image_functions.ts";
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

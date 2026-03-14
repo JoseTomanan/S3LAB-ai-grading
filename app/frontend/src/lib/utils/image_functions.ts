@@ -1,6 +1,7 @@
 import type { FileRecord } from "$lib/types/ui.ts";
 
 
+
 export async function rotateImage(record: FileRecord, isCw: boolean): Promise<FileRecord> {
   const degrees = isCw ? 90 : 270;
 
@@ -25,7 +26,6 @@ export async function rotateImage(record: FileRecord, isCw: boolean): Promise<Fi
     )
   );
 
-  // Revoke the old object URL to avoid memory leaks
   URL.revokeObjectURL(record.url);
 
   return {
@@ -40,3 +40,43 @@ export async function rotateImage(record: FileRecord, isCw: boolean): Promise<Fi
 }
 
 
+export async function flipImage(record: FileRecord, isFlipHorizontal: boolean): Promise<FileRecord> {
+  const bitmap = await createImageBitmap(record.file);
+  const { width, height } = bitmap;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d")!;
+
+  if (isFlipHorizontal) {
+    ctx.translate(width, 0);
+    ctx.scale(-1, 1);
+  } else {
+    ctx.translate(0, height);
+    ctx.scale(1, -1);
+  }
+
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+      record.file.type || "image/jpeg"
+    )
+  );
+
+  URL.revokeObjectURL(record.url);
+
+  return {
+    file: new File([blob], record.file.name, {
+      type: blob.type,
+      lastModified: Date.now(),
+    }),
+    name: record.name,
+    url: URL.createObjectURL(blob),
+    statusCode: record.statusCode,
+  };
+}
