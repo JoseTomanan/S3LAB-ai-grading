@@ -61,17 +61,11 @@ class BoxSegmenter(DocumentScanner):
         if images_good_contours == []:
             raise ValueError("Could not find any boxes.")
         
-        print(f"INFO:\tResult # of boxes: {len(images_good_contours)}")
+        print(f"INFO:\tResult # of boxes: {len(images_good_contours)} (take top {num_boxes})")
         images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
-        
-        images_warped = []
-        for image in images_good_contours:
-            images_warped.append(self._warp_from_original(image, image_original))
-            if len(images_warped) >= num_boxes:
-                print(f"INFO:\tTop {num_boxes} have already been taken. Breaking loop")
-                break
+        images_warped = [self._warp_from_original(c, image_original) for c in images_good_contours]
 
-        return [self._encode_to_bytes(image) for image in images_warped]
+        return [self._encode_to_bytes(i) for i in images_warped]
 
     def beautify_scan(self, image_bytes: bytes) -> bytes:
         array = self._load_array(image_bytes)
