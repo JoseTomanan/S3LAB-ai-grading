@@ -95,6 +95,31 @@ class BoxSegmenter(DocumentScanner):
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
    
+    def _load_array(self, image_bytes: bytes) -> np.ndarray:
+        """Convert bytes to OpenCV image with validation"""
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        return image
+
+    def _unload_array(self, image: np.ndarray) -> bytes:
+        """Encode OpenCV image to high-quality JPEG bytes."""
+        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+        return buffer.tobytes()
+
+    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
+        """Increase image brightness using linear transform"""
+        amount = max(0.0, min(1.0, float(amount)))
+        beta = amount * 255
+        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
+    
+    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
+        """Adjust image contrast with brightness compensation"""
+        amount = max(0.1, float(amount))
+        beta = 128 * (1 - amount)
+        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
+    #endregion
+
+    #region Archived unstable functions
     def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
         """
         Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
@@ -116,7 +141,8 @@ class BoxSegmenter(DocumentScanner):
         return cv2.subtract(image, horizontal_candidates)
 
     def _get_ruled_mask(self, horizontal_candidates: MatLike, image: MatLike):
-        """Experimental (removed) substep to filter handdrawn lines."""
+        """## UNSTABLE
+        ### Experimental (removed) substep to filter handdrawn lines."""
         ### Use HoughLinesP to validate: only accept near-perfect horizontal lines
         lines = cv2.HoughLinesP(horizontal_candidates, rho=1, theta=np.pi / 180, threshold=80,
                                 minLineLength=int(NORMAL_SIZE * 0.30),
@@ -143,29 +169,6 @@ class BoxSegmenter(DocumentScanner):
         ruled_mask = cv2.dilate(ruled_mask, cleanup_kernel, iterations=1)
 
         return ruled_mask
-
-    def _load_array(self, image_bytes: bytes) -> np.ndarray:
-        """Convert bytes to OpenCV image with validation"""
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        return image
-
-    def _unload_array(self, image: np.ndarray) -> bytes:
-        """Encode OpenCV image to high-quality JPEG bytes."""
-        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        return buffer.tobytes()
-
-    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
-        """Increase image brightness using linear transform"""
-        amount = max(0.0, min(1.0, float(amount)))
-        beta = amount * 255
-        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
-    
-    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
-        """Adjust image contrast with brightness compensation"""
-        amount = max(0.1, float(amount))
-        beta = 128 * (1 - amount)
-        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
     #endregion
 #endregion
 
