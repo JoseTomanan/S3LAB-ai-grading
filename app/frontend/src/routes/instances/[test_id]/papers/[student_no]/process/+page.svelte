@@ -5,79 +5,67 @@
   import { dataUrlToFile } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
-  import MdiCamera from "~icons/mdi/camera";
+  import IconCamera from "~icons/mdi/camera";
+  import IconImagePreview from "~icons/mdi/image";
+  import IconRotateCW from "~icons/mdi/rotate-clockwise";
+  import IconRotateCCW from "~icons/mdi/rotate-counter-clockwise";
+  import IconFlipHorizontally from "~icons/mdi/flip-horizontal";
+  import IconFlipVertically from "~icons/mdi/flip-vertical";
 
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+	import type { FileRecord } from '$lib/index.ts';
 
 
   let isOperationOngoing: boolean = $state(false);
 
   let formFile: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
-  let uploadableFile: File | null = $state(null);
-  $effect(() => {
-    if (formFile)
-      uploadableFile = formFile[0];
-  });
 
+  let formFileRecord: FileRecord | null = $state(null);
 
   let isAskingForValidation: boolean = $state(false);
-
   let supposedScans: {index: number, image_directory: string, item_number: string}[] = $state([]);
 
+  function handleFile() {
+    if (!formFile || formFile.length == 0)
+      return;
+    if (formFileRecord)
+      URL.revokeObjectURL(formFileRecord.url);
+
+    console.log("HANDLE FILE EXECUTING...");
+    console.log(formFile[0].size);
+    formFileRecord = {
+      file: formFile[0],
+      name: `${data.student_no}.jpeg`,
+      url: URL.createObjectURL(formFile[0]),
+      statusCode: -1,
+    };
+  }
 
   function getImageFromComponent(imageDataUrl: string) {
     const imageFile: File = dataUrlToFile(imageDataUrl, "CAPTURED_IMAGE.jpeg")
     formFile = undefined;
-    uploadableFile = imageFile;
-  }
-
-  async function sendImage() {
-    if (!uploadableFile)
-      return;
-
-    console.log(uploadableFile.name);
-    console.log(uploadableFile.size);
-    isOperationOngoing = true;
-
-    const formData = new FormData();
-    formData.append('file', uploadableFile);
-
-    try {
-      const response = await fetch(
-            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/image_preprocess?num_boxes=${paramNumBoxes ?? 2}`,
-            { method: "POST", body: formData, }
-            );
-
-      switch (response.status) {
-        case 200:
-          alert("Image has been processed and segmented into the appropriate items.");
-          window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
-    } catch(e) {
-      alert("Failed to send raw image for processing:\n"+e);
-    } finally {
-      isOperationOngoing = false;
-    }
+    formFileRecord = {
+      file: imageFile,
+      name: `${data.student_no}.jpeg`,
+      url: URL.createObjectURL(imageFile),
+      statusCode: -1,
+    };
   }
 
   async function sendImageForValidation() {
-    if (!uploadableFile)
+    if (!formFileRecord)
       return;
 
-    console.log(uploadableFile.name);
-    console.log(uploadableFile.size);
+    console.log(formFileRecord.name);
     isOperationOngoing = true;
 
     const formData = new FormData();
-    formData.append('file', uploadableFile);
+    formData.append('file', formFileRecord.file);
 
     try {
       const response = await fetch(
@@ -138,28 +126,30 @@
     <h1>Process image</h1>
     <h5>For {data.student_no}</h5>
   </span>
+
   {#if isAskingForValidation === false}
     <div class="flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
               class="flex-1 border-2 border-outline pl-2 rounded
                   flex flex-row items-center min-w-0 font-medium shadow-xs">
         <span class="shrink-0 whitespace-nowrap text-sm">
-          {uploadableFile
-              ? "Uploaded image:"
-              : "Choose an image..." }
+          {formFileRecord
+            ? "Uploaded image:"
+            : "Choose an image..." }
         </span>
         <span class="truncate min-w-0">
-          {uploadableFile ? uploadableFile.name : ""}
+          {formFileRecord ? formFileRecord.name : ""}
         </span>
       </Label>
       <Input id="sendImage"
               type="file"
               accept="image/*"
               class="hidden"
+              onchange={handleFile}
               bind:files={formFile}/>
       <Dialog.Root>
         <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
-          <MdiCamera class="size-6 opacity-80"/>
+          <IconCamera class="size-6 opacity-80"/>
         </Dialog.Trigger>
         <OpenCamera onImageCapture={getImageFromComponent} />
       </Dialog.Root>
@@ -171,7 +161,7 @@
         />
     <Button variant="outline"
             onclick={sendImageForValidation}
-            disabled={!uploadableFile || isOperationOngoing}>
+            disabled={!formFileRecord || isOperationOngoing}>
       {isOperationOngoing
         ? "Sending..."
         : "Send for processing"}
@@ -179,6 +169,36 @@
         <Spinner />
       {/if}
     </Button>
+    {#if !formFileRecord}
+      <div class="card flex flex-col items-center justify-center relative">
+        <IconImagePreview class="size-12 opacity-60"/>
+        <h4 class="opacity-60">Uploaded image will be shown here.</h4>
+      </div>
+    {:else}
+      <div class="relative">
+        <img src={formFileRecord.url}
+              alt="Uploaded file preview"
+              />
+        <span class="flex flex-row gap-x-1 absolute top-0 right-0 m-1 w-fit h-fit">
+          <button class="button-secondary"
+                    onclick={() => {}}>
+            <IconRotateCW />
+          </button>
+          <button class="button-secondary"
+                    onclick={() => {}}>
+            <IconRotateCCW />
+          </button>
+          <button class="button-secondary"
+                    onclick={() => {}}>
+            <IconFlipHorizontally />
+          </button>
+          <button class="button-secondary"
+                    onclick={() => {}}>
+            <IconFlipVertically />
+          </button>
+        </span>
+      </div>
+    {/if}
 
   {:else}
     <div class="flex flex-row w-full gap-x-1">
