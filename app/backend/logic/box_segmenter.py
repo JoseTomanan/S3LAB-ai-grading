@@ -18,7 +18,7 @@ MAX_ASPECT_RATIO = 9.0
 #region Class
 class BoxSegmenter(DocumentScanner):
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False,) -> list[bytes]:
-        """Get best boxes (non-overlapping) from the image given. Note that image is expected to have been scanned already."""
+        """Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
         # image_cannied = self._filter_only_handdrawn_lines(image_cannied)    # FIXME: experimental extra step
@@ -29,7 +29,7 @@ class BoxSegmenter(DocumentScanner):
                     "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
                     )
 
-        contours, _ = cv2.findContours(image_dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
         images_good_contours = []
@@ -279,7 +279,7 @@ class BlobDetector:
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA.jpeg"
+    FILENAME = "testWhiteC.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -292,8 +292,8 @@ if __name__ == "__main__":
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
-    # images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
-    images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
+    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
+    # images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
 
     for i in range(len(images_after_box)):
         label="X"
