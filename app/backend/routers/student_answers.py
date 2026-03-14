@@ -63,7 +63,10 @@ async def scan_then_label_save_boxes(
     contents = await _validate_file(file)
 
     print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
-    processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
+    try:
+        processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
+    except:
+        raise HTTPException(status_code=500, detail="Could not find any boxes.")
 
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
