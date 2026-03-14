@@ -22,6 +22,7 @@ class BoxSegmenter(DocumentScanner):
         """Get best boxes (non-overlapping) from the image given. Note that image is expected to have been scanned already."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
+        image_cannied = self._filter_only_handdrawn_lines(image_cannied)    # FIXME: experimental extra step
         image_dilated = self._dilate_edges(image_cannied)
 
         self.save_image(
@@ -92,11 +93,14 @@ class BoxSegmenter(DocumentScanner):
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
    
-    def _filter_only_handdrawn_lines(self, image: MatLike, h_kernel_length: int = 60) -> MatLike:
+    def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
         """
         Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
-        Currently unstable, nabibiktima kahit handdrawn lines on white paper. FIXME: make fail-safe
+        ## UNSTABLE
+        ### Handdrawn lines on white paper get filtered out. FIXME: make fail-safe
         """
+        h_kernel_length = int(NORMAL_SIZE * length_percent)
+
         # Detect horizontal lines: open with a wide horizontal kernel.
         # Only structures wider than h_kernel_length survive — i.e. ruled lines.
         h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
