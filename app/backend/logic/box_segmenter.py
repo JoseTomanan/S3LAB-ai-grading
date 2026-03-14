@@ -47,7 +47,9 @@ class BoxSegmenter(DocumentScanner):
                                 f"./TEMP/output/DEBUG_CONTOUR_BOX_{i}.jpg"
                                 )
                 if 4 <= len(approximate) <= 10:
-                    approximate = approximate.reshape(4,2)
+                    hull = cv2.convexHull(c)
+                    rect = cv2.minAreaRect(hull)
+                    approximate = cv2.boxPoints(rect).astype(int)  # always exactly 4 pts
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
                     if 0.25 <= aspect_ratio <= 8:
