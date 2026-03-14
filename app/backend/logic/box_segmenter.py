@@ -101,8 +101,8 @@ class BoxSegmenter(DocumentScanner):
         """
         h_kernel_length = int(NORMAL_SIZE * length_percent)
 
-        # Detect horizontal lines: open with a wide horizontal kernel.
-        # Only structures wider than h_kernel_length survive — i.e. ruled lines.
+        #### Detect horizontal lines: open with a wide horizontal kernel.
+        #### Only structures wider than h_kernel_length survive — i.e. ruled lines.
         h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
         horizontal_candidates = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
 
@@ -110,13 +110,17 @@ class BoxSegmenter(DocumentScanner):
                     self._encode_to_bytes(horizontal_candidates),
                     "./TEMP/output/DEBUG_horizontal_candidates.jpg"
                     )
+        # ruled_mask = self._get_ruled_mask(horizontal_candidates, image)
+        return cv2.subtract(image, horizontal_candidates)
 
-        # Use HoughLinesP to validate: only accept near-perfect horizontal lines
+    def _get_ruled_mask(self, horizontal_candidates: MatLike, image: MatLike):
+        """Experimental (removed) substep to filter handdrawn lines."""
+        ### Use HoughLinesP to validate: only accept near-perfect horizontal lines
         lines = cv2.HoughLinesP(horizontal_candidates, rho=1, theta=np.pi / 180, threshold=80,
                                 minLineLength=int(NORMAL_SIZE * 0.30),
                                 maxLineGap=10)
 
-        # Filter to only near-perfect horizontal lines (angle < 1 degree)
+        #### Filter to only near-perfect horizontal lines (angle < 1 degree)
         strict_lines = []
         for line in lines:
             x1, y1, x2, y2 = line[0]
@@ -136,7 +140,7 @@ class BoxSegmenter(DocumentScanner):
         cleanup_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
         ruled_mask = cv2.dilate(ruled_mask, cleanup_kernel, iterations=1)
 
-        return cv2.subtract(image, ruled_mask)
+        return ruled_mask
 
     def _load_array(self, image_bytes: bytes) -> np.ndarray:
         """Convert bytes to OpenCV image with validation"""
