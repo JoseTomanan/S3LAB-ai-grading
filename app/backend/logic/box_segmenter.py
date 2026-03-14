@@ -9,6 +9,8 @@ from logic.ai_interface import AIAnswerEvaluator
 AREA = NORMAL_SIZE ** 2
 MIN_AREA = AREA * 0.01
 MAX_AREA = AREA * 0.90
+MAX_SKEW_DEG = 15.0
+MAX_ASPECT_RATIO = 9.0
 
 
 
@@ -48,7 +50,7 @@ class BoxSegmenter(DocumentScanner):
                     approximate = cv2.boxPoints(rect).astype(int)  # always exactly 4 pts
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
-                    if 0.25 <= aspect_ratio <= 8:
+                    if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
                         print(f"INFO:\tAccepted and stored contour {i}")
                         images_good_contours.append(approximate)
                     else:
