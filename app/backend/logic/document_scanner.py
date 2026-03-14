@@ -1,6 +1,9 @@
+import pathlib
 import numpy as np
 import cv2
 from cv2.typing import MatLike
+
+
 
 NORMAL_SIZE = 2048
 
@@ -123,23 +126,23 @@ class DocumentScanner:
             raise ValueError("Failed to encode image")
         return buffer.tobytes()
 
-
     def brighten(self, image_bytes: bytes, amount: float) -> bytes:
         """Scale pixel values with (1 + amount). Amount > 0 increases brightness; < 0 decreases it."""
         image = self._decode_bytes(image_bytes)
         brightened = cv2.convertScaleAbs(image, alpha=1, beta=amount)
         return self._encode_to_bytes(brightened)
     
-
     def adjust_contrast(self, image_bytes: bytes, amount: float) -> bytes:
         """Increase/decrease contrast by given alpha"""
         image = self._decode_bytes(image_bytes)
         contrasted = cv2.convertScaleAbs(image, alpha=amount, beta=128*(1 - amount))
         return self._encode_to_bytes(contrasted)
     
-
     def save_image(self, image_bytes: bytes, save_path: str) -> None:
         """Save image to specified path."""
+        path = pathlib.Path(save_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         with open(save_path, "wb") as f:
             ret = f.write(image_bytes)
         if not ret:
@@ -227,7 +230,6 @@ class DocumentScanner:
                     (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2
                     )
         return debug_img
-
     #endregion
 
 #endregion
@@ -236,7 +238,7 @@ class DocumentScanner:
 
 if __name__ == "__main__":  
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledB.jpg"
+    FILENAME = "testRuledB.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -251,5 +253,5 @@ if __name__ == "__main__":
 
     DOCUMENT_SCANNER.save_image(
                     image_after,
-                    GET_OUTPUT(f"{_onlyfilename}_scan.jpg")
+                    GET_OUTPUT(f"{_onlyfilename}/scan.jpg")
                     )
