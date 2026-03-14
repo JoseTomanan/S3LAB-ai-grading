@@ -25,7 +25,6 @@ export function dataUrlToFile(dataUrl: string, filename: string) {
 }
 
 export function filesToFileList(fileArray: File[]) {
-		console.log("--> It reached here lol")
     return fileArray as unknown as FileList;
 }
 
@@ -38,6 +37,7 @@ export function redownloadFile(file: File) {
 		URL.revokeObjectURL(url);
 }
 
+export { rotateImage } from "./utils/image_functions.ts";
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

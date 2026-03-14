@@ -19,6 +19,8 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import type { FileRecord } from '$lib/index.ts';
 
+  import { rotateImage } from '$lib/utils.ts';
+
 
   let isOperationOngoing: boolean = $state(false);
 
@@ -55,6 +57,14 @@
       url: URL.createObjectURL(imageFile),
       statusCode: -1,
     };
+  }
+
+  async function handleRotateCommand(isCw: boolean) {
+    if (!formFileRecord)
+      return;
+
+    const recordResponse = await rotateImage(formFileRecord, isCw);
+    formFileRecord = recordResponse;
   }
 
   async function sendImageForValidation() {
@@ -179,13 +189,11 @@
         <img src={formFileRecord.url}
               alt="Uploaded file preview"
               />
-        <span class="flex flex-row gap-x-1 absolute top-0 right-0 m-1 w-fit h-fit">
-          <button class="button-secondary"
-                    onclick={() => {}}>
+        <span class="flex flex-row gap-x-1 absolute top-0 right-0 mt-1 mr-2 w-fit h-fit">
+          <button onclick={() => handleRotateCommand(true)} class="button-secondary" >
             <IconRotateCW />
           </button>
-          <button class="button-secondary"
-                    onclick={() => {}}>
+          <button onclick={() => handleRotateCommand(false)} class="button-secondary" >
             <IconRotateCCW />
           </button>
           <button class="button-secondary"
