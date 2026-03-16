@@ -71,7 +71,6 @@
                   ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
                   : ans
                 );
-          REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
           break;
         default:
           alert(`${response.status} ${response.statusText}`);
