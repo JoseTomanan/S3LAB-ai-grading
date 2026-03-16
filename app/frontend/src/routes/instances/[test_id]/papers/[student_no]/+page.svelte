@@ -108,17 +108,16 @@
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
-            {#if studentItem.image_directory != ""}
-              <button class={`${isRequestLoading ? "opacity-50" : "opacity-100"} button-outline px-0 py-0`}
-                      onclick={() => reevaluateAnswer(studentItem.answer_id)}
-                      disabled={isRequestLoading}>
-                <IconReevaluate />
-              </button>
-            {/if}
             <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
                   class="button-outline">
               <MdiCrop/>
             </a>
+            <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
+                            button-outline px-0 py-0`}
+                    onclick={() => reevaluateAnswer(studentItem.answer_id)}
+                    disabled={isRequestLoading || studentItem.image_directory == ""}>
+              <IconReevaluate />
+            </button>
           </span>
         </Label>
         <div class="flex flex-col justify-center items-center gap-x-3 gap-y-1.5
