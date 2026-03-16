@@ -147,7 +147,7 @@
         <div class="card space-y-1">
           {#if evalItem.answer_id == -1}
             <h4 class="truncate text-ellipsis w-fill">
-              {evalItem.label}: {evalItem.question}
+              ({evalItem.label}) {evalItem.question}
             </h4>
             <h6 class="flex flex-row items-center gap-1">
               <MdiAlertBoxOutline />
