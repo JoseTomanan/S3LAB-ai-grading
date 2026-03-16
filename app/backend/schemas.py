@@ -88,6 +88,14 @@ class TestInstanceResponse(BaseModel):
 
 
 # ==============================
+#region Section schemas
+class SectionCreate(BaseModel):
+    section: str
+# ==============================
+
+
+
+# ==============================
 #region Student Schemas
 class StudentResponse(BaseModel):
     student_no: str

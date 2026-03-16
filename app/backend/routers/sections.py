@@ -40,4 +40,22 @@ def get_students_in_section(section_id: int, session: Session = Depends(get_sess
             section_id=s.section_id
         ) for s in students
         ]
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def add_new_section(section: SectionCreate, session: Session = Depends(get_session)):
+    """Add a new section"""
+    # Check if section with this name already exists
+    existing = session.exec(select(Section).where(Section.section == section.section)).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Section '{section.section}' already exists."
+        )
+
+    new_section = Section(section=section.section)
+    session.add(new_section)
+    session.commit()
+    session.refresh(new_section)
+    return {"section_id": new_section.section_id, "section_name": new_section.section}
 #endregion
