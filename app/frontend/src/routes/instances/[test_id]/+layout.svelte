@@ -7,7 +7,7 @@
   import { onMount, setContext } from 'svelte';
 
   import ExportSheets from './ExportSheets.svelte';
-	import BulkUpload from './BulkUpload.svelte';
+	import BulkUpload from './upload/BulkUpload.svelte';
 
   import IconBack from '~icons/mdi/arrow-back';
   import IconTable from '~icons/mdi/table';
