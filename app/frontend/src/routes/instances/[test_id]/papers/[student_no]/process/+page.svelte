@@ -23,6 +23,7 @@
 	import ReviewForCommit from './ReviewForCommit.svelte';
 
 
+  let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
   let formFile: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
@@ -178,11 +179,12 @@
               class="hidden"
               onchange={handleFile}
               bind:files={formFile}/>
-      <Dialog.Root>
+      <Dialog.Root bind:open={isCameraDialogOpen}>
         <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
         </Dialog.Trigger>
-        <OpenCamera onImageCapture={getImageFromComponent} />
+        <OpenCamera {isCameraDialogOpen}
+                    onImageCapture={getImageFromComponent} />
       </Dialog.Root>
     </div>
     <Input id="numBoxes"

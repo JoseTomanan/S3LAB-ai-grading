@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { onImageCapture } = $props();
+  let { isCameraDialogOpen, onImageCapture } = $props();
 
   import MdiCamera from "~icons/mdi/camera";
   import MdiCameraOff from "~icons/mdi/camera-off";
@@ -10,7 +10,6 @@
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
-	import { dataUrlToFile, redownloadFile } from "$lib/utils.ts";
 	import { Spinner } from "$lib/components/ui/spinner/index.ts";
 
   let cameraInstance: any = $state(null);
@@ -39,11 +38,17 @@
   let isCameraDetected: boolean | null = $state(null);
   let cameraLoadTimeout: ReturnType<typeof setTimeout>;
   $effect(() => {
+    if (!isCameraDialogOpen) {
+      isCameraUnready = true;
+      isCameraDetected = null;
+      return;
+    }
+
     cameraLoadTimeout = setTimeout(() => {
       console.error("Camera loading timed out.");
       if (isCameraUnready && isCameraDetected !== true)
         isCameraDetected = false;
-    }, 8000);
+    }, 5000);
     return () => clearTimeout(cameraLoadTimeout);
   });
 </script>
