@@ -7,7 +7,6 @@
   import { onMount, setContext } from 'svelte';
 
   import ExportSheets from './ExportSheets.svelte';
-	import BulkUpload from './upload/BulkUpload.svelte';
 
   import IconBack from '~icons/mdi/arrow-back';
   import IconTable from '~icons/mdi/table';
@@ -93,31 +92,27 @@
       </span>
     </div>
     <div id="thisOne"
-          class="flex items-center justify-between *:space-x-1 [&>span>a]:font-medium [&>span>a]:underline-offset-3">
+          class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
         <a class={`button-primary ${isRouteItems ? "underline" : ""}`}
-            href={`/instances/${data.test_id}/items`}>
+            href="/instances/{data.test_id}/items">
           Items
         </a>
         <a class={`button-primary ${isRoutePapers ? "underline" : ""}`}
-            href={`/instances/${data.test_id}/papers`}>
+            href="/instances/{data.test_id}/papers">
           Papers
         </a>
       </span>
-      <span>
+      <span class="flex flex-row gap-x-1">
         <Dialog.Root>
           <Dialog.Trigger class="button-primary">
             <IconTable class="size-6" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
-        <Dialog.Root>
-          <Dialog.Trigger class="button-primary">
-            <IconUpload class="size-6"/>
-          </Dialog.Trigger>
-          <BulkUpload test_id={data.test_id}
-                      section_id={data.test_instance!.section_id}/>
-        </Dialog.Root>
+        <a href="/instances/{data.test_id}/upload" class="button-primary">
+          <IconUpload class="size-6"/>
+        </a>
       </span>
     </div>
   </nav>
