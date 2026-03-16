@@ -1,23 +1,22 @@
 import type { PageLoad } from "./$types.js";
 import { API_BASE_URL } from '$lib/constants.ts';
-import type { StudentAnswer } from "$lib/index.ts";
+import type { GetSpecificEvaluationResponse, StudentAnswer, TestItem } from "$lib/index.ts";
+import { REPOPULATE_UNANSWERED_ITEMS } from "$lib/utils/ai_evaluations.ts";
 
 
 
 export const load: PageLoad = async ({ fetch, params, parent }) => {
   const { test_items } = await parent();
 
+  if (typeof test_items === "undefined")
+    throw new Error("test_items is undefined");
+
   let student_items: (StudentAnswer & {label: string})[] | undefined = undefined;
+  let student_ai_evaluations: GetSpecificEvaluationResponse[] = [];
+  REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
 
   try {
-    const responseOne = await fetch(
-          `${API_BASE_URL}/api/student_answers/${params.test_id}/${params.student_no}`,
-          {
-            method: "GET",
-            headers: {'Content-Type': 'application/json',},
-          }
-          );
-    
+    const responseOne = await fetch(`${API_BASE_URL}/api/student_answers/${params.test_id}/${params.student_no}`);
     switch (responseOne.status) {
       case 200:
         const result = await responseOne.json();
@@ -31,6 +30,21 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
     }
   } catch (e) {
     console.log("Failed to fetch student answers:\n"+e)
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/student_answers/${params.test_id}/results/${params.student_no}`);
+    switch (response.status) {
+    case 200:
+      const result = await response.json();
+      student_ai_evaluations = result.evaluations ?? [];
+      REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
+      break;
+    default:
+      alert(`${response.status} ${response.statusText}`);
+    }
+  } catch (e) {
+    console.log("Failed to fetch AI evaluations:\n"+e)
   }
 
   if (test_items && student_items) {
@@ -51,5 +65,5 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
     }
   }
 
-  return { student_items };
+  return { student_items, student_ai_evaluations };
 };
