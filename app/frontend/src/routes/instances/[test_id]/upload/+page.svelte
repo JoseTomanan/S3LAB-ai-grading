@@ -35,7 +35,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/sections/${data.test_instance!.section_id}`);
+      const response = await fetch(`/api/sections/${data.test_instance!.section_id}`);
       const results = await response.json();
       students = results;
     } catch (e) {
@@ -74,7 +74,7 @@
           const formData = new FormData();
           formData.append('file', p.file);
           const response = await fetch(
-                `${API_BASE_URL}/api/student_answers/${data.test_id}/${activeStudentNo}/image_preprocess`,
+                `/api/student_answers/${data.test_id}/${activeStudentNo}/image_preprocess`,
                 { method: "POST", body: formData, }
               );
           console.log(`${p.name}: ${response.status}`);

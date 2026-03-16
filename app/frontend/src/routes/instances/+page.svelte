@@ -21,7 +21,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/test_instances`);
+      const response = await fetch(`/api/test_instances`);
 
       switch (response.status) {
         case 200:

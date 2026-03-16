@@ -44,7 +44,7 @@
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/answers/${answer_id}/reevaluate`,
+            `/api/answers/${answer_id}/reevaluate`,
             {
               method: "PATCH",
               headers: {'Content-Type': 'application/json',},
@@ -72,7 +72,7 @@
 
   async function deleteAnswer(item_id: number) {
     console.log(item_id);
-    const response = await fetch(`${API_BASE_URL}/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
+    const response = await fetch(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
     switch (response.status) {
       case 204:
         alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
@@ -132,7 +132,7 @@
             {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
             <div class="flex justify-center items-center w-4/5 md:w-3/4 lg:w-1/2">
               <img class="size-fill"
-                    src={`${API_BASE_URL}${studentItem.image_directory}`}
+                    src={`${studentItem.image_directory}`}
                     alt={studentItem.label}/>
             </div>
             <div class="flex-1 w-full h-full">

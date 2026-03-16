@@ -55,7 +55,7 @@
 
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/${item_id}`,
+            `/api/student_answers/${data.test_id}/${data.student_no}/${item_id}`,
             { method: "PATCH", body: formData, }
             );
 

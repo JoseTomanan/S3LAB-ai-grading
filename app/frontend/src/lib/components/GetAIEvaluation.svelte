@@ -29,7 +29,7 @@
     REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/student_answers/${test_id}/results/${student_no}`,
+            `/api/student_answers/${test_id}/results/${student_no}`,
             {
               method: "GET",
               headers: {'Content-Type': 'application/json',},
@@ -56,7 +56,7 @@
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/answers/${answer_id}/reevaluate`,
+            `/api/answers/${answer_id}/reevaluate`,
             {
               method: "PATCH",
               headers: {'Content-Type': 'application/json',},

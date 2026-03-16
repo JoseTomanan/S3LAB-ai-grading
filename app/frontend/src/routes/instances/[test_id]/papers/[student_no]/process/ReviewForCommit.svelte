@@ -47,7 +47,7 @@
       {/if}
       
       <img class="block sm:max-w-3/4 md:max-w-2/3"
-            src={`${API_BASE_URL}${supposedScan.image_directory}`}
+            src={`${supposedScan.image_directory}`}
             alt={supposedScan.item_number}
             />
     </div>

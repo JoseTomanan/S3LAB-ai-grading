@@ -15,7 +15,7 @@
 
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/test_instances/${test_id}/export`,
+            `/api/test_instances/${test_id}/export`,
             {
               method: "GET",
               headers: { 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }

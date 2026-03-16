@@ -16,7 +16,7 @@
 		isLoading = true;
 		try {
 			const response = await fetch(
-						`${API_BASE_URL}/api/students`,
+						`/api/students`,
 						{
 							method: "POST",
 							headers: {'Content-Type': 'application/json',},

@@ -1,6 +1,4 @@
 <script lang="ts">
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
   import { onMount } from "svelte";
   import type { Section } from "$lib/index.ts";
 
@@ -24,7 +22,7 @@
   onMount(async () => {
     isItemsLoading = true;
     try {
-      const response = await fetch(`${apiBaseUrl}/api/sections/`);
+      const response = await fetch("/api/sections/");
 
       switch (response.status) {
         case 200:
@@ -44,7 +42,7 @@
   async function addNewTestInstance(name: string, section_id: string) {
     try {
       const response = await fetch(
-            `${apiBaseUrl}/api/test_instances`,
+            "/api/test_instances",
             {
               method: "POST",
               headers: {'Content-Type': 'application/json',},

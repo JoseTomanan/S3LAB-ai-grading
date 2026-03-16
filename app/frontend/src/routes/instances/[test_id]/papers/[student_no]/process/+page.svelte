@@ -84,7 +84,7 @@
 
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
+            `/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
             { method: "POST", body: formData, }
             );
 
@@ -111,7 +111,7 @@
       console.log(supposedScans);
 
       const response = await fetch(
-            `${API_BASE_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
+            `/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
             {
               method: "POST",
               headers: {'Content-Type': 'application/json',},

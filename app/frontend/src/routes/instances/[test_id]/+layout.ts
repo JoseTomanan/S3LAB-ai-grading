@@ -10,7 +10,7 @@ export const load: LayoutLoad = async ({ fetch, params }) => {
   let test_items: TestItem[] | undefined = undefined;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/test_instances/${test_id}`);
+    const response = await fetch(`/api/test_instances/${test_id}`);
     if (response.ok) {
       const result = await response.json();
       test_instance = {
@@ -26,7 +26,7 @@ export const load: LayoutLoad = async ({ fetch, params }) => {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/test_items/${test_id}/items`);
+    const response = await fetch(`/api/test_items/${test_id}/items`);
     if (response.ok) {
       const result = await response.json();
       test_items = result.items;

@@ -36,7 +36,7 @@
   onMount(async () => {
     isSectionsLoading = true;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/sections/`);
+      const response = await fetch(`/api/sections/`);
 
       switch (response.status) {
         case 200:
@@ -60,7 +60,7 @@
     }
     isRequestLoading = true;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/students/${student_no}`, {
+      const response = await fetch(`/api/students/${student_no}`, {
         method: "PATCH",
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@
   async function deleteStudent() {
     isRequestLoading = true;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/students/${student_no}`, {method: "DELETE",});
+      const response = await fetch(`/api/students/${student_no}`, {method: "DELETE",});
 
       switch (response.status) {
         case 204:

@@ -48,7 +48,7 @@
       console.log(formBody);
       
       const response = await fetch(
-            `${API_BASE_URL}/api/test_items/${test_id}/items/${submittedTestItem.item_id}`,
+            `/api/test_items/${test_id}/items/${submittedTestItem.item_id}`,
             {
               method: "PATCH",
               headers: {'Content-Type': 'application/json',},
@@ -73,7 +73,7 @@
   async function deleteTestItem() {
     try {
       const response = await fetch(
-            `${API_BASE_URL}/api/test_items/${test_id}/${formTestItem.item_id}`,
+            `/api/test_items/${test_id}/${formTestItem.item_id}`,
             {
               method: "DELETE",
               headers: {'Content-Type': 'application/json',},
