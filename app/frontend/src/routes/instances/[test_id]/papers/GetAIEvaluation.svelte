@@ -11,6 +11,7 @@
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+	import { GET_E_A_R_Q, GET_SCORES, REPOPULATE_UNANSWERED_ITEMS } from '$lib/utils/ai_evaluations.ts';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
@@ -20,28 +21,9 @@
   let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
 
-  const GET_E_A_R_Q = (i: GetSpecificEvaluationResponse) => i.expected_answer_rubric_questions.split(';');
-  const GET_SCORES = (i: GetSpecificEvaluationResponse) => i.scores.split(';');
-  const REPOPULATE_UNANSWERED_ITEMS = () => {
-          const evalItemIds = new Set(questionItemEvals.map(e => e.item_id));
-          const unansweredItems = testItems
-                  .filter(item => !evalItemIds.has(item.item_id))
-                  .map(item => ({
-                    answer_id: -1,
-                    item_id: item.item_id,
-                    label: item.label,
-                    question: item.question,
-                    expected_answer_rubric_questions: item.expected_answer_rubric_questions,
-                    ai_evaluation: "",
-                    scores: "",
-                  }));
-          questionItemEvals.push(...unansweredItems);
-          unansweredItems.forEach(i => isRequestOngoings.set(i.answer_id, false));
-        };
-
   onMount(async () => {
     isPageLoading = true;
-    REPOPULATE_UNANSWERED_ITEMS();
+    REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
     try {
       const response = await fetch(
             `${API_BASE_URL}/api/student_answers/${test_id}/results/${student_no}`,
@@ -55,7 +37,7 @@
         case 200:
           const result = await response.json();
           questionItemEvals = result.evaluations;
-          REPOPULATE_UNANSWERED_ITEMS();
+          REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
           break;
         default:
           alert(`${response.status} ${response.statusText}`);
@@ -86,7 +68,7 @@
                   ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
                   : ans
                 );
-          REPOPULATE_UNANSWERED_ITEMS();
+          REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
           break;
         default:
           alert(`${response.status} ${response.statusText}`);

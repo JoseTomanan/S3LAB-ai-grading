@@ -25,7 +25,3 @@ export interface TestItemsContext {
 	isLoading: boolean;
 }
 
-// ================ OPERATION INDICATORS ================
-export interface AIEvaluation extends GetSpecificEvaluationResponse {
-  is_operation_ongoing: boolean;
-}
