@@ -40,11 +40,12 @@
 </script>
 
 
-<div class="space-y-3 overflow-visible">
-  <h1 class="text-left font-semibold">Test papers</h1>
+<div class="flex flex-col gap-y-3 overflow-visible items-center">
+  <h1 class="text-left font-semibold w-full">Test papers</h1>
   {#if isPageLoading}
     {#each { length: 3 } as _}
-      <Skeleton class="h-10 w-full grayscale-100"/>
+      <Skeleton class="h-10 w-full grayscale-100
+                    md:w-5/6 lg:w-3/4"/>
     {/each}
   
   {:else if perStudentStatuses.length == 0}
@@ -52,21 +53,20 @@
   
   {:else}
     {#each perStudentStatuses as testPaper}
-      <span class="flex flex-row items-center justify-between gap-2">
-        <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-            class="flex-1 button-outline
-                    flex flex-row justify-between items-center">
-          <h4>{testPaper.name}</h4>
-          <h5 class="flex flex-row gap-x-1.5 items-center">
-            {testPaper.total_score}
-            {#if testPaper.is_done_rendering}
-              <MdiPaperCheckOutline class="size-5"/>
-            {:else}
-              <MdiPaperAlertOutline class="size-5"/>
-            {/if}
-          </h5>
-        </a>
-      </span>
+    <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
+        class="flex-1 button-outline
+                w-full md:w-5/6 lg:w-3/4
+                flex flex-row justify-between items-center">
+      <h4>{testPaper.name}</h4>
+      <h5 class="flex flex-row gap-x-1.5 items-center">
+        {testPaper.total_score}
+        {#if testPaper.is_done_rendering}
+          <MdiPaperCheckOutline class="size-5"/>
+        {:else}
+          <MdiPaperAlertOutline class="size-5"/>
+        {/if}
+      </h5>
+    </a>
     {/each}
   {/if}
 </div>
