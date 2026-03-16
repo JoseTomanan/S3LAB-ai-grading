@@ -6,18 +6,65 @@
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';
+  import IconReevaluate from "~icons/mdi/head-reload";
 
-  import type { StudentAnswer } from '$lib/index.ts';
+  import type { GetSpecificEvaluationResponse, StudentAnswer } from '$lib/index.ts';
   import { Label } from '$lib/components/ui/label/index.js';
 	import SafeDelete from '$lib/components/SafeDelete.svelte';
+	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
+	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 
   if (!data.student_items)
     throw new Error("Student items failed to load");
-
-  let studentItems: (StudentAnswer & {label: string})[] = $state(data.student_items);
-  console.log(studentItems);
+  if (!data.student_ai_evaluations)
+    throw new Error("Student AI evaluations failed to load");
 
   let isWantsToDelete: boolean = $state(false);
+  let studentItems: (StudentAnswer & GetSpecificEvaluationResponse)[] = $derived((() => {
+    const evalMap = new Map<number, GetSpecificEvaluationResponse>();
+    
+    for (const evalItem of data.student_ai_evaluations)
+      evalMap.set(evalItem.item_id, evalItem);
+
+    return data.student_items!.map(item => {
+      const evalData = evalMap.get(item.item_id)!;
+      return {...item,
+        question: evalData.question, expected_answer_rubric_questions: evalData.expected_answer_rubric_questions, scores: evalData.scores};
+    })
+  })());
+
+  let isRequestOngoings: Map<number, boolean> = $state(new Map());
+
+
+  async function reevaluateAnswer(answer_id: number) {
+    isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
+    try {
+      const response = await fetch(
+            `${API_BASE_URL}/api/answers/${answer_id}/reevaluate`,
+            {
+              method: "PATCH",
+              headers: {'Content-Type': 'application/json',},
+            }
+            );
+
+      switch (response.status) {
+        case 200:
+          const result = await response.json();
+          studentItems = studentItems.map(ans => 
+                  ans.answer_id == result.answer_id 
+                  ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
+                  : ans
+                );
+          break;
+        default:
+          alert(`${response.status} ${response.statusText}`);
+      }
+    } catch (e) {
+      alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
+    } finally {
+      isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
+    }
+  }
 
   async function deleteAnswer(item_id: number) {
     console.log(item_id);
@@ -45,32 +92,64 @@
       <MdiImagePlus class="size-5 mx-2"/>
     </a>
   </span>
+
   {#if studentItems.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
+  
   {:else}
-    <div class="overflow-y-auto space-y-2">
+    <div class="overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
-      <div class="card space-y-1">
+      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)}
+      <div class="card space-y-1.5 w-full md:w-3/4 lg:w-2/3">
         <Label for={studentItem.label} class="flex flex-row justify-between">
           {studentItem.label}
-          <span class="flex flex-row space-x-1.5">
+          <span class="flex flex-row space-x-1">
             <SafeDelete toggle={isWantsToDelete}
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
+            {#if studentItem.image_directory != ""}
+              <button class={`${isRequestLoading ? "opacity-50" : "opacity-100"} button-outline px-0 py-0`}
+                      onclick={() => reevaluateAnswer(studentItem.answer_id)}
+                      disabled={isRequestLoading}>
+                <IconReevaluate />
+              </button>
+            {/if}
             <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
                   class="button-outline">
               <MdiCrop/>
             </a>
           </span>
         </Label>
-        <div class="flex justify-center items-center">
+        <div class="flex flex-col justify-center items-center gap-x-3 gap-y-1.5
+                    lg:flex-row lg:items-start">
           {#if studentItem.image_directory == ""}
             <MdiPaperOff class="size-8 opacity-50" />
           {:else}
-            <img class="size-fill md:max-w-1/2"
-                  src={`${API_BASE_URL}${studentItem.image_directory}`}
-                  alt={studentItem.label}/>
+            {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
+            <div class="flex justify-center items-center w-4/5 md:w-3/4 lg:w-1/2">
+              <img class="size-fill"
+                    src={`${API_BASE_URL}${studentItem.image_directory}`}
+                    alt={studentItem.label}/>
+            </div>
+            <div class="flex-1 w-full h-full">
+              {#each e_a_r_qs as e_a_r_q, index}
+              {#if e_a_r_q.length != 0}
+                {@const answerScore = GET_SCORES(studentItem)[index]}
+                {@const isHasScore = answerScore && answerScore != ""}
+                <span class="flex flex-wrap justify-between items-center lg:*:text-base">
+                  <h6 class="italic">{e_a_r_q}</h6>
+                  {#if isRequestLoading}
+                    <Spinner class="text-chart-3 size-4" />
+                  {:else}
+                    <h6 class="font-bold">
+                      {isHasScore ? answerScore : "—"}
+                    </h6>
+                  {/if}
+                </span>
+              {/if}
+            {/each}
+            </div>
           {/if}
         </div>
       </div>
