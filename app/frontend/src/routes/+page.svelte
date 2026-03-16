@@ -1,7 +1,8 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
 
-  import IconLink from '~icons/mdi/arrow-top-right';
+  import IconPaper from '~icons/mdi/paper-outline';
+  import IconSection from '~icons/mdi/person';
 </script>
 
 
@@ -19,19 +20,19 @@
       SIPAT<br>MATH
     </h1>
   </div>
-  <div class="flex flex-col gap-y-1.5 w-full
-          [&>a]:text-center">
+  <div class="flex flex-row gap-x-1.5 w-full justify-center
+          [&>a]:text-center [&>a]:px-2">
     <a href="/instances" class="button-primary">
+      <IconPaper class="size-32 opacity-80"/>
       Test instances
     </a>
-    <a href="/sections" class="button-outline">
+    <a href="/sections" class="button-primary">
+      <IconSection class="size-32 opacity-80"/>
       Sections
     </a>
-    <a href="https://github.com/JoseTomanan/S3LAB-ai-grading"
-          class="button-outline flex flex-row items-center justify-center gap-x-1 hover:gap-x-3 transition-all">
-      Git Repository
-      <IconLink />
-    </a>
   </div>
+  <!-- <button class="button-outline">
+    Guide
+  </button> -->
 </div>
 <h6 class="opacity-40">Made for CS199 by Tomanan and Tuan, with love.</h6>
