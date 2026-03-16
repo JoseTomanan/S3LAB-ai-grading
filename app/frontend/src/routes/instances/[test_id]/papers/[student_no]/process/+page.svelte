@@ -17,20 +17,18 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
-	import type { FileRecord } from '$lib/index.ts';
+	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
 
   import { rotateImage, flipImage } from '$lib/utils.ts';
+	import ReviewForCommit from './ReviewForCommit.svelte';
 
 
   let isOperationOngoing: boolean = $state(false);
-
   let formFile: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
-
   let formFileRecord: FileRecord | null = $state(null);
-
   let isAskingForValidation: boolean = $state(false);
-  let supposedScans: {index: number, image_directory: string, item_number: string}[] = $state([]);
+  let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
 
   function handleFile() {
     if (!formFile || formFile.length == 0)
@@ -93,7 +91,8 @@
         case 200:
           const result = await response.json();
           console.log(result);
-          supposedScans = result.boxes ?? [];
+          supposedScans = (result.boxes ?? [])
+                            .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
           isAskingForValidation = true;
           break;
         default:
@@ -126,13 +125,31 @@
           window.location.reload();
           break;
         default:
-          alert(`${response.status} ${response.statusText}`);
+          const responseBody = await response.json();
+          alert(`${response.status}: ${responseBody.detail}`);
       }
       return;
     }
 
     // TODO: handle the otherwise case
   }
+
+  // FIXME: test code, remove when no longer necessary
+  // supposedScans =
+  //       [
+  //         { index: 1,
+  //           image_directory: "/api/temp/3-Rizal_Seatwork-1_201911111_8a3ace9da3b04c48a3325e1507f620e5_0.jpg",
+  //           item_number: "1", 
+  //           editing: false },
+  //         { index: 2,
+  //           image_directory: "/api/temp/3-Rizal_Seatwork-1_201911111_9509b2b3fc9640419c5e3bf07c174d4d_2.jpg",
+  //           item_number: "2", 
+  //           editing: false },
+  //         { index: 3,
+  //           image_directory: "/api/temp/3-Rizal_Seatwork-1_201911111_2e6f8f201c5c4dec821d8d6b4537f5d3_1.jpg",
+  //           item_number: "2b", 
+  //           editing: false },
+  //       ]
 </script>
 
 
@@ -142,8 +159,7 @@
     <h1>Process image</h1>
     <h5>For {data.student_no}</h5>
   </span>
-
-  {#if isAskingForValidation === false}
+  <!-- {#if isAskingForValidation === false} -->
     <div class="flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
               class="button-outline flex-1">
@@ -163,7 +179,7 @@
               onchange={handleFile}
               bind:files={formFile}/>
       <Dialog.Root>
-        <Dialog.Trigger class="button-outline w-1/5 h-auto flex justify-center items-center">
+        <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
         </Dialog.Trigger>
         <OpenCamera onImageCapture={getImageFromComponent} />
@@ -172,8 +188,14 @@
     <Input id="numBoxes"
             type="number"
             placeholder="Number of boxes (default=2)..."
+            disabled={isAskingForValidation}
             bind:value={paramNumBoxes}
         />
+  <!-- {/else} -->
+
+  {#if isAskingForValidation === false}
+  <!--FIXME: test code; remove when done-->
+  <!-- {#if isAskingForValidation === true} -->
     <Button variant="outline"
             onclick={sendImageForValidation}
             disabled={!formFileRecord || isOperationOngoing}>
@@ -187,7 +209,7 @@
     <div class="card flex flex-col items-center justify-center relative">
       {#if !formFileRecord}
         <IconImagePreview class="size-12 opacity-60"/>
-        <h4 class="opacity-60">Uploaded image will be shown here.</h4>
+        <h6 class="opacity-60">Uploaded image will be shown here.</h6>
       {:else}
         <img src={formFileRecord.url}
               alt="Uploaded file preview"
@@ -211,29 +233,15 @@
     </div>
 
   {:else}
-    <div class="flex flex-row w-full gap-x-1">
-      <Button variant="outline"
-              class="flex-1"
-              onclick={() => validateAndCommit(true)}>
-        Accept segmentation
-      </Button>
-      <button class="button-destructive text-sm"
-              onclick={() => validateAndCommit(false)}>
-        Discard
-      </button>
-    </div>
-    
-    {#each supposedScans as supposedScan}
-      <div class="relative border border-border">
-        <h4 class="absolute left-2 top-2 bg-white/80">
-          {supposedScan.item_number}
-        </h4>
-        <img class="block"
-              src={`${API_BASE_URL}${supposedScan.image_directory}`}
-              alt={supposedScan.item_number}
-              />
-      </div>
-    {/each}
+    <Dialog.Root>
+      <Dialog.Trigger class="button-secondary text-sm">
+        Open segmentation results
+      </Dialog.Trigger>
+      <ReviewForCommit supposedScans={supposedScans}
+                        onAccept={() => validateAndCommit(true)}
+                        onReject={() => validateAndCommit(false)} />
+    </Dialog.Root>
+    <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
   {/if}
 </div>
 
