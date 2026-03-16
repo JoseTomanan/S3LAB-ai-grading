@@ -6,7 +6,7 @@
 </script>
 
 
-<div class="container w-full h-[95vh] flex flex-col items-center justify-center gap-y-16">
+<div class="container w-full h-[93vh] flex flex-col items-center justify-center gap-y-16">
   <div class="relative w-full py-10 flex items-center justify-center">
     <span class="absolute inset-0 m-auto size-32 object-contain -z-50 block left-0 right-0 top-0 bottom-0">
       <span class="slow-spin bg-accent/40 rounded-full">
@@ -20,7 +20,7 @@
       SIPAT<br>MATH
     </h1>
   </div>
-  <div class="flex flex-row gap-x-1.5 w-full justify-evenly
+  <div class="flex flex-row gap-x-4 w-full justify-center
           [&>a]:text-center [&>a]:px-2 [&>a>*]:opacity-80">
     <a href="/instances" class="button-primary">
       <IconPaper class="size-28"/>
