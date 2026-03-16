@@ -1,3 +1,4 @@
+import type { GetSpecificEvaluationResponse } from "./schemas.ts";
 import type { TestItem } from "./types.ts";
 
 export interface Point {
@@ -18,8 +19,13 @@ export type FileRecord = {
   statusCode: number;
 };
 
-// ============ CONTEXT ============
+// ================ CONTEXT ================
 export interface TestItemsContext {
 	items: TestItem[];
 	isLoading: boolean;
+}
+
+// ================ OPERATION INDICATORS ================
+export interface AIEvaluation extends GetSpecificEvaluationResponse {
+  is_operation_ongoing: boolean;
 }
