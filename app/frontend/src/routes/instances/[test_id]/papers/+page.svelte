@@ -7,9 +7,6 @@
   import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
   import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
 
-  import * as Dialog from '$lib/components/ui/dialog/index.ts';
-
-  import GetAIEvaluation from './GetAIEvaluation.svelte';
   import type { GetEvaluationsResponse } from '$lib/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 
@@ -49,8 +46,10 @@
     {#each { length: 3 } as _}
       <Skeleton class="h-10 w-full grayscale-100"/>
     {/each}
+  
   {:else if perStudentStatuses.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
+  
   {:else}
     {#each perStudentStatuses as testPaper}
       <span class="flex flex-row items-center justify-between gap-2">
@@ -58,14 +57,15 @@
             class="flex-1 button-outline
                     flex flex-row justify-between items-center">
           <h4>{testPaper.name}</h4>
-          {#if testPaper.is_done_rendering}
-            <MdiPaperCheckOutline class="size-5"/>
-          {:else}
-            <MdiPaperAlertOutline class="size-5"/>
-          {/if}
+          <h5 class="flex flex-row gap-x-1.5 items-center">
+            {testPaper.total_score}
+            {#if testPaper.is_done_rendering}
+              <MdiPaperCheckOutline class="size-5"/>
+            {:else}
+              <MdiPaperAlertOutline class="size-5"/>
+            {/if}
+          </h5>
         </a>
-        <GetAIEvaluation test_id={data.test_id}
-                          student_no={testPaper.student_no}/>
       </span>
     {/each}
   {/if}
