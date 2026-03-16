@@ -19,6 +19,9 @@
   let testItems: TestItem[] = $state(testItemsContext.items);
 
   let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
+  $effect(() => {
+    questionItemEvals.sort((a, b) => a.label.localeCompare(b.label))
+  });
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
 
   onMount(async () => {
@@ -125,7 +128,7 @@
       {/each}
     
     {:else}
-      {#each questionItemEvals.slice().sort((a, b) => a.label.localeCompare(b.label)) as evalItem}
+      {#each questionItemEvals as evalItem}
         <div class="card space-y-1">
           {#if evalItem.answer_id == -1}
             <h4 class="truncate text-ellipsis w-fill">
