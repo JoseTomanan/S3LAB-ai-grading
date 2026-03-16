@@ -17,7 +17,7 @@ export default defineConfig({
 	plugins: [
 		tailwindcss(),
 		sveltekit(),
-    basicSsl(),
+    // basicSsl(),
 		Icons({
 			compiler: 'svelte',
 		}),
