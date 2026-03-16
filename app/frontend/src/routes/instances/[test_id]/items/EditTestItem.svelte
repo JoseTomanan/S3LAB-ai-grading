@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { API_BASE_URL } from '$lib/constants.ts';
-  
+    
   import MdiDelete from "~icons/mdi/delete";
 
   import type { TestItem } from '$lib/index.ts';

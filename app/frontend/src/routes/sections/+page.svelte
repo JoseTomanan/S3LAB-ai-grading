@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { API_BASE_URL } from "$lib/constants.ts";
-
 	import { onMount } from "svelte";
 	import MdiPapersOutline from "~icons/mdi/papers-outline";
 	import MdiPeopleAdd from "~icons/mdi/people-add";

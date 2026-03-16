@@ -1,8 +1,7 @@
 <script lang="ts">
   let { data } = $props();
 
-  import { API_BASE_URL } from '$lib/constants.ts';
-  import { onMount } from 'svelte';
+    import { onMount } from 'svelte';
 
   const GET_NAME_ONLY = (s: string) => s.substring(0, s.lastIndexOf('.'));
   const GET_EXTENSION_ONLY = (s: string) => s.substring(s.lastIndexOf('.'));

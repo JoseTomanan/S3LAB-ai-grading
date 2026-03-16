@@ -1,8 +1,7 @@
 <script lang="ts">
   const { data } = $props();
 
-  import { API_BASE_URL } from '$lib/constants.ts';
-  import { dataUrlToFile } from '$lib/utils.ts';
+    import { dataUrlToFile } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
   import IconCamera from "~icons/mdi/camera";

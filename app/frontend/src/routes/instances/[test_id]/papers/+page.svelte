@@ -1,8 +1,7 @@
 <script lang="ts">
   const { data } = $props();
   
-  import { API_BASE_URL } from '$lib/constants.ts';
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   
   import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
   import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';

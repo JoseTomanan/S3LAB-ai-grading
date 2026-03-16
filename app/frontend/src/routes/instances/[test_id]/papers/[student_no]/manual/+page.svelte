@@ -1,7 +1,6 @@
 <script lang="ts">
   const { data } = $props();
 
-  import { API_BASE_URL } from '$lib/constants.ts';
   import { page } from '$app/state';
 
   import MdiUpload from '~icons/mdi/upload';
@@ -105,7 +104,7 @@
     </div>
   {:else if responseImage != ""}
     <img class="border"
-          src={API_BASE_URL+responseImage} alt="Test item"/>
+          src={responseImage} alt="Test item"/>
   {:else}
     <span class="py-4 border bg-muted text-muted-foreground flex flex-col items-center">
       <MdiUpload class="h-8 w-full"/>

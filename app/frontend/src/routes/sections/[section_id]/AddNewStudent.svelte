@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { API_BASE_URL } from '$lib/constants.ts';
-
+	
 	const { section_id } = $props();
 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";

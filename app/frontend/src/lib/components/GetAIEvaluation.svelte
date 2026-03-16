@@ -1,8 +1,7 @@
 <script lang="ts">
   const { test_id, student_no } = $props();
 
-  import { API_BASE_URL } from '$lib/constants.ts';
-  import { getContext, onMount } from "svelte";
+    import { getContext, onMount } from "svelte";
 
   import MdiHeadReload from "~icons/mdi/head-reload";
   import MdiAlertBoxOutline from "~icons/mdi/alert-box-outline";

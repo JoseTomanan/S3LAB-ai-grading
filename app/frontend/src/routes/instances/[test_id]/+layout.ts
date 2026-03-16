@@ -1,5 +1,4 @@
 import type { LayoutLoad } from './$types.ts';
-import { API_BASE_URL } from '$lib/constants.ts';
 import type { TestInstance, TestItem } from '$lib/index.ts';
 
 

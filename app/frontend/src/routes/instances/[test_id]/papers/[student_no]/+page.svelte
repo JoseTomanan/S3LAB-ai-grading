@@ -1,8 +1,7 @@
 <script lang="ts">
   const { data } = $props();
 
-  import { API_BASE_URL } from '$lib/constants.ts';
-
+  
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';

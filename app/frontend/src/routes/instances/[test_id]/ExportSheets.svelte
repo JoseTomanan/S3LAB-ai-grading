@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { API_BASE_URL } from '$lib/constants.ts';
-
+  
   const { test_id } = $props();
   
   import { Button } from '$lib/components/ui/button/index.ts';

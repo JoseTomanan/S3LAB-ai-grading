@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { API_BASE_URL } from '$lib/constants.ts';
-	import { onMount } from 'svelte';
+  	import { onMount } from 'svelte';
 
   const { test_id, section_id } = $props();
 

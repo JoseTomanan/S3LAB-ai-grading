@@ -1,7 +1,5 @@
 <script lang="ts">
   let { supposedScans, onAccept, onReject } = $props();
-	
-  import { API_BASE_URL } from "$lib/constants.ts";
   import IconLabel from "~icons/mdi/label";
 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";

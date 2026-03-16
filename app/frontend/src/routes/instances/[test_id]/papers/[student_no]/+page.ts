@@ -1,5 +1,4 @@
 import type { PageLoad } from "./$types.js";
-import { API_BASE_URL } from '$lib/constants.ts';
 import type { GetSpecificEvaluationResponse, StudentAnswer, TestItem } from "$lib/index.ts";
 import { REPOPULATE_UNANSWERED_ITEMS } from "$lib/utils/ai_evaluations.ts";
 

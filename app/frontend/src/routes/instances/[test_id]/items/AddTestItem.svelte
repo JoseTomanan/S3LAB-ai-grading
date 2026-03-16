@@ -1,8 +1,7 @@
 <script lang="ts">
   const { test_id } = $props();
   
-  import { API_BASE_URL } from '$lib/constants.ts';
-  import MdiPlus from "~icons/mdi/plus";
+    import MdiPlus from "~icons/mdi/plus";
 
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
