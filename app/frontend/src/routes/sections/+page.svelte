@@ -8,6 +8,7 @@
 	import Pagination from "$lib/components/Pagination.svelte";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
+  import AddSection from "./AddSection.svelte";
 
 	let isPageLoading: boolean = $state(true);
 	let sections: Section[] = $state([]);
@@ -45,17 +46,22 @@
       </a>
     </span>
 		<h1 class="italic">Sections</h1>
-		<button class="button-secondary" onclick={() => {}}>
-			<MdiPeopleAdd class="size-6"/>
-		</button>
+    <Dialog.Root>
+      <Dialog.Trigger class="button-secondary">
+        <MdiPeopleAdd class="size-6"/>
+      </Dialog.Trigger>
+      <AddSection />
+    </Dialog.Root>
 	</span>
 	<div class="flex flex-col gap-3">
 		{#if isPageLoading}
       {#each { length: 2 } as _}
         <Skeleton class="h-16 w-full grayscale-100"/>
       {/each}
+
 		{:else if sections.length == 0}
 			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
+
 		{:else}
 			{#each paginationValues as section}
 				<a href={`/sections/${section.section_id}`}
