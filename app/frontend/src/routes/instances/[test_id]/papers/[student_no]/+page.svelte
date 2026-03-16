@@ -28,8 +28,12 @@
 
     return data.student_items!.map(item => {
       const evalData = evalMap.get(item.item_id)!;
-      return {...item,
-        question: evalData.question, expected_answer_rubric_questions: evalData.expected_answer_rubric_questions, scores: evalData.scores};
+      return {
+        ...item,
+        answer_id: evalData.answer_id,
+        question: evalData.question,
+        expected_answer_rubric_questions: evalData.expected_answer_rubric_questions,
+        scores: evalData.scores};
     })
   })());
 
