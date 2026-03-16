@@ -21,3 +21,9 @@ export interface GetEvaluationsResponse {
 	is_done_rendering: boolean;
 	total_score: string;
 }
+
+export interface CommitBoxesResponseItem {
+  index: number;
+  image_directory: string;
+  item_number: string;
+}
