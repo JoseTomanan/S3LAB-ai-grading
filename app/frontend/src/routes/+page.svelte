@@ -1,8 +1,10 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
+	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 
   import IconPaper from '~icons/mdi/paper';
   import IconSection from '~icons/mdi/person';
+	import Manual from "./Manual.svelte";
 </script>
 
 
@@ -20,19 +22,24 @@
       SIPAT<br>MATH
     </h1>
   </div>
-  <div class="flex flex-row gap-x-4 w-full justify-center
-          [&>a]:text-center [&>a]:px-2 [&>a>*]:opacity-80">
-    <a href="/instances" class="button-primary">
-      <IconPaper class="size-28"/>
-      <b>Test Instances</b>
-    </a>
-    <a href="/sections" class="button-primary">
-      <IconSection class="size-28"/>
-      <b>Sections</b>
-    </a>
+  <div class="space-y-4">
+    <div class="flex flex-row gap-x-4 w-full justify-center
+            [&>a]:text-center [&>a]:px-2 [&>a>*]:opacity-80">
+      <a href="/instances" class="button-primary">
+        <IconPaper class="size-28"/>
+        <b>Test Instances</b>
+      </a>
+      <a href="/sections" class="button-primary">
+        <IconSection class="size-28"/>
+        <b>Sections</b>
+      </a>
+    </div>
+    <Dialog.Root>
+      <Dialog.Trigger class="button-outline w-full">
+        User manual
+      </Dialog.Trigger>
+      <Manual />
+    </Dialog.Root>
   </div>
-  <!-- <button class="button-outline">
-    Guide
-  </button> -->
 </div>
 <h6 class="opacity-40">Made for CS199 by Tomanan and Tuan, with love.</h6>
