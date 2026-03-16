@@ -85,10 +85,11 @@ async def commit_boxes_endpoint(
                 session: Session = Depends(get_session)
                 ):
     test_exists = session.exec(
-                    select(TestPaperInstance)
-                    .where(TestPaperInstance.test_id == test_id)
+                    select(TestInstance)
+                    .where(TestInstance.test_id == test_id)
                     ).first()
     if not test_exists:
+        print("INFO:\ttest_exists failed")
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Test with ID '{test_id}' not found"
@@ -99,6 +100,7 @@ async def commit_boxes_endpoint(
                         .where(Student.student_no == student_no)
                         ).first()
     if not student_exists:
+        print("INFO:\tstudent_exists failed")
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Student with student_no '{student_no}' not found"
