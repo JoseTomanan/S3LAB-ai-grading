@@ -7,7 +7,21 @@ from logic.document_scanner import _mapp, _get_robust_aspect_ratio
 
 
 def _is_valid_quad(pts: np.ndarray) -> bool:
-    """Get points, return whether or not valid section (through area, aspect ratio, skew angle)."""
+    """
+    Check if a set of four points forms a valid section (quadrilateral)
+    based on area, aspect ratio, and skew angle.
+
+    This function ALLOWS non-perfect quadrilaterals. It considers a quadrilateral
+    valid if it approximately meets the size, shape, and skew constraints—i.e.,
+    the four points do not need to form a mathematically perfect rectangle or square,
+    but must "closely" resemble one within tolerance defined by constants.
+
+    Args:
+        pts (np.ndarray): 4x2 array of corner points.
+
+    Returns:
+        bool: True if the points approximate a valid quadrilateral section, False otherwise.
+    """
     ordered = _mapp(pts.flatten())
     tl, tr, br, bl = ordered
     w = (np.linalg.norm(tr - tl) + np.linalg.norm(br - bl)) / 2
