@@ -4,9 +4,9 @@ from fastapi.responses import FileResponse
 
 from pathlib import Path
 
+from core.database import create_db_and_tables, get_session
 from models import *
 from schemas import *
-from database import create_db_and_tables, get_session
 
 from logic.utility import *
 
