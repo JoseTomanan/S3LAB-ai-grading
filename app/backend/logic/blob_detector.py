@@ -2,7 +2,8 @@ from itertools import combinations
 import numpy as np
 import cv2
 from core.constants import *
-from logic.document_scanner import _mapp, _get_robust_aspect_ratio
+from logic.document_scanner import DocumentScanner
+from logic.utility import _mapp, _get_robust_aspect_ratio, _is_valid_quad
 
 
 
