@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 from cv2.typing import MatLike
 from core.constants import NORMAL_SIZE
-from utils import _mapp, _get_robust_aspect_ratio
+from utils import mapp, get_robust_aspect_ratio
 
 
 
@@ -141,8 +141,8 @@ class DocumentScanner:
     
     def _warp_from_original(self, screen_contour: MatLike, original: MatLike) -> MatLike:
         """Take given screen contour from original image."""
-        approximation = _mapp(screen_contour)
-        box_ratio = _get_robust_aspect_ratio(approximation)
+        approximation = mapp(screen_contour)
+        box_ratio = get_robust_aspect_ratio(approximation)
         box_height = int(NORMAL_SIZE * box_ratio)
 
         points = np.float32(np.array([

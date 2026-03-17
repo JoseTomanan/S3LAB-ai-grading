@@ -5,7 +5,7 @@ from core.constants import *
 
 # ==============================
 #region Private functions
-def _mapp(h):
+def mapp(h):
     """
     Reorders and reorganizes a set of 4 points (corners) based on their spatial properties.
     
@@ -38,7 +38,7 @@ def _mapp(h):
     return hnew
 
 
-def _get_robust_aspect_ratio(coords):
+def get_robust_aspect_ratio(coords):
     """
     Calculate the aspect ratio of a quadrilateral defined by its corner coordinates.
     This function takes a set of coordinates representing the corners of a quadrilateral,
@@ -68,7 +68,12 @@ def _get_robust_aspect_ratio(coords):
     return w / h
 
 
-def _is_valid_quad(pts: np.ndarray) -> bool:
+def group_dots_into_quads(pts: np.ndarray, x_tol_ratio: float = 0.02, y_tol_ratio: float = 0.02) -> bool:
+    """Return only point-sets that could plausibly be rectangle corners."""
+    ...
+
+
+def is_valid_quad(pts: np.ndarray) -> bool:
     """
     Check if a set of four points forms a valid section (quadrilateral)
     based on area, aspect ratio, and skew angle.
@@ -84,7 +89,7 @@ def _is_valid_quad(pts: np.ndarray) -> bool:
     Returns:
         bool: True if the points approximate a valid quadrilateral section, False otherwise.
     """
-    ordered = _mapp(pts.flatten())
+    ordered = mapp(pts.flatten())
     tl, tr, br, bl = ordered
     w = (np.linalg.norm(tr - tl) + np.linalg.norm(br - bl)) / 2
     h = (np.linalg.norm(bl - tl) + np.linalg.norm(br - tr)) / 2
@@ -92,7 +97,7 @@ def _is_valid_quad(pts: np.ndarray) -> bool:
     if w * h < MIN_AREA:
         return False
 
-    aspect = _get_robust_aspect_ratio(pts)
+    aspect = get_robust_aspect_ratio(pts)
     if aspect > MAX_ASPECT_RATIO or aspect < 1/MAX_ASPECT_RATIO:
         return False
 
@@ -100,6 +105,29 @@ def _is_valid_quad(pts: np.ndarray) -> bool:
     angle_bot = np.degrees(np.arctan2(br[1] - bl[1], br[0] - bl[0]))
     if abs(angle_top - angle_bot) > MAX_SKEW_DEG:
         return False
+    
+    if not _corners_are_right_angles(np.array(ordered)):
+        return False
+    
     return True
+
+
+def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=20.0) -> bool:
+    """Return whether or not corners are approximately 90 degrees"""
+    tl, tr, br, bl = ordered
+    corners = [
+        (bl, tl, tr),   # angle at TL
+        (tl, tr, br),   # angle at TR
+        (tr, br, bl),   # angle at BR
+        (br, bl, tl),   # angle at BL
+    ]
+    for a, vertex, b in corners:
+        v1 = a - vertex
+        v2 = b - vertex
+        cos_a = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-6)
+        angle = np.degrees(np.arccos(np.clip(cos_a, -1, 1)))
+        if abs(angle - 90) > tol_deg:
+            return False
+    return True 
 #endregion
 # ==============================
