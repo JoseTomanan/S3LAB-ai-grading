@@ -117,14 +117,32 @@ class BoxSegmenter(DocumentScanner):
             quad_candidates = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
 
         image_good_sections = []
-        for i, c in enumerate(quad_candidates):
-            c
-            
-            if _is_valid_quad(c):
-                ordered = np.array(_mapp(c.flatten()), dtype=np.float32).reshape(4, 2)
-                image_good_sections.append(ordered)
-            else:
+        for i, q in enumerate(quad_candidates):
+            if not _is_valid_quad(q):
                 continue
+
+            ordered = np.array(_mapp(q.flatten()), dtype=np.float32).reshape(4, 2)
+            contour = np.array(ordered, dtype=np.int32).reshape((-1, 1, 2))
+            perimeter = cv2.arcLength(contour, True)
+            approximate = cv2.approxPolyDP(contour, 0.06 * perimeter, True)
+
+            if len(approximate) == 4:
+                if debug:
+                    debug_img = self._highlight_contours(cv2.cvtColor(image_mat, cv2.COLOR_BGR2GRAY), approximate, contour)
+                    self.save_image(
+                                self._encode_to_bytes(debug_img),
+                                f"./TEMP/output/DEBUG_blob_box{i}.jpg"
+                                )
+                approximate = approximate.reshape(4, 2)
+                (_, _, w, h) = cv2.boundingRect(approximate)
+                aspect_ratio = w / float(h)
+                if 1 / MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
+                    print(f"INFO:\tAccepted and stored dot-quad {i}")
+                    image_good_sections.append(approximate)
+                else:
+                    print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+            else:
+                print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
 
         return image_good_sections
 
