@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from cv2.typing import MatLike
 from core.constants import *
-from logic.document_scanner import DocumentScanner, NORMAL_SIZE, _mapp, _get_robust_aspect_ratio
+from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector
 
