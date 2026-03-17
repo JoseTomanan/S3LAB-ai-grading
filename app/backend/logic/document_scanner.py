@@ -3,10 +3,9 @@ from typing import Callable
 import numpy as np
 import cv2
 from cv2.typing import MatLike
+from core.constants import NORMAL_SIZE
 
 
-
-NORMAL_SIZE = 2048
 
 
 def _mapp(h):

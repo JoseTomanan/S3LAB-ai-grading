@@ -1,8 +1,8 @@
 from itertools import combinations
 import numpy as np
 import cv2
+from core.constants import *
 from logic.document_scanner import _mapp, _get_robust_aspect_ratio
-from logic.box_segmenter import AREA, MIN_AREA, MAX_AREA, MAX_SKEW_DEG, MAX_ASPECT_RATIO
 
 
 

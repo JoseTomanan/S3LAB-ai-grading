@@ -1,17 +1,10 @@
 import numpy as np
 import cv2
 from cv2.typing import MatLike
+from core.constants import *
 from logic.document_scanner import DocumentScanner, NORMAL_SIZE, _mapp, _get_robust_aspect_ratio
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector
-
-
-
-AREA = NORMAL_SIZE ** 2
-MIN_AREA = AREA * 0.01
-MAX_AREA = AREA * 0.90
-MAX_SKEW_DEG = 15.0
-MAX_ASPECT_RATIO = 9.0
 
 
 
