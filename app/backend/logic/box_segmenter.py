@@ -201,7 +201,7 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA.jpeg"
+    FILENAME = "testRuledDottedA2.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
     images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
     # images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
