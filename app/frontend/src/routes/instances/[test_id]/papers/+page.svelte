@@ -43,8 +43,7 @@
   <h1 class="text-left font-semibold w-full">Test papers</h1>
   {#if isPageLoading}
     {#each { length: 3 } as _}
-      <Skeleton class="h-10 w-full grayscale-100
-                    md:w-5/6 lg:w-3/4"/>
+      <Skeleton class="subcontainer h-10 w-full grayscale"/>
     {/each}
   
   {:else if perStudentStatuses.length == 0}
@@ -53,8 +52,7 @@
   {:else}
     {#each perStudentStatuses as testPaper}
     <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-        class="flex-1 button-outline
-                w-full md:w-5/6 lg:w-3/4
+        class="flex-1 button-outline subcontainer
                 flex flex-row justify-between items-center">
       <h4>{testPaper.name}</h4>
       <h5 class="flex flex-row gap-x-1.5 items-center">

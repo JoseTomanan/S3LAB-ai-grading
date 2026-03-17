@@ -151,6 +151,13 @@
     @apply gap-4;
   }
 
+  .subcontainer {
+    @apply w-full;
+    @apply md:w-7/8;
+    @apply lg:w-5/6;
+    @apply xl:w-4/5;
+  }
+
   .card {
     background-color: var(--card);
     color: var(--card-foreground);

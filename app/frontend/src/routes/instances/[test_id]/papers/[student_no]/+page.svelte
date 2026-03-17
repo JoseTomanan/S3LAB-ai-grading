@@ -104,8 +104,7 @@
     {#each studentItems as studentItem}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
-      <div class="card flex flex-col sm:flex-row gap-x-3 gap-y-1.5
-                  w-full md:w-7/8 lg:w-5/6">
+      <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
         <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
                       flex justify-center items-center relative">
           <Label for={studentItem.label}
