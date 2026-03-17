@@ -70,28 +70,6 @@ class BoxSegmenter(DocumentScanner):
 
         return [self._encode_to_bytes(i) for i in images_warped]
 
-    def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """
-        Same as previous function, but using solid fill blobs instead of handdrawn boxes.
-        # UNTESTED
-        """
-        image = self._decode_bytes(image_bytes)
-        image_original, image_cannied = self._regularize_forgivingly(image)
-        image_dilated = self._dilate_edges(image_cannied)
-        if debug:
-            self.save_image(
-                    self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
-                    )
-
-        BLOB_DETECTOR = BlobDetector()
-        scale = (image_original.shape[1] / image_dilated.shape[1],
-                    image_original.shape[0] / image_dilated.shape[0])
-        image_sections = BLOB_DETECTOR.detect_sections_via_anchors(image_dilated, scale)
-
-        images_warped = [self._warp_from_original(i, image_original) for i in image_sections[:num_boxes]]
-        return [self._encode_to_bytes(i) for i in images_warped]
-    
     def beautify_scan(self, image_bytes: bytes) -> bytes:
         array = self._load_array(image_bytes)
         img = self._adjust_contrast(
@@ -148,6 +126,28 @@ class BoxSegmenter(DocumentScanner):
     #endregion
 
     #region Archived unstable functions
+    def _get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
+        """
+        Same as previous function, but using solid fill blobs instead of handdrawn boxes.
+        # UNTESTED
+        """
+        image = self._decode_bytes(image_bytes)
+        image_original, image_cannied = self._regularize_forgivingly(image)
+        image_dilated = self._dilate_edges(image_cannied)
+        if debug:
+            self.save_image(
+                    self._encode_to_bytes(image_dilated),
+                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
+                    )
+
+        BLOB_DETECTOR = BlobDetector()
+        scale = (image_original.shape[1] / image_dilated.shape[1],
+                    image_original.shape[0] / image_dilated.shape[0])
+        image_sections = BLOB_DETECTOR.detect_sections_via_anchors(image_dilated, scale)
+
+        images_warped = [self._warp_from_original(i, image_original) for i in image_sections[:num_boxes]]
+        return [self._encode_to_bytes(i) for i in images_warped]
+
     def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
         """
         Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
