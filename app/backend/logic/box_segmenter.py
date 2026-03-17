@@ -9,7 +9,7 @@ from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector
 
-from utils import _get_robust_aspect_ratio, _is_valid_quad, _mapp
+from utils import is_valid_quad, mapp
 
 
 
@@ -118,10 +118,10 @@ class BoxSegmenter(DocumentScanner):
 
         image_good_sections = []
         for i, q in enumerate(quad_candidates):
-            if not _is_valid_quad(q):
+            if not is_valid_quad(q):
                 continue
 
-            ordered = np.array(_mapp(q.flatten()), dtype=np.float32).reshape(4, 2)
+            ordered = np.array(mapp(q.flatten()), dtype=np.float32).reshape(4, 2)
             contour = np.array(ordered, dtype=np.int32).reshape((-1, 1, 2))
             perimeter = cv2.arcLength(contour, True)
             approximate = cv2.approxPolyDP(contour, 0.06 * perimeter, True)
@@ -268,7 +268,7 @@ class BoxSegmenter(DocumentScanner):
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA2.jpeg"
+    FILENAME = "testRuledDottedA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
