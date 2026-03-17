@@ -34,8 +34,8 @@ class BlobDetector:
         params.filterByColor = True
         params.blobColor = 0  # dark blobs
         params.filterByArea = True
-        params.minArea = MIN_AREA
-        params.maxArea = MAX_AREA
+        params.minArea = 50
+        params.maxArea = 5000
         params.filterByCircularity = True
         params.minCircularity = 0.55
         params.filterByConvexity = True
@@ -44,23 +44,20 @@ class BlobDetector:
         params.minInertiaRatio = 0.4
         self._detector = cv2.SimpleBlobDetector_create(params)
 
-    def detect_sections_via_anchors(self, image_preprocessed: np.ndarray, scale: tuple[float, float]) -> list[dict]:
+    def detect_sections_via_anchors(self, image_mat: MatLike, debug: bool = False) -> list[MatLike]:
         """
         Detect rectangular sections in a preprocessed image using detected dark solid blobs (corners/anchors).
 
         This function finds keypoints (anchor points) in the input image using a blob detector. It then considers 
         all possible combinations of four keypoints, checks if they can form a valid quadrilateral based on area, 
-        aspect ratio, and skew angle, and collects those that pass these checks as valid sections. The corner 
-        coordinates are scaled back to the original image size. Each section returned includes its ordered corners 
-        and the corresponding keypoints.
+        aspect ratio, and skew angle, and collects those that pass these checks as valid sections. The returned
+        result is an ndarray where each element is a 4x2 array of corner points.
 
         Args:
-            image_preprocessed (np.ndarray): The input image that has already been preprocessed for blob detection.
-            scale (tuple[float, float]): Scaling factors (x, y) to map detected keypoint positions back to the original image scale.
+            image_mat (MatLike): Input image for blob detection.
 
         Returns:
-            list[dict]: A list of detected sections, where each section is a dict containing 'corners' (the 4 points of the box)
-                        and 'keypoints' (the keypoint objects for these corners).
+            list[MatLike]: An array of detected section corner arrays of shape (num_sections, 4, 2).
         """
         keypoints = self._detector.detect(image_preprocessed)
         if len(keypoints) < 4:
