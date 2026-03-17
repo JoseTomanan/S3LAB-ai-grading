@@ -103,10 +103,27 @@
     <div class="overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)}
-      <div class="card space-y-1.5 w-full md:w-3/4 lg:w-2/3">
-        <Label for={studentItem.label} class="flex flex-row justify-between">
-          {studentItem.label}
-          <span class="flex flex-row space-x-1">
+      {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
+      <div class="card flex flex-col sm:flex-row gap-x-3 gap-y-1.5
+                  w-full md:w-7/8 lg:w-5/6">
+        <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
+                      flex justify-center items-center relative">
+          <Label for={studentItem.label}
+                  class="absolute top-0 left-0 bg-white px-1.5 text-lg">
+            {studentItem.label}
+          </Label>
+          <span>
+            {#if studentItem.image_directory == ""}
+              <MdiPaperOff class="size-8 opacity-50" />
+            {:else}
+              <img class="max-h-70 w-auto mx-auto"
+                    src={`${studentItem.image_directory}`}
+                    alt={studentItem.label}/>
+            {/if}
+          </span>
+        </span>
+        <div class="flex-1 w-full h-full space-y-2">
+          <span class="flex flex-row space-x-1 justify-end">
             <SafeDelete toggle={isWantsToDelete}
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
@@ -122,37 +139,24 @@
               <IconReevaluate />
             </button>
           </span>
-        </Label>
-        <div class="flex flex-col justify-center items-center gap-x-3 gap-y-1.5
-                    lg:flex-row lg:items-start">
-          {#if studentItem.image_directory == ""}
-            <MdiPaperOff class="size-8 opacity-50" />
-          {:else}
-            {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
-            <div class="flex justify-center items-center w-4/5 md:w-3/4 lg:w-1/2">
-              <img class="size-fill"
-                    src={`${studentItem.image_directory}`}
-                    alt={studentItem.label}/>
-            </div>
-            <div class="flex-1 w-full h-full">
-              {#each e_a_r_qs as e_a_r_q, index}
-              {#if e_a_r_q.length != 0}
-                {@const answerScore = GET_SCORES(studentItem)[index]}
-                {@const isHasScore = answerScore && answerScore != ""}
-                <span class="flex flex-wrap justify-between items-center lg:*:text-base">
-                  <h6 class="italic">{e_a_r_q}</h6>
-                  {#if isRequestLoading}
-                    <Spinner class="text-chart-3 size-4" />
-                  {:else}
-                    <h6 class="font-bold">
-                      {isHasScore ? answerScore : "—"}
-                    </h6>
-                  {/if}
-                </span>
-              {/if}
+          <div>
+            {#each e_a_r_qs as e_a_r_q, index}
+            {#if e_a_r_q.length != 0}
+              {@const answerScore = GET_SCORES(studentItem)[index]}
+              {@const isHasScore = answerScore && answerScore != ""}
+              <span class="flex flex-wrap justify-between items-center [&>h5]:opacity-60">
+                <h5 class="italic">{e_a_r_q}</h5>
+                {#if isRequestLoading}
+                  <Spinner class="text-chart-3 size-4" />
+                {:else}
+                  <h5 class="font-bold">
+                    {isHasScore ? answerScore : "—"}
+                  </h5>
+                {/if}
+              </span>
+            {/if}
             {/each}
-            </div>
-          {/if}
+          </div>
         </div>
       </div>
     {/each}
