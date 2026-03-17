@@ -8,13 +8,13 @@ from logic.blob_detector import BlobDetector
 
 
 
+# ================================
 #region Class
 class BoxSegmenter(DocumentScanner):
-    def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False,) -> list[bytes]:
+    def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
-        # image_cannied = self._filter_only_handdrawn_lines(image_cannied)    # FIXME: experimental extra step
         image_dilated = self._dilate_edges(image_cannied)
 
         self.save_image(
@@ -22,6 +22,16 @@ class BoxSegmenter(DocumentScanner):
                     "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
                     )
 
+        images_good_contours = self._detect_contours(image_dilated, image_cannied, debug=debug)
+        
+        print(f"INFO:\tResult # of boxes: {len(images_good_contours)} (take top {num_boxes})")
+        images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
+        images_warped = [self._warp_from_original(c, image_original) for c in images_good_contours]
+
+        return [self._encode_to_bytes(i) for i in images_warped]
+
+    def _detect_contours(self, image_dilated: MatLike, image_cannied: MatLike, debug: bool = False) -> list[MatLike]:
+        """From `image_dilated` and `image_cannied`, get contours, then return only the contours that look the most like an answer box."""
         contours, _ = cv2.findContours(image_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
@@ -56,10 +66,25 @@ class BoxSegmenter(DocumentScanner):
 
         if images_good_contours == []:
             raise ValueError("Could not find any boxes.")
+
+        return images_good_contours
+
+    def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
+        """Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
+        image = self._decode_bytes(image_bytes)
+        image_original, image_cannied = self._regularize_forgivingly(image)
+        image_dilated = self._dilate_edges(image_cannied)
         
-        print(f"INFO:\tResult # of boxes: {len(images_good_contours)} (take top {num_boxes})")
-        images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
-        images_warped = [self._warp_from_original(c, image_original) for c in images_good_contours]
+        if debug:
+            self.save_image(
+                    self._encode_to_bytes(image_dilated),
+                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
+                    )
+
+        BLOB_DETECTOR = BlobDetector()
+        image_sections = BLOB_DETECTOR.detect_sections_via_anchors(image_original)
+
+        images_warped = [self._warp_from_original(i, image_original) for i in image_sections[:num_boxes]]
 
         return [self._encode_to_bytes(i) for i in images_warped]
 
@@ -119,28 +144,6 @@ class BoxSegmenter(DocumentScanner):
     #endregion
 
     #region Archived unstable functions
-    def _get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """
-        Same as previous function, but using solid fill blobs instead of handdrawn boxes.
-        # UNTESTED
-        """
-        image = self._decode_bytes(image_bytes)
-        image_original, image_cannied = self._regularize_forgivingly(image)
-        image_dilated = self._dilate_edges(image_cannied)
-        if debug:
-            self.save_image(
-                    self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
-                    )
-
-        BLOB_DETECTOR = BlobDetector()
-        scale = (image_original.shape[1] / image_dilated.shape[1],
-                    image_original.shape[0] / image_dilated.shape[0])
-        image_sections = BLOB_DETECTOR.detect_sections_via_anchors(image_dilated, scale)
-
-        images_warped = [self._warp_from_original(i, image_original) for i in image_sections[:num_boxes]]
-        return [self._encode_to_bytes(i) for i in images_warped]
-
     def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
         """
         Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
@@ -192,12 +195,13 @@ class BoxSegmenter(DocumentScanner):
         return ruled_mask
     #endregion
 #endregion
+# ================================
 
 
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testWhiteC.jpeg"
+    FILENAME = "testRuledDottedA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -210,13 +214,8 @@ if __name__ == "__main__":
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
-    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
-    # images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
+    images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
+    # images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
-    for i in range(len(images_after_box)):
-        label="X"
-        # label = AI_EVALUATOR.get_nearest_item_number(images_after_box[i], ["1", "2", "3"])
-        BOX_SEGMENTER.save_image(
-                    images_after_box[i],
-                    GET_OUTPUT(f"{_onlyfilename}/box{i}_item{label}.jpg")
-                    )
+    for i, b in enumerate(images_after_box):
+        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/blob{i}.jpg"))
