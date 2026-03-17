@@ -1,4 +1,5 @@
 from itertools import combinations
+from cv2.typing import MatLike
 import numpy as np
 import cv2
 from core.constants import *
@@ -6,41 +7,7 @@ from logic.document_scanner import DocumentScanner
 from logic.utility import _mapp, _get_robust_aspect_ratio, _is_valid_quad
 
 
-
-def _is_valid_quad(pts: np.ndarray) -> bool:
-    """
-    Check if a set of four points forms a valid section (quadrilateral)
-    based on area, aspect ratio, and skew angle.
-
-    This function ALLOWS non-perfect quadrilaterals. It considers a quadrilateral
-    valid if it approximately meets the size, shape, and skew constraints—i.e.,
-    the four points do not need to form a mathematically perfect rectangle or square,
-    but must "closely" resemble one within tolerance defined by constants.
-
-    Args:
-        pts (np.ndarray): 4x2 array of corner points.
-
-    Returns:
-        bool: True if the points approximate a valid quadrilateral section, False otherwise.
-    """
-    ordered = _mapp(pts.flatten())
-    tl, tr, br, bl = ordered
-    w = (np.linalg.norm(tr - tl) + np.linalg.norm(br - bl)) / 2
-    h = (np.linalg.norm(bl - tl) + np.linalg.norm(br - tr)) / 2
-
-    if w * h < MIN_AREA:
-        return False
-
-    aspect = _get_robust_aspect_ratio(pts)
-    if aspect > MAX_ASPECT_RATIO or aspect < 1/MAX_ASPECT_RATIO:
-        return False
-
-    angle_top = np.degrees(np.arctan2(tr[1] - tl[1], tr[0] - tl[0]))
-    angle_bot = np.degrees(np.arctan2(br[1] - bl[1], br[0] - bl[0]))
-    if abs(angle_top - angle_bot) > MAX_SKEW_DEG:
-        return False
-    return True
-
+DOCUMENT_SCANNER = DocumentScanner()
 
 
 class BlobDetector:
@@ -49,8 +16,8 @@ class BlobDetector:
         params.filterByColor = True
         params.blobColor = 0  # dark blobs
         params.filterByArea = True
-        params.minArea = 50
-        params.maxArea = 5000
+        params.minArea = NORMAL_SIZE*0.05
+        params.maxArea = NORMAL_SIZE*10.0
         params.filterByCircularity = True
         params.minCircularity = 0.55
         params.filterByConvexity = True
@@ -58,6 +25,9 @@ class BlobDetector:
         params.filterByInertia = True
         params.minInertiaRatio = 0.4
         self._detector = cv2.SimpleBlobDetector_create(params)
+
+    def detect(self, image_mat: MatLike) -> list[cv2.KeyPoint]:
+        return self._detector.detect(image_mat)
 
     def detect_sections_via_anchors(self, image_mat: MatLike, debug: bool = False) -> list[MatLike]:
         """
@@ -74,30 +44,42 @@ class BlobDetector:
         Returns:
             list[MatLike]: An array of detected section corner arrays of shape (num_sections, 4, 2).
         """
-        keypoints = self._detector.detect(image_preprocessed)
+        keypoints = self.detect(image_mat)
         if len(keypoints) < 4:
+            print(f"INFO:\tOnly {len(keypoints)} blobs detected")
             return []
 
         pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
-        scale_x, scale_y = scale
 
-        quad_candidates = (
-                    [list(range(4))] if len(pts) == 4
-                    else [list(c) for c in combinations(range(len(pts)), 4)]
-                    )
+        if debug:
+            debug_img = image_mat.copy()
+            for p in pts:
+                debug_img = self._highlight_dot(debug_img, p)
+            DOCUMENT_SCANNER.save_image(DOCUMENT_SCANNER._encode_to_bytes(debug_img), "./TEMP/output/DEBUG_mark_dots.jpg")
 
-        sections = []
-        for indices in quad_candidates:
-            quad_pts = pts[indices]
-            if not _is_valid_quad(quad_pts):
+        if len(pts) == 4:
+            quad_candidates = [pts]
+        else:
+            quad_candidates = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
+
+        image_good_sections = []
+        for i, c in enumerate(quad_candidates):
+            c
+            
+            if _is_valid_quad(c):
+                ordered = np.array(_mapp(c.flatten()), dtype=np.float32).reshape(4, 2)
+                image_good_sections.append(ordered)
+            else:
                 continue
 
-            ordered = _mapp(quad_pts.flatten())
-            ordered_orig = ordered * np.array([scale_x, scale_y])
-            sections.append({
-                        'corners': ordered_orig,
-                        'keypoints': [keypoints[i] for i in indices],
-                        })
+        if image_good_sections == []:
+            raise ValueError("Could not find any boxes.")
+        
+        return image_good_sections
 
-        sections.sort(key=lambda s: s['corners'][0][1])
-        return sections
+    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
+        """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
+        debug_img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image.copy()
+        x, y = coordinate
+        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=(0, 255, 0), thickness=-1)
+        return debug_img
