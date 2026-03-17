@@ -21,12 +21,15 @@ class BoxSegmenter(DocumentScanner):
         image_original, image_cannied = self._regularize_forgivingly(image)
         image_dilated = self._dilate_edges(image_cannied)
 
-        self.save_image(
-                    self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
-                    )
+        if debug:
+            self.save_image(
+                        self._encode_to_bytes(image_dilated),
+                        "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
+                        )
 
         images_good_contours = self._detect_contours(image_dilated, image_cannied, debug=debug)
+        if images_good_contours == []:
+            raise ValueError("Could not find any boxes.")
         
         print(f"INFO:\tResult # of boxes: {len(images_good_contours)} (take top {num_boxes})")
         images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
@@ -68,9 +71,6 @@ class BoxSegmenter(DocumentScanner):
             else:
                 print(f"INFO:\tDid not pass for area={area}")
 
-        if images_good_contours == []:
-            raise ValueError("Could not find any boxes.")
-
         return images_good_contours
 
     def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
@@ -85,9 +85,11 @@ class BoxSegmenter(DocumentScanner):
                     "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
                     )
 
-        image_sections = self._detect_boxes_via_dots(image_original, debug=debug)
+        images_good_sections = self._detect_boxes_via_dots(image_original, debug=debug)
+        if images_good_sections == []:
+            raise ValueError("Could not find any boxes.")
         # TODO: sort accdg to upper left corner
-        images_warped = [self._warp_from_original(i, image_original) for i in image_sections[:num_boxes]]
+        images_warped = [self._warp_from_original(i, image_original) for i in images_good_sections[:num_boxes]]
 
         return [self._encode_to_bytes(i) for i in images_warped]
 
@@ -123,9 +125,6 @@ class BoxSegmenter(DocumentScanner):
             else:
                 continue
 
-        if image_good_sections == []:
-            raise ValueError("Could not find any boxes.")
-        
         return image_good_sections
 
     def beautify_scan(self, image_bytes: bytes) -> bytes:
