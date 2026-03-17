@@ -68,11 +68,6 @@ def get_robust_aspect_ratio(coords):
     return w / h
 
 
-def group_dots_into_quads(pts: np.ndarray, x_tol_ratio: float = 0.02, y_tol_ratio: float = 0.02) -> bool:
-    """Return only point-sets that could plausibly be rectangle corners."""
-    ...
-
-
 def is_valid_quad(pts: np.ndarray) -> bool:
     """
     Check if a set of four points forms a valid section (quadrilateral)
@@ -106,13 +101,13 @@ def is_valid_quad(pts: np.ndarray) -> bool:
     if abs(angle_top - angle_bot) > MAX_SKEW_DEG:
         return False
     
-    if not _corners_are_right_angles(np.array(ordered)):
-        return False
+    # if not _corners_are_right_angles(np.array(ordered)):
+    #     return False
     
     return True
 
 
-def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=20.0) -> bool:
+def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=10.0) -> bool:
     """Return whether or not corners are approximately 90 degrees"""
     tl, tr, br, bl = ordered
     corners = [
@@ -129,5 +124,10 @@ def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=20.0) -> bool:
         if abs(angle - 90) > tol_deg:
             return False
     return True 
+
+
+def group_dots_into_quads(pts: np.ndarray, x_tol_ratio: float = 0.02, y_tol_ratio: float = 0.02) -> bool:
+    """Return only point-sets that could plausibly be rectangle corners."""
+    ...
 #endregion
 # ==============================
