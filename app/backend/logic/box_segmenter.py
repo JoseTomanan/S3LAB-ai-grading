@@ -16,6 +16,20 @@ from utils import is_valid_quad, mapp
 # ================================
 #region Class
 class BoxSegmenter(DocumentScanner):
+    def get_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
+        """Use dots to find section corners, then lines to verify rectangle that serves as section."""
+        # TODO: FUNCTION
+
+    def beautify_scan(self, image_bytes: bytes) -> bytes:
+        array = self._load_array(image_bytes)
+        img = self._adjust_contrast(
+                            self._brighten(array, amount=0.25),
+                            amount=1.3
+                            )
+        return self._unload_array(img)
+
+    # --------------------------------
+    #region SOON TO BE DEPRECATED FUNCTIONS
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
         image = self._decode_bytes(image_bytes)
@@ -145,14 +159,9 @@ class BoxSegmenter(DocumentScanner):
                 print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
 
         return image_good_sections
-
-    def beautify_scan(self, image_bytes: bytes) -> bytes:
-        array = self._load_array(image_bytes)
-        img = self._adjust_contrast(
-                            self._brighten(array, amount=0.25),
-                            amount=1.3
-                            )
-        return self._unload_array(img)
+ 
+    #endregion
+    # --------------------------------
 
     #region Debugging functions
     def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
