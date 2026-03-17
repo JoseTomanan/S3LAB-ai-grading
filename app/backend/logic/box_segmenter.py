@@ -92,20 +92,7 @@ class BoxSegmenter(DocumentScanner):
         return [self._encode_to_bytes(i) for i in images_warped]
 
     def _detect_boxes_via_dots(self, image_mat: MatLike, debug: bool = False) -> list[MatLike]:
-        """
-        Detect rectangular sections in a preprocessed image using detected dark solid blobs (corners/anchors).
-
-        This function finds keypoints (anchor points) in the input image using a blob detector. It then considers 
-        all possible combinations of four keypoints, checks if they can form a valid quadrilateral based on area, 
-        aspect ratio, and skew angle, and collects those that pass these checks as valid sections. The returned
-        result is an ndarray where each element is a 4x2 array of corner points.
-
-        Args:
-            image_mat (MatLike): Input image for blob detection.
-
-        Returns:
-            list[MatLike]: An array of detected section corner arrays of shape (num_sections, 4, 2).
-        """
+        """Detect rectangular sections in image using dark solid blobs (corners)"""
         BLOB_DETECTOR = BlobDetector()
 
         keypoints = BLOB_DETECTOR.detect(image_mat)
