@@ -1,10 +1,6 @@
 from cv2.typing import MatLike
 import cv2
 from core.constants import *
-from logic.document_scanner import DocumentScanner
-
-
-DOCUMENT_SCANNER = DocumentScanner()
 
 
 class BlobDetector:

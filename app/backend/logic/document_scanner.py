@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 from cv2.typing import MatLike
 from core.constants import NORMAL_SIZE
-from logic.utility import _mapp, _get_robust_aspect_ratio
+from utils import _mapp, _get_robust_aspect_ratio
 
 
 

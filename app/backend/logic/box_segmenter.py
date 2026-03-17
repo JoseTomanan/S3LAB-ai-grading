@@ -8,7 +8,8 @@ from core.constants import *
 from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector
-from logic.utility import _get_robust_aspect_ratio, _is_valid_quad, _mapp
+
+from utils import _get_robust_aspect_ratio, _is_valid_quad, _mapp
 
 
 
