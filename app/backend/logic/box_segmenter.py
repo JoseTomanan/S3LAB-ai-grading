@@ -35,6 +35,7 @@ class BoxSegmenter(DocumentScanner):
 
     def _detect_dotted_boxes(self, image_original: MatLike, image_dilated: MatLike, debug: bool = False):
         """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
+        image_original_greyscale = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
         BLOB_DETECTOR = BlobDetector()
         
         keypoints = BLOB_DETECTOR.detect(image_original)
@@ -46,13 +47,13 @@ class BoxSegmenter(DocumentScanner):
         pts = self._filter_out_dup_pts(pts)
 
         if debug:
-            debug_img = image_dilated.copy()
+            debug_img = image_original_greyscale.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/canny_marked_dots.jpg")
 
         quads = self._group_dots_into_quads(pts)
-        print(f"INFO:\tObtained {len(quads)} quads")
+        print(f"INFO:\tObtained total of {len(quads)} quads")
 
         image_good_sections = []
         for i, q in enumerate(quads):
@@ -65,7 +66,7 @@ class BoxSegmenter(DocumentScanner):
                 
                 if len(approximate) == 4:
                     if debug:
-                        debug_img = self._highlight_contours(cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY), approximate, contour)
+                        debug_img = self._highlight_contours(image_original_greyscale, approximate, contour)
                         self.save_image(
                                     self._encode_to_bytes(debug_img),
                                     f"./TEMP/output/DEBUG/section_box{i}.jpg"
@@ -81,7 +82,8 @@ class BoxSegmenter(DocumentScanner):
                 else:
                     print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
             else:
-                print(f"INFO:\tDid not pass for area={area}")
+                # print(f"INFO:\tDid not pass for area={area}")
+                continue
 
         return image_good_sections
 
@@ -105,7 +107,7 @@ class BoxSegmenter(DocumentScanner):
 
     # --------------------------------
     #region Auxiliary functions: Answer section detection
-    def _filter_out_dup_pts(self, pts: np.ndarray) -> np:
+    def _filter_out_dup_pts(self, pts: np.ndarray) -> np.ndarray:
         """Filter out duplicate points"""
         filtered_pts = []
         for p in pts:
@@ -392,9 +394,10 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
 
 
+# MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA.jpeg"
+    FILENAME = "testRuledDottedD.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
