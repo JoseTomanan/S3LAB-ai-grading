@@ -15,7 +15,7 @@ from utils import is_valid_quad, mapp
 
 #region Class
 class BoxSegmenter(DocumentScanner):
-    def get_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
+    def get_answer_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Use dots to find section corners, then lines to verify rectangle that serves as section."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_forgivingly(image)
@@ -303,8 +303,9 @@ if __name__ == "__main__":
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-    images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
+    images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
+    # images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
     # images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
-        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/blob{i}.jpg"))
+        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
