@@ -61,7 +61,7 @@ class BoxSegmenter(DocumentScanner):
             ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
             self.save_image(
                     self._encode_to_bytes(ruled_line_mask),
-                    "./TEMP/output/DEBUG_horizontal_candidates.jpg"
+                    "./TEMP/output/DEBUG/horizontal_candidates.jpg"
                     )
             return cv2.subtract(i, ruled_line_mask)
 
@@ -113,7 +113,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_dilated),
-                        "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
+                        "./TEMP/output/DEBUG/canny_regularize_dilate.jpg"
                         )
 
         images_good_contours = self._detect_contours(image_dilated, image_cannied, debug=debug)
@@ -142,7 +142,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                     debug_img = self._highlight_contours(image_cannied, approximate, c)
                     self.save_image(
                                 self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG_contour_box{i}.jpg"
+                                f"./TEMP/output/DEBUG/contour_box{i}.jpg"
                                 )
                 if 4 <= len(approximate) <= 10:
                     hull = cv2.convexHull(c)
@@ -171,13 +171,12 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         if debug:
             self.save_image(
                     self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
+                    "./TEMP/output/DEBUG/canny_regularize_dilate.jpg"
                     )
 
         images_good_sections = self._detect_boxes_via_dots(image_original, debug=debug)
         if images_good_sections == []:
             raise ValueError("Could not find any boxes.")
-        # TODO: sort accdg to upper left corner
         images_warped = [self._warp_from_original(i, image_original) for i in images_good_sections[:num_boxes]]
 
         return [self._encode_to_bytes(i) for i in images_warped]
@@ -197,7 +196,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
             debug_img = image_mat.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
-            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG_mark_dots.jpg")
+            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/mark_dots.jpg")
 
         if len(pts) == 4:
             quad_candidates = [pts]
@@ -219,7 +218,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                     debug_img = self._highlight_contours(cv2.cvtColor(image_mat, cv2.COLOR_BGR2GRAY), approximate, contour)
                     self.save_image(
                                 self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG_blob_box{i}.jpg"
+                                f"./TEMP/output/DEBUG/blob_box{i}.jpg"
                                 )
                 approximate = approximate.reshape(4, 2)
                 (_, _, w, h) = cv2.boundingRect(approximate)
@@ -250,7 +249,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
         self.save_image(
                     self._encode_to_bytes(horizontal_candidates),
-                    "./TEMP/output/DEBUG_horizontal_candidates.jpg"
+                    "./TEMP/output/DEBUG/horizontal_candidates.jpg"
                     )
         # ruled_mask = self._get_ruled_mask(horizontal_candidates, image)
         return cv2.subtract(image, horizontal_candidates)

@@ -22,7 +22,7 @@ class DocumentScanner:
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_cannied),
-                        "./TEMP/output/DEBUG_CANNY.jpg"
+                        "./TEMP/output/DEBUG/CANNY.jpg"
                         )
 
         contours, _ = cv2.findContours(image_cannied, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -37,7 +37,7 @@ class DocumentScanner:
                 debug_img = self._highlight_contours(image_cannied, approximate, c)
                 self.save_image(
                             self._encode_to_bytes(debug_img),
-                            f"./TEMP/output/DEBUG_CONTOUR_{i}.jpg"
+                            f"./TEMP/output/DEBUG/CONTOUR_{i}.jpg"
                             )
             if len(approximate) == 4:
                 image_good_contour = approximate.reshape(4,2)
