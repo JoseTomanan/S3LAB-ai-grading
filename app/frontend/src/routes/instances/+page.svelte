@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
   import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
   import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
   import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
   import MdiPeopleOutline from '~icons/mdi/people-outline';
   import IconHome from '~icons/mdi/home-outline';
+  import IconArrow from '~icons/mdi/arrow-up';
   
   import type { TestInstance } from '$lib/index.ts';
   
@@ -63,7 +64,12 @@
         <Skeleton class="h-16 w-full grayscale-100"/>
       {/each}
     {:else if instances.length == 0}
-      <p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
+      <div class="flex flex-col items-end text-right mt-2 opacity-60">
+        <svg class="size-10 -mb-2 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <IconArrow />
+        </svg>
+        <p>No test instances yet &mdash; tap here to add one.</p>
+      </div>
     {:else}
       {#each paginationValues as instance}
         <a href={`/instances/${instance.test_id}/items`}
