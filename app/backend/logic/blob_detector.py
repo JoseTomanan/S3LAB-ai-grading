@@ -3,6 +3,9 @@ import cv2
 from core.constants import NORMAL_SIZE
 
 
+
+AREA_FACTOR = (NORMAL_SIZE/1000)**2
+
 class BlobDetector:
     def __init__(self):
         params = cv2.SimpleBlobDetector_Params()
@@ -13,19 +16,18 @@ class BlobDetector:
         params.maxThreshold = 180
         params.thresholdStep = 5
         
-        areaFactor = (NORMAL_SIZE/1000)**2
         params.filterByArea = True
-        params.minArea = areaFactor * 50
-        params.maxArea = areaFactor * 6250
+        params.minArea = AREA_FACTOR*62.5
+        params.maxArea = AREA_FACTOR*6250
         
         params.filterByCircularity = True
-        params.minCircularity = 0.30
+        params.minCircularity = 0.20
         
         params.filterByConvexity = True
         params.minConvexity = 0.70
         
         params.filterByInertia = True
-        params.minInertiaRatio = 0.4
+        params.minInertiaRatio = 0.25
         
         self._detector = cv2.SimpleBlobDetector_create(params)
 
