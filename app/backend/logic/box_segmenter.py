@@ -39,13 +39,13 @@ class BoxSegmenter(DocumentScanner):
 
         image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
         image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
-        
         if debug:
             self.save_image(self._encode_to_bytes(image_holes_filled),
                                     "./TEMP/output/DEBUG/_1holesfilled.jpg")
             self.save_image(self._encode_to_bytes(image_eroded),
                                     "./TEMP/output/DEBUG/_2eroded.jpg")
         
+        # keypoints = BLOB_DETECTOR.detect_dark_blob(cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY))
         keypoints = BLOB_DETECTOR.detect(image_eroded)
 
         if len(keypoints) < 4:
@@ -404,7 +404,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 # MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedF.jpeg"
+    FILENAME = "testRuledDottedA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
