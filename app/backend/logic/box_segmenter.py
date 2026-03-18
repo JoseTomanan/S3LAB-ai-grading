@@ -18,14 +18,15 @@ class BoxSegmenter(DocumentScanner):
     def get_answer_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Use dots to find section corners, then lines to verify rectangle that serves as section."""
         image = self._decode_bytes(image_bytes)
-        image_original, image_cannied = self._regularize_forgivingly(image)
+        image_original, image_cannied = self._regularize_image(image, canny_thresholds=(30,150),
+                                                                gaussian_blur_kernel_size=None)
         image_dilated = self._dilate_edges(image_cannied)
 
         if debug:
-            self.save_image(self._encode_to_bytes(image_dilated),
-                            "./TEMP/output/DEBUG/canny_regularize_dilate.jpg")
+            self.save_image(self._encode_to_bytes(image_cannied), "./TEMP/output/DEBUG/canny_0only.jpg")
+            self.save_image(self._encode_to_bytes(image_dilated), "./TEMP/output/DEBUG/canny_regularize_dilate.jpg")
         
-        images_answers = self._detect_dotted_boxes(image_original, image_dilated, debug=debug)
+        images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
 
@@ -33,12 +34,22 @@ class BoxSegmenter(DocumentScanner):
         return [self._encode_to_bytes(i) for i in images_warped]
 
 
-    def _detect_dotted_boxes(self, image_original: MatLike, image_dilated: MatLike, debug: bool = False):
+    def _detect_dotted_boxes(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False):
         """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
-        image_original_greyscale = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
         BLOB_DETECTOR = BlobDetector()
+
+        image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
+        image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
         
-        keypoints = BLOB_DETECTOR.detect(image_original)
+        if debug:
+            self.save_image(self._encode_to_bytes(image_holes_filled),
+                                "./TEMP/output/DEBUG/canny_1holesfilled.jpg")
+            self.save_image(self._encode_to_bytes(image_eroded),
+                                "./TEMP/output/DEBUG/canny_2eroded.jpg")
+        
+        keypoints = BLOB_DETECTOR.detect(image_eroded)
+
+
         if len(keypoints) < 4:
             print(f"INFO:\tOnly {len(keypoints)} blobs detected")
             return []
@@ -47,10 +58,11 @@ class BoxSegmenter(DocumentScanner):
         pts = self._filter_out_dup_pts(pts)
 
         if debug:
-            debug_img = image_original_greyscale.copy()
+            debug_img = image_cannied.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
-            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/canny_marked_dots.jpg")
+            self.save_image(self._encode_to_bytes(debug_img),
+                                "./TEMP/output/DEBUG/canny_3markeddots.jpg")
 
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
@@ -66,7 +78,7 @@ class BoxSegmenter(DocumentScanner):
                 
                 if len(approximate) == 4:
                     if debug:
-                        debug_img = self._highlight_contours(image_original_greyscale, approximate, contour)
+                        debug_img = self._highlight_contours(image_cannied, approximate, contour)
                         self.save_image(
                                     self._encode_to_bytes(debug_img),
                                     f"./TEMP/output/DEBUG/section_box{i}.jpg"
@@ -170,9 +182,7 @@ class BoxSegmenter(DocumentScanner):
                     "./TEMP/output/DEBUG/horizontal_candidates.jpg"
                     )
             return cv2.subtract(i, ruled_line_mask)
-
         # return self._regularize_image(image_mat, (30, 150), _pre_canny)
-
         return self._regularize_image(image_mat, canny_thresholds=(30, 150))
     
     def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
@@ -397,7 +407,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 # MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedD.jpeg"
+    FILENAME = "testRuledDottedF.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -409,10 +419,8 @@ if __name__ == "__main__":
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
     images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
-    # images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
-    # images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
         BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
