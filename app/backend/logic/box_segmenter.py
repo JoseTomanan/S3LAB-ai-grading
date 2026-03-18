@@ -13,11 +13,20 @@ from utils import is_valid_quad, mapp
 
 
 
-# ================================
 #region Class
 class BoxSegmenter(DocumentScanner):
     def get_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Use dots to find section corners, then lines to verify rectangle that serves as section."""
+        image = self._decode_bytes(image_bytes)
+        image_original, image_cannied = self._regularize_forgivingly(image)
+        image_dilated = self._dilate_edges(image_cannied)
+
+        if debug:
+            self.save_image(
+                        self._encode_to_bytes(image_dilated),
+                        "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
+                        )
+        ...
         # TODO: FUNCTION
 
     def beautify_scan(self, image_bytes: bytes) -> bytes:
@@ -28,8 +37,73 @@ class BoxSegmenter(DocumentScanner):
                             )
         return self._unload_array(img)
 
-    # --------------------------------
-    #region SOON TO BE DEPRECATED FUNCTIONS
+    def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
+        """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
+        return BoxSegmenterOldFunctions().get_boxes(image_bytes, num_boxes, debug)
+
+    def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
+        """[DEPRECATED] Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
+        return BoxSegmenterOldFunctions().get_boxes_via_dots(image_bytes, num_boxes, debug)
+
+    #region Auxiliary functions
+    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
+        """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
+        debug_img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image.copy()
+        x, y = coordinate
+        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=(0, 255, 0), thickness=-1)
+        return debug_img
+    
+    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
+        def _pre_canny(i: MatLike) -> MatLike:
+            ruled_line_mask = cv2.inRange(i, 20, 80)
+            h_kernel_length = int(NORMAL_SIZE*0.30)
+            horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+            ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
+            self.save_image(
+                    self._encode_to_bytes(ruled_line_mask),
+                    "./TEMP/output/DEBUG_horizontal_candidates.jpg"
+                    )
+            return cv2.subtract(i, ruled_line_mask)
+
+        # return self._regularize_image(image_mat, (30, 150), _pre_canny)
+
+        return self._regularize_image(image_mat, canny_thresholds=(30, 150))
+    
+    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
+        kernel = np.ones((dilate_size, dilate_size), np.uint8)
+        image_dilated = cv2.dilate(image, kernel, iterations=2)
+        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
+        return image_closed
+   
+    def _load_array(self, image_bytes: bytes) -> np.ndarray:
+        """Convert bytes to OpenCV image with validation"""
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        return image
+
+    def _unload_array(self, image: np.ndarray) -> bytes:
+        """Encode OpenCV image to high-quality JPEG bytes."""
+        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+        return buffer.tobytes()
+
+    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
+        """Increase image brightness using linear transform"""
+        amount = max(0.0, min(1.0, float(amount)))
+        beta = amount * 255
+        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
+    
+    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
+        """Adjust image contrast with brightness compensation"""
+        amount = max(0.1, float(amount))
+        beta = 128 * (1 - amount)
+        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
+    #endregion
+#endregion
+
+
+
+class BoxSegmenterOldFunctions(BoxSegmenter):
+    """Container/archive for deprecated functions."""
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
         image = self._decode_bytes(image_bytes)
@@ -159,65 +233,6 @@ class BoxSegmenter(DocumentScanner):
                 print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
 
         return image_good_sections
- 
-    #endregion
-    # --------------------------------
-
-    #region Debugging functions
-    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
-        """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
-        debug_img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image.copy()
-        x, y = coordinate
-        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=(0, 255, 0), thickness=-1)
-        return debug_img
-    #endregion
-
-    #region Auxiliary functions
-    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
-        def _pre_canny(i: MatLike) -> MatLike:
-            ruled_line_mask = cv2.inRange(i, 20, 80)
-            h_kernel_length = int(NORMAL_SIZE*0.30)
-            horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
-            ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
-            self.save_image(
-                    self._encode_to_bytes(ruled_line_mask),
-                    "./TEMP/output/DEBUG_horizontal_candidates.jpg"
-                    )
-            return cv2.subtract(i, ruled_line_mask)
-
-        # return self._regularize_image(image_mat, (30, 150), _pre_canny)
-
-        return self._regularize_image(image_mat, canny_thresholds=(30, 150))
-    
-    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
-        kernel = np.ones((dilate_size, dilate_size), np.uint8)
-        image_dilated = cv2.dilate(image, kernel, iterations=2)
-        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
-        return image_closed
-   
-    def _load_array(self, image_bytes: bytes) -> np.ndarray:
-        """Convert bytes to OpenCV image with validation"""
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        return image
-
-    def _unload_array(self, image: np.ndarray) -> bytes:
-        """Encode OpenCV image to high-quality JPEG bytes."""
-        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        return buffer.tobytes()
-
-    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
-        """Increase image brightness using linear transform"""
-        amount = max(0.0, min(1.0, float(amount)))
-        beta = amount * 255
-        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
-    
-    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
-        """Adjust image contrast with brightness compensation"""
-        amount = max(0.1, float(amount))
-        beta = 128 * (1 - amount)
-        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
-    #endregion
 
     #region Archived unstable functions
     def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
@@ -270,8 +285,6 @@ class BoxSegmenter(DocumentScanner):
 
         return ruled_mask
     #endregion
-#endregion
-# ================================
 
 
 
