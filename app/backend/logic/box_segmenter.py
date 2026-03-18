@@ -105,6 +105,19 @@ class BoxSegmenter(DocumentScanner):
 
     # --------------------------------
     #region Auxiliary functions: Answer section detection
+    def _filter_out_dup_pts(self, pts: np.ndarray) -> np:
+        """Filter out duplicate points"""
+        filtered_pts = []
+        for p in pts:
+            is_similar = False
+            for fp in filtered_pts:
+                if np.linalg.norm(np.array(p) - np.array(fp)) < 10:
+                    is_similar = True
+                    break
+            if not is_similar:
+                filtered_pts.append(p)
+        return filtered_pts
+
     def _group_dots_into_quads(self, pts: np.ndarray) -> bool:
         """Return only point-sets that could plausibly be rectangle corners."""
         quad_combinations = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
