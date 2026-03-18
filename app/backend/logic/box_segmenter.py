@@ -26,7 +26,8 @@ class BoxSegmenter(DocumentScanner):
             self.save_image(self._encode_to_bytes(image_cannied), "./TEMP/output/DEBUG/canny_0only.jpg")
             self.save_image(self._encode_to_bytes(image_dilated), "./TEMP/output/DEBUG/canny_regularize_dilate.jpg")
         
-        images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
+        ## images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
+        images_answers = self._dark_detect_dotted_boxes(image_original, image_cannied, debug=debug)
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
 
@@ -76,6 +77,61 @@ class BoxSegmenter(DocumentScanner):
                 perimeter = cv2.arcLength(contour, True)
                 approximate = cv2.approxPolyDP(contour, 0.06*perimeter, True)
                 
+                if len(approximate) == 4:
+                    if debug:
+                        debug_img = self._highlight_contours(image_cannied, approximate, contour)
+                        self.save_image(
+                                    self._encode_to_bytes(debug_img),
+                                    f"./TEMP/output/DEBUG/section_box{i}.jpg"
+                                    )
+                    approximate = approximate.reshape(4, 2)
+                    (_, _, w, h) = cv2.boundingRect(approximate)
+                    aspect_ratio = w / float(h)
+                    if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
+                        print(f"INFO:\tAccepted and stored dot-quad {i}")
+                        image_good_sections.append(approximate)
+                    else:
+                        print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+                else:
+                    print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
+            else:
+                # print(f"INFO:\tDid not pass for area={area}")
+                continue
+
+        return image_good_sections
+
+    def _dark_detect_dotted_boxes(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False):
+        """Detect dots directly on the original image as dark blobs, bypassing canny fill/erode pipeline."""
+        BLOB_DETECTOR = BlobDetector()
+
+        keypoints = BLOB_DETECTOR.detect_dark(image_original)
+
+        if len(keypoints) < 4:
+            print(f"INFO:\tOnly {len(keypoints)} dark blobs detected")
+            return []
+
+        pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
+        pts = self._filter_out_dup_pts(pts)
+
+        if debug:
+            debug_img = image_cannied.copy()
+            for p in pts:
+                debug_img = self._highlight_dot(debug_img, p)
+            self.save_image(self._encode_to_bytes(debug_img),
+                                "./TEMP/output/DEBUG/canny_3markeddots.jpg")
+
+        quads = self._group_dots_into_quads(pts)
+        print(f"INFO:\tObtained total of {len(quads)} quads")
+
+        image_good_sections = []
+        for i, q in enumerate(quads):
+            contour = q.reshape((-1, 1, 2)).astype(np.int32)
+
+            area = cv2.contourArea(contour)
+            if MIN_AREA <= area <= MAX_AREA:
+                perimeter = cv2.arcLength(contour, True)
+                approximate = cv2.approxPolyDP(contour, 0.06*perimeter, True)
+
                 if len(approximate) == 4:
                     if debug:
                         debug_img = self._highlight_contours(image_cannied, approximate, contour)
@@ -407,7 +463,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 # MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedF.jpeg"
+    FILENAME = "testRuledDottedE.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
