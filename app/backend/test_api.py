@@ -13,7 +13,7 @@ import functools
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from main import app
-from database import engine, create_db_and_tables
+from core.database import engine, create_db_and_tables
 from models import *
 
 # Test client

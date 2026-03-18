@@ -8,7 +8,7 @@ import io
 
 from models import *
 from schemas import *
-from database import get_session
+from core.database import get_session
 
 from logic.utility import populate_spreadsheet_logic
 

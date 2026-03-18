@@ -20,7 +20,7 @@ backend_dir = script_dir.parent  # app/backend
 sys.path.insert(0, str(backend_dir))
 
 # Use RELATIVE imports to match api.py (prevents duplicate table definitions)
-from database import (
+from core.database import (
     engine,
     create_db_and_tables,
     get_direct_session,

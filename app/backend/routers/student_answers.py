@@ -10,7 +10,7 @@ from pathlib import Path
 
 from models import *
 from schemas import *
-from database import get_session
+from core.database import get_session
 
 from logic.box_segmenter import BoxSegmenter
 from logic.document_scanner import DocumentScanner
