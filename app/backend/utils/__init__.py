@@ -1,5 +1,5 @@
 import numpy as np
-from core.constants import MAX_SKEW_DEG
+from core.constants import MAX_SKEW_DEG, SECTION_CORNER_ANGLE_TOL
 
 
 
@@ -66,7 +66,7 @@ def get_robust_aspect_ratio(coords):
     return w / h
 
 
-def is_valid_quad(pts: np.ndarray, max_skew_deg: float = MAX_SKEW_DEG, tol_deg: float = 15.0) -> bool:
+def is_valid_quad(pts: np.ndarray, max_skew_deg: float = MAX_SKEW_DEG, tol_deg: float = SECTION_CORNER_ANGLE_TOL) -> bool:
     """
     Check if a set of four points forms a valid section (quadrilateral)
     based on area, aspect ratio, and skew angle.
