@@ -22,13 +22,70 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = self._dilate_edges(image_cannied)
 
         if debug:
-            self.save_image(
-                        self._encode_to_bytes(image_dilated),
-                        "./TEMP/output/DEBUG_canny_regularize_dilate.jpg"
-                        )
-        ...
-        # TODO: FUNCTION
+            self.save_image(self._encode_to_bytes(image_dilated),
+                            "./TEMP/output/DEBUG/canny_regularize_dilate.jpg")
+        
+        images_answers = self._detect_dotted_boxes(image_original, image_dilated, debug=debug)
+        if images_answers == []:
+            raise ValueError("Could not find any dotted boxes.")
 
+        images_warped = [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
+        return [self._encode_to_bytes(i) for i in images_warped]
+
+
+    def _detect_dotted_boxes(self, image_original: MatLike, image_dilated: MatLike, debug: bool = False):
+        """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
+        BLOB_DETECTOR = BlobDetector()
+        
+        keypoints = BLOB_DETECTOR.detect(image_original)
+        if len(keypoints) < 4:
+            print(f"INFO:\tOnly {len(keypoints)} blobs detected")
+            return []
+
+        pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
+        # pts = self._filter_out_dup_pts(pts)
+
+        if debug:
+            debug_img = image_dilated.copy()
+            for p in pts:
+                debug_img = self._highlight_dot(debug_img, p)
+            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/canny_marked_dots.jpg")
+
+        quads = self._group_dots_into_quads(pts)
+        print(f"INFO:\tObtained {len(quads)} quads")
+
+        image_good_sections = []
+        for i, q in enumerate(quads):
+            contour = q.reshape((-1, 1, 2)).astype(np.int32)
+            
+            area = cv2.contourArea(contour)
+            if MIN_AREA <= area <= MAX_AREA:
+                perimeter = cv2.arcLength(contour, True)
+                approximate = cv2.approxPolyDP(contour, 0.06*perimeter, True)
+                
+                if len(approximate) == 4:
+                    if debug:
+                        debug_img = self._highlight_contours(cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY), approximate, contour)
+                        self.save_image(
+                                    self._encode_to_bytes(debug_img),
+                                    f"./TEMP/output/DEBUG/section_box{i}.jpg"
+                                    )
+                    approximate = approximate.reshape(4, 2)
+                    (_, _, w, h) = cv2.boundingRect(approximate)
+                    aspect_ratio = w / float(h)
+                    if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
+                        print(f"INFO:\tAccepted and stored dot-quad {i}")
+                        image_good_sections.append(approximate)
+                    else:
+                        print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+                else:
+                    print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
+            else:
+                print(f"INFO:\tDid not pass for area={area}")
+
+        return image_good_sections
+
+    #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
         array = self._load_array(image_bytes)
         img = self._adjust_contrast(
@@ -44,8 +101,41 @@ class BoxSegmenter(DocumentScanner):
     def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
         return BoxSegmenterOldFunctions().get_boxes_via_dots(image_bytes, num_boxes, debug)
+    #endregion
 
-    #region Auxiliary functions
+    # --------------------------------
+    #region Auxiliary functions: Answer section detection
+    def _group_dots_into_quads(self, pts: np.ndarray) -> bool:
+        """Return only point-sets that could plausibly be rectangle corners."""
+        quad_combinations = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
+
+        quads = []
+        for q in quad_combinations:
+            q_ordered = mapp(q.flatten())
+            if is_valid_quad(q_ordered):
+                quads.append(q_ordered)
+
+        return quads
+
+    def _edge_confirmed_by_line(self, pt1: np.ndarray, pt2: np.ndarray, edge_img: np.ndarray, min_fill: float = 0.4, num_samples: int = 50) -> bool:
+        """Check if a straight line exists in edge_img between pt1 and pt2."""
+        xs = np.linspace(pt1[0], pt2[0], num_samples).astype(int)
+        ys = np.linspace(pt1[1], pt2[1], num_samples).astype(int)
+        # Clamp to image bounds
+        xs = np.clip(xs, 0, edge_img.shape[1] - 1)
+        ys = np.clip(ys, 0, edge_img.shape[0] - 1)
+        fill = np.sum(edge_img[ys, xs] > 0) / num_samples
+        return fill >= min_fill
+
+    def _quad_edges_confirmed(self, ordered: np.ndarray, edge_img: np.ndarray, min_fill: float = 0.4) -> bool:
+        tl, tr, br, bl = ordered
+        edges = [(tl, tr), (tr, br), (br, bl), (bl, tl)]
+        return all(self._edge_confirmed_by_line(a, b, edge_img, min_fill) for a, b in edges)
+    #endregion
+    # --------------------------------
+
+    # --------------------------------
+    #region Auxiliary functions: Image preloading, postloading
     def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
         """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
         debug_img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image.copy()
@@ -98,6 +188,7 @@ class BoxSegmenter(DocumentScanner):
         beta = 128 * (1 - amount)
         return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
     #endregion
+    # --------------------------------
 #endregion
 
 
@@ -196,7 +287,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
             debug_img = image_mat.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
-            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/mark_dots.jpg")
+            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/canny_marked_dots.jpg")
 
         if len(pts) == 4:
             quad_candidates = [pts]
@@ -301,7 +392,7 @@ if __name__ == "__main__":
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
     images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
     # images_after_box = BOX_SEGMENTER.get_boxes_via_dots(image_before, num_boxes=3, debug=True)
     # images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
