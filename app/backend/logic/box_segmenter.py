@@ -43,7 +43,7 @@ class BoxSegmenter(DocumentScanner):
             return []
 
         pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
-        # pts = self._filter_out_dup_pts(pts)
+        pts = self._filter_out_dup_pts(pts)
 
         if debug:
             debug_img = image_dilated.copy()
@@ -120,7 +120,8 @@ class BoxSegmenter(DocumentScanner):
 
     def _group_dots_into_quads(self, pts: np.ndarray) -> bool:
         """Return only point-sets that could plausibly be rectangle corners."""
-        quad_combinations = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
+        # quad_combinations = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
+        quad_combinations = [np.array([pts[i] for i in c]) for c in combinations(range(len(pts)), 4)]
 
         quads = []
         for q in quad_combinations:
