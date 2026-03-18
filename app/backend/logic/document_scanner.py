@@ -120,7 +120,7 @@ class DocumentScanner:
         iterated_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
         iterated_img = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8,8)) \
                             .apply(iterated_img)    # CLAHE
-        iterated_img = cv2.GaussianBlur(iterated_img, (5,5), 0)
+        iterated_img = cv2.GaussianBlur(iterated_img, (3,3), 0) # FIXME: remove this comment once this change is verified non-breaking
         if additional_pre_canny_step is not None:
             iterated_img = additional_pre_canny_step(iterated_img)
         iterated_img = cv2.Canny(iterated_img, *canny_thresholds)
