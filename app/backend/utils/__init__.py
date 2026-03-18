@@ -1,5 +1,5 @@
 import numpy as np
-from core.constants import *
+from core.constants import MAX_SKEW_DEG
 
 
 
@@ -66,7 +66,7 @@ def get_robust_aspect_ratio(coords):
     return w / h
 
 
-def is_valid_quad(pts: np.ndarray) -> bool:
+def is_valid_quad(pts: np.ndarray, max_skew_deg: float = MAX_SKEW_DEG, tol_deg: float = 15.0) -> bool:
     """
     Check if a set of four points forms a valid section (quadrilateral)
     based on area, aspect ratio, and skew angle.
@@ -83,37 +83,20 @@ def is_valid_quad(pts: np.ndarray) -> bool:
         bool: True if the points approximate a valid quadrilateral section, False otherwise.
     """
     ordered = mapp(pts.flatten())
-    tl, tr, br, bl = ordered
-    w = (np.linalg.norm(tr - tl) + np.linalg.norm(br - bl)) / 2
-    h = (np.linalg.norm(bl - tl) + np.linalg.norm(br - tr)) / 2
+    _tl, _bl, _br, _tr = ordered
 
-    if w * h < MIN_AREA:
-        return False
-
-    aspect = get_robust_aspect_ratio(pts)
-    if aspect > MAX_ASPECT_RATIO or aspect < 1/MAX_ASPECT_RATIO:
-        return False
-
-    angle_top = np.degrees(np.arctan2(tr[1] - tl[1], tr[0] - tl[0]))
-    angle_bot = np.degrees(np.arctan2(br[1] - bl[1], br[0] - bl[0]))
-    if abs(angle_top - angle_bot) > MAX_SKEW_DEG:
+    angle_top = np.degrees(np.arctan2(_tr[1] - _tl[1], _tr[0] - _tl[0]))
+    angle_bot = np.degrees(np.arctan2(_br[1] - _bl[1], _br[0] - _bl[0]))
+    if abs(angle_top - angle_bot) > max_skew_deg:
         return False
     
-    # if not _corners_are_right_angles(np.array(ordered)):
-    #     return False
-    
-    return True
-
-
-def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=10.0) -> bool:
-    """Return whether or not corners are approximately 90 degrees"""
-    tl, tr, br, bl = ordered
+    #### Check if corner angle is approximately 90 degrees for all
     corners = [
-        (bl, tl, tr),   # angle at TL
-        (tl, tr, br),   # angle at TR
-        (tr, br, bl),   # angle at BR
-        (br, bl, tl),   # angle at BL
-    ]
+            (_bl, _tl, _tr),   # angle at TL
+            (_br, _bl, _tl),   # angle at BL
+            (_tr, _br, _bl),   # angle at BR
+            (_tl, _tr, _br),   # angle at TR
+            ]
     for a, vertex, b in corners:
         v1 = a - vertex
         v2 = b - vertex
@@ -121,4 +104,5 @@ def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=10.0) -> bool:
         angle = np.degrees(np.arccos(np.clip(cos_a, -1, 1)))
         if abs(angle - 90) > tol_deg:
             return False
-    return True 
+    
+    return True
