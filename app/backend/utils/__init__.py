@@ -3,8 +3,6 @@ from core.constants import *
 
 
 
-# ==============================
-#region Private functions
 def mapp(h):
     """
     Reorders and reorganizes a set of 4 points (corners) based on their spatial properties.
@@ -124,10 +122,3 @@ def _corners_are_right_angles(ordered: np.ndarray, tol_deg: float=10.0) -> bool:
         if abs(angle - 90) > tol_deg:
             return False
     return True 
-
-
-def group_dots_into_quads(pts: np.ndarray, x_tol_ratio: float = 0.02, y_tol_ratio: float = 0.02) -> bool:
-    """Return only point-sets that could plausibly be rectangle corners."""
-    ...
-#endregion
-# ==============================
