@@ -197,6 +197,13 @@ async def update_answer_segmentation(
         session.add(answer)
 
     session.commit()
+    session.refresh(answer)
+
+    ## MARK: Automatic AI evaluation
+    try:
+        evaluate_image_logic(answer.answer_id, session)
+    except Exception as e:
+        print(f"INTERNAL:\tAI evaluation failed for answer {answer.answer_id}: {e}")
 
     return {"image_directory": f"/api/temp/{safe_filename}"}
 
@@ -651,5 +658,11 @@ def _commit_boxes(
             answer.detected_item_number = item_number
         session.commit()
         session.refresh(answer)
+
+        ## MARK: Automatic AI evaluation
+        try:
+            evaluate_image_logic(answer.answer_id, session)
+        except Exception as e:
+            print(f"INTERNAL:\tAI evaluation failed for answer {answer.answer_id}: {e}")
 #endregion
 # ==============================
