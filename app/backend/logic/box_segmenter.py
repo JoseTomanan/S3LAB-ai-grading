@@ -46,15 +46,15 @@ class BoxSegmenter(DocumentScanner):
         image_lines_removed = BLOB_DETECTOR.remove_horizontal_lines(image_holes_filled)
 
         # Pass 1: contour-circularity (with ring density filtering)
-        pts_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
+        pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
 
         # Pass 2: lenient SimpleBlobDetector on eroded image
         image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
-        pts_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
+        pts_pass2_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
 
         # Consensus: keep only dots both methods agree on
-        pts_detected = BlobDetector.intersect_points(pts_contour, pts_blob)
-        print(f"INFO:\tConsensus dots: {len(pts_detected)} (contour={len(pts_contour)}, blob={len(pts_blob)})")
+        pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
+        print(f"INFO:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)}, blob={len(pts_pass2_blob)})")
 
         if debug:
             self.save_image(self._encode_to_bytes(image_holes_filled),
@@ -79,11 +79,11 @@ class BoxSegmenter(DocumentScanner):
             self.save_image(self._encode_to_bytes(consensus_debug),
                                     f"{self.debug_dir}/_07_dots_consensus.jpg")
 
-        if len(pts_detected) < 4:
-            print(f"INFO:\tOnly {len(pts_detected)} blobs detected")
+        if len(pts_consensus) < 4:
+            print(f"INFO:\tOnly {len(pts_consensus)} blobs detected")
             return []
 
-        pts = np.array(pts_detected, dtype=np.float32)
+        pts = np.array(pts_consensus, dtype=np.float32)
         pts = self._filter_out_dup_pts(pts)
 
         if debug:

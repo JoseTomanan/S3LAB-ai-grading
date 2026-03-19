@@ -125,10 +125,8 @@ class BlobDetector:
         to reject dots surrounded by handwriting clutter.
         Returns centroid points as list of [x, y].
         If debug_images dict is provided, populates it with intermediate closed images."""
-        if len(img.shape) == 3:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img
+        # FIXME: Move vertical reconnecting to a separate function
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
 
         # Dual-pass: a small close preserves delicate dots, a tall close
         # reconnects dot halves split by line removal. Union of both
