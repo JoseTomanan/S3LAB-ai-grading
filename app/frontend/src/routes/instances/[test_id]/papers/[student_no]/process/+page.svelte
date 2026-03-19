@@ -28,65 +28,64 @@
 
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
-  let formFile: FileList | undefined = $state();
+  // let formFile: FileList | undefined = $state();
+  let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
-  let formFileRecord: FileRecord | null = $state(null);
+  // let formFileRecord: FileRecord | null = $state(null);
+  let formFileRecords: FileRecord[] = $state([]);
   let isAskingForValidation: boolean = $state(false);
   let segmentationStrategy: string = $state("corner_dots");
   let paperType: string = $state("ruled");
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
 
-  function handleFile() {
-    if (!formFile || formFile.length == 0)
+  function handleFiles() {
+    if (!formFiles || formFiles.length == 0)
       return;
-    if (formFileRecord)
-      URL.revokeObjectURL(formFileRecord.url);
 
-    console.log("HANDLE FILE EXECUTING...");
-    console.log(formFile[0].size);
-    formFileRecord = {
-      file: formFile[0],
-      name: `${data.student_no}.jpeg`,
-      url: URL.createObjectURL(formFile[0]),
+    formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
+    formFileRecords = Array.from(formFiles).map((f, i) => ({
+      file: f,
+      name: `${data.student_no}_page${i + 1}.jpeg`,
+      url: URL.createObjectURL(f),
       statusCode: -1,
-    };
+    }));
   }
 
   function getImageFromComponent(imageDataUrl: string) {
     const imageFile: File = dataUrlToFile(imageDataUrl, "CAPTURED_IMAGE.jpeg")
-    formFile = undefined;
-    formFileRecord = {
+    formFiles = undefined;
+    formFileRecords = [...formFileRecords, {
       file: imageFile,
-      name: `${data.student_no}.jpeg`,
+      name: `${data.student_no}_page${formFileRecords.length + 1}.jpeg`,
       url: URL.createObjectURL(imageFile),
       statusCode: -1,
-    };
+    }];
   }
 
-  async function handleRotateCommand(isCw: boolean) {
+  async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
     if (!formFileRecord)
       return;
     const recordResponse = await rotateImage(formFileRecord, isCw);
-    formFileRecord = recordResponse;
+    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
   }
 
-  async function handleFlipCommand(isFlipHorizontally: boolean) {
+  async function handleFlipCommand(formFileRecord: FileRecord, isFlipHorizontally: boolean) {
     if (!formFileRecord)
       return;
     const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
-    formFileRecord = recordResponse;
+    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
   }
 
   async function sendImageForValidation() {
-    if (!formFileRecord)
+    if (formFileRecords.length === 0)
       return;
 
-    console.log(formFileRecord.name);
     isOperationOngoing = true;
 
     const formData = new FormData();
-    // formData.append('file', formFileRecord.file);
-    formData.append('files', formFileRecord.file);
+    for (const r of formFileRecords) {
+      formData.append('files', r.file);
+    }
 
     try {
       const response = await fetch(
@@ -114,7 +113,7 @@
 
   let isCommitmentOngoing = $state(false);
   async function validateAndCommit(accept: boolean) {
-    if (isCommitmentOngoing = true)
+    if (isCommitmentOngoing === true)
       return;
 
     isCommitmentOngoing = true;
@@ -179,22 +178,25 @@
   <!-- {#if isAskingForValidation === false} -->
     <div class="flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-              class="button-outline flex-1">
+        class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
         <span class="shrink-0 whitespace-nowrap text-sm pl-1">
-          {formFileRecord
-            ? "Uploaded image:"
-            : "Choose an image..." }
+          {formFileRecords.length > 0
+            ? `Uploaded ${formFileRecords.length} image(s):`
+            : "Choose image(s)..." }
         </span>
-        <span class="truncate min-w-0">
-          {formFileRecord ? formFileRecord.name : ""}
-        </span>
+        {#if formFileRecords.length > 0}
+          <span class="truncate min-w-0 flex-1">
+            {formFileRecords.map(r => r.name).join(', ')}
+          </span>
+        {/if}
       </Label>
       <Input id="sendImage"
               type="file"
               accept="image/*"
+              multiple
               class="hidden"
-              onchange={handleFile}
-              bind:files={formFile}/>
+              onchange={handleFiles}
+              bind:files={formFiles}/>
       <Dialog.Root bind:open={isCameraDialogOpen}>
         <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
@@ -247,7 +249,7 @@
   <!-- {#if isAskingForValidation === true} -->
     <Button variant="outline"
             onclick={sendImageForValidation}
-            disabled={!formFileRecord || isOperationOngoing}>
+            disabled={formFileRecords.length === 0 || isOperationOngoing}>
       {isOperationOngoing
         ? "Sending..."
         : "Send for processing"}
@@ -255,29 +257,40 @@
         <Spinner />
       {/if}
     </Button>
-    <div class="card flex flex-col items-center justify-center relative">
-      {#if !formFileRecord}
+
+    <div class="card flex flex-col items-center justify-center">
+      {#if formFileRecords.length === 0}
         <IconImagePreview class="size-12 opacity-60"/>
-        <h6 class="opacity-60">Uploaded image will be shown here.</h6>
+        <h6 class="opacity-60">
+          Uploaded image(s) will be shown here.
+        </h6>
+      
       {:else}
-        <img src={formFileRecord.url}
-              alt="Uploaded file preview"
-              class="md:max-w-3/4 lg:max-w-2/3"
-              />
-        <span class="flex flex-col gap-y-1 absolute top-2 right-2 size-fit">
-          <button onclick={() => handleRotateCommand(true)} class="button-secondary" >
-            <IconRotateCW />
-          </button>
-          <button onclick={() => handleRotateCommand(false)} class="button-secondary" >
-            <IconRotateCCW />
-          </button>
-          <button onclick={() => handleFlipCommand(true)} class="button-secondary" >
-            <IconFlipHorizontally />
-          </button>
-          <button onclick={() => handleFlipCommand(false)} class="button-secondary" >
-            <IconFlipVertically />
-          </button>
-        </span>
+        <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
+              style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
+          {#each formFileRecords as p}
+            <div class="relative flex flex-col justify-end min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
+              <img src={p.url}
+                    alt={p.name}
+                    class="aspect-auto"
+                    />
+              <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
+                <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
+                  <IconRotateCW />
+                </button>
+                <button onclick={() => handleRotateCommand(p, false)} class="button-outline" >
+                  <IconRotateCCW />
+                </button>
+                <button onclick={() => handleFlipCommand(p, true)} class="button-outline" >
+                  <IconFlipHorizontally />
+                </button>
+                <button onclick={() => handleFlipCommand(p, false)} class="button-outline" >
+                  <IconFlipVertically />
+                </button>
+              </span>
+            </div>
+          {/each}
+        </div>
       {/if}
     </div>
 
