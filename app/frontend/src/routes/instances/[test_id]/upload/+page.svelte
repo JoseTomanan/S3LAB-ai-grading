@@ -122,7 +122,9 @@
               );
           console.log(`${studentNo}: ${response.status}`);
           records.forEach(r => r.statusCode = response.status);
-        })();
+        })().catch(() => {
+          records.forEach(r => r.statusCode = 500);
+        });
       }
     } catch (e) {
       console.log("Bulk upload operation failed:\n"+e);

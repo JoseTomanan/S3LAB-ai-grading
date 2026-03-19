@@ -129,10 +129,6 @@
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
-            <!-- <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
-                  class="button-outline">
-              <MdiCrop/>
-            </a> -->
             <Dialog.Root>
               <Dialog.Trigger class="button-outline">
                 <MdiCrop/>
