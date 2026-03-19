@@ -5,6 +5,7 @@
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import { Spinner } from '$lib/components/ui/spinner/index.ts';
 
   let { test_id, student_no, item_id } = $props<{
     test_id: string,
@@ -113,16 +114,18 @@
         Send
       </Button>
     </span>
-    {#if isOperationOngoing}
-      <p>Loading...</p>
-    {/if}
+    
     {#if canvasImageUrl}
       <div id="canvasArea"
-            class="flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
+            class="relative flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
         <Cropper bind:cropper={canvasCropper}
               src={canvasImageUrl}
               cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1, autoCropArea: 0.1, ready: handleCropperReady}}
               />
+        {#if isOperationOngoing}
+          <!-- <p>Loading...</p> -->
+          <Spinner class="absolute top-1 left-1 size-16 text-chart-3 bg-white/80" />
+        {/if}
       </div>
     {:else if responseImage != ""}
       <img class="border"
