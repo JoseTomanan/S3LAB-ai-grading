@@ -44,6 +44,7 @@ class BoxSegmenter(DocumentScanner):
 
         image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
         image_lines_removed = BLOB_DETECTOR.remove_horizontal_lines(image_holes_filled)
+        image_vertical_reconnected = ...
 
         # Pass 1: contour-circularity (with ring density filtering)
         pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
@@ -178,11 +179,11 @@ class BoxSegmenter(DocumentScanner):
 
     # --------------------------------
     #region Auxiliary functions: Image preloading, postloading
-    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
+    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int], color: tuple[int,int,int] = (0,255,0)) -> MatLike:
         """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
         debug_img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image.copy()
         x, y = coordinate
-        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=(0, 255, 0), thickness=-1)
+        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=color, thickness=-1)
         return debug_img
     
     def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
