@@ -123,8 +123,9 @@
               cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1, autoCropArea: 0.1, ready: handleCropperReady}}
               />
         {#if isOperationOngoing}
-          <!-- <p>Loading...</p> -->
-          <Spinner class="absolute top-1 left-1 size-16 text-chart-3 bg-white/80" />
+          <div class="absolute top-1 left-1 bg-white/80">
+            <Spinner class="size-16 text-chart-3" />
+          </div>
         {/if}
       </div>
     {:else if responseImage != ""}
