@@ -25,8 +25,8 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = self._dilate_edges(image_cannied)
 
         if debug:
-            self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_0canny.jpg")
-            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/canny_regularize_dilate.jpg")
+            self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_01_canny.jpg")
+            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02_canny_dilated.jpg")
 
         images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
         if images_answers == []:
@@ -57,14 +57,14 @@ class BoxSegmenter(DocumentScanner):
 
         if debug:
             self.save_image(self._encode_to_bytes(image_holes_filled),
-                                    f"{self.debug_dir}/_1holesfilled.jpg")
+                                    f"{self.debug_dir}/_03_holes_filled.jpg")
             self.save_image(self._encode_to_bytes(image_lines_removed),
-                                    f"{self.debug_dir}/_2linesremoved.jpg")
+                                    f"{self.debug_dir}/_04_lines_removed.jpg")
             self.save_image(self._encode_to_bytes(image_eroded),
-                                    f"{self.debug_dir}/_2_eroded_lenient.jpg")
+                                    f"{self.debug_dir}/_05_eroded_lenient.jpg")
             for name, img in debug_images.items():
                 self.save_image(self._encode_to_bytes(img),
-                                    f"{self.debug_dir}/_2_{name}.jpg")
+                                    f"{self.debug_dir}/_06_{name}.jpg")
 
             # Debug: show consensus (green) vs rejected contour-only dots (red)
             consensus_debug = cv2.cvtColor(image_lines_removed, cv2.COLOR_GRAY2BGR) if len(image_lines_removed.shape) == 2 else image_lines_removed.copy()
@@ -76,7 +76,7 @@ class BoxSegmenter(DocumentScanner):
                 else:
                     cv2.circle(consensus_debug, key, radius=10, color=(0, 0, 255), thickness=-1)
             self.save_image(self._encode_to_bytes(consensus_debug),
-                                    f"{self.debug_dir}/_3markeddots_consensus.jpg")
+                                    f"{self.debug_dir}/_07_dots_consensus.jpg")
 
         if len(pts_detected) < 4:
             print(f"INFO:\tOnly {len(pts_detected)} blobs detected")
@@ -90,7 +90,7 @@ class BoxSegmenter(DocumentScanner):
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img),
-                                f"{self.debug_dir}/_3markeddots.jpg")
+                                f"{self.debug_dir}/_08_dots_deduped.jpg")
 
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
@@ -109,7 +109,7 @@ class BoxSegmenter(DocumentScanner):
                         debug_img = self._highlight_contours(image_cannied, approximate, contour)
                         self.save_image(
                                     self._encode_to_bytes(debug_img),
-                                    f"{self.debug_dir}/sections/box{i}.jpg"
+                                    f"{self.debug_dir}/_09_sections/box{i}.jpg"
                                     )
                     approximate = approximate.reshape(4, 2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
