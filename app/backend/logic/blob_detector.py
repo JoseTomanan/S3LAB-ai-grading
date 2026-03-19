@@ -244,12 +244,8 @@ class BlobDetector:
         return self._detector.detect(image_mat)
 
     def fill_blobs(self, img: MatLike) -> MatLike:
-        """Fills hollow contours (e.g. Canny circles) into solid shapes.
-        Note: Still used by detect_dot_contours pipeline."""
-        if len(img.shape) == 3:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img.copy()
+        """Fills hollow contours (e.g. Canny circles) into solid shapes."""
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
 
         contours, hierarchy = cv2.findContours(gray, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 

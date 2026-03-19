@@ -26,6 +26,7 @@ class BoxSegmenter(DocumentScanner):
 
         if debug:
             self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_01_canny.jpg")
+            # NOTE: though being saved, canny_dilated is not relevant
             self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02_canny_dilated.jpg")
 
         images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
