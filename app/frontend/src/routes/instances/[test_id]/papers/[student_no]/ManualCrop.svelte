@@ -20,6 +20,18 @@
 
   let responseImage: string = $state("");
 
+  function handleCropperReady() {
+    if (!canvasCropper) return;
+    const canvasData = canvasCropper.getCanvasData();
+    const boxSize = Math.min(canvasData.width, canvasData.height) * 0.1;
+    canvasCropper.setCropBoxData({
+      left: canvasData.left + canvasData.width - boxSize,
+      top: canvasData.top + canvasData.height - boxSize,
+      width: boxSize,
+      height: boxSize
+    });
+  }
+
   function handleFileUpload(e: Event) {
     const target = e.target as HTMLInputElement;
     const file = target.files?.[0];
@@ -105,10 +117,11 @@
       <p>Loading...</p>
     {/if}
     {#if canvasImageUrl}
-      <div class="flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
+      <div id="canvasArea"
+            class="flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
         <Cropper bind:cropper={canvasCropper}
               src={canvasImageUrl}
-              cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1}}
+              cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1, autoCropArea: 0.1, ready: handleCropperReady}}
               />
       </div>
     {:else if responseImage != ""}
@@ -122,3 +135,9 @@
     {/if}
   </div>
 </Dialog.Content>
+
+<style>
+  :global(.cropper-modal) {
+    opacity: 0.20 !important;
+  }
+</style>
