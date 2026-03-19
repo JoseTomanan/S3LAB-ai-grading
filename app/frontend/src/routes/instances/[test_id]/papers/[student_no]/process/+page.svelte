@@ -16,10 +16,14 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
 
   import { rotateImage, flipImage } from '$lib/utils.ts';
 	import ReviewForCommit from './ReviewForCommit.svelte';
+
+
+  // TODO: Use `segmentationStrategy` and `supposedScans` as parameters in API calls
 
 
   let isCameraDialogOpen: boolean = $state(false);
@@ -28,6 +32,8 @@
   let paramNumBoxes: number | null = $state(null);
   let formFileRecord: FileRecord | null = $state(null);
   let isAskingForValidation: boolean = $state(false);
+  let segmentationStrategy: string = $state("corner_dots");
+  let paperType: string = $state("ruled");
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
 
   function handleFile() {
@@ -79,7 +85,8 @@
     isOperationOngoing = true;
 
     const formData = new FormData();
-    formData.append('file', formFileRecord.file);
+    // formData.append('file', formFileRecord.file);
+    formData.append('files', formFileRecord.file);
 
     try {
       const response = await fetch(
@@ -186,12 +193,43 @@
                     onImageCapture={getImageFromComponent} />
       </Dialog.Root>
     </div>
-    <Input id="numBoxes"
-            type="number"
-            placeholder="Number of boxes (default=2)..."
-            disabled={isAskingForValidation}
-            bind:value={paramNumBoxes}
-        />
+    <div class="flex flex-col sm:flex-row gap-x-4 gap-y-2">
+      <Input id="numBoxes"
+              class="flex-1"
+              type="number"
+              placeholder="Number of boxes (default: 2)..."
+              disabled={isAskingForValidation}
+              bind:value={paramNumBoxes}
+          />
+      <div class="card grid grid-cols-2 gap-x-4 flex-1">
+        <div class="space-y-1.5">
+          <Label>Segmentation strategy</Label>
+          <RadioGroup.Root bind:value={segmentationStrategy}>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="corner_dots" />
+              <Label>Corner dots</Label>
+            </div>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="boxes" />
+              <Label>Boxes</Label>
+            </div>
+          </RadioGroup.Root>
+        </div>
+        <div class="space-y-1.5">
+          <Label>Paper type</Label>
+          <RadioGroup.Root bind:value={paperType}>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="ruled" />
+              <Label>Ruled</Label>
+            </div>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="unruled" />
+              <Label>Unruled</Label>
+            </div>
+          </RadioGroup.Root>
+        </div>
+      </div>
+    </div>
   <!-- {/else} -->
 
   {#if isAskingForValidation === false}
