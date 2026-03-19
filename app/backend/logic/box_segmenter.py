@@ -172,21 +172,6 @@ class BoxSegmenter(DocumentScanner):
                 quads.append(q_ordered)
 
         return quads
-
-    def _edge_confirmed_by_line(self, pt1: np.ndarray, pt2: np.ndarray, edge_img: np.ndarray, min_fill: float = 0.4, num_samples: int = 50) -> bool:
-        """Check if a straight line exists in edge_img between pt1 and pt2."""
-        xs = np.linspace(pt1[0], pt2[0], num_samples).astype(int)
-        ys = np.linspace(pt1[1], pt2[1], num_samples).astype(int)
-        # Clamp to image bounds
-        xs = np.clip(xs, 0, edge_img.shape[1] - 1)
-        ys = np.clip(ys, 0, edge_img.shape[0] - 1)
-        fill = np.sum(edge_img[ys, xs] > 0) / num_samples
-        return fill >= min_fill
-
-    def _quad_edges_confirmed(self, ordered: np.ndarray, edge_img: np.ndarray, min_fill: float = 0.4) -> bool:
-        tl, tr, br, bl = ordered
-        edges = [(tl, tr), (tr, br), (br, bl), (bl, tl)]
-        return all(self._edge_confirmed_by_line(a, b, edge_img, min_fill) for a, b in edges)
     #endregion
     # --------------------------------
 

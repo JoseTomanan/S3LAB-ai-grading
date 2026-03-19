@@ -51,23 +51,6 @@ class BlobDetector:
 
         self._lenient_detector = cv2.SimpleBlobDetector_create(lenient_params)
 
-        dark_params = cv2.SimpleBlobDetector_Params()
-        dark_params.filterByColor = True
-        dark_params.blobColor = 0
-        dark_params.minThreshold = 0
-        dark_params.maxThreshold = 100
-        dark_params.filterByArea = True
-        dark_params.minArea = AREA_FACTOR*62.5
-        dark_params.maxArea = AREA_FACTOR*6250
-        dark_params.filterByCircularity = True
-        dark_params.minCircularity = 0.15
-        dark_params.filterByConvexity = True
-        dark_params.minConvexity = 0.55
-        dark_params.filterByInertia = True
-        dark_params.minInertiaRatio = 0.25
-
-        self._dark_detector = cv2.SimpleBlobDetector_create(dark_params)
-
     def remove_horizontal_lines(self, img: MatLike, min_line_length_ratio: float = 0.05) -> MatLike:
         """Remove long horizontal structures (ruled lines) from a binary image.
         Keeps dots and short strokes intact."""
@@ -259,12 +242,6 @@ class BlobDetector:
     def detect(self, image_mat: MatLike) -> list[cv2.KeyPoint]:
         """[DEPRECATED] Detect white blobs from cannied image."""
         return self._detector.detect(image_mat)
-
-    def detect_dark_blob(self, image_mat: MatLike) -> list[cv2.KeyPoint]:
-        """[DEPRECATED] Detect small dark filled dots on a light background (e.g. original grayscale scan)."""
-        return self._dark_detector.detect(
-                                cv2.cvtColor(image_mat, cv2.COLOR_BGR2GRAY)
-                                if len(image_mat.shape) == 3 else image_mat )
 
     def fill_blobs(self, img: MatLike) -> MatLike:
         """Fills hollow contours (e.g. Canny circles) into solid shapes.
