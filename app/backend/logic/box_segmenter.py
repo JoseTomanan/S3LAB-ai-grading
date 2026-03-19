@@ -50,6 +50,7 @@ class BoxSegmenter(DocumentScanner):
         pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
 
         # Pass 2: lenient SimpleBlobDetector on eroded image
+        # TODO: use lines_removed -> vertical_reconnected here
         image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
         pts_pass2_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
 
@@ -68,16 +69,26 @@ class BoxSegmenter(DocumentScanner):
                 self.save_image(self._encode_to_bytes(img),
                                     f"{self.debug_dir}/_06_{name}.jpg")
 
-            # Debug: show consensus (green) vs rejected contour-only dots (red)
-            consensus_debug = cv2.cvtColor(image_lines_removed, cv2.COLOR_GRAY2BGR) if len(image_lines_removed.shape) == 2 else image_lines_removed.copy()
-            consensus_set = set((int(p[0]), int(p[1])) for p in pts_detected)
-            for p in pts_contour:
-                key = (int(p[0]), int(p[1]))
-                if key in consensus_set:
-                    cv2.circle(consensus_debug, key, radius=10, color=(0, 255, 0), thickness=-1)
-                else:
-                    cv2.circle(consensus_debug, key, radius=10, color=(0, 0, 255), thickness=-1)
-            self.save_image(self._encode_to_bytes(consensus_debug),
+        if debug:
+            # - Only in pts_pass1_contour: yellow
+            # - Only in pts_pass2_blob: green
+            # - In both: red
+            image_consensus_debug = image_lines_removed.copy()
+            set_pass1 = set((int(p[0]), int(p[1])) for p in pts_pass1_contour)
+            set_pass2 = set((int(p[0]), int(p[1])) for p in pts_pass2_blob)
+            
+            consensus_set = set_pass1 & set_pass2
+            only_pass1 = set_pass1 - set_pass2
+            only_pass2 = set_pass2 - set_pass1
+
+            for key in only_pass1:
+                image_consensus_debug = self._highlight_dot(image_consensus_debug, key, (0, 255, 255))  # yellow (BGR)
+            for key in only_pass2:
+                image_consensus_debug = self._highlight_dot(image_consensus_debug, key, (0, 255, 0))    # green (BGR)
+            for key in consensus_set:
+                image_consensus_debug = self._highlight_dot(image_consensus_debug, key, (0, 0, 255))    # red (BGR)
+
+            self.save_image(self._encode_to_bytes(image_consensus_debug),
                                     f"{self.debug_dir}/_07_dots_consensus.jpg")
 
         if len(pts_consensus) < 4:
