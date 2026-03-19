@@ -28,16 +28,20 @@ TEMP_DIR = Path("static/images")
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
-                file: UploadFile = File(...),
-                num_boxes: Optional[int] = Query(None), 
+                ## file: UploadFile = File(...),
+                files: List[UploadFile] = File(...),
+                num_boxes: Optional[int] = Query(None),
                 session: Session = Depends(get_session)
                 ):
-    """Process raw student assessment image through CV pipeline"""
+    """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
     await _validate_request(test_id, student_no, session)
-    contents = await _validate_file(file)
+    ## contents = await _validate_file(file)
+    contents_list = await _validate_files(files)
 
-    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
-    processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
+    ## print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
+    ## processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
+    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
@@ -54,17 +58,21 @@ async def process_student_answer_image(
 async def scan_then_label_save_boxes(
                 test_id: str,
                 student_no: str,
-                file: UploadFile = File(...),
-                num_boxes: Optional[int] = Query(None), 
+                ## file: UploadFile = File(...),
+                files: List[UploadFile] = File(...),
+                num_boxes: Optional[int] = Query(None),
                 session: Session = Depends(get_session)
                 ):
-    """Process raw student assessment image through CV pipeline"""
+    """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
     await _validate_request(test_id, student_no, session)
-    contents = await _validate_file(file)
+    ## contents = await _validate_file(file)
+    contents_list = await _validate_files(files)
 
-    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
+    ## print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting now.")
+    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
-        processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
+        ## processed_list: list[bytes] = await _scan_and_segment(contents, num_boxes)
+        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
     except:
         raise HTTPException(status_code=500, detail="Could not find any boxes.")
 
@@ -523,30 +531,67 @@ async def _validate_request(test_id: str, student_no: str, session: Session):
         raise HTTPException(status_code=404, detail=f"Student with ID '{student_no}' not found")
 
 
-async def _validate_file(file: UploadFile) -> bytes:
-    if not file or not file.filename:
-        raise HTTPException(status_code=400, detail="No file provided")
-    if not IMAGE_MODIFIER.validate_file_extension(file.filename):
-        raise HTTPException(status_code=415, detail=f"Unsupported file format. Got: {file.filename}")
-    contents = await file.read()
-    if len(contents) == 0:
-        raise HTTPException(status_code=400, detail="Uploaded file is empty")
-    return contents
+## async def _validate_file(file: UploadFile) -> bytes:
+##     if not file or not file.filename:
+##         raise HTTPException(status_code=400, detail="No file provided")
+##     if not IMAGE_MODIFIER.validate_file_extension(file.filename):
+##         raise HTTPException(status_code=415, detail=f"Unsupported file format. Got: {file.filename}")
+##     contents = await file.read()
+##     if len(contents) == 0:
+##         raise HTTPException(status_code=400, detail="Uploaded file is empty")
+##     return contents
+
+async def _validate_files(files: List[UploadFile]) -> list[bytes]:
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided")
+    contents_list = []
+    for file in files:
+        if not file or not file.filename:
+            raise HTTPException(status_code=400, detail="No file provided")
+        if not IMAGE_MODIFIER.validate_file_extension(file.filename):
+            raise HTTPException(status_code=415, detail=f"Unsupported file format. Got: {file.filename}")
+        contents = await file.read()
+        if len(contents) == 0:
+            raise HTTPException(status_code=400, detail="Uploaded file is empty")
+        contents_list.append(contents)
+    return contents_list
 
 
-async def _scan_and_segment(contents: bytes, num_boxes: int) -> list[bytes]:
-    # ======== DOCUMENT SCANNING ========
+## async def _scan_and_segment(contents: bytes, num_boxes: int) -> list[bytes]:
+##     # ======== DOCUMENT SCANNING ========
+##     DOCUMENT_SCANNER = DocumentScanner()
+##     scanned_page = DOCUMENT_SCANNER.scan_page(contents)
+##
+##     # ======== BOX SEGMENTING ========
+##     BOX_SEGMENTER = BoxSegmenter()
+##     segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
+##     processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+##
+##     print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
+##
+##     return processed_list
+
+async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optional[int]) -> list[bytes]:
     DOCUMENT_SCANNER = DocumentScanner()
-    scanned_page = DOCUMENT_SCANNER.scan_page(contents)
-
-    # ======== BOX SEGMENTING ========
     BOX_SEGMENTER = BoxSegmenter()
-    segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
-    processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
-    
-    print(f"INTERNAL:\tSegmenting success with {len(processed_list)} boxes detected.")
 
-    return processed_list
+    all_processed: list[bytes] = []
+    for page_idx, contents in enumerate(contents_list):
+        # ======== DOCUMENT SCANNING ========
+        scanned_page = DOCUMENT_SCANNER.scan_page(contents)
+
+        # ======== BOX SEGMENTING ========
+        segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
+        processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+
+        print(f"INTERNAL:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
+        all_processed.extend(processed_list)
+
+    if num_boxes is not None:
+        all_processed = all_processed[:num_boxes]
+
+    print(f"INTERNAL:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
+    return all_processed
 
 
 def _label_save_boxes(
