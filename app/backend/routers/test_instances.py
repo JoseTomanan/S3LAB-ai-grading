@@ -3,7 +3,6 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sqlmodel import Session, delete, select
 from typing import List
 
-import uuid
 import io
 
 from models import *
@@ -105,7 +104,7 @@ def add_test_instance(
                 )
     
     # Generate test_id (section-based naming)
-    test_id = f"{section.section}_{request.name}_{uuid.uuid4().hex[:6]}"
+    test_id = f"{section.section}_{request.name}"
     
     # Create new instance
     new_instance = TestInstance(
