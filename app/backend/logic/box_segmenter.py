@@ -22,12 +22,10 @@ class BoxSegmenter(DocumentScanner):
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_image(image, canny_thresholds=(30,150),
                                                                 gaussian_blur_kernel_size=None)
-        image_dilated = self._dilate_edges(image_cannied)
+        # image_dilated = self._dilate_edges(image_cannied)
 
         if debug:
             self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_01_canny.jpg")
-            # NOTE: though being saved, canny_dilated is not relevant
-            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02_canny_dilated.jpg")
 
         images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
         if images_answers == []:
@@ -60,14 +58,14 @@ class BoxSegmenter(DocumentScanner):
 
         if debug:
             self.save_image(self._encode_to_bytes(image_holes_filled),
-                                    f"{self.debug_dir}/_03_holes_filled.jpg")
+                                    f"{self.debug_dir}/_02_holes_filled.jpg")
             self.save_image(self._encode_to_bytes(image_lines_removed),
-                                    f"{self.debug_dir}/_04_lines_removed.jpg")
+                                    f"{self.debug_dir}/_03A_lines_removed.jpg")
             self.save_image(self._encode_to_bytes(image_eroded),
-                                    f"{self.debug_dir}/_05_eroded_lenient.jpg")
+                                    f"{self.debug_dir}/_03B_eroded_lenient.jpg")
             for name, img in debug_images.items():
                 self.save_image(self._encode_to_bytes(img),
-                                    f"{self.debug_dir}/_06_{name}.jpg")
+                                    f"{self.debug_dir}/_04_{name}.jpg")
 
         if debug:
             # - Only in pts_pass1_contour: yellow
@@ -381,7 +379,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 # MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA.jpeg"
+    FILENAME = "testRuledDottedB.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
