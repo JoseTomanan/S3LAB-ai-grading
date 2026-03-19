@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { supposedScans, onAccept, onReject } = $props();
+  let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
   import IconLabel from "~icons/mdi/label";
 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
@@ -10,8 +10,9 @@
 <Dialog.Content>
   <div class="flex flex-row w-full gap-x-1">
     <button class="button-secondary flex-1 text-sm"
+            disabled={isCommitmentOngoing}
             onclick={onAccept}>
-      Accept segmentation
+      {isCommitmentOngoing ? "Evaluating..." : "Accept and evaluate"}
     </button>
     <button class="button-destructive text-sm"
             onclick={onReject}>

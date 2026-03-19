@@ -112,33 +112,43 @@
     }
   }
 
+  let isCommitmentOngoing = $state(false);
   async function validateAndCommit(accept: boolean) {
-    if (accept) {
-      console.log(supposedScans);
-
-      const response = await fetch(
-            `/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
-            {
-              method: "POST",
-              headers: {'Content-Type': 'application/json',},
-              body: JSON.stringify({
-                "boxes": supposedScans,
-              }),
-            }
-          );
-      switch (response.status) {
-        case 200:
-          alert("Review has been accepted.");
-          window.location.reload();
-          break;
-        default:
-          const responseBody = await response.json();
-          alert(`${response.status}: ${responseBody.detail}`);
-      }
+    if (isCommitmentOngoing = true)
       return;
-    }
+
+    isCommitmentOngoing = true;
+    try {
+      if (accept) {
+        console.log(supposedScans);
+        const response = await fetch(
+              `/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
+              {
+                method: "POST",
+                headers: {'Content-Type': 'application/json',},
+                body: JSON.stringify({
+                  "boxes": supposedScans,
+                }),
+              }
+            );
+        switch (response.status) {
+          case 200:
+            alert("Review has been accepted.");
+            window.location.reload();
+            break;
+          default:
+            const responseBody = await response.json();
+            alert(`${response.status}: ${responseBody.detail}`);
+        }
+        return;
+      }
 
     // TODO: handle the otherwise case
+    } catch {
+      console.log("Catch kita kase nafall ka");
+    } finally {
+      isCommitmentOngoing = false;
+    }
   }
 
   // FIXME: test code, remove when no longer necessary
@@ -277,8 +287,10 @@
         Open segmentation results
       </Dialog.Trigger>
       <ReviewForCommit supposedScans={supposedScans}
+                        {isCommitmentOngoing}
                         onAccept={() => validateAndCommit(true)}
-                        onReject={() => validateAndCommit(false)} />
+                        onReject={() => validateAndCommit(false)}
+                        />
     </Dialog.Root>
     <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
   {/if}
