@@ -7,7 +7,7 @@ from core.constants import *
 
 from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
-from logic.blob_detector import BlobDetector
+from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST
 
 from utils import is_valid_quad, mapp
 
@@ -15,6 +15,8 @@ from utils import is_valid_quad, mapp
 
 #region Class
 class BoxSegmenter(DocumentScanner):
+    debug_dir = "./TEMP/output/DEBUG"
+
     def get_answer_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Use dots to find section corners, then lines to verify rectangle that serves as section."""
         image = self._decode_bytes(image_bytes)
@@ -23,9 +25,9 @@ class BoxSegmenter(DocumentScanner):
         image_dilated = self._dilate_edges(image_cannied)
 
         if debug:
-            self.save_image(self._encode_to_bytes(image_cannied), "./TEMP/output/DEBUG/_0canny.jpg")
-            self.save_image(self._encode_to_bytes(image_dilated), "./TEMP/output/DEBUG/canny_regularize_dilate.jpg")
-        
+            self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_0canny.jpg")
+            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/canny_regularize_dilate.jpg")
+
         images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
@@ -38,21 +40,49 @@ class BoxSegmenter(DocumentScanner):
         BLOB_DETECTOR = BlobDetector()
 
         image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
+        image_lines_removed = BLOB_DETECTOR.remove_horizontal_lines(image_holes_filled)
+
+        debug_images = {} if debug else None
+
+        # Pass 1: contour-circularity (with ring density filtering)
+        pts_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
+
+        # Pass 2: lenient SimpleBlobDetector on eroded image
         image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
+        pts_blob = BLOB_DETECTOR.detect_lenient(image_eroded)
+
+        # Consensus: keep only dots both methods agree on
+        pts_detected = BlobDetector.intersect_points(pts_contour, pts_blob)
+        print(f"INFO:\tConsensus dots: {len(pts_detected)} (contour={len(pts_contour)}, blob={len(pts_blob)})")
+
         if debug:
             self.save_image(self._encode_to_bytes(image_holes_filled),
-                                    "./TEMP/output/DEBUG/_1holesfilled.jpg")
+                                    f"{self.debug_dir}/_1holesfilled.jpg")
+            self.save_image(self._encode_to_bytes(image_lines_removed),
+                                    f"{self.debug_dir}/_2linesremoved.jpg")
             self.save_image(self._encode_to_bytes(image_eroded),
-                                    "./TEMP/output/DEBUG/_2eroded.jpg")
-        
-        # keypoints = BLOB_DETECTOR.detect_dark_blob(cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY))
-        keypoints = BLOB_DETECTOR.detect(image_eroded)
+                                    f"{self.debug_dir}/_2_eroded_lenient.jpg")
+            for name, img in debug_images.items():
+                self.save_image(self._encode_to_bytes(img),
+                                    f"{self.debug_dir}/_2_{name}.jpg")
 
-        if len(keypoints) < 4:
-            print(f"INFO:\tOnly {len(keypoints)} blobs detected")
+            # Debug: show consensus (green) vs rejected contour-only dots (red)
+            consensus_debug = cv2.cvtColor(image_lines_removed, cv2.COLOR_GRAY2BGR) if len(image_lines_removed.shape) == 2 else image_lines_removed.copy()
+            consensus_set = set((int(p[0]), int(p[1])) for p in pts_detected)
+            for p in pts_contour:
+                key = (int(p[0]), int(p[1]))
+                if key in consensus_set:
+                    cv2.circle(consensus_debug, key, radius=10, color=(0, 255, 0), thickness=-1)
+                else:
+                    cv2.circle(consensus_debug, key, radius=10, color=(0, 0, 255), thickness=-1)
+            self.save_image(self._encode_to_bytes(consensus_debug),
+                                    f"{self.debug_dir}/_3markeddots_consensus.jpg")
+
+        if len(pts_detected) < 4:
+            print(f"INFO:\tOnly {len(pts_detected)} blobs detected")
             return []
 
-        pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
+        pts = np.array(pts_detected, dtype=np.float32)
         pts = self._filter_out_dup_pts(pts)
 
         if debug:
@@ -60,7 +90,7 @@ class BoxSegmenter(DocumentScanner):
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img),
-                                "./TEMP/output/DEBUG/_3markeddots.jpg")
+                                f"{self.debug_dir}/_3markeddots.jpg")
 
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
@@ -79,7 +109,7 @@ class BoxSegmenter(DocumentScanner):
                         debug_img = self._highlight_contours(image_cannied, approximate, contour)
                         self.save_image(
                                     self._encode_to_bytes(debug_img),
-                                    f"./TEMP/output/DEBUG/sections/box{i}.jpg"
+                                    f"{self.debug_dir}/sections/box{i}.jpg"
                                     )
                     approximate = approximate.reshape(4, 2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
@@ -118,12 +148,12 @@ class BoxSegmenter(DocumentScanner):
     # --------------------------------
     #region Auxiliary functions: Answer section detection
     def _filter_out_dup_pts(self, pts: np.ndarray) -> np.ndarray:
-        """Filter out duplicate points"""
+        """Filter out duplicate points within DOT_DEDUP_DIST of each other."""
         filtered_pts = []
         for p in pts:
             is_similar = False
             for fp in filtered_pts:
-                if np.linalg.norm(np.array(p) - np.array(fp)) < 10:
+                if np.linalg.norm(np.array(p) - np.array(fp)) < DOT_DEDUP_DIST:
                     is_similar = True
                     break
             if not is_similar:
@@ -177,7 +207,7 @@ class BoxSegmenter(DocumentScanner):
             ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
             self.save_image(
                     self._encode_to_bytes(ruled_line_mask),
-                    "./TEMP/output/DEBUG/horizontal_candidates.jpg"
+                    f"{self.debug_dir}/horizontal_candidates.jpg"
                     )
             return cv2.subtract(i, ruled_line_mask)
         # return self._regularize_image(image_mat, (30, 150), _pre_canny)
@@ -228,7 +258,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_dilated),
-                        "./TEMP/output/DEBUG/canny_regularize_dilate.jpg"
+                        f"{self.debug_dir}/canny_regularize_dilate.jpg"
                         )
 
         images_good_contours = self._detect_contours(image_dilated, image_cannied, debug=debug)
@@ -257,7 +287,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                     debug_img = self._highlight_contours(image_cannied, approximate, c)
                     self.save_image(
                                 self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG/contours/box{i}.jpg"
+                                f"{self.debug_dir}/contours/box{i}.jpg"
                                 )
                 if 4 <= len(approximate) <= 10:
                     hull = cv2.convexHull(c)
@@ -286,7 +316,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         if debug:
             self.save_image(
                     self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG/canny_regularize_dilate.jpg"
+                    f"{self.debug_dir}/canny_regularize_dilate.jpg"
                     )
 
         images_good_sections = self._detect_boxes_via_dots(image_original, debug=debug)
@@ -311,7 +341,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
             debug_img = image_mat.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
-            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/canny_marked_dots.jpg")
+            self.save_image(self._encode_to_bytes(debug_img), f"{self.debug_dir}/canny_marked_dots.jpg")
 
         if len(pts) == 4:
             quad_candidates = [pts]
@@ -333,7 +363,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                     debug_img = self._highlight_contours(cv2.cvtColor(image_mat, cv2.COLOR_BGR2GRAY), approximate, contour)
                     self.save_image(
                                 self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG/blobs/box{i}.jpg"
+                                f"{self.debug_dir}/blobs/box{i}.jpg"
                                 )
                 approximate = approximate.reshape(4, 2)
                 (_, _, w, h) = cv2.boundingRect(approximate)
@@ -364,7 +394,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
         self.save_image(
                     self._encode_to_bytes(horizontal_candidates),
-                    "./TEMP/output/DEBUG/horizontal_candidates.jpg"
+                    f"{self.debug_dir}/horizontal_candidates.jpg"
                     )
         # ruled_mask = self._get_ruled_mask(horizontal_candidates, image)
         return cv2.subtract(image, horizontal_candidates)
@@ -413,6 +443,7 @@ if __name__ == "__main__":
     _onlyfilename = FILENAME.split(".")[0]
     
     BOX_SEGMENTER = BoxSegmenter()
+    BOX_SEGMENTER.debug_dir = f"./TEMP/output/{_onlyfilename}"
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
