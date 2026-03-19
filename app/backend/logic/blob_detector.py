@@ -83,7 +83,7 @@ class BlobDetector:
         line_thickness = measure_line_thickness(image_canny)
         print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
 
-        if line_thickness <= 0:
+        if line_thickness > 0:
             min_dot_diameter = line_thickness * 3
             max_dot_diameter = line_thickness * 15
             dyn_min_area = math.pi * (min_dot_diameter / 2) ** 2
@@ -235,7 +235,8 @@ class BlobDetector:
         return _deduplicate_points(result, min_dist=max_dist)
 
     def fill_blobs(self, img: MatLike) -> MatLike:
-        """Fills hollow contours (e.g. Canny circles) into solid shapes."""
+        """Fills small, compact hollow contours (e.g. Canny circles) into solid shapes.
+        Skips large enclosed regions and elongated contours (ruled lines)."""
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
 
         contours, hierarchy = cv2.findContours(gray, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
@@ -246,6 +247,14 @@ class BlobDetector:
                 # RETR_CCOMP gives 2-level hierarchy: outer=0, hole=1
                 # Only draw top-level contours (no parent), filled solid
                 if hierarchy[0][i][3] == -1:  # no parent → outer contour
+                    # area = cv2.contourArea(contour)
+                    # if area > MAX_DOT_AREA:
+                    #     continue
+                    # _, _, w, h = cv2.boundingRect(contour)
+                    # if max(w, h) == 0:
+                    #     continue
+                    # if min(w, h) / max(w, h) < 0.05:
+                    #     continue
                     cv2.drawContours(filled, contours, i, 255, thickness=cv2.FILLED)
 
         return filled
