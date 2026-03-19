@@ -6,6 +6,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   server: {
+    // FIXME: allow host when done
     // host: true,
     proxy: {
       '/api': {

@@ -28,10 +28,8 @@
 
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
-  // let formFile: FileList | undefined = $state();
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
-  // let formFileRecord: FileRecord | null = $state(null);
   let formFileRecords: FileRecord[] = $state([]);
   let isAskingForValidation: boolean = $state(false);
   let segmentationStrategy: string = $state("corner_dots");
