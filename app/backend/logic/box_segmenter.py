@@ -4,7 +4,6 @@ from itertools import combinations
 from cv2.typing import MatLike
 
 from core.constants import *
-
 from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST, OversimplifiedBlobDetector
@@ -52,37 +51,31 @@ class BoxSegmenter(DocumentScanner):
         print(f"INFO:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)}, blob={len(pts_pass2_blob)})")
 
         if debug:
-            image_pass1 = image_cannied.copy()
-            image_pass2 = image_cannied.copy()
-            image_consensus = image_cannied.copy()
+            debug_sets = [
+                (pts_pass1_contour, (0, 255, 0), "_02A_dots_pass1contour.jpg"),
+                (pts_pass2_blob, (0, 255, 255), "_02B_dots_pass2blob.jpg"),
+                (pts_consensus, (0, 0, 255), "_03_dots_consensus.jpg"),
+                ]
 
-            for key in pts_pass1_contour:
-                image_pass1 = self._highlight_dot(image_pass1, key, (0, 255, 0))
-            for key in pts_pass2_blob:
-                image_pass2 = self._highlight_dot(image_pass2, key, (0, 255, 255))
-            for key in pts_consensus:
-                image_consensus = self._highlight_dot(image_consensus, key, (0, 0, 255))
-
-            self.save_image(self._encode_to_bytes(image_pass1),
-                                    f"{self.debug_dir}/_02A_dots_pass1contour.jpg")
-            self.save_image(self._encode_to_bytes(image_pass2),
-                                    f"{self.debug_dir}/_02B_dots_pass2blob.jpg")
-            self.save_image(self._encode_to_bytes(image_consensus),
-                                    f"{self.debug_dir}/_03_dots_consensus.jpg")
+            for pts, color, filename in debug_sets:
+                debug_img = image_cannied.copy()
+                for p in pts:
+                    debug_img = self._highlight_dot(debug_img, p, color)
+                self.save_image(self._encode_to_bytes(debug_img),
+                                    f"{self.debug_dir}/{filename}")
 
         if len(pts_consensus) < 4:
             print(f"INFO:\tOnly {len(pts_consensus)} blobs detected")
             return []
 
-        pts = np.array(pts_consensus, dtype=np.float32)
-        pts = self._filter_out_dup_pts(pts)
+        pts = self._filter_out_dup_pts(pts_consensus)
 
         if debug:
             debug_img = image_cannied.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img),
-                                f"{self.debug_dir}/_04_dots_deduped.jpg")
+                                f"{self.debug_dir}/_04_dots_deduped.jpg" )
 
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
@@ -99,10 +92,8 @@ class BoxSegmenter(DocumentScanner):
                 if len(approximate) == 4:
                     if debug:
                         debug_img = self._highlight_contours(image_cannied, approximate, contour)
-                        self.save_image(
-                                    self._encode_to_bytes(debug_img),
-                                    f"{self.debug_dir}/_09_sections/box{i}.jpg"
-                                    )
+                        self.save_image(self._encode_to_bytes(debug_img),
+                                            f"{self.debug_dir}/_05_sections/box{i}.jpg" )
                     approximate = approximate.reshape(4, 2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
@@ -121,12 +112,13 @@ class BoxSegmenter(DocumentScanner):
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
-        array = self._load_array(image_bytes)
+        """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
+        array = self._decode_bytes(image_bytes)
         img = self._adjust_contrast(
-                            self._brighten(array, amount=0.25),
+                            self._brighten(array, amount=0.175),
                             amount=1.3
                             )
-        return self._unload_array(img)
+        return self._encode_to_bytes(img)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
@@ -137,7 +129,6 @@ class BoxSegmenter(DocumentScanner):
         return BoxSegmenterOldFunctions().get_boxes_via_dots(image_bytes, num_boxes, debug)
     #endregion
 
-    # --------------------------------
     #region Auxiliary functions: Answer section detection
     def _filter_out_dup_pts(self, pts: np.ndarray) -> np.ndarray:
         """Filter out duplicate points within DOT_DEDUP_DIST of each other."""
@@ -165,9 +156,7 @@ class BoxSegmenter(DocumentScanner):
 
         return quads
     #endregion
-    # --------------------------------
 
-    # --------------------------------
     #region Auxiliary functions: Image preloading, postloading
     def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int], color: tuple[int,int,int] = (0,255,0)) -> MatLike:
         """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
@@ -175,8 +164,23 @@ class BoxSegmenter(DocumentScanner):
         x, y = coordinate
         cv2.circle(debug_img, (int(x), int(y)), radius=10, color=color, thickness=-1)
         return debug_img
+
+    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
+        """Increase image brightness using linear transform"""
+        amount = max(0.0, min(1.0, float(amount)))
+        beta = amount * 255
+        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
     
+    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
+        """Adjust image contrast with brightness compensation"""
+        amount = max(0.1, float(amount))
+        beta = 128 * (1 - amount)
+        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
+    #endregion
+
+    #region [UNUSED] Auxiliary functions
     def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
+        """[UNUSED]"""
         def _pre_canny(i: MatLike) -> MatLike:
             ruled_line_mask = cv2.inRange(i, 20, 80)
             h_kernel_length = int(NORMAL_SIZE*0.30)
@@ -191,35 +195,12 @@ class BoxSegmenter(DocumentScanner):
         return self._regularize_image(image_mat, canny_thresholds=(30, 150))
     
     def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
+        """[UNUSED]"""
         kernel = np.ones((dilate_size, dilate_size), np.uint8)
         image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
-   
-    def _load_array(self, image_bytes: bytes) -> np.ndarray:
-        """Convert bytes to OpenCV image with validation"""
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        return image
-
-    def _unload_array(self, image: np.ndarray) -> bytes:
-        """Encode OpenCV image to high-quality JPEG bytes."""
-        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        return buffer.tobytes()
-
-    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
-        """Increase image brightness using linear transform"""
-        amount = max(0.0, min(1.0, float(amount)))
-        beta = amount * 255
-        return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
-    
-    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
-        """Adjust image contrast with brightness compensation"""
-        amount = max(0.1, float(amount))
-        beta = 128 * (1 - amount)
-        return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
     #endregion
-    # --------------------------------
 #endregion
 
 
@@ -360,7 +341,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 # MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedB.jpeg"
+    FILENAME = "testRuledDottedD.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
