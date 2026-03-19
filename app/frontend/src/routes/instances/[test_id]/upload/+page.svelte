@@ -32,6 +32,7 @@
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import { Separator } from '$lib/components/ui/separator/index.ts';
   import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
   import BulkUploadRename from './BulkUploadRename.svelte';
   import type { FileRecord, Student } from '$lib/index.ts';
@@ -188,6 +189,7 @@
     </h6>
   
   {:else if !isOperationStarted}
+    <Separator/>
     <div class="space-y-1">
       <span class="flex flex-row justify-between items-center">
         <h5>
@@ -199,7 +201,6 @@
           <IconSend class="size-4" />
         </Button>
       </span>
-      <div class="border-b-2 border-t-2 border-border">
       <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
         {#each formFileRecords as p}
@@ -209,8 +210,8 @@
           {@const dashIdx = nameOnly.lastIndexOf('-')}
           {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1)) ? nameOnly.substring(dashIdx) : ''}
 
-          <div class="relative flex flex-col justify-end min-w-3/4
-                      sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
+          <div class="relative flex flex-col justify-end
+                      min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
             <img src={p.url}
                   class="aspect-auto block"
                   alt={p.name} />
@@ -263,7 +264,7 @@
           </div>
         {/each}
       </div>
-      </div>
+      <Separator/>
     </div>
   
   {:else}
