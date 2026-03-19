@@ -231,9 +231,9 @@
                         onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
             </Dialog.Root>
             {#if IS_FIRST_PAGE(p.name)}
-              <span class="absolute bottom-2 right-2 bg-white/80 px-1 backdrop-blur-md">
+              <span class="absolute bottom-2 right-2 bg-white/80 backdrop-blur-md">
                 <input type="number"
-                        class="w-16 bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         placeholder="# of box..."
                         value={numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
                         oninput={(e: Event) => {
