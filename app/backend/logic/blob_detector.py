@@ -17,13 +17,13 @@ DOT_DEDUP_DIST = math.sqrt(MAX_DOT_AREA) / 2.5  # ~73px at NORMAL_SIZE=2048
 MAX_RING_DENSITY = 0.12  # max white-pixel density in ring around dot (filters handwriting clutter)
 
 
-#region Auxiliary points
+#region Auxiliary functions
 def measure_line_thickness(target_image_canny: MatLike, min_line_length_ratio: float = 0.05) -> float:
     """Measure median ruled-line thickness in a binary image.
     Returns 0 if no ruled lines are detected."""
     gray = cv2.cvtColor(target_image_canny, cv2.COLOR_BGR2GRAY) if len(target_image_canny.shape) == 3 \
                     else target_image_canny
-    
+
     kernel_len = int(NORMAL_SIZE * min_line_length_ratio)
     h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
     horizontal = cv2.morphologyEx(gray, cv2.MORPH_OPEN, h_kernel)
@@ -60,9 +60,11 @@ def _deduplicate_dots(dots: list[tuple], min_dist: float = 10.0) -> list[tuple]:
         if not merged:
             deduped.append(d)
     return deduped
+#endregion
 
+#region [UNUSED] Auxiliary functions
 def _deduplicate_points(pts: list[list[float]], min_dist: float = 10.0) -> list[list[float]]:
-    """Remove near-duplicate points, keeping the first occurrence."""
+    """[UNUSED] Remove near-duplicate points, keeping the first occurrence."""
     deduped = []
     for p in pts:
         is_dup = False
@@ -73,8 +75,19 @@ def _deduplicate_points(pts: list[list[float]], min_dist: float = 10.0) -> list[
         if not is_dup:
             deduped.append(p)
     return deduped
-#endregion
 
+def _is_fillable_contour(contour) -> bool:
+    """[UNUSED] Check if a contour is small and compact enough to be a dot."""
+    area = cv2.contourArea(contour)
+    if area > MAX_DOT_AREA:
+        return False
+    _, _, w, h = cv2.boundingRect(contour)
+    if max(w, h) == 0:
+        return False
+    if min(w, h) / max(w, h) < 0.05:
+        return False
+    return True
+#endregion
 
 
 #region Class
@@ -109,37 +122,55 @@ class BlobDetector:
         params.minInertiaRatio = 0.15
         self._blob_detector = cv2.SimpleBlobDetector_create(params)
 
-    def remove_horizontal_lines(self, img: MatLike, min_line_length_ratio: float = 0.05) -> MatLike:
-        """Remove long horizontal structures (ruled lines) from a binary image, while keeping dots and short strokes intact."""
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
-
-        kernel_len = int(NORMAL_SIZE * min_line_length_ratio)
-        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
-        horizontal = cv2.morphologyEx(gray, cv2.MORPH_OPEN, h_kernel)
-        return cv2.subtract(gray, horizontal)
-
-    def detect_dot_contours(self, img: MatLike, debug_images: dict | None = None) -> list[list[float]]:
-        """Detect round dot contours from a binary image via geometric filtering.
-        Runs a dual-pass vertical close (small then tall) to recover dots that
-        were split by horizontal line removal, then filters by ring density
-        to reject dots surrounded by handwriting clutter.
-        Returns centroid points as list of [x, y].
-        If debug_images dict is provided, populates it with intermediate closed images."""
-        # FIXME: Move vertical reconnecting to a separate function
+    def detect_circular_contours_from_canny(self, img: MatLike) -> list[list[float]]:
+        """Detect dots via inner contours of Canny rings.
+        In Canny output, dots appear as hollow rings. The inner contour (hole)
+        is isolated from ruled lines and other edge noise, making it a robust
+        circular indicator. Uses RETR_CCOMP to find child contours whose
+        geometry passes dot filters."""
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
+        contours, hierarchy = cv2.findContours(gray, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Dual-pass: a small close preserves delicate dots, a tall close
-        # reconnects dot halves split by line removal. Union of both
-        # catches dots that either kernel alone would miss.
-        all_dots = []  # list of (cx, cy, area)
-        for close_height in [5, 11]:
-            close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, close_height))
-            closed = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, close_kernel)
-            all_dots.extend(self._find_dot_centroids(closed, min_area=self.dyn_min_area, max_area=self.dyn_max_area))
-            if debug_images is not None:
-                debug_images[f"vclose_h{close_height}"] = closed
+        if hierarchy is None:
+            return []
 
-        deduped = _deduplicate_dots(all_dots, min_dist=DOT_DEDUP_DIST)
+        centroids = []
+        for i, contour in enumerate(contours):
+            ## Only consider inner contours (those with a parent)
+            if hierarchy[0][i][3] == -1:
+                continue
+
+            area = cv2.contourArea(contour)
+            if not (self.dyn_min_area <= area <= self.dyn_max_area):
+                continue
+
+            perimeter = cv2.arcLength(contour, True)
+            if perimeter == 0:
+                continue
+            circularity = 4 * math.pi * area / (perimeter * perimeter)
+            if circularity < MIN_CIRCULARITY:
+                continue
+
+            hull_area = cv2.contourArea(cv2.convexHull(contour))
+            if hull_area == 0:
+                continue
+            solidity = area / hull_area
+            if solidity < MIN_SOLIDITY:
+                continue
+
+            _, _, w, h = cv2.boundingRect(contour)
+            bbox_aspect = min(w, h) / max(w, h)
+            if bbox_aspect < MIN_BBOX_ASPECT:
+                continue
+
+            M = cv2.moments(contour)
+            if M["m00"] == 0:
+                continue
+            cx = M["m10"] / M["m00"]
+            cy = M["m01"] / M["m00"]
+            centroids.append((cx, cy, area))
+
+        deduped = _deduplicate_dots(centroids, min_dist=DOT_DEDUP_DIST)
         filtered = self._filter_by_ring_density(gray, deduped)
         return [[cx, cy] for cx, cy, _ in filtered]
 
@@ -178,8 +209,42 @@ class BlobDetector:
                 result.append((cx, cy, area))
         return result
 
+    #region [UNUSED] by detect_circular_contours_from_canny
+    def remove_horizontal_lines(self, img: MatLike, min_line_length_ratio: float = 0.05) -> MatLike:
+        """[UNUSED] Remove long horizontal structures (ruled lines) from a binary image, while keeping dots and short strokes intact."""
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
+
+        kernel_len = int(NORMAL_SIZE * min_line_length_ratio)
+        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
+        horizontal = cv2.morphologyEx(gray, cv2.MORPH_OPEN, h_kernel)
+        return cv2.subtract(gray, horizontal)
+
+    def detect_dot_contours(self, img: MatLike, debug_images: dict | None = None) -> list[list[float]]:
+        """[UNUSED] Detect round dot contours from a binary image via geometric filtering.
+        First, vertically reconnects dot halves split by horizontal line removal (dual-pass close).
+        Then, filters by ring density to reject dots surrounded by handwriting clutter.
+        Returns centroid points as list of [x, y].
+        If debug_images dict is provided, populates it with intermediate closed images."""
+        # FIXME: Move vertical reconnecting to a separate function
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
+
+        # Dual-pass: a small close preserves delicate dots, a tall close
+        # reconnects dot halves split by line removal. Union of both
+        # catches dots that either kernel alone would miss.
+        all_dots = []  # list of (cx, cy, area)
+        for close_height in [5, 11]:
+            close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, close_height))
+            closed = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, close_kernel)
+            all_dots.extend(self._find_dot_centroids(closed, min_area=self.dyn_min_area, max_area=self.dyn_max_area))
+            if debug_images is not None:
+                debug_images[f"vclose_h{close_height}"] = closed
+
+        deduped = _deduplicate_dots(all_dots, min_dist=DOT_DEDUP_DIST)
+        filtered = self._filter_by_ring_density(gray, deduped)
+        return [[cx, cy] for cx, cy, _ in filtered]
+
     def _find_dot_centroids(self, img: MatLike, min_area=MIN_DOT_AREA, max_area=MAX_DOT_AREA) -> list[tuple]:
-        """Find centroids of contours that pass dot geometry filters.
+        """[UNUSED] Find centroids of contours that pass dot geometry filters.
         Returns list of (cx, cy, area) tuples."""
         contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -218,13 +283,13 @@ class BlobDetector:
         return centroids
 
     def detect_simple_blobs(self, image_mat: MatLike) -> list[list[float]]:
-        """Detect white blobs with lenient params. Returns centroids as list of [x, y]."""
+        """[UNUSED] Detect white blobs with lenient params. Returns centroids as list of [x, y]."""
         keypoints = self._blob_detector.detect(image_mat)
         return [[kp.pt[0], kp.pt[1]] for kp in keypoints]
 
     @staticmethod
     def intersect_points(pts_a, pts_b, max_dist=DOT_DEDUP_DIST):
-        """Keep only points from pts_a that have a nearby match in pts_b.
+        """[UNUSED] Keep only points from pts_a that have a nearby match in pts_b.
         Result is deduplicated at max_dist."""
         result = []
         for a in pts_a:
@@ -235,7 +300,7 @@ class BlobDetector:
         return _deduplicate_points(result, min_dist=max_dist)
 
     def fill_blobs(self, img: MatLike) -> MatLike:
-        """Fills small, compact hollow contours (e.g. Canny circles) into solid shapes.
+        """[UNUSED] Fills small, compact hollow contours (e.g. Canny circles) into solid shapes.
         Skips large enclosed regions and elongated contours (ruled lines)."""
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
 
@@ -244,28 +309,65 @@ class BlobDetector:
         filled = np.zeros_like(gray)
         if hierarchy is not None:
             for i, contour in enumerate(contours):
-                # RETR_CCOMP gives 2-level hierarchy: outer=0, hole=1
-                # Only draw top-level contours (no parent), filled solid
-                if hierarchy[0][i][3] == -1:  # no parent → outer contour
-                    # area = cv2.contourArea(contour)
-                    # if area > MAX_DOT_AREA:
-                    #     continue
-                    # _, _, w, h = cv2.boundingRect(contour)
-                    # if max(w, h) == 0:
-                    #     continue
-                    # if min(w, h) / max(w, h) < 0.05:
-                    #     continue
-                    cv2.drawContours(filled, contours, i, 255, thickness=cv2.FILLED)
+                if hierarchy[0][i][3] != -1:  # has parent → skip (inner contour)
+                    continue
+                area = cv2.contourArea(contour)
+                if area > MAX_DOT_AREA:
+                    ## Large contour rejected, but check its children (e.g. corner dots inside a box border)
+                    child = hierarchy[0][i][2]  # first child index
+                    while child != -1:
+                        if _is_fillable_contour(contours[child]):
+                            cv2.drawContours(filled, contours, child, 255, thickness=cv2.FILLED)
+                        child = hierarchy[0][child][0]  # next sibling
+                    continue
+                x, y, w, h = cv2.boundingRect(contour)
+                if max(w, h) == 0:
+                    continue
+                if min(w, h) / max(w, h) < 0.05:
+                    continue
+                cv2.drawContours(filled, contours, i, 255, thickness=cv2.FILLED)
 
         return filled
 
     def erode_connections(self, img: MatLike, kernel_size: int = 3, iterations: int = 4) -> MatLike:
-        """Erodes thin line/stroke connections between blobs."""
-        if len(img.shape) == 3:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img.copy()
-
+        """[UNUSED] Erodes thin line/stroke connections between blobs."""
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
         return cv2.erode(gray, kernel, iterations=iterations)
+    #endregion
 #endregion
+
+
+class OversimplifiedBlobDetector:
+    """Oversimplified dark blob detector."""
+    @staticmethod
+    def detect(image_canny: MatLike) -> list[cv2.KeyPoint]:
+        params = cv2.SimpleBlobDetector_Params()
+        
+        params.filterByColor = True
+        params.blobColor = 0
+        params.filterByArea = True
+
+        line_thickness = measure_line_thickness(image_canny)
+        print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
+
+        if line_thickness > 0:
+            min_dot_diameter = line_thickness * 3
+            max_dot_diameter = line_thickness * 15
+            params.minArea = math.pi * (min_dot_diameter / 2) ** 2
+            params.maxArea  = math.pi * (max_dot_diameter / 2) ** 2
+        else:
+            print("INFO:\tpre naman")
+            params.minArea = AREA_FACTOR * 62.5
+            params.maxArea  = AREA_FACTOR * 6250
+        
+        params.filterByCircularity = True
+        params.minCircularity = 0.30
+        params.filterByConvexity = True
+        params.minConvexity = 0.60
+        params.filterByInertia = True
+        params.minInertiaRatio = 0.15
+
+        _blob_detector = cv2.SimpleBlobDetector_create(params)
+        _keypoints =  _blob_detector.detect(image_canny)
+        return [[kp.pt[0], kp.pt[1]] for kp in _keypoints]
