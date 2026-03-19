@@ -111,7 +111,7 @@
       <Button variant="secondary"
             disabled={!canvasFile || !canvasImageUrl || isOperationOngoing}
             onclick={() => sendCropRequest()}>
-        Send
+        {isOperationOngoing ? "Sending..." : "Send"}
       </Button>
     </span>
     
