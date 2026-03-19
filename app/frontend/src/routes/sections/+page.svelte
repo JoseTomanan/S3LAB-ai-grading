@@ -3,6 +3,7 @@
 	import MdiPapersOutline from "~icons/mdi/papers-outline";
 	import MdiPeopleAdd from "~icons/mdi/people-add";
   import IconHome from '~icons/mdi/home-outline';
+  import IconArrow from '~icons/mdi/arrow-up';
 
 	import type { Section, Student } from "$lib/index.ts";
 	import Pagination from "$lib/components/Pagination.svelte";
@@ -60,7 +61,10 @@
       {/each}
 
 		{:else if sections.length == 0}
-			<p>Nothing to see here. <br>Check your network connection, or add a new instance.</p>
+			<div class="flex flex-col items-end text-right mt-2 opacity-60">
+				<IconArrow />
+				<p>No sections yet &mdash; tap here to add one!</p>
+			</div>
 
 		{:else}
 			{#each paginationValues as section}

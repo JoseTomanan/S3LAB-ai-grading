@@ -3,7 +3,6 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sqlmodel import Session, delete, select
 from typing import List
 
-import uuid
 import io
 
 from models import *
@@ -105,8 +104,15 @@ def add_test_instance(
                 )
     
     # Generate test_id (section-based naming)
-    test_id = f"{section.section}_{request.name}_{uuid.uuid4().hex[:6]}"
-    
+    test_id = f"{section.section}_{request.name}"
+
+    existing = session.get(TestInstance, test_id)
+    if existing:
+        raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Test instance '{test_id}' already exists"
+                )
+
     # Create new instance
     new_instance = TestInstance(
             test_id=test_id,

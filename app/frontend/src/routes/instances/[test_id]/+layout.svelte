@@ -59,7 +59,7 @@
         <IconBack class="size-full" />
       </button>
       <h1>{ activeTestInstance.name }</h1>
-      <a href="/">
+      <a href="/instances">
         <IconHome class="size-7 opacity-85" />
       </a>
     </span>

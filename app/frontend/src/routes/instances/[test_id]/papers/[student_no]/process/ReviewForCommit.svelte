@@ -1,17 +1,24 @@
 <script lang="ts">
-  let { supposedScans, onAccept, onReject } = $props();
+  let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
   import IconLabel from "~icons/mdi/label";
 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import { Input } from "$lib/components/ui/input/index.ts";
+	import { Spinner } from "$lib/components/ui/spinner/index.ts";
 </script>
 
 
 <Dialog.Content>
   <div class="flex flex-row w-full gap-x-1">
-    <button class="button-secondary flex-1 text-sm"
+    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
+            disabled={isCommitmentOngoing}
             onclick={onAccept}>
-      Accept segmentation
+      {#if isCommitmentOngoing}
+        Evaluating...
+        <Spinner />
+      {:else}
+        Accept and evaluate
+      {/if}
     </button>
     <button class="button-destructive text-sm"
             onclick={onReject}>

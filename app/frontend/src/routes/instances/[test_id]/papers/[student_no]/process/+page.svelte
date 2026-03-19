@@ -16,70 +16,74 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
 
   import { rotateImage, flipImage } from '$lib/utils.ts';
 	import ReviewForCommit from './ReviewForCommit.svelte';
 
 
+  // TODO: Use `segmentationStrategy` and `supposedScans` as parameters in API calls
+
+
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
-  let formFile: FileList | undefined = $state();
+  let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
-  let formFileRecord: FileRecord | null = $state(null);
+  let formFileRecords: FileRecord[] = $state([]);
   let isAskingForValidation: boolean = $state(false);
+  let segmentationStrategy: string = $state("corner_dots");
+  let paperType: string = $state("ruled");
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
 
-  function handleFile() {
-    if (!formFile || formFile.length == 0)
+  function handleFiles() {
+    if (!formFiles || formFiles.length == 0)
       return;
-    if (formFileRecord)
-      URL.revokeObjectURL(formFileRecord.url);
 
-    console.log("HANDLE FILE EXECUTING...");
-    console.log(formFile[0].size);
-    formFileRecord = {
-      file: formFile[0],
-      name: `${data.student_no}.jpeg`,
-      url: URL.createObjectURL(formFile[0]),
+    formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
+    formFileRecords = Array.from(formFiles).map((f, i) => ({
+      file: f,
+      name: `${data.student_no}_page${i + 1}.jpeg`,
+      url: URL.createObjectURL(f),
       statusCode: -1,
-    };
+    }));
   }
 
   function getImageFromComponent(imageDataUrl: string) {
     const imageFile: File = dataUrlToFile(imageDataUrl, "CAPTURED_IMAGE.jpeg")
-    formFile = undefined;
-    formFileRecord = {
+    formFiles = undefined;
+    formFileRecords = [...formFileRecords, {
       file: imageFile,
-      name: `${data.student_no}.jpeg`,
+      name: `${data.student_no}_page${formFileRecords.length + 1}.jpeg`,
       url: URL.createObjectURL(imageFile),
       statusCode: -1,
-    };
+    }];
   }
 
-  async function handleRotateCommand(isCw: boolean) {
+  async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
     if (!formFileRecord)
       return;
     const recordResponse = await rotateImage(formFileRecord, isCw);
-    formFileRecord = recordResponse;
+    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
   }
 
-  async function handleFlipCommand(isFlipHorizontally: boolean) {
+  async function handleFlipCommand(formFileRecord: FileRecord, isFlipHorizontally: boolean) {
     if (!formFileRecord)
       return;
     const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
-    formFileRecord = recordResponse;
+    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
   }
 
   async function sendImageForValidation() {
-    if (!formFileRecord)
+    if (formFileRecords.length === 0)
       return;
 
-    console.log(formFileRecord.name);
     isOperationOngoing = true;
 
     const formData = new FormData();
-    formData.append('file', formFileRecord.file);
+    for (const r of formFileRecords) {
+      formData.append('files', r.file);
+    }
 
     try {
       const response = await fetch(
@@ -105,33 +109,43 @@
     }
   }
 
+  let isCommitmentOngoing = $state(false);
   async function validateAndCommit(accept: boolean) {
-    if (accept) {
-      console.log(supposedScans);
-
-      const response = await fetch(
-            `/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
-            {
-              method: "POST",
-              headers: {'Content-Type': 'application/json',},
-              body: JSON.stringify({
-                "boxes": supposedScans,
-              }),
-            }
-          );
-      switch (response.status) {
-        case 200:
-          alert("Review has been accepted.");
-          window.location.reload();
-          break;
-        default:
-          const responseBody = await response.json();
-          alert(`${response.status}: ${responseBody.detail}`);
-      }
+    if (isCommitmentOngoing === true)
       return;
-    }
+
+    isCommitmentOngoing = true;
+    try {
+      if (accept) {
+        console.log(supposedScans);
+        const response = await fetch(
+              `/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`,
+              {
+                method: "POST",
+                headers: {'Content-Type': 'application/json',},
+                body: JSON.stringify({
+                  "boxes": supposedScans,
+                }),
+              }
+            );
+        switch (response.status) {
+          case 200:
+            alert("Review has been accepted.");
+            window.location.reload();
+            break;
+          default:
+            const responseBody = await response.json();
+            alert(`${response.status}: ${responseBody.detail}`);
+        }
+        return;
+      }
 
     // TODO: handle the otherwise case
+    } catch {
+      console.log("Catch kita kase nafall ka");
+    } finally {
+      isCommitmentOngoing = false;
+    }
   }
 
   // FIXME: test code, remove when no longer necessary
@@ -162,22 +176,25 @@
   <!-- {#if isAskingForValidation === false} -->
     <div class="flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-              class="button-outline flex-1">
+        class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
         <span class="shrink-0 whitespace-nowrap text-sm pl-1">
-          {formFileRecord
-            ? "Uploaded image:"
-            : "Choose an image..." }
+          {formFileRecords.length > 0
+            ? `Uploaded ${formFileRecords.length} image(s):`
+            : "Choose image(s)..." }
         </span>
-        <span class="truncate min-w-0">
-          {formFileRecord ? formFileRecord.name : ""}
-        </span>
+        {#if formFileRecords.length > 0}
+          <span class="truncate min-w-0 flex-1">
+            {formFileRecords.map(r => r.name).join(', ')}
+          </span>
+        {/if}
       </Label>
       <Input id="sendImage"
               type="file"
               accept="image/*"
+              multiple
               class="hidden"
-              onchange={handleFile}
-              bind:files={formFile}/>
+              onchange={handleFiles}
+              bind:files={formFiles}/>
       <Dialog.Root bind:open={isCameraDialogOpen}>
         <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
@@ -186,12 +203,43 @@
                     onImageCapture={getImageFromComponent} />
       </Dialog.Root>
     </div>
-    <Input id="numBoxes"
-            type="number"
-            placeholder="Number of boxes (default=2)..."
-            disabled={isAskingForValidation}
-            bind:value={paramNumBoxes}
-        />
+    <div class="flex flex-col sm:flex-row gap-x-4 gap-y-2">
+      <Input id="numBoxes"
+              class="flex-1"
+              type="number"
+              placeholder="Number of boxes (default: 2)..."
+              disabled={isAskingForValidation}
+              bind:value={paramNumBoxes}
+          />
+      <div class="card grid grid-cols-2 gap-x-4 flex-1">
+        <div class="space-y-1.5">
+          <Label>Segmentation strategy</Label>
+          <RadioGroup.Root bind:value={segmentationStrategy}>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="corner_dots" />
+              <Label>Corner dots</Label>
+            </div>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="boxes" />
+              <Label>Boxes</Label>
+            </div>
+          </RadioGroup.Root>
+        </div>
+        <div class="space-y-1.5">
+          <Label>Paper type</Label>
+          <RadioGroup.Root bind:value={paperType}>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="ruled" />
+              <Label>Ruled</Label>
+            </div>
+            <div class="flex items-center gap-x-1.5">
+              <RadioGroup.Item value="unruled" />
+              <Label>Unruled</Label>
+            </div>
+          </RadioGroup.Root>
+        </div>
+      </div>
+    </div>
   <!-- {/else} -->
 
   {#if isAskingForValidation === false}
@@ -199,7 +247,7 @@
   <!-- {#if isAskingForValidation === true} -->
     <Button variant="outline"
             onclick={sendImageForValidation}
-            disabled={!formFileRecord || isOperationOngoing}>
+            disabled={formFileRecords.length === 0 || isOperationOngoing}>
       {isOperationOngoing
         ? "Sending..."
         : "Send for processing"}
@@ -207,29 +255,40 @@
         <Spinner />
       {/if}
     </Button>
-    <div class="card flex flex-col items-center justify-center relative">
-      {#if !formFileRecord}
+
+    <div class="card flex flex-col items-center justify-center">
+      {#if formFileRecords.length === 0}
         <IconImagePreview class="size-12 opacity-60"/>
-        <h6 class="opacity-60">Uploaded image will be shown here.</h6>
+        <h6 class="opacity-60">
+          Uploaded image(s) will be shown here.
+        </h6>
+      
       {:else}
-        <img src={formFileRecord.url}
-              alt="Uploaded file preview"
-              class="md:max-w-3/4 lg:max-w-2/3"
-              />
-        <span class="flex flex-col gap-y-1 absolute top-2 right-2 size-fit">
-          <button onclick={() => handleRotateCommand(true)} class="button-secondary" >
-            <IconRotateCW />
-          </button>
-          <button onclick={() => handleRotateCommand(false)} class="button-secondary" >
-            <IconRotateCCW />
-          </button>
-          <button onclick={() => handleFlipCommand(true)} class="button-secondary" >
-            <IconFlipHorizontally />
-          </button>
-          <button onclick={() => handleFlipCommand(false)} class="button-secondary" >
-            <IconFlipVertically />
-          </button>
-        </span>
+        <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
+              style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
+          {#each formFileRecords as p}
+            <div class="relative flex flex-col justify-end min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
+              <img src={p.url}
+                    alt={p.name}
+                    class="aspect-auto"
+                    />
+              <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
+                <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
+                  <IconRotateCW />
+                </button>
+                <button onclick={() => handleRotateCommand(p, false)} class="button-outline" >
+                  <IconRotateCCW />
+                </button>
+                <button onclick={() => handleFlipCommand(p, true)} class="button-outline" >
+                  <IconFlipHorizontally />
+                </button>
+                <button onclick={() => handleFlipCommand(p, false)} class="button-outline" >
+                  <IconFlipVertically />
+                </button>
+              </span>
+            </div>
+          {/each}
+        </div>
       {/if}
     </div>
 
@@ -239,8 +298,10 @@
         Open segmentation results
       </Dialog.Trigger>
       <ReviewForCommit supposedScans={supposedScans}
+                        {isCommitmentOngoing}
                         onAccept={() => validateAndCommit(true)}
-                        onReject={() => validateAndCommit(false)} />
+                        onReject={() => validateAndCommit(false)}
+                        />
     </Dialog.Root>
     <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
   {/if}
