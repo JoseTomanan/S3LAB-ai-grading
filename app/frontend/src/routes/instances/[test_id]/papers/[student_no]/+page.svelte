@@ -12,6 +12,8 @@
 	import SafeDelete from '$lib/components/SafeDelete.svelte';
 	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import ManualCrop from './ManualCrop.svelte';
 
   if (!data.student_items)
     throw new Error("Student items failed to load");
@@ -127,10 +129,18 @@
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
-            <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
+            <!-- <a href="/instances/{data.test_id}/papers/{data.student_no}/manual?item_id={studentItem.item_id}"
                   class="button-outline">
               <MdiCrop/>
-            </a>
+            </a> -->
+            <Dialog.Root>
+              <Dialog.Trigger class="button-outline">
+                <MdiCrop/>
+              </Dialog.Trigger>
+              <ManualCrop test_id={data.test_id}
+                          student_no={data.student_no}
+                          item_id={studentItem.item_id}/>
+            </Dialog.Root>
             <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
                             button-outline px-0 py-0`}
                     onclick={() => reevaluateAnswer(studentItem.answer_id)}
