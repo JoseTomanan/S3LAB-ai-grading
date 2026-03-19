@@ -7,7 +7,7 @@ from core.constants import *
 
 from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
-from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST
+from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST, OversimplifiedBlobDetector
 
 from utils import is_valid_quad, mapp
 
@@ -36,58 +36,39 @@ class BoxSegmenter(DocumentScanner):
 
     def _detect_dotted_boxes(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False):
         """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
-        debug_images = {} if debug else None
-
         BLOB_DETECTOR = BlobDetector(image_cannied)
 
-        image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
-        image_lines_removed = BLOB_DETECTOR.remove_horizontal_lines(image_holes_filled)
-        image_vertical_reconnected = ...
+        # Pass 1: detect circular contours directly from Canny (no fill/line-removal needed)
+        pts_pass1_contour = BLOB_DETECTOR.detect_circular_contours_from_canny(image_cannied)
 
-        # Pass 1: contour-circularity (with ring density filtering)
-        pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
-
-        # Pass 2: lenient SimpleBlobDetector on eroded image
-        # TODO: use lines_removed -> vertical_reconnected here
-        image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
-        pts_pass2_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
+        ## Pass 2: lenient SimpleBlobDetector on filled+eroded image
+        # image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
+        # image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
+        # pts_pass2_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
+        pts_pass2_blob = OversimplifiedBlobDetector.detect(image_cannied)
 
         # Consensus: keep only dots both methods agree on
         pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
         print(f"INFO:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)}, blob={len(pts_pass2_blob)})")
 
         if debug:
-            self.save_image(self._encode_to_bytes(image_holes_filled),
-                                    f"{self.debug_dir}/_02_holes_filled.jpg")
-            self.save_image(self._encode_to_bytes(image_lines_removed),
-                                    f"{self.debug_dir}/_03A_lines_removed.jpg")
-            self.save_image(self._encode_to_bytes(image_eroded),
-                                    f"{self.debug_dir}/_03B_eroded_lenient.jpg")
-            for name, img in debug_images.items():
-                self.save_image(self._encode_to_bytes(img),
-                                    f"{self.debug_dir}/_04_{name}.jpg")
+            image_pass1 = image_cannied.copy()
+            image_pass2 = image_cannied.copy()
+            image_consensus = image_cannied.copy()
 
-        if debug:
-            # - Only in pts_pass1_contour: yellow
-            # - Only in pts_pass2_blob: green
-            # - In both: red
-            image_consensus_debug = image_lines_removed.copy()
-            set_pass1 = set((int(p[0]), int(p[1])) for p in pts_pass1_contour)
-            set_pass2 = set((int(p[0]), int(p[1])) for p in pts_pass2_blob)
-            
-            consensus_set = set_pass1 & set_pass2
-            only_pass1 = set_pass1 - set_pass2
-            only_pass2 = set_pass2 - set_pass1
+            for key in pts_pass1_contour:
+                image_pass1 = self._highlight_dot(image_pass1, key, (0, 255, 0))
+            for key in pts_pass2_blob:
+                image_pass2 = self._highlight_dot(image_pass2, key, (0, 255, 255))
+            for key in pts_consensus:
+                image_consensus = self._highlight_dot(image_consensus, key, (0, 0, 255))
 
-            for key in only_pass1:
-                image_consensus_debug = self._highlight_dot(image_consensus_debug, key, (0, 255, 255))  # yellow (BGR)
-            for key in only_pass2:
-                image_consensus_debug = self._highlight_dot(image_consensus_debug, key, (0, 255, 0))    # green (BGR)
-            for key in consensus_set:
-                image_consensus_debug = self._highlight_dot(image_consensus_debug, key, (0, 0, 255))    # red (BGR)
-
-            self.save_image(self._encode_to_bytes(image_consensus_debug),
-                                    f"{self.debug_dir}/_07_dots_consensus.jpg")
+            self.save_image(self._encode_to_bytes(image_pass1),
+                                    f"{self.debug_dir}/_02A_dots_pass1contour.jpg")
+            self.save_image(self._encode_to_bytes(image_pass2),
+                                    f"{self.debug_dir}/_02B_dots_pass2blob.jpg")
+            self.save_image(self._encode_to_bytes(image_consensus),
+                                    f"{self.debug_dir}/_03_dots_consensus.jpg")
 
         if len(pts_consensus) < 4:
             print(f"INFO:\tOnly {len(pts_consensus)} blobs detected")
@@ -101,7 +82,7 @@ class BoxSegmenter(DocumentScanner):
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img),
-                                f"{self.debug_dir}/_08_dots_deduped.jpg")
+                                f"{self.debug_dir}/_04_dots_deduped.jpg")
 
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
