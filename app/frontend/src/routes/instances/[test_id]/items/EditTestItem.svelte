@@ -72,7 +72,8 @@
   async function deleteTestItem() {
     try {
       const response = await fetch(
-            `/api/test_items/${test_id}/${formTestItem.item_id}`,
+            // `/api/test_items/${test_id}/${formTestItem.item_id}`,
+            `/api/test_items/${test_id}/items/${formTestItem.item_id}`,
             {
               method: "DELETE",
               headers: {'Content-Type': 'application/json',},
@@ -80,7 +81,8 @@
             );
       
       switch (response.status) {
-        case 200:
+        // case 200:
+        case 204:
           alert("Delete success.");
           window.location.reload();
           break;
