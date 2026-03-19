@@ -38,19 +38,19 @@ class BoxSegmenter(DocumentScanner):
 
     def _detect_dotted_boxes(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False):
         """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
-        BLOB_DETECTOR = BlobDetector()
+        debug_images = {} if debug else None
+
+        BLOB_DETECTOR = BlobDetector(image_cannied)
 
         image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
         image_lines_removed = BLOB_DETECTOR.remove_horizontal_lines(image_holes_filled)
-
-        debug_images = {} if debug else None
 
         # Pass 1: contour-circularity (with ring density filtering)
         pts_contour = BLOB_DETECTOR.detect_dot_contours(image_lines_removed, debug_images=debug_images)
 
         # Pass 2: lenient SimpleBlobDetector on eroded image
         image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
-        pts_blob = BLOB_DETECTOR.detect_lenient(image_eroded)
+        pts_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
 
         # Consensus: keep only dots both methods agree on
         pts_detected = BlobDetector.intersect_points(pts_contour, pts_blob)
@@ -142,7 +142,7 @@ class BoxSegmenter(DocumentScanner):
         return BoxSegmenterOldFunctions().get_boxes(image_bytes, num_boxes, debug)
 
     def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """[DEPRECATED] Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
+        """[DEPRECATED] [CURRENTLY UNUSED] Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
         return BoxSegmenterOldFunctions().get_boxes_via_dots(image_bytes, num_boxes, debug)
     #endregion
 
@@ -232,7 +232,7 @@ class BoxSegmenter(DocumentScanner):
 #endregion
 
 
-
+#region Archive of old box segmenter functions
 class BoxSegmenterOldFunctions(BoxSegmenter):
     """Container/archive for deprecated functions."""
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
@@ -363,58 +363,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                 print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
 
         return image_good_sections
-
-    #region Archived unstable functions
-    def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
-        """
-        Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
-        ## UNSTABLE
-        ### Handdrawn lines on white paper get filtered out. FIXME: make fail-safe
-        """
-        h_kernel_length = int(NORMAL_SIZE * length_percent)
-
-        #### Detect horizontal lines: open with a wide horizontal kernel.
-        #### Only structures wider than h_kernel_length survive — i.e. ruled lines.
-        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
-        horizontal_candidates = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
-
-        self.save_image(
-                    self._encode_to_bytes(horizontal_candidates),
-                    f"{self.debug_dir}/horizontal_candidates.jpg"
-                    )
-        # ruled_mask = self._get_ruled_mask(horizontal_candidates, image)
-        return cv2.subtract(image, horizontal_candidates)
-
-    def _get_ruled_mask(self, horizontal_candidates: MatLike, image: MatLike):
-        """## UNSTABLE
-        ### Experimental (removed) substep to filter handdrawn lines."""
-        ### Use HoughLinesP to validate: only accept near-perfect horizontal lines
-        lines = cv2.HoughLinesP(horizontal_candidates, rho=1, theta=np.pi / 180, threshold=80,
-                                minLineLength=int(NORMAL_SIZE * 0.30),
-                                maxLineGap=10)
-
-        #### Filter to only near-perfect horizontal lines (angle < 1 degree)
-        strict_lines = []
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            angle = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if angle < 1.0:
-                strict_lines.append((x1, y1, x2, y2))
-
-        #### Validate even spacing: ruled lines should be evenly spaced
-        # y_positions = sorted(set(y1 for x1, y1, x2, y2 in strict_lines))
-        # gaps = [y_positions[i+1] - y_positions[i] for i in range(len(y_positions)-1)]
-        # median_gap = np.median(gaps)
-
-        ruled_mask = np.zeros_like(image)
-        for x1, y1, x2, y2 in strict_lines:
-            cv2.line(ruled_mask, (x1, y1), (x2, y2), 255, 3)
-
-        cleanup_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        ruled_mask = cv2.dilate(ruled_mask, cleanup_kernel, iterations=1)
-
-        return ruled_mask
-    #endregion
+#endregion
 
 
 # MARK: Main
