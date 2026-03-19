@@ -8,8 +8,6 @@ from core.constants import NORMAL_SIZE
 
 
 AREA_FACTOR = (NORMAL_SIZE/1000)**2
-
-# Contour-based dot detection thresholds
 MIN_DOT_AREA = AREA_FACTOR * 50
 MAX_DOT_AREA = AREA_FACTOR * 8000
 MIN_CIRCULARITY = 0.40
@@ -19,77 +17,108 @@ DOT_DEDUP_DIST = math.sqrt(MAX_DOT_AREA) / 2.5  # ~73px at NORMAL_SIZE=2048
 MAX_RING_DENSITY = 0.12  # max white-pixel density in ring around dot (filters handwriting clutter)
 
 
+#region Auxiliary points
+def measure_line_thickness(target_image_canny: MatLike, min_line_length_ratio: float = 0.05) -> float:
+    """Measure median ruled-line thickness in a binary image.
+    Returns 0 if no ruled lines are detected."""
+    gray = cv2.cvtColor(target_image_canny, cv2.COLOR_BGR2GRAY) if len(target_image_canny.shape) == 3 \
+                    else target_image_canny
+    
+    kernel_len = int(NORMAL_SIZE * min_line_length_ratio)
+    h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
+    horizontal = cv2.morphologyEx(gray, cv2.MORPH_OPEN, h_kernel)
+
+    thicknesses = []
+    for col in range(0, horizontal.shape[1], 50):
+        column = horizontal[:, col]
+        in_run = False
+        run_len = 0
+        for px in column:
+            if px > 0:
+                in_run = True
+                run_len += 1
+            else:
+                if in_run and run_len > 0:
+                    thicknesses.append(run_len)
+                in_run = False
+                run_len = 0
+    return float(np.median(thicknesses)) if thicknesses else 0.0
+
+def _deduplicate_dots(dots: list[tuple], min_dist: float = 10.0) -> list[tuple]:
+    """Remove near-duplicate dots, keeping the one with largest area.
+    dots: list of (cx, cy, area) tuples."""
+    deduped = []
+    for d in dots:
+        merged = False
+        for i, existing in enumerate(deduped):
+            if math.hypot(d[0] - existing[0], d[1] - existing[1]) < min_dist:
+                # Keep the detection with larger area (more likely the full dot)
+                if d[2] > existing[2]:
+                    deduped[i] = d
+                merged = True
+                break
+        if not merged:
+            deduped.append(d)
+    return deduped
+
+def _deduplicate_points(pts: list[list[float]], min_dist: float = 10.0) -> list[list[float]]:
+    """Remove near-duplicate points, keeping the first occurrence."""
+    deduped = []
+    for p in pts:
+        is_dup = False
+        for d in deduped:
+            if math.hypot(p[0] - d[0], p[1] - d[1]) < min_dist:
+                is_dup = True
+                break
+        if not is_dup:
+            deduped.append(p)
+    return deduped
+#endregion
+
+
+
+#region Class
 class BlobDetector:
-    def __init__(self):
+    def __init__(self, image_canny: MatLike):
+        line_thickness = measure_line_thickness(image_canny)
+        print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
+
+        if line_thickness <= 0:
+            min_dot_diameter = line_thickness * 3
+            max_dot_diameter = line_thickness * 15
+            dyn_min_area = math.pi * (min_dot_diameter / 2) ** 2
+            dyn_max_area = math.pi * (max_dot_diameter / 2) ** 2
+        else:
+            dyn_min_area = AREA_FACTOR * 62.5
+            dyn_max_area = AREA_FACTOR * 6250
+
+        self.dyn_min_area = dyn_min_area
+        self.dyn_max_area = dyn_max_area
+
         params = cv2.SimpleBlobDetector_Params()
         params.filterByColor = True
         params.blobColor = 255
         params.filterByArea = True
-        params.minArea = AREA_FACTOR*62.5
-        params.maxArea = AREA_FACTOR*6250
+        params.minArea = dyn_min_area
+        params.maxArea = dyn_max_area
         params.filterByCircularity = True
-        params.minCircularity = 0.15
+        params.minCircularity = 0.10
         params.filterByConvexity = True
-        params.minConvexity = 0.55
+        params.minConvexity = 0.40
         params.filterByInertia = True
-        params.minInertiaRatio = 0.25
-
-        self._detector = cv2.SimpleBlobDetector_create(params)
-
-        lenient_params = cv2.SimpleBlobDetector_Params()
-        lenient_params.filterByColor = True
-        lenient_params.blobColor = 255
-        lenient_params.filterByArea = True
-        lenient_params.minArea = AREA_FACTOR*62.5
-        lenient_params.maxArea = AREA_FACTOR*6250
-        lenient_params.filterByCircularity = True
-        lenient_params.minCircularity = 0.10
-        lenient_params.filterByConvexity = True
-        lenient_params.minConvexity = 0.40
-        lenient_params.filterByInertia = True
-        lenient_params.minInertiaRatio = 0.15
-
-        self._lenient_detector = cv2.SimpleBlobDetector_create(lenient_params)
+        params.minInertiaRatio = 0.15
+        self._blob_detector = cv2.SimpleBlobDetector_create(params)
 
     def remove_horizontal_lines(self, img: MatLike, min_line_length_ratio: float = 0.05) -> MatLike:
-        """Remove long horizontal structures (ruled lines) from a binary image.
-        Keeps dots and short strokes intact."""
-        if len(img.shape) == 3:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img.copy()
+        """Remove long horizontal structures (ruled lines) from a binary image, while keeping dots and short strokes intact."""
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
 
         kernel_len = int(NORMAL_SIZE * min_line_length_ratio)
         h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
         horizontal = cv2.morphologyEx(gray, cv2.MORPH_OPEN, h_kernel)
         return cv2.subtract(gray, horizontal)
 
-    @staticmethod
-    def measure_line_thickness(img: MatLike, min_line_length_ratio: float = 0.05) -> float:
-        """Measure median ruled-line thickness in a binary image.
-        Returns 0 if no ruled lines are detected."""
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
-        kernel_len = int(NORMAL_SIZE * min_line_length_ratio)
-        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_len, 1))
-        horizontal = cv2.morphologyEx(gray, cv2.MORPH_OPEN, h_kernel)
-
-        thicknesses = []
-        for col in range(0, horizontal.shape[1], 50):
-            column = horizontal[:, col]
-            in_run = False
-            run_len = 0
-            for px in column:
-                if px > 0:
-                    in_run = True
-                    run_len += 1
-                else:
-                    if in_run and run_len > 0:
-                        thicknesses.append(run_len)
-                    in_run = False
-                    run_len = 0
-        return float(np.median(thicknesses)) if thicknesses else 0.0
-
-    def detect_dot_contours(self, img: MatLike, debug_images: dict | None = None, line_thickness: float = 0) -> list[list[float]]:
+    def detect_dot_contours(self, img: MatLike, debug_images: dict | None = None) -> list[list[float]]:
         """Detect round dot contours from a binary image via geometric filtering.
         Runs a dual-pass vertical close (small then tall) to recover dots that
         were split by horizontal line removal, then filters by ring density
@@ -108,11 +137,11 @@ class BlobDetector:
         for close_height in [5, 11]:
             close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, close_height))
             closed = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, close_kernel)
-            all_dots.extend(self._find_dot_centroids(closed))
+            all_dots.extend(self._find_dot_centroids(closed, min_area=self.dyn_min_area, max_area=self.dyn_max_area))
             if debug_images is not None:
                 debug_images[f"vclose_h{close_height}"] = closed
 
-        deduped = self._deduplicate_dots(all_dots, min_dist=DOT_DEDUP_DIST)
+        deduped = _deduplicate_dots(all_dots, min_dist=DOT_DEDUP_DIST)
         filtered = self._filter_by_ring_density(gray, deduped)
         return [[cx, cy] for cx, cy, _ in filtered]
 
@@ -151,7 +180,7 @@ class BlobDetector:
                 result.append((cx, cy, area))
         return result
 
-    def _find_dot_centroids(self, img: MatLike) -> list[tuple]:
+    def _find_dot_centroids(self, img: MatLike, min_area=MIN_DOT_AREA, max_area=MAX_DOT_AREA) -> list[tuple]:
         """Find centroids of contours that pass dot geometry filters.
         Returns list of (cx, cy, area) tuples."""
         contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -159,7 +188,7 @@ class BlobDetector:
         centroids = []
         for contour in contours:
             area = cv2.contourArea(contour)
-            if not (MIN_DOT_AREA <= area <= MAX_DOT_AREA):
+            if not (min_area <= area <= max_area):
                 continue
 
             perimeter = cv2.arcLength(contour, True)
@@ -190,41 +219,9 @@ class BlobDetector:
 
         return centroids
 
-    @staticmethod
-    def _deduplicate_dots(dots: list[tuple], min_dist: float = 10.0) -> list[tuple]:
-        """Remove near-duplicate dots, keeping the one with largest area.
-        dots: list of (cx, cy, area) tuples."""
-        deduped = []
-        for d in dots:
-            merged = False
-            for i, existing in enumerate(deduped):
-                if math.hypot(d[0] - existing[0], d[1] - existing[1]) < min_dist:
-                    # Keep the detection with larger area (more likely the full dot)
-                    if d[2] > existing[2]:
-                        deduped[i] = d
-                    merged = True
-                    break
-            if not merged:
-                deduped.append(d)
-        return deduped
-
-    @staticmethod
-    def _deduplicate_points(pts: list[list[float]], min_dist: float = 10.0) -> list[list[float]]:
-        """Remove near-duplicate points, keeping the first occurrence."""
-        deduped = []
-        for p in pts:
-            is_dup = False
-            for d in deduped:
-                if math.hypot(p[0] - d[0], p[1] - d[1]) < min_dist:
-                    is_dup = True
-                    break
-            if not is_dup:
-                deduped.append(p)
-        return deduped
-
-    def detect_lenient(self, image_mat: MatLike) -> list[list[float]]:
+    def detect_simple_blobs(self, image_mat: MatLike) -> list[list[float]]:
         """Detect white blobs with lenient params. Returns centroids as list of [x, y]."""
-        keypoints = self._lenient_detector.detect(image_mat)
+        keypoints = self._blob_detector.detect(image_mat)
         return [[kp.pt[0], kp.pt[1]] for kp in keypoints]
 
     @staticmethod
@@ -237,11 +234,7 @@ class BlobDetector:
                 if math.hypot(a[0]-b[0], a[1]-b[1]) < max_dist:
                     result.append(a)
                     break
-        return BlobDetector._deduplicate_points(result, min_dist=max_dist)
-
-    def detect(self, image_mat: MatLike) -> list[cv2.KeyPoint]:
-        """[DEPRECATED] Detect white blobs from cannied image."""
-        return self._detector.detect(image_mat)
+        return _deduplicate_points(result, min_dist=max_dist)
 
     def fill_blobs(self, img: MatLike) -> MatLike:
         """Fills hollow contours (e.g. Canny circles) into solid shapes."""
@@ -268,3 +261,4 @@ class BlobDetector:
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
         return cv2.erode(gray, kernel, iterations=iterations)
+#endregion
