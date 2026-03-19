@@ -182,14 +182,16 @@
       </RadioGroup.Root>
     </div>
   </div>
+  <Separator/>
   
   {#if !formFiles}
-    <h6 class="opacity-60 text-right">
-      For convenience, name files according to student number, e.g., "202011111.jpeg" or "202011111-1.jpeg" for multi-page.
+    <h6 class="opacity-60 text-left">
+      Uploads will appear here.
+      <br>
+      For ease, name by student no, e.g., 202011111.jpeg (single page) 202011111-1.jpeg (multi-page)
     </h6>
   
   {:else if !isOperationStarted}
-    <Separator/>
     <div class="space-y-1">
       <span class="flex flex-row justify-between items-center">
         <h5>
