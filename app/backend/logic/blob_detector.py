@@ -14,7 +14,7 @@ MIN_CIRCULARITY = 0.40
 MIN_SOLIDITY = 0.65
 MIN_BBOX_ASPECT = 0.35
 DOT_DEDUP_DIST = math.sqrt(MAX_DOT_AREA) / 2.5  # ~73px at NORMAL_SIZE=2048
-MAX_RING_DENSITY = 0.12  # max white-pixel density in ring around dot (filters handwriting clutter)
+MAX_RING_DENSITY = 0.30  # max white-pixel density in ring around dot (filters handwriting clutter)
 
 
 #region Auxiliary functions
