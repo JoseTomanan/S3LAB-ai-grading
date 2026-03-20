@@ -9,8 +9,7 @@ from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST, OversimplifiedBlobDetector
 from logic.image_modifier import ImageModifier
-
-from utils import is_valid_quad, mapp
+from utils import is_valid_quad, mapp, get_robust_aspect_ratio
 
 
 
@@ -97,38 +96,40 @@ class BoxSegmenter(DocumentScanner):
     def _segment_dots_into_boxes(self, image_original: MatLike, pts: list[list[float]], debug: bool = False) -> list[MatLike]:
         """From list of points, crop what seems the most like the dotted boxes (answer sections), and return this."""
         quads = self._group_dots_into_quads(pts)
-        
         print(f"INFO:\tObtained total of {len(quads)} quads")
 
-        image_good_sections = []
+        ## Step 1: Collect all valid quads (no approxPolyDP — input is already 4 points)
+        valid_quads = []
         for i, q in enumerate(quads):
             contour = q.reshape((-1, 1, 2)).astype(np.int32)
-            
+
             area = cv2.contourArea(contour)
             if MIN_AREA <= area <= MAX_AREA:
-                perimeter = cv2.arcLength(contour, True)
-                approximate = cv2.approxPolyDP(contour, 0.06*perimeter, True)
-                
-                if len(approximate) == 4:
-                    if debug:
-                        debug_img = self._highlight_contours(image_original, approximate, contour)
-                        self.save_image(self._encode_to_bytes(debug_img),
-                                            f"{self.debug_dir}/_06_sections/box{i}.jpg" )
-                    approximate = approximate.reshape(4, 2)
-                    (_, _, w, h) = cv2.boundingRect(approximate)
-                    aspect_ratio = w / float(h)
-                    if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
-                        print(f"INFO:\tAccepted and stored dot-quad {i}")
-                        image_good_sections.append(approximate)
-                    else:
-                        print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+                ## Use get_robust_aspect_ratio instead of axis-aligned boundingRect
+                aspect_ratio = get_robust_aspect_ratio(q)
+                if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
+                    print(f"INFO:\tAccepted dot-quad {i} (area={area:.0f}, AR={aspect_ratio:.2f})")
+                    valid_quads.append(q)
                 else:
-                    print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
+                    print(f"INFO:\tBad ratio, AR={aspect_ratio:.2f}.")
             else:
-                # print(f"INFO:\tDid not pass for area={area}")
                 continue
 
-        return image_good_sections
+        ## Step 2: Deduplicate overlapping quads (keep the one with larger area)
+        deduped_quads = self._deduplicate_quads(valid_quads)
+        print(f"INFO:\tAfter dedup: {len(deduped_quads)} quads (was {len(valid_quads)})")
+
+        ## Step 3: Sort by vertical position (top of page first)
+        deduped_quads.sort(key=lambda q: np.min(q[:, 1]))
+
+        if debug:
+            for i, q in enumerate(deduped_quads):
+                contour = q.reshape((-1, 1, 2)).astype(np.int32)
+                debug_img = self._highlight_contours(image_original, contour, contour)
+                self.save_image(self._encode_to_bytes(debug_img),
+                                    f"{self.debug_dir}/_06_sections/box{i}.jpg" )
+
+        return deduped_quads
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
@@ -163,18 +164,65 @@ class BoxSegmenter(DocumentScanner):
                 filtered_pts.append(p)
         return filtered_pts
 
-    def _group_dots_into_quads(self, pts: np.ndarray) -> bool:
+    def _group_dots_into_quads(self, pts: np.ndarray) -> list[np.ndarray]:
         """Return only point-sets that could plausibly be rectangle corners."""
-        # quad_combinations = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
         quad_combinations = [np.array([pts[i] for i in c]) for c in combinations(range(len(pts)), 4)]
 
         quads = []
         for q in quad_combinations:
+            ## Spatial pre-filter: skip if bounding box area is too small or too large
+            xs = q[:, 0] if q.ndim == 2 else [p[0] for p in q]
+            ys = q[:, 1] if q.ndim == 2 else [p[1] for p in q]
+            bbox_w = max(xs) - min(xs)
+            bbox_h = max(ys) - min(ys)
+            bbox_area = bbox_w * bbox_h
+            if bbox_area < MIN_AREA or bbox_area > MAX_AREA:
+                continue
+
             q_ordered = mapp(q.flatten())
             if is_valid_quad(q_ordered):
                 quads.append(q_ordered)
 
         return quads
+
+    @staticmethod
+    def _deduplicate_quads(quads: list[np.ndarray]) -> list[np.ndarray]:
+        """Remove overlapping quads. Prefer smaller quads (individual sections) over
+        larger cross-section combinations that span multiple physical boxes."""
+        if not quads:
+            return []
+
+        ## Compute centers
+        centers = [np.mean(q, axis=0) for q in quads]
+        areas = [cv2.contourArea(q.reshape((-1, 1, 2)).astype(np.int32)) for q in quads]
+
+        ## Two quads overlap if one's center falls inside the other
+        ## Greedily pick smallest-area quads first (individual sections are smaller
+        ## than cross-box combinations formed from dots of different physical boxes)
+        used = [False] * len(quads)
+        result = []
+        order = sorted(range(len(quads)), key=lambda i: areas[i])  ## smallest first
+        for i in order:
+            if used[i]:
+                continue
+            result.append(quads[i])
+            used[i] = True
+            contour_i = quads[i].reshape((-1, 1, 2)).astype(np.int32)
+            ## Mark quads whose center falls inside this quad as used
+            for j in range(len(quads)):
+                if not used[j]:
+                    dist = cv2.pointPolygonTest(contour_i, tuple(centers[j].astype(float)), False)
+                    if dist >= 0:  ## center of j is inside quad i
+                        used[j] = True
+            ## Also mark quads that contain this quad's center
+            for j in range(len(quads)):
+                if not used[j]:
+                    contour_j = quads[j].reshape((-1, 1, 2)).astype(np.int32)
+                    dist = cv2.pointPolygonTest(contour_j, tuple(centers[i].astype(float)), False)
+                    if dist >= 0:  ## center of i is inside quad j
+                        used[j] = True
+
+        return result
     #endregion
 
     #region Auxiliary functions: Image preloading, postloading
@@ -356,7 +404,7 @@ if __name__ == "__main__":
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
     images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
