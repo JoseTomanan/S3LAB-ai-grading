@@ -64,7 +64,7 @@ def _deduplicate_dots(dots: list[tuple], min_dist: float = 10.0) -> list[tuple]:
 
 #region [UNUSED] Auxiliary functions
 def _deduplicate_points(pts: list[list[float]], min_dist: float = 10.0) -> list[list[float]]:
-    """[UNUSED] Remove near-duplicate points, keeping the first occurrence."""
+    """Remove near-duplicate points, keeping the first occurrence."""
     deduped = []
     for p in pts:
         is_dup = False
@@ -124,7 +124,7 @@ class BlobDetector:
         self._blob_detector = cv2.SimpleBlobDetector_create(params)
 
     def detect_circular_contours_from_canny(self, img: MatLike) -> list[list[float]]:
-        """Detect dots via inner contours of Canny rings.
+        """[UNUSED] Detect dots via inner contours of Canny rings.
         In Canny output, dots appear as hollow rings. The inner contour (hole)
         is isolated from ruled lines and other edge noise, making it a robust
         circular indicator. Uses RETR_CCOMP to find child contours whose
@@ -221,7 +221,7 @@ class BlobDetector:
         return cv2.subtract(gray, horizontal)
 
     def detect_dot_contours(self, img: MatLike, debug_images: dict | None = None) -> list[list[float]]:
-        """[UNUSED] Detect round dot contours from a binary image via geometric filtering.
+        """Detect round dot contours from a binary image via geometric filtering.
         First, vertically reconnects dot halves split by horizontal line removal (dual-pass close).
         Then, filters by ring density to reject dots surrounded by handwriting clutter.
         Returns centroid points as list of [x, y].
@@ -245,7 +245,7 @@ class BlobDetector:
         return [[cx, cy] for cx, cy, _ in filtered]
 
     def _find_dot_centroids(self, img: MatLike, min_area=MIN_DOT_AREA, max_area=MAX_DOT_AREA) -> list[tuple]:
-        """[UNUSED] Find centroids of contours that pass dot geometry filters.
+        """Find centroids of contours that pass dot geometry filters.
         Returns list of (cx, cy, area) tuples."""
         contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -285,7 +285,7 @@ class BlobDetector:
 
     @staticmethod
     def intersect_points(pts_a, pts_b, max_dist=DOT_DEDUP_DIST):
-        """[UNUSED] Keep only points from pts_a that have a nearby match in pts_b.
+        """Keep only points from pts_a that have a nearby match in pts_b.
         Result is deduplicated at max_dist."""
         result = []
         for a in pts_a:
@@ -326,7 +326,7 @@ class BlobDetector:
         return filled
 
     def erode_connections(self, img: MatLike, kernel_size: int = 3, iterations: int = 4) -> MatLike:
-        """[UNUSED] Erodes thin line/stroke connections between blobs."""
+        """Erodes thin line/stroke connections between blobs."""
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
         return cv2.erode(gray, kernel, iterations=iterations)
@@ -370,6 +370,7 @@ class OversimplifiedBlobDetector:
 
     @staticmethod
     def detect(image_canny: MatLike) -> list[list[float]]:
+        """[UNUSED]"""
         return OversimplifiedBlobDetector._base_detect(image_canny, is_dark=True)
 
     @staticmethod
