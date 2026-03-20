@@ -27,15 +27,17 @@ class BoxSegmenter(DocumentScanner):
         if debug:
             self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_01A_canny.jpg")
 
-        images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
+        marker_dots = self._detect_dots(image_original, image_cannied, debug=debug)
+        images_answers = self._segment_dots_into_boxes(image_original, marker_dots, debug=debug)
+
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
 
         images_warped = [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
         return [self._encode_to_bytes(i) for i in images_warped]
 
-    def _detect_dotted_boxes(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False):
-        """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
+    def _detect_dots(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False) -> list[list[float]]:
+        """From image, use marker dots to find section corners."""
         BLOB_DETECTOR = BlobDetector(image_cannied)
 
         image_binarized = ImageModifier().pseudocanny(image_original)
@@ -89,7 +91,12 @@ class BoxSegmenter(DocumentScanner):
             self.save_image(self._encode_to_bytes(debug_img),
                                 f"{self.debug_dir}/_05_dots_deduped.jpg" )
 
+        return pts
+
+    def _segment_dots_into_boxes(self, image_original: MatLike, pts: list[list[float]], debug: bool = False) -> list[MatLike]:
+        """From list of points, crop what seems the most like the dotted boxes (answer sections), and return this."""
         quads = self._group_dots_into_quads(pts)
+        
         print(f"INFO:\tObtained total of {len(quads)} quads")
 
         image_good_sections = []
@@ -103,7 +110,7 @@ class BoxSegmenter(DocumentScanner):
                 
                 if len(approximate) == 4:
                     if debug:
-                        debug_img = self._highlight_contours(image_cannied, approximate, contour)
+                        debug_img = self._highlight_contours(image_original, approximate, contour)
                         self.save_image(self._encode_to_bytes(debug_img),
                                             f"{self.debug_dir}/_06_sections/box{i}.jpg" )
                     approximate = approximate.reshape(4, 2)
