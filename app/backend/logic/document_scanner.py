@@ -207,9 +207,9 @@ class DocumentScanner:
 
         return None
 
-    def _highlight_contours(self, image_cannied: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
+    def _highlight_contours(self, image_mat: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
         """FOR DEBUGGING; Highlight contours and add detected # of verts."""
-        debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
+        debug_img = image_mat.copy()
         cv2.drawContours(debug_img, [approxPolyDpResult], -1, (0, 255, 0), 3)
         cv2.putText(debug_img,
                     f"verts={len(approxPolyDpResult)} area={cv2.contourArea(contour):.0f}",
