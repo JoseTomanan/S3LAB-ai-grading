@@ -23,16 +23,23 @@
     </h1>
   </div>
   <div class="space-y-3 w-full max-w-md px-4 sm:px-0">
-    <div class="flex flex-col sm:flex-row gap-3 w-full">
-      <a href="/instances" class="button-outline flex-1 flex flex-col items-center gap-y-1 py-4 px-4">
-        <IconPaper class="size-10 sm:size-12 opacity-80"/>
+    <div
+      class="flex flex-col sm:flex-row gap-3 w-full
+              [&>a]:flex-1 [&>a]:flex [&>a]:flex-col
+              [&>a]:items-center [&>a]:gap-y-1
+              [&>a]:py-4 [&>a]:px-4
+              [&>a>svg]:size-10 [&>a>svg]:sm:size-12 [&>a>svg]:opacity-80
+              [&>a>b]:font-bold [&>a>p]:text-xs [&>a>p]:text-muted-foreground
+              ">
+      <a href="/instances" class="button-outline">
+        <IconPaper />
         <b>Test Instances</b>
-        <p class="text-xs text-muted-foreground">Manage exams & grading</p>
+        <p>Manage exams & grading</p>
       </a>
-      <a href="/sections" class="button-outline flex-1 flex flex-col items-center gap-y-1 py-4 px-4">
-        <IconSection class="size-10 sm:size-12 opacity-80"/>
+      <a href="/sections" class="button-outline">
+        <IconSection />
         <b>Sections</b>
-        <p class="text-xs text-muted-foreground">Manage student rosters</p>
+        <p>Manage student rosters</p>
       </a>
     </div>
     <Dialog.Root>

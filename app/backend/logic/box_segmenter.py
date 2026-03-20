@@ -265,77 +265,58 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
         return images_good_contours
 
-    def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
-        image = self._decode_bytes(image_bytes)
-        image_original, image_cannied = self._regularize_forgivingly(image)
-        image_dilated = self._dilate_edges(image_cannied)
-        
-        if debug:
-            self.save_image(
-                    self._encode_to_bytes(image_dilated),
-                    f"{self.debug_dir}/canny_regularize_dilate.jpg"
-                    )
+    @staticmethod
+    def _build_ruled_mask(candidates: MatLike, shape: tuple,
+                          min_span: float = 0.50, max_angle_deg: float = 3.0) -> MatLike:
+        """Return a binary mask of near-horizontal, full-width ruled lines."""
+        mask = np.zeros(shape[:2], dtype=np.uint8)
+        lines = cv2.HoughLinesP(candidates, rho=1, theta=np.pi/180,
+                                threshold=50,
+                                minLineLength=int(shape[1] * min_span),
+                                maxLineGap=20)
+        if lines is None:
+            return mask
+        for x1, y1, x2, y2 in lines[:, 0]:
+            angle = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
+            if angle <= max_angle_deg:
+                cv2.line(mask, (x1, y1), (x2, y2), 255, thickness=3)
+        return mask
 
-        images_good_sections = self._detect_boxes_via_dots(image_original, debug=debug)
-        if images_good_sections == []:
-            raise ValueError("Could not find any boxes.")
-        images_warped = [self._warp_from_original(i, image_original) for i in images_good_sections[:num_boxes]]
+    def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: float = 0.60) -> MatLike:
+        """Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content."""
+        h_kernel_length = int(image.shape[1] * length_percent)
+        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+        candidates = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
+        ruled_mask = BoxSegmenterOldFunctions._build_ruled_mask(candidates, image.shape)
+        v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
+        ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
+        return cv2.subtract(image, ruled_mask)
+    
+    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
+        def _pre_canny(gray: MatLike) -> MatLike:
+            binary = cv2.adaptiveThreshold(gray, 255,
+                                           cv2.ADAPTIVE_THRESH_MEAN_C,
+                                           cv2.THRESH_BINARY_INV, 15, 5)
+            h_kernel_length = int(gray.shape[1] * 0.55)
+            h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+            candidates = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel)
+            ruled_mask = BoxSegmenterOldFunctions._build_ruled_mask(candidates, gray.shape, min_span=0.50, max_angle_deg=3.0)
+            v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
+            ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
+            output = gray.copy()
+            output[ruled_mask > 0] = 255
+            return output
 
-        return [self._encode_to_bytes(i) for i in images_warped]
-
-    def _detect_boxes_via_dots(self, image_mat: MatLike, debug: bool = False) -> list[MatLike]:
-        """Detect rectangular sections in image using dark solid blobs (corners)"""
-        BLOB_DETECTOR = BlobDetector()
-
-        keypoints = BLOB_DETECTOR.detect(image_mat)
-        if len(keypoints) < 4:
-            print(f"INFO:\tOnly {len(keypoints)} blobs detected")
-            return []
-
-        pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
-
-        if debug:
-            debug_img = image_mat.copy()
-            for p in pts:
-                debug_img = self._highlight_dot(debug_img, p)
-            self.save_image(self._encode_to_bytes(debug_img), f"{self.debug_dir}/canny_marked_dots.jpg")
-
-        if len(pts) == 4:
-            quad_candidates = [pts]
-        else:
-            quad_candidates = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
-
-        image_good_sections = []
-        for i, q in enumerate(quad_candidates):
-            if not is_valid_quad(q):
-                continue
-
-            ordered = np.array(mapp(q.flatten()), dtype=np.float32).reshape(4, 2)
-            contour = np.array(ordered, dtype=np.int32).reshape((-1, 1, 2))
-            perimeter = cv2.arcLength(contour, True)
-            approximate = cv2.approxPolyDP(contour, 0.06 * perimeter, True)
-
-            if len(approximate) == 4:
-                if debug:
-                    debug_img = self._highlight_contours(cv2.cvtColor(image_mat, cv2.COLOR_BGR2GRAY), approximate, contour)
-                    self.save_image(
-                                self._encode_to_bytes(debug_img),
-                                f"{self.debug_dir}/blobs/box{i}.jpg"
-                                )
-                approximate = approximate.reshape(4, 2)
-                (_, _, w, h) = cv2.boundingRect(approximate)
-                aspect_ratio = w / float(h)
-                if 1 / MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
-                    print(f"INFO:\tAccepted and stored dot-quad {i}")
-                    image_good_sections.append(approximate)
-                else:
-                    print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
-            else:
-                print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
-
-        return image_good_sections
-#endregion
+        returnable = self._regularize_image(image_mat,
+                                canny_thresholds=(30, 150),
+                                additional_pre_canny_step=_pre_canny)
+        return returnable
+    
+    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
+        kernel = np.ones((dilate_size, dilate_size), np.uint8)
+        image_dilated = cv2.dilate(image, kernel, iterations=2)
+        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
+        return image_closed
 
 
 # MARK: Main
@@ -355,7 +336,7 @@ if __name__ == "__main__":
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-    images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
+    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
         BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))

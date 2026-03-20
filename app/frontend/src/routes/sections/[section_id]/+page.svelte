@@ -4,6 +4,8 @@
 	const { data } = $props();
 	
 	import MdiEdit from "~icons/mdi/edit";
+  import IconBack from "~icons/mdi/arrow-left";
+
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import AddNewStudent from './AddNewStudent.svelte';
@@ -42,9 +44,8 @@
 
 <div class="container">
 	<span class="flex flex-row space-x-4 mb-4">
-		<a href="/sections"
-				class="font-bold button-outline h-fit">
-			&middot;&middot;&middot;
+		<a href="/sections">
+			<IconBack class="size-8"/>
 		</a>
     <span class="*:leading-5.5">
       <h1 class="align-left">Class List</h1>
