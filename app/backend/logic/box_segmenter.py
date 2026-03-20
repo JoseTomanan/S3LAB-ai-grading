@@ -52,24 +52,23 @@ class BoxSegmenter(DocumentScanner):
         pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_dilated)
 
         ## Pass 2: blobs
-        # pts_pass2_blob = OversimplifiedBlobDetector.detect_white(image_eroded)
+        pts_pass2_blob = OversimplifiedBlobDetector.detect_white(image_eroded)
 
         if debug:
             # self.save_image(self._encode_to_bytes(image_lines_removed), f"{self.debug_dir}/_02A_linesRemoved.jpg")
-            self.save_image(self._encode_to_bytes(image_eroded), f"{self.debug_dir}/_02A_eroded.jpg")
-            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02B_dilated.jpg")
             # for key, img in images_vertical_kernel.items():
             #     self.save_image(self._encode_to_bytes(img), f"{self.debug_dir}/_02A_{key}.jpg")
+            self.save_image(self._encode_to_bytes(image_eroded), f"{self.debug_dir}/_02A_eroded.jpg")
+            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02B_dilated.jpg")
 
-        # Consensus: keep only dots both methods agree on
-        # pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
-        pts_consensus = pts_pass1_contour
+        ## Consensus: keep only dots both methods agree on
+        pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
         print(f"INFO:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)})")
 
         if debug:
             debug_sets = [
                 (pts_pass1_contour, (0, 0, 255), "_03A_dots_pass1contour.jpg"),
-                # (pts_pass2_blob, (0, 0, 255), "_03B_dots_pass2blob.jpg"),
+                (pts_pass2_blob, (0, 0, 255), "_03B_dots_pass2blob.jpg"),
                 (pts_consensus, (0, 0, 255), "_04_dots_consensus.jpg"),
                 ]
 

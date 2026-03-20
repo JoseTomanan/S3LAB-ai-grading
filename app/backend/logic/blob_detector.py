@@ -354,19 +354,19 @@ class OversimplifiedBlobDetector:
         print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
 
         if line_thickness > 0:
-            min_dot_diameter = line_thickness * 3
+            min_dot_diameter = line_thickness * 2
             max_dot_diameter = line_thickness * 15
             params.minArea = math.pi * (min_dot_diameter / 2) ** 2
             params.maxArea  = math.pi * (max_dot_diameter / 2) ** 2
         else:
             print("INFO:\tpre naman")
-            params.minArea = AREA_FACTOR * 62.5
+            params.minArea = AREA_FACTOR * 30
             params.maxArea  = AREA_FACTOR * 6250
         
         params.filterByCircularity = True
-        params.minCircularity = 0.30
+        params.minCircularity = 0.15
         params.filterByConvexity = True
-        params.minConvexity = 0.60
+        params.minConvexity = 0.40
         params.filterByInertia = True
         params.minInertiaRatio = 0.15
 
