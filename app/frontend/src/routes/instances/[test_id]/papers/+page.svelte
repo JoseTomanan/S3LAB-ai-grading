@@ -54,10 +54,10 @@
 
 
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
-  <h1 class="text-left font-semibold w-full flex items-center gap-x-2">
+  <h1 class="text-left font-semibold w-full flex justify-between items-center gap-x-2">
     Test papers
     {#if pollInterval}
-      <Spinner class="size-4"/>
+      <Spinner class="size-4 text-muted-foreground/80"/>
     {/if}
   </h1>
   {#if isPageLoading}
