@@ -168,29 +168,7 @@ class BoxSegmenter(DocumentScanner):
         x, y = coordinate
         cv2.circle(debug_img, (int(x), int(y)), radius=10, color=(0, 255, 0), thickness=-1)
         return debug_img
-    
-    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
-        def _pre_canny(gray: MatLike) -> MatLike:
-            binary = cv2.adaptiveThreshold(gray, 255,
-                                           cv2.ADAPTIVE_THRESH_MEAN_C,
-                                           cv2.THRESH_BINARY_INV, 15, 5)
-            h_kernel_length = int(gray.shape[1] * 0.55)
-            h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
-            candidates = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel)
-            ruled_mask = BoxSegmenterOldFunctions._build_ruled_mask(candidates, gray.shape, min_span=0.50, max_angle_deg=3.0)
-            v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
-            ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
-            output = gray.copy()
-            output[ruled_mask > 0] = 255
-            return output
-        return self._regularize_image(image_mat, (30, 150), _pre_canny)
-    
-    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
-        kernel = np.ones((dilate_size, dilate_size), np.uint8)
-        image_dilated = cv2.dilate(image, kernel, iterations=2)
-        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
-        return image_closed
-   
+
     def _load_array(self, image_bytes: bytes) -> np.ndarray:
         """Convert bytes to OpenCV image with validation"""
         nparr = np.frombuffer(image_bytes, np.uint8)
@@ -305,12 +283,38 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
         ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
         return cv2.subtract(image, ruled_mask)
+    
+    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
+        def _pre_canny(gray: MatLike) -> MatLike:
+            binary = cv2.adaptiveThreshold(gray, 255,
+                                           cv2.ADAPTIVE_THRESH_MEAN_C,
+                                           cv2.THRESH_BINARY_INV, 15, 5)
+            h_kernel_length = int(gray.shape[1] * 0.55)
+            h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+            candidates = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel)
+            ruled_mask = BoxSegmenterOldFunctions._build_ruled_mask(candidates, gray.shape, min_span=0.50, max_angle_deg=3.0)
+            v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
+            ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
+            output = gray.copy()
+            output[ruled_mask > 0] = 255
+            return output
+
+        returnable = self._regularize_image(image_mat,
+                                canny_thresholds=(30, 150),
+                                additional_pre_canny_step=_pre_canny)
+        return returnable
+    
+    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
+        kernel = np.ones((dilate_size, dilate_size), np.uint8)
+        image_dilated = cv2.dilate(image, kernel, iterations=2)
+        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
+        return image_closed
 
 
 # MARK: Main
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA.jpeg"
+    FILENAME = "testRuledA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -323,7 +327,7 @@ if __name__ == "__main__":
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-    images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
+    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
         BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
