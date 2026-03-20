@@ -549,7 +549,7 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
         scanned_page = DOCUMENT_SCANNER.scan_page(contents)
 
         # ======== BOX SEGMENTING ========
-        segmented_list: list[bytes] = BOX_SEGMENTER.get_boxes(scanned_page, num_boxes if num_boxes is not None else 3)
+        segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
         processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
 
         print(f"INTERNAL:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
