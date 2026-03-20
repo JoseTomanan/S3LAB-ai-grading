@@ -92,6 +92,7 @@ def _is_fillable_contour(contour) -> bool:
 
 #region Class
 class BlobDetector:
+    """Note that name is a misnomer; FIXME: Rename to CircleBlobDetector"""
     def __init__(self, image_canny: MatLike):
         line_thickness = measure_line_thickness(image_canny)
         print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
@@ -107,20 +108,6 @@ class BlobDetector:
 
         self.dyn_min_area = dyn_min_area
         self.dyn_max_area = dyn_max_area
-
-        params = cv2.SimpleBlobDetector_Params()
-        params.filterByColor = True
-        params.blobColor = 255
-        params.filterByArea = True
-        params.minArea = dyn_min_area
-        params.maxArea = dyn_max_area
-        params.filterByCircularity = True
-        params.minCircularity = 0.10
-        params.filterByConvexity = True
-        params.minConvexity = 0.40
-        params.filterByInertia = True
-        params.minInertiaRatio = 0.15
-        self._blob_detector = cv2.SimpleBlobDetector_create(params)
 
     def detect_circular_contours_from_canny(self, img: MatLike) -> list[list[float]]:
         """Detect dots via inner contours of Canny rings.
