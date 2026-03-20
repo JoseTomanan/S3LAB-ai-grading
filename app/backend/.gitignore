@@ -1,5 +1,13 @@
 **/__pycache__/*
-/TEMP/*
+
+
+## ================================
+/TEMP/input/corner_positions/*
+/TEMP/input/quads/**/*
+/TEMP/input/*
+/TEMP/output/**/*.jpg
+## ================================
+
 
 /static/images/*
 !/static/images/.gitkeep
@@ -11,3 +19,5 @@ test.db
 database.db
 
 **/+test_*.py
+
+# THERES MORE TO ADD IM JUST FORGETTING

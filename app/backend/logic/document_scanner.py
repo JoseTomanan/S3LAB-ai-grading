@@ -3,8 +3,8 @@ from typing import Callable
 import numpy as np
 import cv2
 from cv2.typing import MatLike
-from core.constants import NORMAL_SIZE
-from utils import mapp, get_robust_aspect_ratio
+from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_AREA, MAX_ASPECT_RATIO
+from utils import mapp, get_robust_aspect_ratio, is_valid_quad
 
 
 
@@ -40,8 +40,13 @@ class DocumentScanner:
                             f"./TEMP/output/DEBUG/CONTOUR_{i}.jpg"
                             )
             if len(approximate) == 4:
-                image_good_contour = approximate.reshape(4,2)
-                break
+                candidate = approximate.reshape(4, 2)
+                if self._is_good_page_contour(candidate):
+                    image_good_contour = candidate
+                    break
+
+        if image_good_contour is None:
+            image_good_contour = self._fallback_otsu_detection(image_original)
 
         if image_good_contour is None:
             raise ValueError("INFO:\tCould not find document outline.")
@@ -166,9 +171,45 @@ class DocumentScanner:
 
         return image_warped
 
-    def _highlight_contours(self, image_cannied: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
+    def _is_good_page_contour(self, approximate: MatLike) -> bool:
+        """Validate that a 4-point contour is a plausible page outline."""
+        contour = approximate.reshape((-1, 1, 2)).astype(np.int32)
+        area = cv2.contourArea(contour)
+        if not (MIN_PAGE_AREA <= area <= MAX_AREA):
+            return False
+
+        quad = approximate.reshape(4, 2)
+        ratio = get_robust_aspect_ratio(quad)
+        if ratio > MAX_ASPECT_RATIO or ratio < 1.0 / MAX_ASPECT_RATIO:
+            return False
+
+        if not is_valid_quad(quad, max_tilt_deg=180.0):
+            return False
+
+        return True
+
+    def _fallback_otsu_detection(self, image_original: MatLike):
+        """Fallback: use Otsu threshold to find white paper on dark background."""
+        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        for c in contours:
+            perimeter = cv2.arcLength(c, True)
+            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            if len(approximate) == 4:
+                candidate = approximate.reshape(4, 2)
+                if self._is_good_page_contour(candidate):
+                    return candidate
+
+        return None
+
+    def _highlight_contours(self, image_mat: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
         """FOR DEBUGGING; Highlight contours and add detected # of verts."""
-        debug_img = cv2.cvtColor(image_cannied, cv2.COLOR_GRAY2BGR)
+        debug_img = image_mat.copy()
         cv2.drawContours(debug_img, [approxPolyDpResult], -1, (0, 255, 0), 3)
         cv2.putText(debug_img,
                     f"verts={len(approxPolyDpResult)} area={cv2.contourArea(contour):.0f}",
@@ -183,7 +224,7 @@ class DocumentScanner:
 
 if __name__ == "__main__":  
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledB.jpeg"
+    FILENAME = "testRuledDottedF.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     

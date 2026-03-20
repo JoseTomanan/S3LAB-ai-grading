@@ -1,184 +1,237 @@
+import sys
 import numpy as np
 import cv2
 from itertools import combinations
 from cv2.typing import MatLike
 
 from core.constants import *
-
 from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
-from logic.blob_detector import BlobDetector
-
-from utils import is_valid_quad, mapp
+from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST, OversimplifiedBlobDetector
+from logic.image_modifier import ImageModifier
+from utils import is_valid_quad, mapp, get_robust_aspect_ratio
 
 
 
 #region Class
 class BoxSegmenter(DocumentScanner):
+    debug_dir = "./TEMP/output/DEBUG"
+
     def get_answer_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """Use dots to find section corners, then lines to verify rectangle that serves as section."""
         image = self._decode_bytes(image_bytes)
         image_original, image_cannied = self._regularize_image(image, canny_thresholds=(30,150),
                                                                 gaussian_blur_kernel_size=None)
-        image_dilated = self._dilate_edges(image_cannied)
+        # image_dilated = self._dilate_edges(image_cannied)
 
         if debug:
-            self.save_image(self._encode_to_bytes(image_cannied), "./TEMP/output/DEBUG/_0canny.jpg")
-            self.save_image(self._encode_to_bytes(image_dilated), "./TEMP/output/DEBUG/canny_regularize_dilate.jpg")
-        
-        images_answers = self._detect_dotted_boxes(image_original, image_cannied, debug=debug)
+            self.save_image(self._encode_to_bytes(image_cannied), f"{self.debug_dir}/_01A_canny.jpg")
+
+        marker_dots = self._detect_dots(image_original, image_cannied, debug=debug)
+        images_answers = self._segment_dots_into_boxes(image_original, marker_dots, debug=debug)
+
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
 
         images_warped = [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
         return [self._encode_to_bytes(i) for i in images_warped]
 
-    def _detect_dotted_boxes(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False):
-        """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
-        BLOB_DETECTOR = BlobDetector()
+    def _detect_dots(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False) -> list[list[float]]:
+        """From image, use marker dots to find section corners."""
+        BLOB_DETECTOR = BlobDetector(image_cannied)
 
-        image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
-        image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
+        image_binarized = ImageModifier().pseudocanny(image_original)
         if debug:
-            self.save_image(self._encode_to_bytes(image_holes_filled),
-                                    "./TEMP/output/DEBUG/_1holesfilled.jpg")
-            self.save_image(self._encode_to_bytes(image_eroded),
-                                    "./TEMP/output/DEBUG/_2eroded.jpg")
-        
-        # keypoints = BLOB_DETECTOR.detect_dark_blob(cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY))
-        keypoints = BLOB_DETECTOR.detect(image_eroded)
+            self.save_image(self._encode_to_bytes(image_binarized), f"{self.debug_dir}/_01B_binarized.jpg")
 
-        if len(keypoints) < 4:
-            print(f"INFO:\tOnly {len(keypoints)} blobs detected")
+        image_eroded = BLOB_DETECTOR.erode_connections(image_binarized)
+
+        ## Pass 1: circular contours
+        image_dilated = BLOB_DETECTOR.dilate_dots(image_eroded)
+        pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_dilated)
+
+        ## Pass 2: blobs
+        pts_pass2_blob = OversimplifiedBlobDetector.detect_white(image_eroded)
+
+        if debug:
+            # self.save_image(self._encode_to_bytes(image_lines_removed), f"{self.debug_dir}/_02A_linesRemoved.jpg")
+            # for key, img in images_vertical_kernel.items():
+            #     self.save_image(self._encode_to_bytes(img), f"{self.debug_dir}/_02A_{key}.jpg")
+            self.save_image(self._encode_to_bytes(image_eroded), f"{self.debug_dir}/_02A_eroded.jpg")
+            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02B_dilated.jpg")
+
+        ## Consensus: keep only dots both methods agree on
+        pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
+        print(f"INFO:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)})")
+
+        if debug:
+            debug_sets = [
+                (pts_pass1_contour, (0, 0, 255), "_03A_dots_pass1contour.jpg"),
+                (pts_pass2_blob, (0, 0, 255), "_03B_dots_pass2blob.jpg"),
+                (pts_consensus, (0, 0, 255), "_04_dots_consensus.jpg"),
+                ]
+
+            for pts, color, filename in debug_sets:
+                debug_img = image_binarized.copy()
+                for p in pts:
+                    debug_img = self._highlight_dot(debug_img, p, color)
+                self.save_image(self._encode_to_bytes(debug_img),
+                                    f"{self.debug_dir}/{filename}")
+
+        if len(pts_consensus) < 4:
+            print(f"INFO:\tOnly {len(pts_consensus)} blobs detected")
             return []
 
-        pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
-        pts = self._filter_out_dup_pts(pts)
+        pts = self._filter_out_dup_pts(pts_consensus)
 
         if debug:
-            debug_img = image_cannied.copy()
+            debug_img = image_binarized.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img),
-                                "./TEMP/output/DEBUG/_3markeddots.jpg")
+                                f"{self.debug_dir}/_05_dots_deduped.jpg" )
 
+        return pts
+
+    def _segment_dots_into_boxes(self, image_original: MatLike, pts: list[list[float]], debug: bool = False) -> list[MatLike]:
+        """From list of points, crop what seems the most like the dotted boxes (answer sections), and return this."""
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
 
-        image_good_sections = []
+        ## Step 1: Collect all valid quads (no approxPolyDP — input is already 4 points)
+        valid_quads = []
         for i, q in enumerate(quads):
             contour = q.reshape((-1, 1, 2)).astype(np.int32)
-            
+
             area = cv2.contourArea(contour)
             if MIN_AREA <= area <= MAX_AREA:
-                perimeter = cv2.arcLength(contour, True)
-                approximate = cv2.approxPolyDP(contour, 0.06*perimeter, True)
-                
-                if len(approximate) == 4:
-                    if debug:
-                        debug_img = self._highlight_contours(image_cannied, approximate, contour)
-                        self.save_image(
-                                    self._encode_to_bytes(debug_img),
-                                    f"./TEMP/output/DEBUG/sections/box{i}.jpg"
-                                    )
-                    approximate = approximate.reshape(4, 2)
-                    (_, _, w, h) = cv2.boundingRect(approximate)
-                    aspect_ratio = w / float(h)
-                    if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
-                        print(f"INFO:\tAccepted and stored dot-quad {i}")
-                        image_good_sections.append(approximate)
-                    else:
-                        print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+                ## Use get_robust_aspect_ratio instead of axis-aligned boundingRect
+                aspect_ratio = get_robust_aspect_ratio(q)
+                if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
+                    print(f"INFO:\tAccepted dot-quad {i} (area={area:.0f}, AR={aspect_ratio:.2f})")
+                    valid_quads.append(q)
                 else:
-                    print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
+                    print(f"INFO:\tBad ratio, AR={aspect_ratio:.2f}.")
             else:
-                # print(f"INFO:\tDid not pass for area={area}")
                 continue
 
-        return image_good_sections
+        ## Step 2: Deduplicate overlapping quads (keep the one with larger area)
+        deduped_quads = self._deduplicate_quads(valid_quads)
+        print(f"INFO:\tAfter dedup: {len(deduped_quads)} quads (was {len(valid_quads)})")
+
+        ## Step 3: Sort by vertical position (top of page first)
+        deduped_quads.sort(key=lambda q: np.min(q[:, 1]))
+
+        if debug:
+            for i, q in enumerate(deduped_quads):
+                contour = q.reshape((-1, 1, 2)).astype(np.int32)
+                debug_img = self._highlight_contours(image_original, contour, contour)
+                self.save_image(self._encode_to_bytes(debug_img),
+                                    f"{self.debug_dir}/_06_sections/box{i}.jpg" )
+
+        return deduped_quads
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
-        array = self._load_array(image_bytes)
+        """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
+        array = self._decode_bytes(image_bytes)
         img = self._adjust_contrast(
-                            self._brighten(array, amount=0.25),
+                            self._brighten(array, amount=0.175),
                             amount=1.3
                             )
-        return self._unload_array(img)
+        return self._encode_to_bytes(img)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
         return BoxSegmenterOldFunctions().get_boxes(image_bytes, num_boxes, debug)
 
     def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """[DEPRECATED] Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
+        """[DEPRECATED] [CURRENTLY UNUSED] Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
         return BoxSegmenterOldFunctions().get_boxes_via_dots(image_bytes, num_boxes, debug)
     #endregion
 
-    # --------------------------------
     #region Auxiliary functions: Answer section detection
     def _filter_out_dup_pts(self, pts: np.ndarray) -> np.ndarray:
-        """Filter out duplicate points"""
+        """Filter out duplicate points within DOT_DEDUP_DIST of each other."""
         filtered_pts = []
         for p in pts:
             is_similar = False
             for fp in filtered_pts:
-                if np.linalg.norm(np.array(p) - np.array(fp)) < 10:
+                if np.linalg.norm(np.array(p) - np.array(fp)) < DOT_DEDUP_DIST:
                     is_similar = True
                     break
             if not is_similar:
                 filtered_pts.append(p)
         return filtered_pts
 
-    def _group_dots_into_quads(self, pts: np.ndarray) -> bool:
+    def _group_dots_into_quads(self, pts: np.ndarray) -> list[np.ndarray]:
         """Return only point-sets that could plausibly be rectangle corners."""
-        # quad_combinations = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
         quad_combinations = [np.array([pts[i] for i in c]) for c in combinations(range(len(pts)), 4)]
 
         quads = []
         for q in quad_combinations:
+            ## Spatial pre-filter: skip if bounding box area is too small or too large
+            xs = q[:, 0] if q.ndim == 2 else [p[0] for p in q]
+            ys = q[:, 1] if q.ndim == 2 else [p[1] for p in q]
+            bbox_w = max(xs) - min(xs)
+            bbox_h = max(ys) - min(ys)
+            bbox_area = bbox_w * bbox_h
+            if bbox_area < MIN_AREA or bbox_area > MAX_AREA:
+                continue
+
             q_ordered = mapp(q.flatten())
             if is_valid_quad(q_ordered):
                 quads.append(q_ordered)
 
         return quads
 
-    def _edge_confirmed_by_line(self, pt1: np.ndarray, pt2: np.ndarray, edge_img: np.ndarray, min_fill: float = 0.4, num_samples: int = 50) -> bool:
-        """Check if a straight line exists in edge_img between pt1 and pt2."""
-        xs = np.linspace(pt1[0], pt2[0], num_samples).astype(int)
-        ys = np.linspace(pt1[1], pt2[1], num_samples).astype(int)
-        # Clamp to image bounds
-        xs = np.clip(xs, 0, edge_img.shape[1] - 1)
-        ys = np.clip(ys, 0, edge_img.shape[0] - 1)
-        fill = np.sum(edge_img[ys, xs] > 0) / num_samples
-        return fill >= min_fill
+    @staticmethod
+    def _deduplicate_quads(quads: list[np.ndarray]) -> list[np.ndarray]:
+        """Remove overlapping quads. Prefer smaller quads (individual sections) over
+        larger cross-section combinations that span multiple physical boxes."""
+        if not quads:
+            return []
 
-    def _quad_edges_confirmed(self, ordered: np.ndarray, edge_img: np.ndarray, min_fill: float = 0.4) -> bool:
-        tl, tr, br, bl = ordered
-        edges = [(tl, tr), (tr, br), (br, bl), (bl, tl)]
-        return all(self._edge_confirmed_by_line(a, b, edge_img, min_fill) for a, b in edges)
+        ## Compute centers
+        centers = [np.mean(q, axis=0) for q in quads]
+        areas = [cv2.contourArea(q.reshape((-1, 1, 2)).astype(np.int32)) for q in quads]
+
+        ## Two quads overlap if one's center falls inside the other
+        ## Greedily pick smallest-area quads first (individual sections are smaller
+        ## than cross-box combinations formed from dots of different physical boxes)
+        used = [False] * len(quads)
+        result = []
+        order = sorted(range(len(quads)), key=lambda i: areas[i])  ## smallest first
+        for i in order:
+            if used[i]:
+                continue
+            result.append(quads[i])
+            used[i] = True
+            contour_i = quads[i].reshape((-1, 1, 2)).astype(np.int32)
+            ## Mark quads whose center falls inside this quad as used
+            for j in range(len(quads)):
+                if not used[j]:
+                    dist = cv2.pointPolygonTest(contour_i, tuple(centers[j].astype(float)), False)
+                    if dist >= 0:  ## center of j is inside quad i
+                        used[j] = True
+            ## Also mark quads that contain this quad's center
+            for j in range(len(quads)):
+                if not used[j]:
+                    contour_j = quads[j].reshape((-1, 1, 2)).astype(np.int32)
+                    dist = cv2.pointPolygonTest(contour_j, tuple(centers[i].astype(float)), False)
+                    if dist >= 0:  ## center of i is inside quad j
+                        used[j] = True
+
+        return result
     #endregion
-    # --------------------------------
 
-    # --------------------------------
     #region Auxiliary functions: Image preloading, postloading
-    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int]) -> MatLike:
+    def _highlight_dot(self, image: MatLike, coordinate: tuple[int, int], color: tuple[int,int,int] = (0,255,0)) -> MatLike:
         """FOR DEBUGGING; Highlight a single dot on the given image by drawing a green filled circle."""
         debug_img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR) if len(image.shape) == 2 else image.copy()
         x, y = coordinate
-        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=(0, 255, 0), thickness=-1)
+        cv2.circle(debug_img, (int(x), int(y)), radius=10, color=color, thickness=-1)
         return debug_img
-
-    def _load_array(self, image_bytes: bytes) -> np.ndarray:
-        """Convert bytes to OpenCV image with validation"""
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        return image
-
-    def _unload_array(self, image: np.ndarray) -> bytes:
-        """Encode OpenCV image to high-quality JPEG bytes."""
-        _, buffer = cv2.imencode('.jpg', image, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        return buffer.tobytes()
 
     def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
         """Increase image brightness using linear transform"""
@@ -192,7 +245,30 @@ class BoxSegmenter(DocumentScanner):
         beta = 128 * (1 - amount)
         return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
     #endregion
-    # --------------------------------
+
+    #region [UNUSED] Auxiliary functions
+    def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
+        """[UNUSED]"""
+        def _pre_canny(i: MatLike) -> MatLike:
+            ruled_line_mask = cv2.inRange(i, 20, 80)
+            h_kernel_length = int(NORMAL_SIZE*0.30)
+            horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+            ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
+            self.save_image(
+                    self._encode_to_bytes(ruled_line_mask),
+                    f"{self.debug_dir}/horizontal_candidates.jpg"
+                    )
+            return cv2.subtract(i, ruled_line_mask)
+        # return self._regularize_image(image_mat, (30, 150), _pre_canny)
+        return self._regularize_image(image_mat, canny_thresholds=(30, 150))
+    
+    def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
+        """[UNUSED]"""
+        kernel = np.ones((dilate_size, dilate_size), np.uint8)
+        image_dilated = cv2.dilate(image, kernel, iterations=2)
+        image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
+        return image_closed
+    #endregion
 #endregion
 
 
@@ -208,7 +284,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_dilated),
-                        "./TEMP/output/DEBUG/canny_regularize_dilate.jpg"
+                        f"{self.debug_dir}/canny_regularize_dilate.jpg"
                         )
 
         images_good_contours = self._detect_contours(image_dilated, image_cannied, debug=debug)
@@ -237,7 +313,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                     debug_img = self._highlight_contours(image_cannied, approximate, c)
                     self.save_image(
                                 self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG/contours/box{i}.jpg"
+                                f"{self.debug_dir}/contours/box{i}.jpg"
                                 )
                 if 4 <= len(approximate) <= 10:
                     hull = cv2.convexHull(c)
@@ -257,6 +333,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
         return images_good_contours
 
+    #region Auxiliary functions
     @staticmethod
     def _build_ruled_mask(candidates: MatLike, shape: tuple,
                           min_span: float = 0.50, max_angle_deg: float = 3.0) -> MatLike:
@@ -309,25 +386,26 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
+    #endregion
 
 
-# MARK: Main
+
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledA.jpeg"
+    FILENAME = sys.argv[1] if len(sys.argv) > 1 else "testRuledDottedA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
-    
 
     # ================ ACTUAL TEST ================
     _onlyfilename = FILENAME.split(".")[0]
     
     BOX_SEGMENTER = BoxSegmenter()
+    BOX_SEGMENTER.debug_dir = f"./TEMP/output/{_onlyfilename}"
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
     image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
+    images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
         BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
