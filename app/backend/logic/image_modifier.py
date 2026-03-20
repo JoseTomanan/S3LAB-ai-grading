@@ -29,7 +29,7 @@ class ImageModifier:
         beta = 128 * (1 - amount)
         return cv2.convertScaleAbs(image, alpha=amount, beta=beta)
 
-    def pseudocanny(self, image_mat: MatLike, block_size: int = 101, C: int = 13, gaussian_blur_kernel_size: tuple[int,int] | None = (5, 5)) -> MatLike:
+    def pseudocanny(self, image_mat: MatLike, block_size: int = 161, C: int = 13, gaussian_blur_kernel_size: tuple[int,int] | None = (5, 5)) -> MatLike:
         """Convert image to binary (white features on black background) using adaptive thresholding.
         Unlike Canny edge detection, this preserves solid fills — a filled dot stays
         a solid white blob instead of becoming a hollow ring."""
@@ -54,7 +54,7 @@ class ImageModifier:
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedB.jpeg"
+    FILENAME = "testRuledDottedA.jpeg"
     GET_INPUT = lambda x: f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x: f"./TEMP/output/{x}"
 
