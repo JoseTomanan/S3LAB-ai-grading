@@ -210,11 +210,6 @@ class BlobDetector:
                 result.append((cx, cy, area))
         return result
 
-    def detect_white_blobs(self, image_mat: MatLike) -> list[list[float]]:
-        """Detect white blobs with lenient params. Returns centroids as list of [x, y]."""
-        keypoints = self._blob_detector.detect(image_mat)
-        return [[kp.pt[0], kp.pt[1]] for kp in keypoints]
-
     #region [UNUSED] Auxiliary/secondary functions
     def remove_horizontal_lines(self, img: MatLike, min_line_length_ratio: float = 0.05) -> MatLike:
         """[UNUSED] Remove long horizontal structures (ruled lines) from a binary image, while keeping dots and short strokes intact."""
@@ -342,11 +337,11 @@ class BlobDetector:
 class OversimplifiedBlobDetector:
     """Oversimplified dark blob detector."""
     @staticmethod
-    def detect(image_canny: MatLike) -> list[cv2.KeyPoint]:
+    def _base_detect(image_canny: MatLike, is_dark: bool) -> list[list[float]]:
         params = cv2.SimpleBlobDetector_Params()
         
         params.filterByColor = True
-        params.blobColor = 0
+        params.blobColor = 0 if is_dark else 255
         params.filterByArea = True
 
         line_thickness = measure_line_thickness(image_canny)
@@ -372,3 +367,11 @@ class OversimplifiedBlobDetector:
         _blob_detector = cv2.SimpleBlobDetector_create(params)
         _keypoints =  _blob_detector.detect(image_canny)
         return [[kp.pt[0], kp.pt[1]] for kp in _keypoints]
+
+    @staticmethod
+    def detect(image_canny: MatLike) -> list[list[float]]:
+        return OversimplifiedBlobDetector._base_detect(image_canny, is_dark=True)
+
+    @staticmethod
+    def detect_white(image_canny: MatLike) -> list[list[float]]:
+        return OversimplifiedBlobDetector._base_detect(image_canny, is_dark=False)
