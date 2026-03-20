@@ -1,6 +1,6 @@
 import base64
 from multiprocessing import process
-from fastapi import APIRouter, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
 from sqlmodel import Session, select
 from typing import List, Optional
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 from models import *
 from schemas import *
-from core.database import get_session
+from core.database import get_session, get_direct_session
 
 from logic.box_segmenter import BoxSegmenter
 from logic.document_scanner import DocumentScanner
@@ -28,6 +28,7 @@ TEMP_DIR = Path("static/images")
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
+                background_tasks: BackgroundTasks,
                 files: List[UploadFile] = File(...),
                 num_boxes: Optional[int] = Query(None),
                 session: Session = Depends(get_session)
@@ -42,12 +43,17 @@ async def process_student_answer_image(
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INTERNAL:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
-    _commit_boxes(boxes_info, test_id, student_no, session)
+    ## _commit_boxes(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
 
-    return {
-            "num_boxes": len(processed_list),
-            "boxes": boxes_info,
-            }
+    return Response(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=json.dumps({
+                "num_boxes": len(processed_list),
+                "boxes": boxes_info,
+            }),
+            media_type="application/json"
+            )
 
 
 @router.post("/{test_id}/{student_no}/label_save_boxes")
@@ -618,6 +624,17 @@ def _label_save_boxes(
                     })
 
     return boxes_info
+
+
+def _commit_boxes_background(boxes_info: list[dict], test_id: str, student_no: str):
+    session = get_direct_session()
+    try:
+        _commit_boxes(boxes_info, test_id, student_no, session)
+    except Exception as e:
+        print(f"INTERNAL:\tBackground commit failed: {e}")
+        session.rollback()
+    finally:
+        session.close()
 
 
 def _commit_boxes(
