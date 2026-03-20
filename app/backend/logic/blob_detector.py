@@ -109,6 +109,20 @@ class BlobDetector:
         self.dyn_min_area = dyn_min_area
         self.dyn_max_area = dyn_max_area
 
+        params = cv2.SimpleBlobDetector_Params()
+        params.filterByColor = True
+        params.blobColor = 255
+        params.filterByArea = True
+        params.minArea = dyn_min_area
+        params.maxArea = dyn_max_area
+        params.filterByCircularity = True
+        params.minCircularity = 0.10
+        params.filterByConvexity = True
+        params.minConvexity = 0.40
+        params.filterByInertia = True
+        params.minInertiaRatio = 0.15
+        self._blob_detector = cv2.SimpleBlobDetector_create(params)
+
     def detect_circular_contours_from_canny(self, img: MatLike) -> list[list[float]]:
         """Detect dots via inner contours of Canny rings.
         In Canny output, dots appear as hollow rings. The inner contour (hole)
@@ -196,7 +210,12 @@ class BlobDetector:
                 result.append((cx, cy, area))
         return result
 
-    #region [UNUSED] by detect_circular_contours_from_canny
+    def detect_white_blobs(self, image_mat: MatLike) -> list[list[float]]:
+        """Detect white blobs with lenient params. Returns centroids as list of [x, y]."""
+        keypoints = self._blob_detector.detect(image_mat)
+        return [[kp.pt[0], kp.pt[1]] for kp in keypoints]
+
+    #region [UNUSED] Auxiliary/secondary functions
     def remove_horizontal_lines(self, img: MatLike, min_line_length_ratio: float = 0.05) -> MatLike:
         """[UNUSED] Remove long horizontal structures (ruled lines) from a binary image, while keeping dots and short strokes intact."""
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
@@ -268,11 +287,6 @@ class BlobDetector:
             centroids.append((cx, cy, area))
 
         return centroids
-
-    def detect_simple_blobs(self, image_mat: MatLike) -> list[list[float]]:
-        """[UNUSED] Detect white blobs with lenient params. Returns centroids as list of [x, y]."""
-        keypoints = self._blob_detector.detect(image_mat)
-        return [[kp.pt[0], kp.pt[1]] for kp in keypoints]
 
     @staticmethod
     def intersect_points(pts_a, pts_b, max_dist=DOT_DEDUP_DIST):
