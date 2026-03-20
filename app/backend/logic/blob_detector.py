@@ -330,6 +330,12 @@ class BlobDetector:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
         return cv2.erode(gray, kernel, iterations=iterations)
+
+    def dilate_dots(self, img: MatLike, kernel_size: int = 3, iterations: int = 4) -> MatLike:
+        """Dilate to restore dot mass after erosion (erode + dilate = morphological open)."""
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
+        return cv2.dilate(gray, kernel, iterations=iterations)
     #endregion
 #endregion
 

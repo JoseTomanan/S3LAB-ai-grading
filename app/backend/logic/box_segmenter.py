@@ -38,17 +38,25 @@ class BoxSegmenter(DocumentScanner):
         """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
         BLOB_DETECTOR = BlobDetector(image_cannied)
 
-        IMAGE_MODIFIER = ImageModifier()
-        image_binarized = IMAGE_MODIFIER.pseudocanny(image_original)
+        image_binarized = ImageModifier().pseudocanny(image_original)
+        if debug:
+            self.save_image(self._encode_to_bytes(image_binarized), f"{self.debug_dir}/_01B_binarized.jpg")
 
-        # Pass 1: detect circular contours directly from Canny (no fill/line-removal needed)
-        pts_pass1_contour = BLOB_DETECTOR.detect_circular_contours_from_canny(image_cannied)
+        image_eroded = BLOB_DETECTOR.erode_connections(image_binarized)
 
-        ## Pass 2: lenient SimpleBlobDetector on filled+eroded image
-        # image_holes_filled = BLOB_DETECTOR.fill_blobs(image_cannied)
-        # image_eroded = BLOB_DETECTOR.erode_connections(image_holes_filled)
-        # pts_pass2_blob = BLOB_DETECTOR.detect_simple_blobs(image_eroded)
-        pts_pass2_blob = OversimplifiedBlobDetector.detect(image_cannied)
+        ## Pass 1: circular contours
+        image_dilated = BLOB_DETECTOR.dilate_dots(image_eroded)
+        pts_pass1_contour = BLOB_DETECTOR.detect_dot_contours(image_dilated)
+
+        ## Pass 2: blobs
+        pts_pass2_blob = OversimplifiedBlobDetector.detect_white(image_eroded)
+
+        if debug:
+            # self.save_image(self._encode_to_bytes(image_lines_removed), f"{self.debug_dir}/_02A_linesRemoved.jpg")
+            self.save_image(self._encode_to_bytes(image_eroded), f"{self.debug_dir}/_02A_eroded.jpg")
+            self.save_image(self._encode_to_bytes(image_dilated), f"{self.debug_dir}/_02B_dilated.jpg")
+            # for key, img in images_vertical_kernel.items():
+            #     self.save_image(self._encode_to_bytes(img), f"{self.debug_dir}/_02A_{key}.jpg")
 
         # Consensus: keep only dots both methods agree on
         pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
@@ -75,11 +83,11 @@ class BoxSegmenter(DocumentScanner):
         pts = self._filter_out_dup_pts(pts_consensus)
 
         if debug:
-            debug_img = image_cannied.copy()
+            debug_img = image_binarized.copy()
             for p in pts:
                 debug_img = self._highlight_dot(debug_img, p)
             self.save_image(self._encode_to_bytes(debug_img),
-                                f"{self.debug_dir}/_04_dots_deduped.jpg" )
+                                f"{self.debug_dir}/_05_dots_deduped.jpg" )
 
         quads = self._group_dots_into_quads(pts)
         print(f"INFO:\tObtained total of {len(quads)} quads")
@@ -97,7 +105,7 @@ class BoxSegmenter(DocumentScanner):
                     if debug:
                         debug_img = self._highlight_contours(image_cannied, approximate, contour)
                         self.save_image(self._encode_to_bytes(debug_img),
-                                            f"{self.debug_dir}/_05_sections/box{i}.jpg" )
+                                            f"{self.debug_dir}/_06_sections/box{i}.jpg" )
                     approximate = approximate.reshape(4, 2)
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
@@ -208,7 +216,7 @@ class BoxSegmenter(DocumentScanner):
 #endregion
 
 
-#region Archive of old box segmenter functions
+
 class BoxSegmenterOldFunctions(BoxSegmenter):
     """Container/archive for deprecated functions."""
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
@@ -269,6 +277,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
         return images_good_contours
 
+    #region Auxiliary functions
     @staticmethod
     def _build_ruled_mask(candidates: MatLike, shape: tuple,
                           min_span: float = 0.50, max_angle_deg: float = 3.0) -> MatLike:
@@ -321,6 +330,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         image_dilated = cv2.dilate(image, kernel, iterations=2)
         image_closed = cv2.morphologyEx(image_dilated, cv2.MORPH_CLOSE, kernel)
         return image_closed
+    #endregion
 
 
 # MARK: Main
@@ -329,7 +339,6 @@ if __name__ == "__main__":
     FILENAME = "testRuledDottedD.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
-    
 
     # ================ ACTUAL TEST ================
     _onlyfilename = FILENAME.split(".")[0]
@@ -339,8 +348,8 @@ if __name__ == "__main__":
     AI_EVALUATOR = AIAnswerEvaluator()
     
     image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(FILENAME))
-    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=True)
-    images_after_box = BOX_SEGMENTER.get_boxes(image_before, num_boxes=3, debug=True)
+    image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
+    images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
         BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
