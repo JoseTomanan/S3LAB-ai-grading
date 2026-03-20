@@ -88,6 +88,7 @@ async def commit_boxes_endpoint(
                 test_id: str,
                 student_no: str,
                 request_body: CommitBoxesRequest,
+                background_tasks: BackgroundTasks,
                 session: Session = Depends(get_session)
                 ):
     test_exists = session.exec(
@@ -111,11 +112,12 @@ async def commit_boxes_endpoint(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Student with student_no '{student_no}' not found"
                     )
-    
-    boxes_info = [box.model_dump() for box in request_body.boxes]
-    _commit_boxes(boxes_info, test_id, student_no, session)
 
-    return Response(status_code=200)
+    boxes_info = [box.model_dump() for box in request_body.boxes]
+    ## _commit_boxes(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
+
+    return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
 @router.patch("/{test_id}/{student_no}/{item_id}")
