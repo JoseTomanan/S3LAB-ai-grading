@@ -56,13 +56,13 @@ class BoxSegmenter(DocumentScanner):
 
         if debug:
             debug_sets = [
-                (pts_pass1_contour, (0, 255, 0), "_02A_dots_pass1contour.jpg"),
-                (pts_pass2_blob, (0, 255, 255), "_02B_dots_pass2blob.jpg"),
-                (pts_consensus, (0, 0, 255), "_03_dots_consensus.jpg"),
+                (pts_pass1_contour, (0, 0, 255), "_03A_dots_pass1contour.jpg"),
+                (pts_pass2_blob, (0, 0, 255), "_03B_dots_pass2blob.jpg"),
+                (pts_consensus, (0, 0, 255), "_04_dots_consensus.jpg"),
                 ]
 
             for pts, color, filename in debug_sets:
-                debug_img = image_cannied.copy()
+                debug_img = image_binarized.copy()
                 for p in pts:
                     debug_img = self._highlight_dot(debug_img, p, color)
                 self.save_image(self._encode_to_bytes(debug_img),
