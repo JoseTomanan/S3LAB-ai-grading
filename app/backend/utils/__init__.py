@@ -1,5 +1,5 @@
 import numpy as np
-from core.constants import MAX_SKEW_DEG, SECTION_CORNER_ANGLE_TOL
+from core.constants import MAX_SKEW_DEG, MAX_TILT_DEG, SECTION_CORNER_ANGLE_TOL
 
 
 
@@ -83,13 +83,18 @@ def is_valid_quad(pts: np.ndarray, max_skew_deg: float = MAX_SKEW_DEG, max_tilt_
         bool: True if the points approximate a valid quadrilateral section, False otherwise.
     """
     ordered = mapp(pts.flatten())
-    _tl, _bl, _br, _tr = ordered
+    _tl, _tr, _br, _bl = ordered
 
     angle_top = np.degrees(np.arctan2(_tr[1] - _tl[1], _tr[0] - _tl[0]))
     angle_bot = np.degrees(np.arctan2(_br[1] - _bl[1], _br[0] - _bl[0]))
     if abs(angle_top - angle_bot) > max_skew_deg:
         return False
-    
+
+    ## Check absolute tilt: top/bottom edges should be near-horizontal
+    avg_tilt = (abs(angle_top) + abs(angle_bot)) / 2
+    if avg_tilt > max_tilt_deg:
+        return False
+
     #### Check if corner angle is approximately 90 degrees for all
     corners = [
             (_bl, _tl, _tr),   # angle at TL
