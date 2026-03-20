@@ -7,6 +7,7 @@ from core.constants import *
 from logic.document_scanner import DocumentScanner
 from logic.ai_interface import AIAnswerEvaluator
 from logic.blob_detector import BlobDetector, DOT_DEDUP_DIST, OversimplifiedBlobDetector
+from logic.image_modifier import ImageModifier
 
 from utils import is_valid_quad, mapp
 
@@ -36,6 +37,9 @@ class BoxSegmenter(DocumentScanner):
     def _detect_dotted_boxes(self, image_cannied: MatLike, debug: bool = False):
         """From canny and original image, use dots to find section corners, then lines to verify rectangle that serves as section."""
         BLOB_DETECTOR = BlobDetector(image_cannied)
+
+        IMAGE_MODIFIER = ImageModifier()
+        image_binarized = IMAGE_MODIFIER.pseudocanny(image_original)
 
         # Pass 1: detect circular contours directly from Canny (no fill/line-removal needed)
         pts_pass1_contour = BLOB_DETECTOR.detect_circular_contours_from_canny(image_cannied)
