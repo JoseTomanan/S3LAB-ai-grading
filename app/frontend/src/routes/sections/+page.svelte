@@ -51,9 +51,9 @@
       <AddSection />
     </Dialog.Root>
   </span>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-3 relative">
     <a href="/instances" class="w-fit text-base opacity-60 hover:underline">
-      ←  Go to test instances
+      Go to test instances ↗
     </a>
     {#if isPageLoading}
       {#each { length: 2 } as _}
@@ -61,9 +61,10 @@
       {/each}
 
     {:else if sections.length == 0}
-      <div class="flex flex-col items-end text-right mt-2 opacity-60">
+      <div class="absolute top-0 right-0
+                  flex flex-col items-end text-right mt-2 opacity-60">
         <IconArrow class="size-10"/>
-        <p>No sections yet &mdash; tap here to add one!</p>
+        <p>No test instances yet.<br>Tap here to add one!</p>
       </div>
 
     {:else}

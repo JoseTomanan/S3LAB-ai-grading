@@ -55,18 +55,19 @@
       <AddTestInstance />
     </Dialog.Root>
   </span>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-3 relative">
     <a href="/sections" class="w-fit text-base opacity-60 hover:underline">
-      ←  Go to sections
+      Go to sections ↗
     </a>
     {#if isPageLoading}
       {#each { length: 2 } as _}
         <Skeleton class="h-16 w-full grayscale-100"/>
       {/each}
     {:else if instances.length == 0}
-      <div class="flex flex-col items-end text-right mt-2 opacity-60">
+      <div class="absolute top-0 right-0
+                  flex flex-col items-end text-right mt-2 opacity-60">
         <IconArrow class="size-10"/>
-        <p>No test instances yet &mdash; tap here to add one!</p>
+        <p>No test instances yet.<br>Tap here to add one!</p>
       </div>
     {:else}
       {#each paginationValues as instance}
