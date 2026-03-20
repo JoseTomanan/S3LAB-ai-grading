@@ -18,6 +18,7 @@
   };
 
   import IconCheck from "~icons/mdi/check";
+  import IconAccepted from "~icons/mdi/cloud-check-variant-outline";
   import IconExclamation from "~icons/mdi/exclamation-thick";
   import IconNotFound from "~icons/mdi/account-question-outline";
   import IconSend from "~icons/mdi/send";
@@ -276,8 +277,8 @@
       {#each formFileRecords as p}
         <span class="flex flex-row justify-start items-center gap-x-1.5">
           <span>
-            {#if p.statusCode == 200}
-              <IconCheck class="size-5"/>
+            {#if p.statusCode == 200 || p.statusCode == 202}
+              <IconAccepted class="size-5"/>
             {:else if p.statusCode == 404}
               <IconNotFound class="size-5" />
             {:else if p.statusCode == 501}
