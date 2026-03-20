@@ -2,8 +2,9 @@
 
 
 ## ================================
-/TEMP/input/**/*.jpg
-/TEMP/input/**/*.jpeg
+/TEMP/input/corner_positions/*
+/TEMP/input/quads/**/*
+/TEMP/input/*
 /TEMP/output/**/*.jpg
 ## ================================
 
