@@ -341,7 +341,7 @@ class BlobDetector:
 
 
 class OversimplifiedBlobDetector:
-    """Oversimplified dark blob detector."""
+    """[UNUSED] Oversimplified dark blob detector. Currently unused in BoxSegmenter because of how it has no strengths that contour detection does not already have."""
     @staticmethod
     def _base_detect(image_canny: MatLike, is_dark: bool) -> list[list[float]]:
         params = cv2.SimpleBlobDetector_Params()
