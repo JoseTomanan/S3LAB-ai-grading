@@ -170,18 +170,20 @@ class BoxSegmenter(DocumentScanner):
         return debug_img
     
     def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
-        def _pre_canny(i: MatLike) -> MatLike:
-            ruled_line_mask = cv2.inRange(i, 20, 80)
-            h_kernel_length = int(NORMAL_SIZE*0.30)
-            horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
-            ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
-            self.save_image(
-                    self._encode_to_bytes(ruled_line_mask),
-                    "./TEMP/output/DEBUG/horizontal_candidates.jpg"
-                    )
-            return cv2.subtract(i, ruled_line_mask)
-        # return self._regularize_image(image_mat, (30, 150), _pre_canny)
-        return self._regularize_image(image_mat, canny_thresholds=(30, 150))
+        def _pre_canny(gray: MatLike) -> MatLike:
+            binary = cv2.adaptiveThreshold(gray, 255,
+                                           cv2.ADAPTIVE_THRESH_MEAN_C,
+                                           cv2.THRESH_BINARY_INV, 15, 5)
+            h_kernel_length = int(gray.shape[1] * 0.55)
+            h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+            candidates = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel)
+            ruled_mask = BoxSegmenterOldFunctions._build_ruled_mask(candidates, gray.shape, min_span=0.50, max_angle_deg=3.0)
+            v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
+            ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
+            output = gray.copy()
+            output[ruled_mask > 0] = 255
+            return output
+        return self._regularize_image(image_mat, (30, 150), _pre_canny)
     
     def _dilate_edges(self, image: MatLike, dilate_size: int = 3) -> MatLike:
         kernel = np.ones((dilate_size, dilate_size), np.uint8)
@@ -277,128 +279,32 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
 
         return images_good_contours
 
-    def get_boxes_via_dots(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """Same as `get_boxes` function, but uses solid fill blobs as section indicator (instead of handdrawn boxes)."""
-        image = self._decode_bytes(image_bytes)
-        image_original, image_cannied = self._regularize_forgivingly(image)
-        image_dilated = self._dilate_edges(image_cannied)
-        
-        if debug:
-            self.save_image(
-                    self._encode_to_bytes(image_dilated),
-                    "./TEMP/output/DEBUG/canny_regularize_dilate.jpg"
-                    )
-
-        images_good_sections = self._detect_boxes_via_dots(image_original, debug=debug)
-        if images_good_sections == []:
-            raise ValueError("Could not find any boxes.")
-        images_warped = [self._warp_from_original(i, image_original) for i in images_good_sections[:num_boxes]]
-
-        return [self._encode_to_bytes(i) for i in images_warped]
-
-    def _detect_boxes_via_dots(self, image_mat: MatLike, debug: bool = False) -> list[MatLike]:
-        """Detect rectangular sections in image using dark solid blobs (corners)"""
-        BLOB_DETECTOR = BlobDetector()
-
-        keypoints = BLOB_DETECTOR.detect(image_mat)
-        if len(keypoints) < 4:
-            print(f"INFO:\tOnly {len(keypoints)} blobs detected")
-            return []
-
-        pts = np.array([[kp.pt[0], kp.pt[1]] for kp in keypoints], dtype=np.float32)
-
-        if debug:
-            debug_img = image_mat.copy()
-            for p in pts:
-                debug_img = self._highlight_dot(debug_img, p)
-            self.save_image(self._encode_to_bytes(debug_img), "./TEMP/output/DEBUG/canny_marked_dots.jpg")
-
-        if len(pts) == 4:
-            quad_candidates = [pts]
-        else:
-            quad_candidates = [pts[list(c)] for c in combinations(range(len(pts)), 4)]
-
-        image_good_sections = []
-        for i, q in enumerate(quad_candidates):
-            if not is_valid_quad(q):
-                continue
-
-            ordered = np.array(mapp(q.flatten()), dtype=np.float32).reshape(4, 2)
-            contour = np.array(ordered, dtype=np.int32).reshape((-1, 1, 2))
-            perimeter = cv2.arcLength(contour, True)
-            approximate = cv2.approxPolyDP(contour, 0.06 * perimeter, True)
-
-            if len(approximate) == 4:
-                if debug:
-                    debug_img = self._highlight_contours(cv2.cvtColor(image_mat, cv2.COLOR_BGR2GRAY), approximate, contour)
-                    self.save_image(
-                                self._encode_to_bytes(debug_img),
-                                f"./TEMP/output/DEBUG/blobs/box{i}.jpg"
-                                )
-                approximate = approximate.reshape(4, 2)
-                (_, _, w, h) = cv2.boundingRect(approximate)
-                aspect_ratio = w / float(h)
-                if 1 / MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
-                    print(f"INFO:\tAccepted and stored dot-quad {i}")
-                    image_good_sections.append(approximate)
-                else:
-                    print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
-            else:
-                print(f"INFO:\tFound non-box at approxPolyDP of dot-quad {i}")
-
-        return image_good_sections
-
-    #region Archived unstable functions
-    def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: int = 0.60) -> MatLike:
-        """
-        Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content.
-        ## UNSTABLE
-        ### Handdrawn lines on white paper get filtered out. FIXME: make fail-safe
-        """
-        h_kernel_length = int(NORMAL_SIZE * length_percent)
-
-        #### Detect horizontal lines: open with a wide horizontal kernel.
-        #### Only structures wider than h_kernel_length survive — i.e. ruled lines.
-        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
-        horizontal_candidates = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
-
-        self.save_image(
-                    self._encode_to_bytes(horizontal_candidates),
-                    "./TEMP/output/DEBUG/horizontal_candidates.jpg"
-                    )
-        # ruled_mask = self._get_ruled_mask(horizontal_candidates, image)
-        return cv2.subtract(image, horizontal_candidates)
-
-    def _get_ruled_mask(self, horizontal_candidates: MatLike, image: MatLike):
-        """## UNSTABLE
-        ### Experimental (removed) substep to filter handdrawn lines."""
-        ### Use HoughLinesP to validate: only accept near-perfect horizontal lines
-        lines = cv2.HoughLinesP(horizontal_candidates, rho=1, theta=np.pi / 180, threshold=80,
-                                minLineLength=int(NORMAL_SIZE * 0.30),
-                                maxLineGap=10)
-
-        #### Filter to only near-perfect horizontal lines (angle < 1 degree)
-        strict_lines = []
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
+    @staticmethod
+    def _build_ruled_mask(candidates: MatLike, shape: tuple,
+                          min_span: float = 0.50, max_angle_deg: float = 3.0) -> MatLike:
+        """Return a binary mask of near-horizontal, full-width ruled lines."""
+        mask = np.zeros(shape[:2], dtype=np.uint8)
+        lines = cv2.HoughLinesP(candidates, rho=1, theta=np.pi/180,
+                                threshold=50,
+                                minLineLength=int(shape[1] * min_span),
+                                maxLineGap=20)
+        if lines is None:
+            return mask
+        for x1, y1, x2, y2 in lines[:, 0]:
             angle = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
-            if angle < 1.0:
-                strict_lines.append((x1, y1, x2, y2))
+            if angle <= max_angle_deg:
+                cv2.line(mask, (x1, y1), (x2, y2), 255, thickness=3)
+        return mask
 
-        #### Validate even spacing: ruled lines should be evenly spaced
-        # y_positions = sorted(set(y1 for x1, y1, x2, y2 in strict_lines))
-        # gaps = [y_positions[i+1] - y_positions[i] for i in range(len(y_positions)-1)]
-        # median_gap = np.median(gaps)
-
-        ruled_mask = np.zeros_like(image)
-        for x1, y1, x2, y2 in strict_lines:
-            cv2.line(ruled_mask, (x1, y1), (x2, y2), 255, 3)
-
-        cleanup_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-        ruled_mask = cv2.dilate(ruled_mask, cleanup_kernel, iterations=1)
-
-        return ruled_mask
-    #endregion
+    def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: float = 0.60) -> MatLike:
+        """Remove ruled pad-paper lines from a binary/edge image leaving only hand-drawn content."""
+        h_kernel_length = int(image.shape[1] * length_percent)
+        h_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
+        candidates = cv2.morphologyEx(image, cv2.MORPH_OPEN, h_kernel)
+        ruled_mask = BoxSegmenterOldFunctions._build_ruled_mask(candidates, image.shape)
+        v_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
+        ruled_mask = cv2.dilate(ruled_mask, v_kernel, iterations=1)
+        return cv2.subtract(image, ruled_mask)
 
 
 # MARK: Main
