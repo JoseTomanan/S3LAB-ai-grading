@@ -13,7 +13,7 @@
   import Pagination from '$lib/components/Pagination.svelte';
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import AddTestInstance from './AddTestInstance.svelte';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
+  import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
   
   let isPageLoading: boolean = true;
   let instances: TestInstance[] = [];
@@ -44,10 +44,7 @@
   <span class="flex flex-row items-center justify-between mb-4">
     <span class="flex flex-row gap-x-2">
       <a href="/">
-        <IconHome class="size-6"/>
-      </a>
-      <a href="/sections">
-        <MdiPeopleOutline class="size-6"/>
+        <IconHome class="size-8"/>
       </a>
     </span>
     <h1>Test instances</h1>
@@ -59,16 +56,17 @@
     </Dialog.Root>
   </span>
   <div class="flex flex-col gap-3">
+    <a href="/sections" class="w-fit text-base opacity-60 hover:underline">
+      ←  Go to sections
+    </a>
     {#if isPageLoading}
       {#each { length: 2 } as _}
         <Skeleton class="h-16 w-full grayscale-100"/>
       {/each}
     {:else if instances.length == 0}
       <div class="flex flex-col items-end text-right mt-2 opacity-60">
-        <svg class="size-10 -mb-2 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <IconArrow />
-        </svg>
-        <p>No test instances yet &mdash; tap here to add one.</p>
+        <IconArrow class="size-10"/>
+        <p>No test instances yet &mdash; tap here to add one!</p>
       </div>
     {:else}
       {#each paginationValues as instance}
