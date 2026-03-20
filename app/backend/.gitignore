@@ -2,17 +2,10 @@
 
 
 ## ================================
-# /TEMP/input/*
-# !/TEMP/input/corner_positions
-
-# /TEMP/output/**.jpg
-# /TEMP/output/DEBUG/*
-# /TEMP/output/**/_09_sections/*
+/TEMP/input/**/*.jpg
+/TEMP/input/**/*.jpeg
+/TEMP/output/**/*.jpg
 ## ================================
-
-#region TEST FILES SETTING 2
-/TEMP/*
-#endregion
 
 
 /static/images/*
