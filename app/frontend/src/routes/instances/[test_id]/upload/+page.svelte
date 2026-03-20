@@ -156,7 +156,7 @@
           onchange={handleFiles}
           disabled={isOperationStarted}
       />
-  <div class="card grid grid-cols-2 gap-x-4">
+  <!-- <div class="card grid grid-cols-2 gap-x-4">
     <div class="space-y-1.5">
       <Label>Segmentation strategy</Label>
       <RadioGroup.Root bind:value={segmentationStrategy}>
@@ -183,7 +183,7 @@
         </div>
       </RadioGroup.Root>
     </div>
-  </div>
+  </div> -->
   <Separator/>
   
   {#if !formFiles}
