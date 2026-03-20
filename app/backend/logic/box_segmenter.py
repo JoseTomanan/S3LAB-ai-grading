@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import cv2
 from itertools import combinations
@@ -340,10 +341,10 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
     #endregion
 
 
-# MARK: Main
+
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedD.jpeg"
+    FILENAME = sys.argv[1] if len(sys.argv) > 1 else "testRuledDottedA.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
 

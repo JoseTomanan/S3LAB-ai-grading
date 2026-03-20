@@ -1,3 +1,4 @@
+import sys
 import cv2
 from cv2.typing import MatLike
 import numpy as np
@@ -54,7 +55,7 @@ class ImageModifier:
 
 if __name__ == "__main__":
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedA.jpeg"
+    FILENAME = sys.argv[1] if len(sys.argv) > 1 else "testRuledDottedA.jpeg"
     GET_INPUT = lambda x: f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x: f"./TEMP/output/{x}"
 
