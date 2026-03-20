@@ -183,7 +183,7 @@ class DocumentScanner:
         if ratio > MAX_ASPECT_RATIO or ratio < 1.0 / MAX_ASPECT_RATIO:
             return False
 
-        if not is_valid_quad(quad):
+        if not is_valid_quad(quad, max_tilt_deg=180.0):
             return False
 
         return True
