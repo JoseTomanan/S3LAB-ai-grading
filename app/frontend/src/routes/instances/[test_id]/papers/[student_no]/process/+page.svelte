@@ -1,6 +1,7 @@
 <script lang="ts">
   const { data } = $props();
 
+  import { onDestroy } from 'svelte';
     import { dataUrlToFile } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
@@ -110,6 +111,12 @@
   }
 
   let isCommitmentOngoing = $state(false);
+  let pollInterval: ReturnType<typeof setInterval> | null = $state(null);
+
+  onDestroy(() => {
+    if (pollInterval) clearInterval(pollInterval);
+  });
+
   async function validateAndCommit(accept: boolean) {
     if (isCommitmentOngoing === true)
       return;
@@ -129,10 +136,26 @@
               }
             );
         switch (response.status) {
-          case 200:
-            alert("Review has been accepted.");
-            window.location.reload();
-            break;
+          case 202:
+            pollInterval = setInterval(async () => {
+              const res = await fetch(
+                `/api/student_answers/${data.test_id}/statuses`,
+                { method: "GET" }
+              );
+              if (res.ok) {
+                const result = await res.json();
+                const thisStudent = result.statuses.find(
+                  (s: { student_no: string }) => s.student_no === data.student_no
+                );
+                if (thisStudent?.is_done_rendering) {
+                  clearInterval(pollInterval!);
+                  pollInterval = null;
+                  isCommitmentOngoing = false;
+                  window.location.reload();
+                }
+              }
+            }, 5000);
+            return;
           default:
             const responseBody = await response.json();
             alert(`${response.status}: ${responseBody.detail}`);
@@ -144,7 +167,7 @@
     } catch {
       console.log("Catch kita kase nafall ka");
     } finally {
-      isCommitmentOngoing = false;
+      if (!pollInterval) isCommitmentOngoing = false;
     }
   }
 
