@@ -10,3 +10,12 @@ __pycache__/*
 # **/ignoreable/*
 
 .vscode
+
+
+## For claude
+**/.claude
+**/.claude*
+**/.anthropic
+**/.anthropic*
+**/.claude_cache/
+**/.claude_cache/**
