@@ -567,7 +567,8 @@ def _label_save_boxes(
                         )).first()
         
         if test_item is None:
-            raise Exception("This is not supposed to happen. Read your code again.")
+            print(f"INTERNAL:\tItem not found because label={item_number} is not valid. Continuing...")
+            continue
 
         item_id = test_item.item_id
         print(f"INTERNAL:\tLabel {item_number} will be stored in {item_id}")
