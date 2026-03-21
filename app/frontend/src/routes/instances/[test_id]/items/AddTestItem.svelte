@@ -17,8 +17,8 @@
   let formItemLabel: string = $state("");
   let formItemQuestion: string = $state("");
   let formItemIsProblemSolving: boolean = $state(false);
-  let formItemRQ: {question: string, points: number}[] = $state([{question: "", points: 0}]);
-  let formItemEA: {question: string, points: number} = $state({question: "", points: 0});
+  let formItemRQ: {question: string, points: number}[] = $state([{question: "", points: 1}]);
+  let formItemEA: {question: string, points: number} = $state({question: "", points: 1});
 
   let submittableEARQ: string = "";
 
@@ -26,12 +26,14 @@
     isOperationOngoing = true;
 
     if (formItemIsProblemSolving) {
-      for (const item of formItemRQ) {
-        if (item.points != 0)
-          submittableEARQ = submittableEARQ.concat(`${item.question} [${item.points}pts];`);
-      }
+      // Convert the rubric questions array for problem-solving items into a semicolon-delimited string,
+      // including only questions with nonzero points and non-blank text, each formatted as "question [Npts]".
+      submittableEARQ = formItemRQ
+            .filter(item => item.points != 0 && item.question.trim() !== "")
+            .map(item => `${item.question} [${item.points}pts]`)
+            .join(';');
     } else {
-      submittableEARQ = `${formItemEA.question} [${formItemEA.points}pts]`
+      submittableEARQ = `${formItemEA.question} [${formItemEA.points}pts]`;
     }
 
     try {
@@ -76,12 +78,13 @@
       <Label for="prob_sol" class="font-normal">Problem solving</Label>
     </span>
   </RadioGroup.Root>
+  
   {#if formItemIsProblemSolving}
     <Label for="r_q"
             class="flex flex-row justify-between">
       Rubric questions
       <button class="px-1 py-0 m-0 bg-secondary"
-              onclick={() => {formItemRQ.push({question: "", points: 0})}}>
+              onclick={() => {formItemRQ.push({question: "", points: 1})}}>
         <MdiPlus class="size-3"/>
       </button>
     </Label>
@@ -98,6 +101,7 @@
         </span>
       {/each}
     </div>
+  
   {:else}
     <Label for="e_a">Expected answer</Label>
     <span class="flex flex-row gap-1">
