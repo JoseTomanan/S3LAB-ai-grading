@@ -125,6 +125,7 @@ async def update_answer_segmentation(
             test_id: str,
             student_no: str,
             item_id: int,
+            background_tasks: BackgroundTasks,
             file: UploadFile = File(...),
             points: str = Form(...),
             session: Session = Depends(get_session)
@@ -134,8 +135,7 @@ async def update_answer_segmentation(
         points_data = json.loads(points)
         required = ["ul", "ur", "lr", "ll"]
         for corner in required:
-            # FIXED: Changed points_ → points_data (was causing NameError)
-            if corner not in points_data:  
+            if corner not in points_data:
                 raise ValueError(f"Missing corner point: {corner}")
             if not all(k in points_data[corner] for k in ["x", "y"]):
                 raise ValueError(f"Point {corner} missing x/y coordinates")
@@ -146,74 +146,38 @@ async def update_answer_segmentation(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid points format: {str(e)}"
                 )
-    
+
+    # ===== RESOLVE ITEM LABEL =====
+    test_item = session.get(TestItem, item_id)
+    if not test_item:
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test item with ID '{item_id}' not found"
+                )
+
     # ===== IMAGE PROCESSING =====
     contents = await file.read()
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
     img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
-    
-    # ===== STORAGE & RESPONSE =====
+
+    # ===== SAVE IMAGE =====
     safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
     filepath = TEMP_DIR / safe_filename
-    
     with open(filepath, "wb") as f:
         f.write(img_bytes)
-    
-    # Create or update TestPaperInstance
-    paper = session.exec(
-                select(TestPaperInstance).where(
-                    TestPaperInstance.test_id == test_id,
-                    TestPaperInstance.student_no == student_no
-                )).first()
-    
-    if not paper:
-        paper = TestPaperInstance(
-                    test_id=test_id,
-                    student_no=student_no,
-                    is_done_rendering=False
-                    )
-        session.add(paper)
-        session.commit()
-        session.refresh(paper)
 
-    assert paper is not None
-    
-    # Create or update StudentAnswer
-    answer = session.exec(
-                select(StudentAnswer).where(
-                    StudentAnswer.paper_id == paper.paper_id,
-                    StudentAnswer.item_id == item_id
-                )
-                ).first()
-    
-    if not answer:
-        answer = StudentAnswer(
-                    paper_id=paper.paper_id,
-                    item_id=item_id, 
-                    image_directory=f"/api/temp/{safe_filename}",
-                    ai_evaluation="",
-                    is_done_rendering=False,
-                    )
-        session.add(answer)
-        session.commit()
-        session.refresh(answer)
-    else:
-        answer.image_directory = f"/api/temp/{safe_filename}"
-        answer.ai_evaluation = ""
-        answer.is_done_rendering = False
-        session.add(answer)
+    image_dir = f"/api/temp/{safe_filename}"
 
-    session.commit()
-    session.refresh(answer)
+    # ===== COMMIT VIA BACKGROUND TASK =====
+    boxes_info = [{"image_directory": image_dir, "item_number": test_item.label}]
+    background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
 
-    # Automatic AI evaluation
-    try:
-        evaluate_image_logic(answer.answer_id, session)
-    except Exception as e:
-        print(f"INTERNAL:\tAI evaluation failed for answer {answer.answer_id}: {e}")
-
-    return {"image_directory": f"/api/temp/{safe_filename}"}
+    return Response(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=json.dumps({"image_directory": image_dir}),
+            media_type="application/json"
+            )
 
 
 @router.get("/{test_id}/statuses")
@@ -663,10 +627,12 @@ def _commit_boxes(
     for box in boxes_info:
         image_dir = box["image_directory"]
         item_number = box["item_number"]
-        item_id = session.exec(
+        item = session.exec(
                         select(TestItem).where(
                             TestItem.label == item_number,
-                        )).first().item_id
+                        )).first()
+        assert item is not None
+        item_id = item.item_id
         
         answer = session.exec(
                     select(StudentAnswer).where(
