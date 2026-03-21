@@ -189,8 +189,8 @@
       <img class="border"
             src={responseImage} alt="Test item"/>
     {:else}
-      <span class="py-4 border bg-muted text-muted-foreground flex flex-col items-center">
-        <MdiUpload class="h-8 w-full"/>
+      <span class="py-4 border card flex flex-col items-center">
+        <MdiUpload class="h-8 w-full opacity-75"/>
         <p>Upload an image to start cropping.</p>
       </span>
     {/if}
