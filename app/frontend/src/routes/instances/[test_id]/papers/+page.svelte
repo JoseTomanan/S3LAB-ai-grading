@@ -12,6 +12,7 @@
   import { createPoller } from '$lib/utils/poller.ts';
 
   let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);
+  let isPolling = $derived(perStudentStatuses.some(s => !s.is_done_rendering));
 
   const poller = createPoller(async () => {
     const result = await api<{ statuses: GetEvaluationsResponse[] }>(
@@ -22,7 +23,7 @@
   }, 5000);
 
   onMount(() => {
-    if (perStudentStatuses.some(s => !s.is_done_rendering)) {
+    if (isPolling) {
       poller.start();
     }
   });
@@ -34,7 +35,7 @@
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
   <h1 class="text-left font-semibold w-full flex justify-between items-center gap-x-2">
     Test papers
-    {#if poller.active}
+    {#if isPolling}
       <Spinner class="size-4 text-muted-foreground/80"/>
     {/if}
   </h1>
