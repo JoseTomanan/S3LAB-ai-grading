@@ -195,8 +195,8 @@ class BlobDetector:
 
             mask_outer = np.zeros_like(roi)
             mask_inner = np.zeros_like(roi)
-            cv2.circle(mask_outer, center, outer_r, 255, -1)
-            cv2.circle(mask_inner, center, inner_r, 255, -1)
+            cv2.circle(mask_outer, center, outer_r, 255, -1)  # type: ignore[call-overload]
+            cv2.circle(mask_inner, center, inner_r, 255, -1)  # type: ignore[call-overload]
             ring_mask = cv2.subtract(mask_outer, mask_inner)
 
             ring_pixels = np.sum(ring_mask > 0)
@@ -313,7 +313,7 @@ class BlobDetector:
                     child = hierarchy[0][i][2]  # first child index
                     while child != -1:
                         if _is_fillable_contour(contours[child]):
-                            cv2.drawContours(filled, contours, child, 255, thickness=cv2.FILLED)
+                            cv2.drawContours(filled, contours, child, 255, thickness=cv2.FILLED)  # type: ignore[call-overload]
                         child = hierarchy[0][child][0]  # next sibling
                     continue
                 x, y, w, h = cv2.boundingRect(contour)
@@ -321,7 +321,7 @@ class BlobDetector:
                     continue
                 if min(w, h) / max(w, h) < 0.05:
                     continue
-                cv2.drawContours(filled, contours, i, 255, thickness=cv2.FILLED)
+                cv2.drawContours(filled, contours, i, 255, thickness=cv2.FILLED)  # type: ignore[call-overload]
 
         return filled
 
