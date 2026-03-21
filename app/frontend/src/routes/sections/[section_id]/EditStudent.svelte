@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
 
   let { section_id = $bindable(), student_no, name = $bindable() } = $props();
 
@@ -9,7 +11,7 @@
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
-  
+
   import type { Section } from '$lib/index.ts';
 	import SafeDelete from '$lib/components/SafeDelete.svelte';
 
@@ -35,18 +37,9 @@
   onMount(async () => {
     isSectionsLoading = true;
     try {
-      const response = await fetch(`/api/sections/`);
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          dropdownSections = result;
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      dropdownSections = await api<Section[]>('/api/sections/');
     } catch (e) {
-      alert("Failed to fetch sections.\n"+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch sections.\n" + e);
     } finally {
       isSectionsLoading = false;
     }
@@ -59,29 +52,19 @@
     }
     isRequestLoading = true;
     try {
-      const response = await fetch(`/api/students/${student_no}`, {
+      await api(`/api/students/${student_no}`, {
         method: "PATCH",
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           name: formName,
           section_id: parseInt(formSectionId),
         })
       });
-
-      switch (response.status) {
-        case 200:
-          alert("Student updated successfully!");
-          // window.location.reload();
-          name = formName;
-          section_id = Number(formSectionId);
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      alert("Student updated successfully!");
+      name = formName;
+      section_id = Number(formSectionId);
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to edit student: " + e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit student: " + e);
     } finally {
       isRequestLoading = false;
     }
@@ -90,19 +73,12 @@
   async function deleteStudent() {
     isRequestLoading = true;
     try {
-      const response = await fetch(`/api/students/${student_no}`, {method: "DELETE",});
-
-      switch (response.status) {
-        case 204:
-          alert("Student deleted successfully!");
-          section_id = -1;
-          // window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      await api(`/api/students/${student_no}`, { method: "DELETE" });
+      alert("Student deleted successfully!");
+      section_id = -1;
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to delete student: " + e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete student: " + e);
     } finally {
       isRequestLoading = false;
     }
@@ -153,19 +129,6 @@
       <SafeDelete toggle={isWantsToDelete}
                   onDelete={deleteStudent}
                   />
-      <!--
-      {#if !isWantsToDelete}
-        <button class="button-destructive"
-                  onclick={() => isWantsToDelete = true}>
-          <MdiDelete class="size-6 mx-auto"/>
-        </button>
-      {:else}
-        <button class="button-destructive text-sm"
-                  onclick={deleteStudent}>
-          Confirm delete
-        </button>
-      {/if}
-      -->
     </div>
   </Dialog.Footer>
 </Dialog.Content>
