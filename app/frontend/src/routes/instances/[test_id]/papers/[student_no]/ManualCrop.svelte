@@ -1,9 +1,11 @@
 <script lang="ts">
   import MdiUpload from '~icons/mdi/upload';
 
+  import Cropper from 'cropperjs';
+  import 'cropperjs/dist/cropper.css';
+
   import { invalidateAll } from '$app/navigation';
   import { apiForm, ApiError } from '$lib/utils/api.ts';
-  import { Cropper, type CropperInstance } from "svelte-cropper";
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -17,7 +19,7 @@
 
   let isOperationOngoing: boolean = $state(false);
 
-  let canvasCropper: CropperInstance | null = $state(null);
+  let canvasCropper: Cropper | null = $state(null);
   let canvasFile: FileList | undefined = $state();
   let canvasImageUrl: string | null = $state(null);
 
@@ -33,6 +35,27 @@
       width: boxSize,
       height: boxSize
     });
+  }
+
+  function initCropper(node: HTMLImageElement, _src: string) {
+    canvasCropper = new Cropper(node, {
+      viewMode: 2,
+      dragMode: 'crop',
+      initialAspectRatio: 1,
+      autoCropArea: 0.1,
+      ready(event: Event) {
+        const inst = (event.currentTarget as HTMLImageElement & { cropper: Cropper }).cropper;
+        inst.zoomTo(0);
+        inst.scaleY(1);
+        inst.scaleX(1);
+        inst.rotateTo(0);
+        handleCropperReady();
+      }
+    });
+    return {
+      update(src: string) { canvasCropper?.replace(src); },
+      destroy() { canvasCropper?.destroy(); canvasCropper = null; }
+    };
   }
 
   function handleFileUpload(e: Event) {
@@ -109,14 +132,16 @@
         {isOperationOngoing ? "Sending..." : "Send"}
       </Button>
     </span>
-    
+
     {#if canvasImageUrl}
       <div id="canvasArea"
             class="relative flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
-        <Cropper bind:cropper={canvasCropper}
-              src={canvasImageUrl}
-              cropper_props={{viewMode: 2, dragMode: "crop", initialAspectRatio: 1, autoCropArea: 0.1, ready: handleCropperReady}}
-              />
+        <img
+          use:initCropper={canvasImageUrl}
+          src={canvasImageUrl}
+          alt="cropper_image"
+          style="max-width: 100%; opacity: 0;"
+        />
         {#if isOperationOngoing}
           <div class="absolute top-1 left-1 bg-white/80">
             <Spinner class="size-16 text-chart-3" />
