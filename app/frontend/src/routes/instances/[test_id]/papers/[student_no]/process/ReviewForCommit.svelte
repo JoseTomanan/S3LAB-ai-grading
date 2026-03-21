@@ -8,13 +8,15 @@
 </script>
 
 
-<Dialog.Content>
+<Dialog.Content showCloseButton={false}
+                onInteractOutside={(e) => e.preventDefault()}
+                onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
     <button class="button-secondary flex-1 text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
             disabled={isCommitmentOngoing}
             onclick={onAccept}>
       {#if isCommitmentOngoing}
-        Evaluating...
+        Identifying labels...
         <Spinner />
       {:else}
         Accept and evaluate
