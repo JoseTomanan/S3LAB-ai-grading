@@ -31,6 +31,7 @@
   let paramNumBoxes: number | null = $state(null);
   let formFileRecords: FileRecord[] = $state([]);
   let isAskingForValidation: boolean = $state(false);
+  let isReviewDialogOpen: boolean = $state(false);
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
 
   function handleFiles() {
@@ -90,6 +91,7 @@
       supposedScans = (result.boxes ?? [])
                         .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
       isAskingForValidation = true;
+      isReviewDialogOpen = true;
     } catch(e) {
       alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send raw image for processing:\n" + e);
     } finally {
@@ -129,6 +131,7 @@
           body: JSON.stringify({ boxes: supposedScans }),
         });
 
+        isReviewDialogOpen = false;
         commitPoller.start();
         return;
       }
@@ -211,7 +214,7 @@
         <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
           {#each formFileRecords as p}
-            <div class="relative flex flex-col justify-end min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
+            <div class="relative flex flex-col items-center justify-end min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
               <img src={p.url}
                     alt={p.name}
                     class="aspect-auto"
@@ -237,7 +240,7 @@
     </div>
 
   {:else}
-    <Dialog.Root>
+    <Dialog.Root bind:open={isReviewDialogOpen}>
       <Dialog.Trigger class="button-secondary text-sm">
         Open segmentation results
       </Dialog.Trigger>
@@ -247,7 +250,14 @@
                         onReject={() => validateAndCommit(false)}
                         />
     </Dialog.Root>
-    <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
+    {#if isCommitmentOngoing}
+      <div class="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
+        <Spinner class="size-4"/>
+        Evaluating answers...
+      </div>
+    {:else}
+      <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
+    {/if}
   {/if}
 </div>
 

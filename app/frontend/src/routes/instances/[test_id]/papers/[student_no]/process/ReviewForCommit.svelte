@@ -1,5 +1,8 @@
 <script lang="ts">
   let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
+  let hasDuplicateLabels = $derived(
+    new Set(supposedScans.map((s: { item_number: string }) => s.item_number)).size !== supposedScans.length
+  );
   import IconLabel from "~icons/mdi/label";
 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
@@ -12,8 +15,8 @@
                 onInteractOutside={(e) => e.preventDefault()}
                 onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
-    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
-            disabled={isCommitmentOngoing}
+    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing || hasDuplicateLabels ? "opacity-50" : ""}"
+            disabled={isCommitmentOngoing || hasDuplicateLabels}
             onclick={onAccept}>
       {#if isCommitmentOngoing}
         Identifying labels...
