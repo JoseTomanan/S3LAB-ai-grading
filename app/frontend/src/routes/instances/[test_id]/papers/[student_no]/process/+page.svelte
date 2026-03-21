@@ -24,6 +24,7 @@
 
   import { rotateImage, flipImage } from '$lib/utils.ts';
 	import ReviewForCommit from './ReviewForCommit.svelte';
+	import { Separator } from '$lib/components/ui/separator/index.ts';
 
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
@@ -203,7 +204,8 @@
       {/if}
     </Button>
 
-    <div class="card flex flex-col items-center justify-center">
+    <Separator/>
+    <div class="subcontainer card flex flex-col items-center justify-center mx-auto">
       {#if formFileRecords.length === 0}
         <IconImagePreview class="size-12 opacity-60"/>
         <h6 class="opacity-60">
@@ -211,13 +213,15 @@
         </h6>
       
       {:else}
-        <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
+        <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 pt-1 pb-3
+                    -mx-6 px-6 md:-mx-18 md:px-18 "
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
           {#each formFileRecords as p}
-            <div class="relative flex flex-col items-center justify-end min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
+            <div class="relative flex flex-col justify-end
+                        min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
               <img src={p.url}
                     alt={p.name}
-                    class="aspect-auto"
+                    class="aspect-auto block"
                     />
               <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
                 <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
