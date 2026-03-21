@@ -1,71 +1,44 @@
 <script lang="ts">
   const { data } = $props();
 
-    import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
   import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
 
   import type { GetEvaluationsResponse } from '$lib/index.ts';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import { api } from '$lib/utils/api.ts';
+  import { createPoller } from '$lib/utils/poller.ts';
 
-  let isPageLoading: boolean = $state(true);
-  let perStudentStatuses: GetEvaluationsResponse[] = $state([]);
-  let pollInterval: ReturnType<typeof setInterval> | null = $state(null);
+  let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);
 
-  async function fetchStatuses() {
-    const response = await fetch(
-          `/api/student_answers/${data.test_id}/statuses`,
-          {
-            method: "GET",
-            headers: {'Content-Type': 'application/json',},
-          }
-          );
-
-    if (response.ok) {
-      const result = await response.json();
-      perStudentStatuses = result.statuses;
-
-      if (perStudentStatuses.length > 0 && perStudentStatuses.every(s => s.is_done_rendering)) {
-        if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-      }
-    }
-  }
+  const poller = createPoller(async () => {
+    const result = await api<{ statuses: GetEvaluationsResponse[] }>(
+      `/api/student_answers/${data.test_id}/statuses`
+    );
+    perStudentStatuses = result.statuses;
+    return perStudentStatuses.length > 0 && perStudentStatuses.every(s => s.is_done_rendering);
+  }, 5000);
 
   onMount(() => {
-    (async () => {
-      try {
-        await fetchStatuses();
-      } catch(e) {
-        alert("Failed to fetch test paper statuses:\nERROR: "+e);
-      } finally {
-        isPageLoading = false;
-      }
-
-      if (perStudentStatuses.some(s => !s.is_done_rendering)) {
-        pollInterval = setInterval(fetchStatuses, 5000);
-      }
-    })();
-
-    return () => { if (pollInterval) clearInterval(pollInterval); };
+    if (perStudentStatuses.some(s => !s.is_done_rendering)) {
+      poller.start();
+    }
   });
+
+  onDestroy(() => poller.stop());
 </script>
 
 
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
   <h1 class="text-left font-semibold w-full flex justify-between items-center gap-x-2">
     Test papers
-    {#if pollInterval}
+    {#if poller.active}
       <Spinner class="size-4 text-muted-foreground/80"/>
     {/if}
   </h1>
-  {#if isPageLoading}
-    {#each { length: 3 } as _}
-      <Skeleton class="subcontainer h-10 w-full grayscale"/>
-    {/each}
-
-  {:else if perStudentStatuses.length == 0}
+  {#if perStudentStatuses.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 
   {:else}
