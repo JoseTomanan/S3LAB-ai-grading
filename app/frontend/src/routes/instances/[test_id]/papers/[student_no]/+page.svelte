@@ -43,6 +43,7 @@
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
   let pollingItemIds: Set<number> = $state(new Set());
+  let cropDialogOpen: Map<number, boolean> = $state(new Map());
 
   const cropPoller = createPoller(async () => {
     const result = await api<StudentAnswer[]>(
@@ -64,6 +65,7 @@
   onDestroy(() => cropPoller.stop());
 
   function handleCropSubmitted(itemId: number) {
+    cropDialogOpen = new Map(cropDialogOpen.set(itemId, false));
     pollingItemIds = new Set(pollingItemIds.add(itemId));
     cropPoller.start();
   }
@@ -144,7 +146,9 @@
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
-            <Dialog.Root>
+            <Dialog.Root
+              open={cropDialogOpen.get(studentItem.item_id) ?? false}
+              onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
               <Dialog.Trigger class="button-outline">
                 <MdiCrop/>
               </Dialog.Trigger>
