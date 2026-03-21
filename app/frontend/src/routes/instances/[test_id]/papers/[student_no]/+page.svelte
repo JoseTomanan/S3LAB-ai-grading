@@ -1,9 +1,10 @@
 <script lang="ts">
   const { data } = $props();
 
-  
+  import { onDestroy } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import { createPoller } from '$lib/utils/poller.ts';
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';
@@ -41,6 +42,32 @@
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
+  let pollingItemIds: Set<number> = $state(new Set());
+
+  const cropPoller = createPoller(async () => {
+    const result = await api<StudentAnswer[]>(
+      `/api/student_answers/${data.test_id}/${data.student_no}`
+    );
+    for (const itemId of pollingItemIds) {
+      const answer = result.find(a => a.item_id === itemId);
+      if (answer?.is_done_rendering) {
+        pollingItemIds = new Set([...pollingItemIds].filter(id => id !== itemId));
+      }
+    }
+    if (pollingItemIds.size === 0) {
+      await invalidateAll();
+      return true;
+    }
+    return false;
+  }, 5000);
+
+  onDestroy(() => cropPoller.stop());
+
+  function handleCropSubmitted(itemId: number) {
+    pollingItemIds = new Set(pollingItemIds.add(itemId));
+    cropPoller.start();
+  }
+
 
 
   async function reevaluateAnswer(answer_id: number) {
@@ -92,7 +119,7 @@
   {:else}
     <div class="overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
-      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)}
+      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
         <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
@@ -123,7 +150,8 @@
               </Dialog.Trigger>
               <ManualCrop test_id={data.test_id}
                           student_no={data.student_no}
-                          item_id={studentItem.item_id}/>
+                          item_id={studentItem.item_id}
+                          onCropSubmitted={() => handleCropSubmitted(studentItem.item_id)}/>
             </Dialog.Root>
             <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
                             button-outline px-0 py-0`}

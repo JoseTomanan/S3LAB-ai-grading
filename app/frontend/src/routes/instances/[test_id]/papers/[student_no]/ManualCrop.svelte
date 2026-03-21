@@ -4,17 +4,17 @@
   import Cropper from 'cropperjs';
   import 'cropperjs/dist/cropper.css';
 
-  import { invalidateAll } from '$app/navigation';
   import { apiForm, ApiError } from '$lib/utils/api.ts';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
 
-  let { test_id, student_no, item_id } = $props<{
+  let { test_id, student_no, item_id, onCropSubmitted } = $props<{
     test_id: string,
     student_no: string,
-    item_id: number
+    item_id: number,
+    onCropSubmitted?: (imageDir: string) => void
   }>();
 
   let isOperationOngoing: boolean = $state(false);
@@ -23,6 +23,7 @@
   let canvasFile: FileList | undefined = $state();
   let canvasImageUrl: string | null = $state(null);
 
+  let croppedPreviewUrl: string | null = $state(null);
   let responseImage: string = $state("");
 
   function handleCropperReady() {
@@ -54,7 +55,10 @@
     });
     return {
       update(src: string) { canvasCropper?.replace(src); },
-      destroy() { canvasCropper?.destroy(); canvasCropper = null; }
+      destroy() {
+        canvasCropper?.destroy(); canvasCropper = null;
+        if (croppedPreviewUrl) { URL.revokeObjectURL(croppedPreviewUrl); croppedPreviewUrl = null; }
+      }
     };
   }
 
@@ -63,25 +67,30 @@
     const file = target.files?.[0];
 
     if (file) {
+      if (croppedPreviewUrl) {
+        URL.revokeObjectURL(croppedPreviewUrl);
+        croppedPreviewUrl = null;
+      }
       if (canvasImageUrl)
         URL.revokeObjectURL(canvasImageUrl);
       canvasImageUrl = URL.createObjectURL(file);
     }
   }
 
-  async function sendCropRequest() {
-    isOperationOngoing = true;
+  const formData: FormData = new FormData();
+  
+  function cropImage() {
+    if (!canvasCropper || !canvasFile?.[0]) return;
 
-    const canvasRectangle: {x: number, y: number, width: number, height: number} = canvasCropper!.getData();
+    formData.append('file', canvasFile[0]);
+
+    const canvasRectangle: {x: number, y: number, width: number, height: number} = canvasCropper.getData();
     const returnablePoints: {x: number, y: number}[] = [
           { x: canvasRectangle.x, y: canvasRectangle.y },
           { x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y },
           { x: canvasRectangle.x+canvasRectangle.width, y: canvasRectangle.y+canvasRectangle.height },
           { x: canvasRectangle.x, y: canvasRectangle.y+canvasRectangle.height }
           ];
-
-    const formData: FormData = new FormData();
-    formData.append('file', canvasFile![0]);
 
     const formMetadata = {
           ul: { x: returnablePoints[0].x.toString(), y: returnablePoints[0].y.toString() },
@@ -91,6 +100,18 @@
           };
     formData.append('points', JSON.stringify(formMetadata));
 
+    const croppedCanvas = canvasCropper.getCroppedCanvas();
+    croppedCanvas.toBlob((blob) => {
+      if (blob) {
+        if (croppedPreviewUrl) URL.revokeObjectURL(croppedPreviewUrl);
+        croppedPreviewUrl = URL.createObjectURL(blob);
+        canvasImageUrl = null;
+      }
+    });
+  }
+
+  async function sendCropRequest() {
+    isOperationOngoing = true;
     try {
       const result = await apiForm<{ image_directory: string }>(
             `/api/student_answers/${test_id}/${student_no}/${item_id}`,
@@ -98,9 +119,12 @@
             "PATCH"
             );
       responseImage = result.image_directory;
+      if (croppedPreviewUrl) {
+        URL.revokeObjectURL(croppedPreviewUrl);
+        croppedPreviewUrl = null;
+      }
       canvasImageUrl = null;
-      alert("Addition successful.");
-      await invalidateAll();
+      onCropSubmitted?.(result.image_directory);
     } catch(e) {
       alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
     } finally {
@@ -126,14 +150,32 @@
             bind:files={canvasFile}
             onchange={handleFileUpload}
             />
-      <Button variant="secondary"
-            disabled={!canvasFile || !canvasImageUrl || isOperationOngoing}
-            onclick={() => sendCropRequest()}>
-        {isOperationOngoing ? "Sending..." : "Send"}
-      </Button>
+      {#if !croppedPreviewUrl}
+        <Button variant="outline"
+              disabled={!canvasFile || !canvasImageUrl}
+              onclick={cropImage}>
+          Crop image
+        </Button>
+      {:else}
+        <Button variant="secondary"
+              disabled={isOperationOngoing}
+              onclick={() => sendCropRequest()}>
+          {isOperationOngoing ? "Sending..." : "Send"}
+        </Button>
+      {/if}
     </span>
 
-    {#if canvasImageUrl}
+    {#if croppedPreviewUrl}
+      <div class="relative flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
+        <img class="border max-w-full"
+              src={croppedPreviewUrl} alt="Cropped preview" />
+        {#if isOperationOngoing}
+          <div class="absolute top-1 left-1 bg-white/80">
+            <Spinner class="size-16 text-chart-3" />
+          </div>
+        {/if}
+      </div>
+    {:else if canvasImageUrl}
       <div id="canvasArea"
             class="relative flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
         <img
@@ -142,11 +184,6 @@
           alt="cropper_image"
           style="max-width: 100%; opacity: 0;"
         />
-        {#if isOperationOngoing}
-          <div class="absolute top-1 left-1 bg-white/80">
-            <Spinner class="size-16 text-chart-3" />
-          </div>
-        {/if}
       </div>
     {:else if responseImage != ""}
       <img class="border"
