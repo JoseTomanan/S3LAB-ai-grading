@@ -1,42 +1,20 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  const { data } = $props();
 
   import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
   import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
   import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
-  import MdiPeopleOutline from '~icons/mdi/people-outline';
   import IconHome from '~icons/mdi/home-outline';
   import IconArrow from '~icons/mdi/arrow-up';
-  
+
   import type { TestInstance } from '$lib/index.ts';
-  
+
   import Pagination from '$lib/components/Pagination.svelte';
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import AddTestInstance from './AddTestInstance.svelte';
-  import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
-  
-  let isPageLoading: boolean = true;
-  let instances: TestInstance[] = [];
-  let paginationValues: TestInstance[];
 
-  onMount(async () => {
-    try {
-      const response = await fetch(`/api/test_instances`);
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          instances = result ? result : [];
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
-    } catch (e) {
-      alert("Failed to fetch test instances:\n"+e);
-    } finally {
-      isPageLoading = false;
-    }
-  });
+  let instances: TestInstance[] = $derived(data.instances);
+  let paginationValues: TestInstance[] = $state([]);
 </script>
 
 
@@ -59,11 +37,7 @@
     <a href="/sections" class="w-fit text-base opacity-60 hover:underline">
       Go to sections ↗
     </a>
-    {#if isPageLoading}
-      {#each { length: 2 } as _}
-        <Skeleton class="h-16 w-full grayscale-100"/>
-      {/each}
-    {:else if instances.length == 0}
+    {#if instances.length == 0}
       <div class="absolute top-0 right-0
                   flex flex-col items-end text-right mt-2 opacity-60">
         <IconArrow class="size-10"/>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import MdiUpload from '~icons/mdi/upload';
 
+  import { invalidateAll } from '$app/navigation';
+  import { apiForm, ApiError } from '$lib/utils/api.ts';
   import { Cropper, type CropperInstance } from "svelte-cropper";
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
@@ -67,24 +69,17 @@
     formData.append('points', JSON.stringify(formMetadata));
 
     try {
-      const response = await fetch(
+      const result = await apiForm<{ image_directory: string }>(
             `/api/student_answers/${test_id}/${student_no}/${item_id}`,
-            { method: "PATCH", body: formData, }
+            formData,
+            "PATCH"
             );
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          responseImage = result.image_directory;
-          canvasImageUrl = null;
-          alert("Addition successful.");
-          window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      responseImage = result.image_directory;
+      canvasImageUrl = null;
+      alert("Addition successful.");
+      await invalidateAll();
     } catch(e) {
-      alert("Failed to send points:\n"+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
     } finally {
       isOperationOngoing = false;
     }

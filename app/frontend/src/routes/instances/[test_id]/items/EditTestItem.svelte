@@ -1,7 +1,7 @@
 <script lang="ts">
     
-  import MdiDelete from "~icons/mdi/delete";
-
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
   import type { TestItem } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Button } from '$lib/components/ui/button/index.ts';
@@ -38,57 +38,28 @@
     }
 
     try {
-      const formBody = {
-            label: submittedTestItem.label,
-            question: submittedTestItem.question,
-            expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
-            };
-
-      console.log(formBody);
-      
-      const response = await fetch(
-            `/api/test_items/${test_id}/items/${submittedTestItem.item_id}`,
-            {
-              method: "PATCH",
-              headers: {'Content-Type': 'application/json',},
-              body: JSON.stringify(formBody),
-            }
-            );
-      
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          alert("Success: " + result.item_id);
-          window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      const result = await api<{ item_id: string }>(`/api/test_items/${test_id}/items/${submittedTestItem.item_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          label: submittedTestItem.label,
+          question: submittedTestItem.question,
+          expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
+        }),
+      });
+      alert("Success: " + result.item_id);
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to edit test item:\n"+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit test item:\n" + e);
     }
   }
 
   async function deleteTestItem() {
     try {
-      const response = await fetch(
-            `/api/test_items/${test_id}/items/${formTestItem.item_id}`,
-            {
-              method: "DELETE",
-              headers: {'Content-Type': 'application/json',},
-            }
-            );
-      
-      switch (response.status) {
-        case 204:
-          alert("Delete success.");
-          window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      await api(`/api/test_items/${test_id}/items/${formTestItem.item_id}`, { method: "DELETE" });
+      alert("Delete success.");
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to delete test item:\n"+e)
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete test item:\n" + e);
     }
   }
 </script>

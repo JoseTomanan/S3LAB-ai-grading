@@ -4,7 +4,7 @@
   import { navigating, page } from '$app/state';
   import type { LayoutData } from './$types.d.ts';
   import type { Snippet } from 'svelte';
-  import { onMount, setContext } from 'svelte';
+  import { setContext } from 'svelte';
 
   import ExportSheets from './ExportSheets.svelte';
 
@@ -12,8 +12,8 @@
   import IconTable from '~icons/mdi/table';
   import IconUpload from '~icons/mdi/tray-upload';
   import IconHome from '~icons/mdi/home-outline';
-  
-  import type { TestInstance, TestItem, TestItemsContext } from '$lib/index.ts';
+
+  import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
@@ -26,28 +26,10 @@
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
-  let activeTestInstance: TestInstance = $state({
-    name: "",
-    section_id: -1,
-    date: "",
-    test_id: data.test_id,
-    is_done_rendering: false,
-  });
+  let activeTestInstance: TestInstance = $derived(data.test_instance!);
 
-  let testItemsContext: TestItemsContext = $state({items: [], isLoading: false});
+  let testItemsContext: TestItemsContext = $state({items: data.test_items!, isLoading: false});
   setContext("testItemsContext", testItemsContext);
-
-  onMount(async () => {
-    testItemsContext.isLoading = true;
-    try {
-      activeTestInstance = data.test_instance!;
-      testItemsContext.items.push(...data.test_items!);
-    } catch (e) {
-      alert("Failed to fetch test instance details:\n"+e);
-    } finally {
-      testItemsContext.isLoading = false;
-    }
-  });
 </script>
 
 
@@ -118,8 +100,6 @@
   </nav>
   <div class="container -mt-4">
     {#if navigating.to}
-      <!--  largely untested; 
-        FIXME: remove this once verified that this is actually working -->
       <Skeleton class="grayscale-50 w-full h-64 rounded-none"/>
     {:else}
       {@render children()}

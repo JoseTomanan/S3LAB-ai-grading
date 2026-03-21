@@ -1,7 +1,8 @@
 <script lang="ts">
   const { test_id, student_no } = $props();
 
-    import { getContext, onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
+  import { api, ApiError } from '$lib/utils/api.ts';
 
   import MdiHeadReload from "~icons/mdi/head-reload";
   import MdiAlertBoxOutline from "~icons/mdi/alert-box-outline";
@@ -27,25 +28,13 @@
     isPageLoading = true;
     REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
     try {
-      const response = await fetch(
-            `/api/student_answers/${test_id}/results/${student_no}`,
-            {
-              method: "GET",
-              headers: {'Content-Type': 'application/json',},
-            }
+      const result = await api<{ evaluations: GetSpecificEvaluationResponse[] }>(
+            `/api/student_answers/${test_id}/results/${student_no}`
             );
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          questionItemEvals = result.evaluations;
-          REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      questionItemEvals = result.evaluations;
+      REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
     } catch (e) {
-      alert("Failed to fetch AI evaluations for given student:\n- ERROR: "+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch AI evaluations:\n" + e);
     } finally {
       isPageLoading = false;
     }
@@ -54,28 +43,17 @@
   async function reevaluateAnswer(answer_id: number) {
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
-      const response = await fetch(
+      const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
             `/api/answers/${answer_id}/reevaluate`,
-            {
-              method: "PATCH",
-              headers: {'Content-Type': 'application/json',},
-            }
+            { method: "PATCH" }
             );
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          questionItemEvals = questionItemEvals.map(ans => 
-                  ans.answer_id == result.answer_id 
-                  ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
-                  : ans
-                );
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      questionItemEvals = questionItemEvals.map(ans =>
+              ans.answer_id == result.answer_id
+              ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
+              : ans
+            );
     } catch (e) {
-      alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
