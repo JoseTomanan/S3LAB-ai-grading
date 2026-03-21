@@ -77,11 +77,12 @@
     }
   }
 
-  const formData: FormData = new FormData();
-  
+  let formData: FormData | null = $state(null);
+
   function cropImage() {
     if (!canvasCropper || !canvasFile?.[0]) return;
 
+    formData = new FormData();
     formData.append('file', canvasFile[0]);
 
     const canvasRectangle: {x: number, y: number, width: number, height: number} = canvasCropper.getData();
@@ -111,6 +112,7 @@
   }
 
   async function sendCropRequest() {
+    if (!formData) return;
     isOperationOngoing = true;
     try {
       const result = await apiForm<{ image_directory: string }>(
