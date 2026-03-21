@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
   import type { Section } from "$lib/index.ts";
 
   import * as Dialog from "$lib/components/ui/dialog/index.js";
@@ -22,18 +24,9 @@
   onMount(async () => {
     isItemsLoading = true;
     try {
-      const response = await fetch("/api/sections/");
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          dropdownItems = result;
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      dropdownItems = await api<Section[]>('/api/sections/');
     } catch (e) {
-      alert("Failed to fetch sections.\n"+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch sections.\n" + e);
     } finally {
       isItemsLoading = false;
     }
@@ -41,27 +34,20 @@
 
   async function addNewTestInstance(name: string, section_id: string) {
     try {
-      const response = await fetch(
-            "/api/test_instances",
-            {
-              method: "POST",
-              headers: {'Content-Type': 'application/json',},
-              body: JSON.stringify({
-                "name": name,
-                "section_id": section_id,
-                "date": new Date().toISOString(),
-              }),
-            }
-            );
-
-      if (response.ok) {
-        alert("Addition successful.");
-        window.location.reload();
-      } else {
-        alert(`Addition fail: ${response.status} ${response.statusText}`);
-      }
+      await api('/api/test_instances', {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          section_id,
+          date: new Date().toISOString(),
+        }),
+      });
+      alert("Addition successful.");
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to add new test instance. Check your network connection and try again.");
+      alert(e instanceof ApiError
+        ? `Addition fail: ${e.status} ${e.statusText}`
+        : "Failed to add new test instance. Check your network connection and try again.");
     }
   }
 </script>

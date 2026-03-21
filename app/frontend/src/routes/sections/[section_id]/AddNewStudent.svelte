@@ -2,6 +2,8 @@
 	
 	const { section_id } = $props();
 
+	import { invalidateAll } from '$app/navigation';
+	import { api, ApiError } from '$lib/utils/api.ts';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from '$lib/components/ui/input/index.ts';
@@ -14,30 +16,18 @@
 	async function addNewStudent() {
 		isLoading = true;
 		try {
-			const response = await fetch(
-						`/api/students`,
-						{
-							method: "POST",
-							headers: {'Content-Type': 'application/json',},
-							body: JSON.stringify({
-								"student_no": formStudentNo,
-								"name": formName,
-								"section_id": section_id,
-							})
-						}
-						);
-
-			switch (response.status) {
-				case 201:
-					const result = await response.json();
-					alert("Success: "+result);
-					window.location.reload();
-					break;
-				default:
-					alert(`${response.status} ${response.statusText}`);
-			}
+			const result = await api('/api/students', {
+				method: "POST",
+				body: JSON.stringify({
+					student_no: formStudentNo,
+					name: formName,
+					section_id: section_id,
+				})
+			});
+			alert("Success: " + result);
+			await invalidateAll();
 		} catch (e) {
-			alert("Failed to add new student:\nERROR: "+e);
+			alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new student:\n" + e);
 		} finally {
 			isLoading = false;
 		}

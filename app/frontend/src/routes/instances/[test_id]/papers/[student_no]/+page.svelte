@@ -2,6 +2,8 @@
   const { data } = $props();
 
   
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';
@@ -44,43 +46,29 @@
   async function reevaluateAnswer(answer_id: number) {
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
-      const response = await fetch(
+      const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
             `/api/answers/${answer_id}/reevaluate`,
-            {
-              method: "PATCH",
-              headers: {'Content-Type': 'application/json',},
-            }
+            { method: "PATCH" }
             );
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          studentItems = studentItems.map(ans => 
-                  ans.answer_id == result.answer_id 
-                  ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
-                  : ans
-                );
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      studentItems = studentItems.map(ans =>
+              ans.answer_id == result.answer_id
+              ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
+              : ans
+            );
     } catch (e) {
-      alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
   }
 
   async function deleteAnswer(item_id: number) {
-    console.log(item_id);
-    const response = await fetch(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
-    switch (response.status) {
-      case 204:
-        alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
-        window.location.reload();
-        break;
-      default:
-        alert(`${response.status} ${response.statusText}`);
+    try {
+      await api(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
+      alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
+      await invalidateAll();
+    } catch (e) {
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
     }
   }
 </script>
