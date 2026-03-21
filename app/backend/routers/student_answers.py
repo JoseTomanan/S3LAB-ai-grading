@@ -37,11 +37,11 @@ async def process_student_answer_image(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    print(f"INTERNAL:\tProceeding to labeling the boxes.")
+    print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
     ## _commit_boxes(boxes_info, test_id, student_no, session)
     background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
@@ -68,13 +68,13 @@ async def scan_then_label_save_boxes(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
     except:
         raise HTTPException(status_code=500, detail="Could not find any boxes.")
 
-    print(f"INTERNAL:\tProceeding to labeling the boxes.")
+    print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
 
     return {
@@ -524,13 +524,13 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
         processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
 
-        print(f"INTERNAL:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
+        print(f"INFO:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
 
     if num_boxes is not None:
         all_processed = all_processed[:num_boxes]
 
-    print(f"INTERNAL:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
+    print(f"INFO:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
     return all_processed
 
 
@@ -556,10 +556,10 @@ def _label_save_boxes(
             else:
                 item_number = item_number.strip()
         except Exception as e:
-            print(f"INTERNAL:\tFailed to extract item number for box {i}: {e}")
+            print(f"INFO:\tFailed to extract item number for box {i}: {e}")
             item_number = "NONE"
 
-        print(f"INTERNAL:\t{i}th detected label = {item_number}")
+        print(f"INFO:\t{i}th detected label = {item_number}")
 
         test_item = session.exec(
                         select(TestItem).where(
@@ -567,11 +567,11 @@ def _label_save_boxes(
                         )).first()
         
         if test_item is None:
-            print(f"INTERNAL:\tItem not found because label={item_number} is not valid. Continuing...")
+            print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
             continue
 
         item_id = test_item.item_id
-        print(f"INTERNAL:\tLabel {item_number} will be stored in {item_id}")
+        print(f"INFO:\tLabel {item_number} will be stored in {item_id}")
 
         # Generate filename
         safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex}_{i}.jpg"
@@ -598,7 +598,7 @@ def _commit_boxes_background(boxes_info: list[dict], test_id: str, student_no: s
     try:
         _commit_boxes(boxes_info, test_id, student_no, session)
     except Exception as e:
-        print(f"INTERNAL:\tBackground commit failed: {e}")
+        print(f"INFO:\tBackground commit failed: {e}")
         session.rollback()
     finally:
         session.close()
@@ -662,6 +662,6 @@ def _commit_boxes(
         try:
             evaluate_image_logic(answer.answer_id, session)
         except Exception as e:
-            print(f"INTERNAL:\tAI evaluation failed for answer {answer.answer_id}: {e}")
+            print(f"INFO:\tAI evaluation failed for answer {answer.answer_id}: {e}")
 #endregion
 # ==============================
