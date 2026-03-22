@@ -1,13 +1,13 @@
 <script lang="ts">
   let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
+  
   let hasDuplicateLabels = $derived(
     new Set(supposedScans.map((s: { item_number: string }) => s.item_number)).size !== supposedScans.length
   );
+  
   import IconLabel from "~icons/mdi/label";
 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-	import { Input } from "$lib/components/ui/input/index.ts";
-	import { Spinner } from "$lib/components/ui/spinner/index.ts";
 </script>
 
 
@@ -20,7 +20,8 @@
             onclick={onAccept}>
       {#if isCommitmentOngoing}
         Identifying labels...
-        <Spinner />
+      {:else if hasDuplicateLabels}
+        <i>Please fix duplicate labels first</i>
       {:else}
         Accept and evaluate
       {/if}
