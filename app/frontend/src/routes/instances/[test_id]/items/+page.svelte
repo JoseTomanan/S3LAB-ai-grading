@@ -14,6 +14,9 @@
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
   let allItems: TestItem[] = $state(testItemsContext.items);
+  $effect(() => {
+    allItems = testItemsContext.items;
+  });
 
   let shortFormItems: TestItem[] = $derived(allItems.filter(item => !item.is_problem_solving));
   let probSolItems: TestItem[] = $derived(allItems.filter(item => item.is_problem_solving));

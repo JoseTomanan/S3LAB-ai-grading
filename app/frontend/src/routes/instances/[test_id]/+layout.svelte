@@ -29,6 +29,9 @@
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
 
   let testItemsContext: TestItemsContext = $state({items: data.test_items!, isLoading: false});
+  $effect(() => {
+    testItemsContext.items = data.test_items!;
+  });
   setContext("testItemsContext", testItemsContext);
 </script>
 
