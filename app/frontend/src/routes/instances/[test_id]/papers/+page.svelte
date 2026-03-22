@@ -12,6 +12,9 @@
   import { createPoller } from '$lib/utils/poller.ts';
 
   let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);
+  $effect(() => {
+    perStudentStatuses = data.statuses;
+  });
   let isPolling = $derived(perStudentStatuses.some(s => !s.is_done_rendering));
 
   const poller = createPoller(async () => {
