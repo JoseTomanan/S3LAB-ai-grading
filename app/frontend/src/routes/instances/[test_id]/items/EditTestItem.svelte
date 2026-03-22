@@ -25,6 +25,8 @@
         expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
       });
 
+  // NOTE: This resets the form on any testItem prop change, including invalidateAll().
+  // Safe because the dialog is always closed before invalidateAll() runs.
   $effect(() => {
     const updated = {
       item_id: testItem.item_id,
