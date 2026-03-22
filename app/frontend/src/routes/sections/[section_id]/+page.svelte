@@ -10,6 +10,8 @@
 	import EditStudent from './EditStudent.svelte';
 
 	let students: Student[] = $derived(data.students);
+
+  let isAddDialogOpen: boolean = $state(false);
 </script>
 
 
@@ -24,27 +26,30 @@
     </span>
 	</span>
   <div class="space-y-2">
-    <Dialog.Root>
+    <Dialog.Root bind:open={isAddDialogOpen}>
       <Dialog.Trigger class="button-outline font-medium items-center w-full">
         (+) Add new student
       </Dialog.Trigger>
-      <AddNewStudent section_id={data.section_id}/>
+      <AddNewStudent bind:isAddDialogOpen
+                      section_id={data.section_id}/>
     </Dialog.Root>
+
     {#each students as student}
-    <div class="card">
-      <span class="flex flex-row items-center justify-between">
-        <h3>{student.name}</h3>
-        <Dialog.Root>
-          <Dialog.Trigger class="button-secondary">
-            <MdiEdit class="size-4"/>
-          </Dialog.Trigger>
-          <EditStudent bind:section_id={data.section_id}
-                        student_no={student.student_no}
-                        bind:name={student.name}/>
-        </Dialog.Root>
-      </span>
-      <h5>{student.student_no}</h5>
-    </div>
+      <div class="card">
+        <span class="flex flex-row items-center justify-between">
+          <h3>{student.name}</h3>
+          <!-- TODO: add dialog bindable; close upon operation done. something similar to add new student-->
+          <Dialog.Root>
+            <Dialog.Trigger class="button-secondary">
+              <MdiEdit class="size-4"/>
+            </Dialog.Trigger>
+            <EditStudent bind:section_id={data.section_id}
+                          student_no={student.student_no}
+                          bind:name={student.name}/>
+          </Dialog.Root>
+        </span>
+        <h5>{student.student_no}</h5>
+      </div>
     {/each}
   </div>
 </div>

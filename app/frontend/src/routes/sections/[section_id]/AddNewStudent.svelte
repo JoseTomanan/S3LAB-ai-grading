@@ -1,6 +1,6 @@
 <script lang="ts">
 	
-	const { section_id } = $props();
+	let { section_id, isAddDialogOpen = $bindable() } = $props();
 
 	import { invalidateAll } from '$app/navigation';
 	import { api, ApiError } from '$lib/utils/api.ts';
@@ -26,6 +26,7 @@
 			});
 			alert("Success: " + result);
 			await invalidateAll();
+      isAddDialogOpen = false;
 		} catch (e) {
 			alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new student:\n" + e);
 		} finally {
