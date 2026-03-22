@@ -1,5 +1,6 @@
 <script lang="ts">
     
+  import { untrack } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
@@ -25,13 +26,14 @@
       });
 
   $effect(() => {
-    formTestItem = {
+    const updated = {
       item_id: testItem.item_id,
       label: testItem.label,
       question: testItem.question,
       is_problem_solving: testItem.is_problem_solving,
       expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
     };
+    untrack(() => { formTestItem = updated; });
   });
 
   let isWantsToDelete = $state(false);
