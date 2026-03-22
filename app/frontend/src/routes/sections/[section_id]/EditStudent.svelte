@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
 
   let { section_id = $bindable(), student_no, name = $bindable() } = $props();
 
@@ -39,7 +40,7 @@
     try {
       dropdownSections = await api<Section[]>('/api/sections/');
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch sections.\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch sections.\n" + e);
     } finally {
       isSectionsLoading = false;
     }
@@ -47,7 +48,7 @@
 
   async function editStudent() {
     if (formName == name && formSectionId == section_id.toString()) {
-      alert("No changes were made.");
+      toast("No changes were made.", { icon: "⚠️" });
       return;
     }
     isRequestLoading = true;
@@ -59,12 +60,12 @@
           section_id: parseInt(formSectionId),
         })
       });
-      alert("Student updated successfully!");
+      toast.success("Student updated successfully!");
       name = formName;
       section_id = Number(formSectionId);
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit student: " + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit student: " + e);
     } finally {
       isRequestLoading = false;
     }
@@ -74,11 +75,11 @@
     isRequestLoading = true;
     try {
       await api(`/api/students/${student_no}`, { method: "DELETE" });
-      alert("Student deleted successfully!");
+      toast.success("Student deleted successfully!");
       section_id = -1;
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete student: " + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete student: " + e);
     } finally {
       isRequestLoading = false;
     }

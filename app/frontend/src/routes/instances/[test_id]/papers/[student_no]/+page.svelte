@@ -4,6 +4,7 @@
   import { onDestroy } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import { createPoller } from '$lib/utils/poller.ts';
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
@@ -85,7 +86,7 @@
               : ans
             );
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
@@ -94,10 +95,10 @@
   async function deleteAnswer(item_id: number) {
     try {
       await api(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
-      alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
+      toast.success(`Deletion of ${item_id} for ${data.student_no} successful.`);
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
     }
   }
 </script>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import { Button } from "$lib/components/ui/button/index.ts";
   import { Input } from "$lib/components/ui/input/index.ts";
@@ -11,7 +12,7 @@
 
   async function addSection() {
     if (!formSectionName.trim()) {
-      alert("Please enter a section name.");
+      toast("Please enter a section name.", { icon: "⚠️" });
       return;
     }
 
@@ -21,10 +22,10 @@
         method: "POST",
         body: JSON.stringify({ section: formSectionName.trim() }),
       });
-      alert("Section added successfully!");
+      toast.success("Section added successfully!");
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new section:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new section:\n" + e);
     } finally {
       isOperationOngoing = false;
     }

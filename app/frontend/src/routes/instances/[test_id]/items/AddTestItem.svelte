@@ -3,6 +3,7 @@
 
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import MdiPlus from "~icons/mdi/plus";
 
   import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -46,10 +47,10 @@
           expected_answer_rubric_questions: submittableEARQ,
         }),
       });
-      alert("Success: " + result.items);
+      toast.success("Test item added successfully!");
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new test item:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new test item:\n" + e);
     } finally {
       isOperationOngoing = false;
     }

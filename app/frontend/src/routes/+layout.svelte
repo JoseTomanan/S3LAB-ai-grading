@@ -3,11 +3,13 @@
   import favicon from '$lib/assets/favicon.ico';
 	import { navigating } from '$app/state';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
+	import { Toaster } from 'svelte-5-french-toast';
 
   let { children } = $props();
 </script>
 
 
+<Toaster/>
 <svelte:head>
   <link rel="icon" href={favicon} />
   <title>SIPAT.MATH</title>

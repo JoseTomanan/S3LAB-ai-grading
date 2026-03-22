@@ -40,7 +40,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
       REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
       break;
     default:
-      alert(`${response.status} ${response.statusText}`);
+      console.error(`${response.status} ${response.statusText}`);
     }
   } catch (e) {
     console.log("Failed to fetch AI evaluations:\n"+e)
