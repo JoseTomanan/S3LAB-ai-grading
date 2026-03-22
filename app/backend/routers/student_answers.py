@@ -489,6 +489,8 @@ def delete_student_answer(
 
 # ==============================
 #region Auxiliary functions    
+# TODO: Relocate to backend/logic/student_answers_utils.py (or a similar module)
+# according to FastAPI best practices. Utility/data-layer code should not reside in router files.
 async def _validate_request(test_id: str, student_no: str, session: Session):
     if not session.get(TestInstance, test_id):
         raise HTTPException(status_code=404, detail=f"Test instance '{test_id}' not found")
