@@ -1,21 +1,36 @@
 <script lang="ts">
   let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
-  import IconLabel from "~icons/mdi/label";
 
+  import { getContext } from "svelte";
+  import type { TestItemsContext } from '$lib/index.ts';
+  import IconLabel from "~icons/mdi/label";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-	import { Input } from "$lib/components/ui/input/index.ts";
-	import { Spinner } from "$lib/components/ui/spinner/index.ts";
+
+  let testItemsContext: TestItemsContext = getContext("testItemsContext");
+  let validLabels = $derived(new Set(testItemsContext.items.map(i => i.label)));
+
+  let hasDuplicateLabels = $derived(
+    new Set(supposedScans.map((s: { item_number: string }) => s.item_number)).size !== supposedScans.length
+  );
+  let isAcceptableLabels = $derived(
+    supposedScans.every((s: { item_number: string }) => validLabels.has(s.item_number))
+  );
 </script>
 
 
-<Dialog.Content>
+<Dialog.Content showCloseButton={false}
+                onInteractOutside={(e) => e.preventDefault()}
+                onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
-    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
-            disabled={isCommitmentOngoing}
+    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels ? "opacity-50" : ""}"
+            disabled={isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels}
             onclick={onAccept}>
       {#if isCommitmentOngoing}
-        Evaluating...
-        <Spinner />
+        Identifying labels...
+      {:else if hasDuplicateLabels}
+        <i>Please fix duplicate labels first</i>
+      {:else if !isAcceptableLabels}
+        <i>Labels must match test items</i>
       {:else}
         Accept and evaluate
       {/if}
@@ -29,27 +44,15 @@
   {#each supposedScans as supposedScan}
     <div class="card relative
                 flex flex-row justify-center items-start gap-x-1">
-      {#if supposedScan.editing}
-        <div class="absolute top-1 left-1 bg-white/80 flex flex-row items-center gap-1">
-          <Input class="border px-1 text-sm w-12"
+      <div class="absolute top-1 left-1 bg-white/80 shadow-sm
+                  flex flex-row items-center gap-x-0">
+        <IconLabel class={validLabels.has(supposedScan.item_number) ? "" : "text-destructive"}/>
+        <input class="w-8 px-1 py-0 leading-none bg-transparent border-none outline-none
+                      [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 type="text"
                 bind:value={supposedScan.item_number}
                 />
-          <button class="button-outline text-xs"
-                  onclick={() => supposedScan.editing = false}>
-            Save
-          </button>
-        </div>
-      
-      {:else}
-        <button class="absolute top-1 left-1
-                      flex flex-row items-center ring-1 ring-border px-2 cursor-pointer rounded-sm
-                      bg-white/80 *:opacity-80"
-                  onclick={() => supposedScan.editing = true}>
-          <IconLabel />
-          <h4>{supposedScan.item_number}</h4>
-        </button>
-      {/if}
+      </div>
       
       <img class="block sm:max-w-3/4 md:max-w-2/3"
             src={`${supposedScan.image_directory}`}

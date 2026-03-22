@@ -74,7 +74,7 @@ class BoxSegmenter(DocumentScanner):
             for pts, color, filename in debug_sets:
                 debug_img = image_binarized.copy()
                 for p in pts:
-                    debug_img = self._highlight_dot(debug_img, p, color)
+                    debug_img = self._highlight_dot(debug_img, (int(p[0]), int(p[1])), color)
                 self.save_image(self._encode_to_bytes(debug_img),
                                     f"{self.debug_dir}/{filename}")
 
@@ -87,7 +87,7 @@ class BoxSegmenter(DocumentScanner):
         if debug:
             debug_img = image_binarized.copy()
             for p in pts:
-                debug_img = self._highlight_dot(debug_img, p)
+                debug_img = self._highlight_dot(debug_img, (int(p[0]), int(p[1])))
             self.save_image(self._encode_to_bytes(debug_img),
                                 f"{self.debug_dir}/_05_dots_deduped.jpg" )
 
@@ -95,7 +95,7 @@ class BoxSegmenter(DocumentScanner):
 
     def _segment_dots_into_boxes(self, image_original: MatLike, pts: list[list[float]], debug: bool = False) -> list[MatLike]:
         """From list of points, crop what seems the most like the dotted boxes (answer sections), and return this."""
-        quads = self._group_dots_into_quads(pts)
+        quads = self._group_dots_into_quads(np.array(pts))
         print(f"INFO:\tObtained total of {len(quads)} quads")
 
         ## Step 1: Collect all valid quads (no approxPolyDP — input is already 4 points)
@@ -151,7 +151,7 @@ class BoxSegmenter(DocumentScanner):
     #endregion
 
     #region Auxiliary functions: Answer section detection
-    def _filter_out_dup_pts(self, pts: np.ndarray) -> np.ndarray:
+    def _filter_out_dup_pts(self, pts: list[list[float]]) -> list[list[float]]:
         """Filter out duplicate points within DOT_DEDUP_DIST of each other."""
         filtered_pts = []
         for p in pts:
@@ -211,14 +211,14 @@ class BoxSegmenter(DocumentScanner):
             ## Mark quads whose center falls inside this quad as used
             for j in range(len(quads)):
                 if not used[j]:
-                    dist = cv2.pointPolygonTest(contour_i, tuple(centers[j].astype(float)), False)
+                    dist = cv2.pointPolygonTest(contour_i, tuple(centers[j].astype(float)), False)  # type: ignore[call-overload]
                     if dist >= 0:  ## center of j is inside quad i
                         used[j] = True
             ## Also mark quads that contain this quad's center
             for j in range(len(quads)):
                 if not used[j]:
                     contour_j = quads[j].reshape((-1, 1, 2)).astype(np.int32)
-                    dist = cv2.pointPolygonTest(contour_j, tuple(centers[i].astype(float)), False)
+                    dist = cv2.pointPolygonTest(contour_j, tuple(centers[i].astype(float)), False)  # type: ignore[call-overload]
                     if dist >= 0:  ## center of i is inside quad j
                         used[j] = True
 
@@ -250,7 +250,7 @@ class BoxSegmenter(DocumentScanner):
     def _regularize_forgivingly(self, image_mat: MatLike) -> list[MatLike]:
         """[UNUSED]"""
         def _pre_canny(i: MatLike) -> MatLike:
-            ruled_line_mask = cv2.inRange(i, 20, 80)
+            ruled_line_mask = cv2.inRange(i, 20, 80)  # type: ignore[call-overload]
             h_kernel_length = int(NORMAL_SIZE*0.30)
             horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (h_kernel_length, 1))
             ruled_line_mask = cv2.morphologyEx(ruled_line_mask, cv2.MORPH_CLOSE, horizontal_kernel)
@@ -348,7 +348,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         for x1, y1, x2, y2 in lines[:, 0]:
             angle = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             if angle <= max_angle_deg:
-                cv2.line(mask, (x1, y1), (x2, y2), 255, thickness=3)
+                cv2.line(mask, (x1, y1), (x2, y2), 255, thickness=3)  # type: ignore[call-overload]
         return mask
 
     def _filter_only_handdrawn_lines(self, image: MatLike, length_percent: float = 0.60) -> MatLike:

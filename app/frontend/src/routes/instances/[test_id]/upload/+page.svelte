@@ -7,8 +7,6 @@
   const GET_EXTENSION_ONLY = (s: string) => s.substring(s.lastIndexOf('.'));
   const IS_IN_STUDENTS = (x: string) => students.some(s => s.student_no == x)
 
-  // Supports: "201900000.jpeg" → "201900000"
-  // Supports: "201900000-1.jpeg" → "201900000"
   const GET_STUDENT_NO = (s: string) => {
     const nameOnly = GET_NAME_ONLY(s);
     const dashIdx = nameOnly.lastIndexOf('-');
@@ -18,6 +16,7 @@
   };
 
   import IconCheck from "~icons/mdi/check";
+  import IconAccepted from "~icons/mdi/cloud-check-variant-outline";
   import IconExclamation from "~icons/mdi/exclamation-thick";
   import IconNotFound from "~icons/mdi/account-question-outline";
   import IconSend from "~icons/mdi/send";
@@ -30,10 +29,8 @@
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import { Input } from '$lib/components/ui/input/index.ts';
-  import { Label } from '$lib/components/ui/label/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import { Separator } from '$lib/components/ui/separator/index.ts';
-  import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
   import BulkUploadRename from './BulkUploadRename.svelte';
   import type { FileRecord, Student } from '$lib/index.ts';
 
@@ -43,8 +40,6 @@
   let formFiles: FileList | undefined = $state();
   let formFileRecords: FileRecord[] = $state([]);
   let students: Student[] = $state([]);
-  let segmentationStrategy: string = $state("corner_dots");
-  let paperType: string = $state("ruled");
   let numBoxesPerStudent: Map<string, number | null> = $state(new Map());
 
   // TODO: finish API side, then wire API call
@@ -156,34 +151,6 @@
           onchange={handleFiles}
           disabled={isOperationStarted}
       />
-  <div class="card grid grid-cols-2 gap-x-4">
-    <div class="space-y-1.5">
-      <Label>Segmentation strategy</Label>
-      <RadioGroup.Root bind:value={segmentationStrategy}>
-        <div class="flex items-center gap-x-1.5">
-          <RadioGroup.Item value="corner_dots" />
-          <Label>Corner dots</Label>
-        </div>
-        <div class="flex items-center gap-x-1.5">
-          <RadioGroup.Item value="boxes" />
-          <Label>Boxes</Label>
-        </div>
-      </RadioGroup.Root>
-    </div>
-    <div class="space-y-1.5">
-      <Label>Paper type</Label>
-      <RadioGroup.Root bind:value={paperType}>
-        <div class="flex items-center gap-x-1.5">
-          <RadioGroup.Item value="ruled" />
-          <Label>Ruled</Label>
-        </div>
-        <div class="flex items-center gap-x-1.5">
-          <RadioGroup.Item value="unruled" />
-          <Label>Unruled</Label>
-        </div>
-      </RadioGroup.Root>
-    </div>
-  </div>
   <Separator/>
   
   {#if !formFiles}
@@ -276,8 +243,8 @@
       {#each formFileRecords as p}
         <span class="flex flex-row justify-start items-center gap-x-1.5">
           <span>
-            {#if p.statusCode == 200}
-              <IconCheck class="size-5"/>
+            {#if p.statusCode == 200 || p.statusCode == 202}
+              <IconAccepted class="size-5"/>
             {:else if p.statusCode == 404}
               <IconNotFound class="size-5" />
             {:else if p.statusCode == 501}

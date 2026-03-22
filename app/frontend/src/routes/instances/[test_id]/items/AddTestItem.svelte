@@ -1,7 +1,9 @@
 <script lang="ts">
   const { test_id } = $props();
-  
-    import MdiPlus from "~icons/mdi/plus";
+
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
+  import MdiPlus from "~icons/mdi/plus";
 
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
@@ -15,49 +17,39 @@
   let formItemLabel: string = $state("");
   let formItemQuestion: string = $state("");
   let formItemIsProblemSolving: boolean = $state(false);
-  let formItemRQ: {question: string, points: number}[] = $state([{question: "", points: 0}]);
-  let formItemEA: {question: string, points: number} = $state({question: "", points: 0});
-  
+  let formItemRQ: {question: string, points: number}[] = $state([{question: "", points: 1}]);
+  let formItemEA: {question: string, points: number} = $state({question: "", points: 1});
+
   let submittableEARQ: string = "";
 
   async function addTestItem() {
     isOperationOngoing = true;
 
     if (formItemIsProblemSolving) {
-      for (const item of formItemRQ) {
-        if (item.points != 0)
-          submittableEARQ = submittableEARQ.concat(`${item.question} [${item.points}pts];`);
-      }
+      // Convert the rubric questions array for problem-solving items into a semicolon-delimited string,
+      // including only questions with nonzero points and non-blank text, each formatted as "question [Npts]".
+      submittableEARQ = formItemRQ
+            .filter(item => item.points != 0 && item.question.trim() !== "")
+            .map(item => `${item.question} [${item.points}pts]`)
+            .join(';');
     } else {
-      submittableEARQ = `${formItemEA.question} [${formItemEA.points}pts]`
+      submittableEARQ = `${formItemEA.question} [${formItemEA.points}pts]`;
     }
 
     try {
-      const response = await fetch(
-        `/api/test_items/${test_id}/items`,
-        {
-          method: "POST",
-          headers: {'Content-Type': 'application/json',},
-          body: JSON.stringify({
-            label: formItemLabel,
-            question: formItemQuestion,
-            is_problem_solving: formItemIsProblemSolving,
-            expected_answer_rubric_questions: submittableEARQ,
-          }),
-        }
-      );
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          alert("Success: " + result.items);
-          window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      const result = await api<{ items: string }>(`/api/test_items/${test_id}/items`, {
+        method: "POST",
+        body: JSON.stringify({
+          label: formItemLabel,
+          question: formItemQuestion,
+          is_problem_solving: formItemIsProblemSolving,
+          expected_answer_rubric_questions: submittableEARQ,
+        }),
+      });
+      alert("Success: " + result.items);
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to add new test item:\n"+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new test item:\n" + e);
     } finally {
       isOperationOngoing = false;
     }
@@ -69,10 +61,10 @@
   <Dialog.Header>
     <Dialog.Title>Add new test item</Dialog.Title>
   </Dialog.Header>
-  <Label for="item_id">Item label</Label>
-  <Input id="item_id" bind:value={formItemLabel} />
-  <Label for="item_id">Question</Label>
-  <Textarea id="item_id" rows={4} bind:value={formItemQuestion} />
+  <Label for="item_label">Item label</Label>
+  <Input id="item_label" bind:value={formItemLabel} />
+  <Label for="item_question">Question</Label>
+  <Textarea id="item_question" rows={4} bind:value={formItemQuestion} />
   <Label>Type of question</Label>
   <RadioGroup.Root value="short_form"
                   class="flex flex-row justify-between"
@@ -86,12 +78,13 @@
       <Label for="prob_sol" class="font-normal">Problem solving</Label>
     </span>
   </RadioGroup.Root>
+  
   {#if formItemIsProblemSolving}
     <Label for="r_q"
             class="flex flex-row justify-between">
       Rubric questions
       <button class="px-1 py-0 m-0 bg-secondary"
-              onclick={() => {formItemRQ.push({question: "", points: 0})}}>
+              onclick={() => {formItemRQ.push({question: "", points: 1})}}>
         <MdiPlus class="size-3"/>
       </button>
     </Label>
@@ -108,6 +101,7 @@
         </span>
       {/each}
     </div>
+  
   {:else}
     <Label for="e_a">Expected answer</Label>
     <span class="flex flex-row gap-1">

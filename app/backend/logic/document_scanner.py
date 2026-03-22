@@ -114,7 +114,7 @@ class DocumentScanner:
                           image_mat: MatLike,
                           canny_thresholds: tuple[int,int] = (75, 200),
                           gaussian_blur_kernel_size: tuple[int,int] | None = (5,5),
-                          additional_pre_canny_step: Callable[MatLike, MatLike] = None
+                          additional_pre_canny_step: Callable[[MatLike], MatLike] | None = None
                           ) -> list[MatLike]:
         """Step before contour ranking. Resize, greyscale, blur, then canny to reduce noises in image."""
         h, w, _ = image_mat.shape
@@ -143,7 +143,7 @@ class DocumentScanner:
         mask = np.zeros_like(iterated_img)
         for c in contours_raw:
             if cv2.arcLength(c, False) > 100:
-                cv2.drawContours(mask, [c], -1, 255, 2)
+                cv2.drawContours(mask, [c], -1, 255, 2)  # type: ignore[call-overload]
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
         iterated_img = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         
@@ -155,12 +155,12 @@ class DocumentScanner:
         box_ratio = get_robust_aspect_ratio(approximation)
         box_height = int(NORMAL_SIZE * box_ratio)
 
-        points = np.float32(np.array([
+        points = np.array([
                         [0, 0],
                         [box_height, 0],
                         [box_height, NORMAL_SIZE],
                         [0, NORMAL_SIZE]
-                    ]))
+                    ], dtype=np.float32)
 
         image_transformed = cv2.getPerspectiveTransform(approximation, points)  # pyright: ignore
         image_warped = cv2.warpPerspective(

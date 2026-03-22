@@ -47,12 +47,12 @@ MOCK_DATA = {
             {"section_id": 2, "section": "3-Aguinaldo"}
         ],
         "students": [
-            {"student_no": "201900000", "name": "Matthew McConaughey", "section_id": 1},
-            {"student_no": "201911111", "name": "Ricci Paolo Rivero", "section_id": 1},
-            {"student_no": "201922222", "name": "Crispin John Cansino", "section_id": 1},
-            {"student_no": "202022222", "name": "Olivia Rodrigo Duterte", "section_id": 2},
-            {"student_no": "202033333", "name": "Nikola Kojic Soap", "section_id": 2},
-            {"student_no": "202044444", "name": "Anthony David Salon", "section_id": 2},
+            {"student_no": "201990011", "name": "Amanda Nuñes", "section_id": 1},
+            {"student_no": "201990022", "name": "Anthony Hernandez", "section_id": 1},
+            {"student_no": "201990033", "name": "Michael Morales", "section_id": 1},
+            {"student_no": "202090011", "name": "Dominick Reyes", "section_id": 2},
+            {"student_no": "202090022", "name": "Olivia Rodrigo Duterte", "section_id": 2},
+            {"student_no": "202090033", "name": "Paulo Costa", "section_id": 2},
         ],
         "test_instances": [
             {

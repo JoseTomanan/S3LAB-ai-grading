@@ -1,6 +1,6 @@
 import base64
 from multiprocessing import process
-from fastapi import APIRouter, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
 from sqlmodel import Session, select
 from typing import List, Optional
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 from models import *
 from schemas import *
-from core.database import get_session
+from core.database import get_session, get_direct_session
 
 from logic.box_segmenter import BoxSegmenter
 from logic.document_scanner import DocumentScanner
@@ -28,6 +28,7 @@ TEMP_DIR = Path("static/images")
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
+                background_tasks: BackgroundTasks,
                 files: List[UploadFile] = File(...),
                 num_boxes: Optional[int] = Query(None),
                 session: Session = Depends(get_session)
@@ -36,18 +37,23 @@ async def process_student_answer_image(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    print(f"INTERNAL:\tProceeding to labeling the boxes.")
+    print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
-    _commit_boxes(boxes_info, test_id, student_no, session)
+    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
-    return {
-            "num_boxes": len(processed_list),
-            "boxes": boxes_info,
-            }
+    return Response(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=json.dumps({
+                "num_boxes": len(processed_list),
+                "boxes": boxes_info,
+            }),
+            media_type="application/json"
+            )
 
 
 @router.post("/{test_id}/{student_no}/label_save_boxes")
@@ -62,13 +68,13 @@ async def scan_then_label_save_boxes(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INTERNAL:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
     except:
         raise HTTPException(status_code=500, detail="Could not find any boxes.")
 
-    print(f"INTERNAL:\tProceeding to labeling the boxes.")
+    print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
 
     return {
@@ -82,6 +88,7 @@ async def commit_boxes_endpoint(
                 test_id: str,
                 student_no: str,
                 request_body: CommitBoxesRequest,
+                background_tasks: BackgroundTasks,
                 session: Session = Depends(get_session)
                 ):
     test_exists = session.exec(
@@ -105,11 +112,12 @@ async def commit_boxes_endpoint(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Student with student_no '{student_no}' not found"
                     )
-    
-    boxes_info = [box.model_dump() for box in request_body.boxes]
-    _commit_boxes(boxes_info, test_id, student_no, session)
 
-    return Response(status_code=200)
+    boxes_info = [box.model_dump() for box in request_body.boxes]
+    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
+
+    return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
 @router.patch("/{test_id}/{student_no}/{item_id}")
@@ -117,6 +125,7 @@ async def update_answer_segmentation(
             test_id: str,
             student_no: str,
             item_id: int,
+            background_tasks: BackgroundTasks,
             file: UploadFile = File(...),
             points: str = Form(...),
             session: Session = Depends(get_session)
@@ -126,8 +135,7 @@ async def update_answer_segmentation(
         points_data = json.loads(points)
         required = ["ul", "ur", "lr", "ll"]
         for corner in required:
-            # FIXED: Changed points_ → points_data (was causing NameError)
-            if corner not in points_data:  
+            if corner not in points_data:
                 raise ValueError(f"Missing corner point: {corner}")
             if not all(k in points_data[corner] for k in ["x", "y"]):
                 raise ValueError(f"Point {corner} missing x/y coordinates")
@@ -138,74 +146,39 @@ async def update_answer_segmentation(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid points format: {str(e)}"
                 )
-    
+
+    # ===== RESOLVE ITEM LABEL =====
+    test_item = session.get(TestItem, item_id)
+    if not test_item:
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test item with ID '{item_id}' not found"
+                )
+
     # ===== IMAGE PROCESSING =====
     contents = await file.read()
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
     img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
-    
-    # ===== STORAGE & RESPONSE =====
+
+    # ===== SAVE IMAGE =====
     safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
     filepath = TEMP_DIR / safe_filename
-    
     with open(filepath, "wb") as f:
         f.write(img_bytes)
-    
-    # Create or update TestPaperInstance
-    paper = session.exec(
-                select(TestPaperInstance).where(
-                    TestPaperInstance.test_id == test_id,
-                    TestPaperInstance.student_no == student_no
-                )).first()
-    
-    if not paper:
-        paper = TestPaperInstance(
-                    test_id=test_id,
-                    student_no=student_no,
-                    is_done_rendering=False
-                    )
-        session.add(paper)
-        session.commit()
-        session.refresh(paper)
 
-    assert paper is not None
-    
-    # Create or update StudentAnswer
-    answer = session.exec(
-                select(StudentAnswer).where(
-                    StudentAnswer.paper_id == paper.paper_id,
-                    StudentAnswer.item_id == item_id
-                )
-                ).first()
-    
-    if not answer:
-        answer = StudentAnswer(
-                    paper_id=paper.paper_id,
-                    item_id=item_id, 
-                    image_directory=f"/api/temp/{safe_filename}",
-                    ai_evaluation="",
-                    is_done_rendering=False,
-                    )
-        session.add(answer)
-        session.commit()
-        session.refresh(answer)
-    else:
-        answer.image_directory = f"/api/temp/{safe_filename}"
-        answer.ai_evaluation = ""
-        answer.is_done_rendering = False
-        session.add(answer)
+    image_dir = f"/api/temp/{safe_filename}"
 
-    session.commit()
-    session.refresh(answer)
+    # ===== COMMIT RECORDS SYNCHRONOUSLY, EVALUATE IN BACKGROUND =====
+    boxes_info = [{"image_directory": image_dir, "item_number": test_item.label}]
+    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
-    # Automatic AI evaluation
-    try:
-        evaluate_image_logic(answer.answer_id, session)
-    except Exception as e:
-        print(f"INTERNAL:\tAI evaluation failed for answer {answer.answer_id}: {e}")
-
-    return {"image_directory": f"/api/temp/{safe_filename}"}
+    return Response(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=json.dumps({"image_directory": image_dir}),
+            media_type="application/json"
+            )
 
 
 @router.get("/{test_id}/statuses")
@@ -552,13 +525,13 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
         processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
 
-        print(f"INTERNAL:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
+        print(f"INFO:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
 
     if num_boxes is not None:
         all_processed = all_processed[:num_boxes]
 
-    print(f"INTERNAL:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
+    print(f"INFO:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
     return all_processed
 
 
@@ -584,10 +557,10 @@ def _label_save_boxes(
             else:
                 item_number = item_number.strip()
         except Exception as e:
-            print(f"INTERNAL:\tFailed to extract item number for box {i}: {e}")
+            print(f"INFO:\tFailed to extract item number for box {i}: {e}")
             item_number = "NONE"
 
-        print(f"INTERNAL:\t{i}th detected label = {item_number}")
+        print(f"INFO:\t{i}th detected label = {item_number}")
 
         test_item = session.exec(
                         select(TestItem).where(
@@ -595,10 +568,11 @@ def _label_save_boxes(
                         )).first()
         
         if test_item is None:
-            raise Exception("This is not supposed to happen. Read your code again.")
+            print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
+            continue
 
         item_id = test_item.item_id
-        print(f"INTERNAL:\tLabel {item_number} will be stored in {item_id}")
+        print(f"INFO:\tLabel {item_number} will be stored in {item_id}")
 
         # Generate filename
         safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex}_{i}.jpg"
@@ -620,12 +594,13 @@ def _label_save_boxes(
     return boxes_info
 
 
-def _commit_boxes(
-                boxes_info: list[dict], # TODO: add type safety
+def _create_answer_records(
+                boxes_info: list[dict],
                 test_id: str,
                 student_no: str,
                 session: Session
-                ) -> None:
+                ) -> list[int]:
+    """Create TestPaperInstance and StudentAnswer records synchronously. Returns answer_ids."""
     paper = session.exec(
                 select(TestPaperInstance).where(
                     TestPaperInstance.test_id == test_id,
@@ -641,14 +616,17 @@ def _commit_boxes(
         session.commit()
         session.refresh(paper)
 
+    answer_ids = []
     for box in boxes_info:
         image_dir = box["image_directory"]
         item_number = box["item_number"]
-        item_id = session.exec(
+        item = session.exec(
                         select(TestItem).where(
                             TestItem.label == item_number,
-                        )).first().item_id
-        
+                        )).first()
+        assert item is not None
+        item_id = item.item_id
+
         answer = session.exec(
                     select(StudentAnswer).where(
                         StudentAnswer.paper_id == paper.paper_id,
@@ -663,19 +641,37 @@ def _commit_boxes(
                         is_done_rendering=False,
                         detected_item_number=item_number
                         )
-            session.add(answer) 
+            session.add(answer)
         else:
             answer.image_directory = image_dir
-            answer.ai_evaluation=""
+            answer.ai_evaluation = ""
             answer.is_done_rendering = False
             answer.detected_item_number = item_number
         session.commit()
         session.refresh(answer)
+        answer_ids.append(answer.answer_id)
 
-        # Automatic AI evaluation
-        try:
-            evaluate_image_logic(answer.answer_id, session)
-        except Exception as e:
-            print(f"INTERNAL:\tAI evaluation failed for answer {answer.answer_id}: {e}")
+    return answer_ids
+
+
+def _evaluate_answers_background(answer_ids: list[int]):
+    """Run AI evaluation on pre-created answer records in a background task."""
+    session = get_direct_session()
+    try:
+        for answer_id in answer_ids:
+            try:
+                evaluate_image_logic(answer_id, session)
+            except Exception as e:
+                print(f"INFO:\tAI evaluation failed for answer {answer_id}: {e}")
+                answer = session.get(StudentAnswer, answer_id)
+                if answer:
+                    answer.is_done_rendering = True
+                    answer.ai_evaluation = f"_ERROR: {e}"
+                    session.commit()
+    except Exception as e:
+        print(f"INFO:\tBackground evaluation failed: {e}")
+        session.rollback()
+    finally:
+        session.close()
 #endregion
 # ==============================

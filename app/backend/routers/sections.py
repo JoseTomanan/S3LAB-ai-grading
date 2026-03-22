@@ -53,7 +53,7 @@ def add_new_section(section: SectionCreate, session: Session = Depends(get_sessi
             detail=f"Section '{section.section}' already exists."
         )
 
-    new_section = Section(section=section.section)
+    new_section = Section(section=section.section) # pyright: ignore -- section_id from auto increment
     session.add(new_section)
     session.commit()
     session.refresh(new_section)

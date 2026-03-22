@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import { Button } from "$lib/components/ui/button/index.ts";
   import { Input } from "$lib/components/ui/input/index.ts";
@@ -15,25 +17,14 @@
 
     isOperationOngoing = true;
     try {
-      const response = await fetch(`/api/sections/`, {
+      await api('/api/sections/', {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          section: formSectionName.trim(),
-        }),
+        body: JSON.stringify({ section: formSectionName.trim() }),
       });
-
-      switch (response.status) {
-        case 200:
-        case 201:
-          alert("Section added successfully!");
-          window.location.reload();
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      alert("Section added successfully!");
+      await invalidateAll();
     } catch (e) {
-      alert("Failed to add new section:\n" + e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new section:\n" + e);
     } finally {
       isOperationOngoing = false;
     }

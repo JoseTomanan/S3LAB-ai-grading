@@ -1,38 +1,17 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import MdiPapersOutline from "~icons/mdi/papers-outline";
+  const { data } = $props();
+
   import MdiPeopleAdd from "~icons/mdi/people-add";
   import IconHome from '~icons/mdi/home-outline';
   import IconArrow from '~icons/mdi/arrow-up';
 
-  import type { Section, Student } from "$lib/index.ts";
+  import type { Section } from "$lib/index.ts";
   import Pagination from "$lib/components/Pagination.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
-  import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
   import AddSection from "./AddSection.svelte";
 
-  let isPageLoading: boolean = $state(true);
-  let sections: Section[] = $state([]);
+  let sections: Section[] = $derived(data.sections);
   let paginationValues: Section[] = $state([]);
-
-  onMount(async () => {
-    try {
-      const response = await fetch(`/api/sections/`);
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          sections = result;
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
-    } catch(e) {
-      alert("Failed to fetch sections:\nERROR: "+e);
-    } finally {
-      isPageLoading = false;
-    }
-  });
 </script>
 
 
@@ -55,12 +34,7 @@
     <a href="/instances" class="w-fit text-base opacity-60 hover:underline">
       Go to test instances ↗
     </a>
-    {#if isPageLoading}
-      {#each { length: 2 } as _}
-        <Skeleton class="h-16 w-full grayscale-100"/>
-      {/each}
-
-    {:else if sections.length == 0}
+    {#if sections.length == 0}
       <div class="absolute top-0 right-0
                   flex flex-col items-end text-right mt-2 opacity-60">
         <IconArrow class="size-10"/>

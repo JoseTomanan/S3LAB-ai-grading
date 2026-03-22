@@ -1,7 +1,10 @@
 <script lang="ts">
   const { data } = $props();
 
-  
+  import { onDestroy } from 'svelte';
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
+  import { createPoller } from '$lib/utils/poller.ts';
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
   import MdiCrop from '~icons/mdi/crop';
@@ -39,48 +42,62 @@
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
+  let pollingItemIds: Set<number> = $state(new Set());
+  let cropDialogOpen: Map<number, boolean> = $state(new Map());
+
+  const cropPoller = createPoller(async () => {
+    const result = await api<StudentAnswer[]>(
+      `/api/student_answers/${data.test_id}/${data.student_no}`
+    );
+    for (const itemId of pollingItemIds) {
+      const answer = result.find(a => a.item_id === itemId);
+      if (answer?.is_done_rendering) {
+        pollingItemIds = new Set([...pollingItemIds].filter(id => id !== itemId));
+      }
+    }
+    if (pollingItemIds.size === 0) {
+      await invalidateAll();
+      return true;
+    }
+    return false;
+  }, 5000);
+
+  onDestroy(() => cropPoller.stop());
+
+  function handleCropSubmitted(itemId: number) {
+    cropDialogOpen = new Map(cropDialogOpen.set(itemId, false));
+    pollingItemIds = new Set(pollingItemIds.add(itemId));
+    cropPoller.start();
+  }
+
 
 
   async function reevaluateAnswer(answer_id: number) {
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
-      const response = await fetch(
+      const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
             `/api/answers/${answer_id}/reevaluate`,
-            {
-              method: "PATCH",
-              headers: {'Content-Type': 'application/json',},
-            }
+            { method: "PATCH" }
             );
-
-      switch (response.status) {
-        case 200:
-          const result = await response.json();
-          studentItems = studentItems.map(ans => 
-                  ans.answer_id == result.answer_id 
-                  ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
-                  : ans
-                );
-          break;
-        default:
-          alert(`${response.status} ${response.statusText}`);
-      }
+      studentItems = studentItems.map(ans =>
+              ans.answer_id == result.answer_id
+              ? { ...ans, ai_evaluation: result.ai_evaluation, scores: result.scores }
+              : ans
+            );
     } catch (e) {
-      alert("Failed to reevaluate answer for given answer_id:\n- ERROR: "+e);
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
   }
 
   async function deleteAnswer(item_id: number) {
-    console.log(item_id);
-    const response = await fetch(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
-    switch (response.status) {
-      case 204:
-        alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
-        window.location.reload();
-        break;
-      default:
-        alert(`${response.status} ${response.statusText}`);
+    try {
+      await api(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
+      alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
+      await invalidateAll();
+    } catch (e) {
+      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
     }
   }
 </script>
@@ -104,7 +121,7 @@
   {:else}
     <div class="overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
-      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)}
+      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
         <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
@@ -129,13 +146,16 @@
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
-            <Dialog.Root>
+            <Dialog.Root
+              open={cropDialogOpen.get(studentItem.item_id) ?? false}
+              onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
               <Dialog.Trigger class="button-outline">
                 <MdiCrop/>
               </Dialog.Trigger>
               <ManualCrop test_id={data.test_id}
                           student_no={data.student_no}
-                          item_id={studentItem.item_id}/>
+                          item_id={studentItem.item_id}
+                          onCropSubmitted={() => handleCropSubmitted(studentItem.item_id)}/>
             </Dialog.Root>
             <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
                             button-outline px-0 py-0`}
