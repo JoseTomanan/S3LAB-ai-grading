@@ -209,6 +209,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
 
         # Check if ALL items have processed answers
         all_items_processed = True
+        has_any_answer = False
         for item in items:
             answer = session.exec(
                         select(StudentAnswer)
@@ -219,10 +220,14 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                                 StudentAnswer.item_id == item.item_id
                             )
                         ).first()
-            
-            if not answer or not answer.is_done_rendering:
-                all_items_processed = False
 
+            if not answer:
+                all_items_processed = False
+                continue
+
+            has_any_answer = True
+            if not answer.is_done_rendering:
+                all_items_processed = False
             else:
                 _parsed_scores = get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
                 total_score += _parsed_scores[0]
@@ -231,7 +236,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
         statuses.append({
                 "student_no": student.student_no,
                 "name": student.name,
-                "is_done_rendering": all_items_processed,
+                "is_done_rendering": all_items_processed or not has_any_answer,
                 "total_score": f"{total_score}/{max_score}",
                 })
     
