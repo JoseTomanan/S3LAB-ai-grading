@@ -43,8 +43,8 @@ async def process_student_answer_image(
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
-    ## _commit_boxes(boxes_info, test_id, student_no, session)
-    background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
+    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(
             status_code=status.HTTP_202_ACCEPTED,
@@ -114,8 +114,8 @@ async def commit_boxes_endpoint(
                     )
 
     boxes_info = [box.model_dump() for box in request_body.boxes]
-    ## _commit_boxes(boxes_info, test_id, student_no, session)
-    background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
+    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
@@ -169,9 +169,10 @@ async def update_answer_segmentation(
 
     image_dir = f"/api/temp/{safe_filename}"
 
-    # ===== COMMIT VIA BACKGROUND TASK =====
+    # ===== COMMIT RECORDS SYNCHRONOUSLY, EVALUATE IN BACKGROUND =====
     boxes_info = [{"image_directory": image_dir, "item_number": test_item.label}]
-    background_tasks.add_task(_commit_boxes_background, boxes_info, test_id, student_no)
+    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(
             status_code=status.HTTP_202_ACCEPTED,
@@ -593,23 +594,13 @@ def _label_save_boxes(
     return boxes_info
 
 
-def _commit_boxes_background(boxes_info: list[dict], test_id: str, student_no: str):
-    session = get_direct_session()
-    try:
-        _commit_boxes(boxes_info, test_id, student_no, session)
-    except Exception as e:
-        print(f"INFO:\tBackground commit failed: {e}")
-        session.rollback()
-    finally:
-        session.close()
-
-
-def _commit_boxes(
-                boxes_info: list[dict], # TODO: add type safety
+def _create_answer_records(
+                boxes_info: list[dict],
                 test_id: str,
                 student_no: str,
                 session: Session
-                ) -> None:
+                ) -> list[int]:
+    """Create TestPaperInstance and StudentAnswer records synchronously. Returns answer_ids."""
     paper = session.exec(
                 select(TestPaperInstance).where(
                     TestPaperInstance.test_id == test_id,
@@ -625,6 +616,7 @@ def _commit_boxes(
         session.commit()
         session.refresh(paper)
 
+    answer_ids = []
     for box in boxes_info:
         image_dir = box["image_directory"]
         item_number = box["item_number"]
@@ -634,7 +626,7 @@ def _commit_boxes(
                         )).first()
         assert item is not None
         item_id = item.item_id
-        
+
         answer = session.exec(
                     select(StudentAnswer).where(
                         StudentAnswer.paper_id == paper.paper_id,
@@ -649,19 +641,37 @@ def _commit_boxes(
                         is_done_rendering=False,
                         detected_item_number=item_number
                         )
-            session.add(answer) 
+            session.add(answer)
         else:
             answer.image_directory = image_dir
-            answer.ai_evaluation=""
+            answer.ai_evaluation = ""
             answer.is_done_rendering = False
             answer.detected_item_number = item_number
         session.commit()
         session.refresh(answer)
+        answer_ids.append(answer.answer_id)
 
-        # Automatic AI evaluation
-        try:
-            evaluate_image_logic(answer.answer_id, session)
-        except Exception as e:
-            print(f"INFO:\tAI evaluation failed for answer {answer.answer_id}: {e}")
+    return answer_ids
+
+
+def _evaluate_answers_background(answer_ids: list[int]):
+    """Run AI evaluation on pre-created answer records in a background task."""
+    session = get_direct_session()
+    try:
+        for answer_id in answer_ids:
+            try:
+                evaluate_image_logic(answer_id, session)
+            except Exception as e:
+                print(f"INFO:\tAI evaluation failed for answer {answer_id}: {e}")
+                answer = session.get(StudentAnswer, answer_id)
+                if answer:
+                    answer.is_done_rendering = True
+                    answer.ai_evaluation = f"_ERROR: {e}"
+                    session.commit()
+    except Exception as e:
+        print(f"INFO:\tBackground evaluation failed: {e}")
+        session.rollback()
+    finally:
+        session.close()
 #endregion
 # ==============================
