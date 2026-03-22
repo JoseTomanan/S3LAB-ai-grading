@@ -24,6 +24,16 @@
         expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
       });
 
+  $effect(() => {
+    formTestItem = {
+      item_id: testItem.item_id,
+      label: testItem.label,
+      question: testItem.question,
+      is_problem_solving: testItem.is_problem_solving,
+      expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
+    };
+  });
+
   let isWantsToDelete = $state(false);
   $effect(() => {
     formTestItem.label;
