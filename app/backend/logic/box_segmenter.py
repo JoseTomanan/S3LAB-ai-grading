@@ -135,11 +135,9 @@ class BoxSegmenter(DocumentScanner):
     def beautify_scan(self, image_bytes: bytes) -> bytes:
         """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
         array = self._decode_bytes(image_bytes)
-        img = self._adjust_contrast(
-                            self._brighten(array, amount=-0.05),
-                            amount=2.0
-                            )
-        return self._encode_to_bytes(img)
+        img_contrasted = self._adjust_contrast(array, amount=1.60)
+        img_brightened = self._brighten(img_contrasted, amount=0.05)
+        return self._encode_to_bytes(img_brightened)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
@@ -233,13 +231,13 @@ class BoxSegmenter(DocumentScanner):
         cv2.circle(debug_img, (int(x), int(y)), radius=10, color=color, thickness=-1)
         return debug_img
 
-    def _brighten(self, image: np.ndarray, amount: float = 0.25) -> np.ndarray:
+    def _brighten(self, image: MatLike, amount: float = 0.25) -> MatLike:
         """Increase image brightness using linear transform"""
         amount = max(0.0, min(1.0, float(amount)))
         beta = amount * 255
         return cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
     
-    def _adjust_contrast(self, image: np.ndarray, amount: float = 1.3) -> np.ndarray:
+    def _adjust_contrast(self, image: MatLike, amount: float = 1.3) -> MatLike:
         """Adjust image contrast with brightness compensation"""
         amount = max(0.1, float(amount))
         beta = 128 * (1 - amount)
