@@ -71,8 +71,6 @@
     cropPoller.start();
   }
 
-
-
   async function reevaluateAnswer(answer_id: number) {
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
@@ -122,6 +120,7 @@
   {:else}
     <div class="overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
+      {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
@@ -168,16 +167,16 @@
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
-              {@const answerScore = GET_SCORES(studentItem)[index]}
-              {@const isHasScore = answerScore && answerScore != ""}
               <span class="flex flex-wrap justify-between items-center [&>h5]:opacity-60">
                 <h5 class="italic">{e_a_r_q}</h5>
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
-                  <h5 class="font-bold">
-                    {isHasScore ? answerScore : "—"}
-                  </h5>
+                  <h4 class="font-semibold">
+                    {isEvalNotError
+                      ? GET_SCORES(studentItem)[index] || "—"
+                      : "⚠️"}
+                  </h4>
                 {/if}
               </span>
             {/if}
