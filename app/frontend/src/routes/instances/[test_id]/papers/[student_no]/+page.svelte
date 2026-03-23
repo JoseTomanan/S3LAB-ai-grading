@@ -127,7 +127,7 @@
         <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
                       flex justify-center items-center relative">
           <Label for={studentItem.label}
-                  class="absolute top-0 left-0 bg-white px-1.5 text-lg">
+                  class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
           </Label>
           <span>
