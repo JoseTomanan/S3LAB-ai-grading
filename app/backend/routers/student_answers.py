@@ -1,9 +1,6 @@
-import base64
-from multiprocessing import process
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
 from sqlmodel import Session, select
 from typing import List, Optional
-
 import uuid
 import json
 from pathlib import Path
@@ -11,11 +8,10 @@ from pathlib import Path
 from models import *
 from schemas import *
 from core.database import get_session, get_direct_session
-
 from logic.box_segmenter import BoxSegmenter
 from logic.document_scanner import DocumentScanner
-
 from logic.utility import *
+
 
 
 router = APIRouter()
@@ -582,7 +578,7 @@ def _label_save_boxes(
         print(f"INFO:\tLabel {item_number} will be stored in {item_id}")
 
         # Generate filename
-        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex}_{i}.jpg"
+        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{i}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
         filepath = TEMP_DIR / safe_filename
         
