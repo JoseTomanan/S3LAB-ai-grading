@@ -136,8 +136,8 @@ class BoxSegmenter(DocumentScanner):
         """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
         array = self._decode_bytes(image_bytes)
         img = self._adjust_contrast(
-                            self._brighten(array, amount=0.175),
-                            amount=1.3
+                            self._brighten(array, amount=-0.05),
+                            amount=2.0
                             )
         return self._encode_to_bytes(img)
 

@@ -16,17 +16,14 @@ if __name__ == "__main__":
     BOX_SEGMENTER = BoxSegmenter()
     AI_EVALUATOR = AIAnswerEvaluator()
     for file in FILENAMES:
-        try:
-            _onlyfilename = file.split(".")[0]
-            BOX_SEGMENTER.debug_dir = f"./TEMP/output/{_onlyfilename}"
-            
-            image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(file))
-            image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
-            images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=4, debug=True)
+        _onlyfilename = file.split(".")[0]
+        BOX_SEGMENTER.debug_dir = f"./TEMP/output/{_onlyfilename}"
+        
+        image_before_before = BOX_SEGMENTER.load_image(GET_INPUT(file))
+        image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
+        images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=4, debug=True)
 
-            for i, b in enumerate(images_after_box):
-                image_beautified = BOX_SEGMENTER.beautify_scan(b)
-                BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section_{i}.jpg"))
-        except:
-            print(f"INFO:\tFailed for {file}")
+        for i, b in enumerate(images_after_box):
+            image_beautified = BOX_SEGMENTER.beautify_scan(b)
+            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section_{i}.jpg"))
         print("================================")
