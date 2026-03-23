@@ -98,7 +98,7 @@ MOCK_DATA = {
             {
                 "item_id": 3,
                 "test_id": "3-Aguinaldo_Quiz-1",
-                "label": "1",
+                "label": "1a",
                 "question": "What is the place value of the digit 7 in the number 7,249?",
                 "is_problem_solving": False,
                 "expected_answer_rubric_questions": "Thousands [1pt]"
@@ -106,7 +106,7 @@ MOCK_DATA = {
             {
                 "item_id": 4,
                 "test_id": "3-Aguinaldo_Quiz-1",
-                "label": "2",
+                "label": "3",
                 "question": "A school library has 9,000 books. If 5,672 books are English books and the rest are Filipino books, how many Filipino books are there?",
                 "is_problem_solving": True,
                 "expected_answer_rubric_questions": "Correct operation/equation [2pts]; Correct calculation/solution [2pts]; Correct label in final answer (Filipino books) [1pts]"
@@ -114,7 +114,7 @@ MOCK_DATA = {
             {
                 "item_id": 6,
                 "test_id": "3-Aguinaldo_Quiz-1",
-                "label": "3",
+                "label": "2",
                 "question": "Mang Juan harvested 2,450 mangoes on Monday and 3,125 mangoes on Tuesday. How many mangoes did he harvest in total?",
                 "is_problem_solving": True,
                 "expected_answer_rubric_questions": "Correct operation/equation [2pts]; Correct calculation/solution [2pts]; Correct label in final answer (mangoes) [1pts]"
@@ -122,19 +122,11 @@ MOCK_DATA = {
             {
                 "item_id": 7,
                 "test_id": "3-Aguinaldo_Quiz-1",
-                "label": "4a",
-                "question": "Compare using >, <, or =: 6702 __ 6720",
+                "label": "1b",
+                "question": "Write the number eight thousand, fifty-six in standard symbols.",
                 "is_problem_solving": False,
-                "expected_answer_rubric_questions": "6702 < 6720 [1pt]"
+                "expected_answer_rubric_questions": "8,056 [1pt]"
             },
-            {
-                "item_id": 8,
-                "test_id": "3-Aguinaldo_Quiz-1",
-                "label": "4b",
-                "question": "Compare using >, <, or =: 700 __ 7000",
-                "is_problem_solving": False,
-                "expected_answer_rubric_questions": "700 < 7000 [1pt]"
-            }
         ]
         }
 #endregion
