@@ -18,8 +18,14 @@
     allItems = testItemsContext.items;
   });
 
-  let shortFormItems: TestItem[] = $derived(allItems.filter(item => !item.is_problem_solving));
-  let probSolItems: TestItem[] = $derived(allItems.filter(item => item.is_problem_solving));
+  let shortFormItems: TestItem[] = $derived(
+    allItems.filter(item => !item.is_problem_solving)
+      .toSorted((a, b) => a.label.localeCompare(b.label))
+    );
+  let probSolItems: TestItem[] = $derived(
+    allItems.filter(item => item.is_problem_solving)
+      .toSorted((a, b) => a.label.localeCompare(b.label))
+    );
 </script>
 
 
