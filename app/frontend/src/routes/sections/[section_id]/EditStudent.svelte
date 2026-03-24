@@ -40,7 +40,9 @@
     try {
       dropdownSections = await api<Section[]>('/api/sections/');
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch sections.\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to fetch sections.\n" + String(e));
     } finally {
       isSectionsLoading = false;
     }
