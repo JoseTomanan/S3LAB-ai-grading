@@ -1,3 +1,5 @@
+import { API_URL } from '$lib/constants.ts';
+
 import type { LayoutLoad } from './$types.ts';
 import type { TestInstance, TestItem } from '$lib/index.ts';
 import { error } from '@sveltejs/kit';
@@ -11,8 +13,8 @@ export const load: LayoutLoad = async ({ fetch, params }) => {
 
   try {
     const [instanceResponse, itemsResponse] = await Promise.all([
-      fetch(`/api/test_instances/${test_id}`),
-      fetch(`/api/test_items/${test_id}/items`)
+      fetch(`${API_URL}/api/test_instances/${test_id}`),
+      fetch(`${API_URL}/api/test_items/${test_id}/items`)
     ]);
   
     if (instanceResponse.ok) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
@@ -18,7 +19,7 @@
 
     isOperationOngoing = true;
     try {
-      await api('/api/sections/', {
+      await api(`${API_URL}/api/sections/`, {
         method: "POST",
         body: JSON.stringify({ section: formSectionName.trim() }),
       });

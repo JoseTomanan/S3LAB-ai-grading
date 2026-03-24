@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   import MdiUpload from '~icons/mdi/upload';
 
   import Cropper from 'cropperjs';
@@ -117,7 +118,7 @@
     isOperationOngoing = true;
     try {
       const result = await apiForm<{ image_directory: string }>(
-            `/api/student_answers/${test_id}/${student_no}/${item_id}`,
+            `${API_URL}/api/student_answers/${test_id}/${student_no}/${item_id}`,
             formData,
             "PATCH"
             );

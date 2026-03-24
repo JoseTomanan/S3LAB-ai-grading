@@ -1,3 +1,4 @@
+import { API_URL } from '$lib/constants.ts';
 import type { PageLoad } from "./$types.js";
 import type { GetSpecificEvaluationResponse, StudentAnswer, TestItem } from "$lib/index.ts";
 import { REPOPULATE_UNANSWERED_ITEMS } from "$lib/utils/ai_evaluations.ts";
@@ -16,7 +17,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
   REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
 
   try {
-    const responseOne = await fetch(`/api/student_answers/${params.test_id}/${params.student_no}`);
+    const responseOne = await fetch(`${API_URL}/api/student_answers/${params.test_id}/${params.student_no}`);
     switch (responseOne.status) {
       case 200:
         const result = await responseOne.json();
@@ -34,7 +35,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
   }
   
   try {
-    const response = await fetch(`/api/student_answers/${params.test_id}/results/${params.student_no}`);
+    const response = await fetch(`${API_URL}/api/student_answers/${params.test_id}/results/${params.student_no}`);
     switch (response.status) {
     case 200:
       const result = await response.json();

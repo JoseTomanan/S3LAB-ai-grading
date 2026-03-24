@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   import { onMount } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
@@ -38,7 +39,7 @@
   onMount(async () => {
     isSectionsLoading = true;
     try {
-      dropdownSections = await api<Section[]>('/api/sections/');
+      dropdownSections = await api<Section[]>(`${API_URL}/api/sections/`);
     } catch (e) {
       toast.error(e instanceof ApiError
         ? `${e.status} ${e.statusText}`
@@ -55,7 +56,7 @@
     }
     isRequestLoading = true;
     try {
-      await api(`/api/students/${student_no}`, {
+      await api(`${API_URL}/api/students/${student_no}`, {
         method: "PATCH",
         body: JSON.stringify({
           name: formName,
@@ -76,7 +77,7 @@
   async function deleteStudent() {
     isRequestLoading = true;
     try {
-      await api(`/api/students/${student_no}`, { method: "DELETE" });
+      await api(`${API_URL}/api/students/${student_no}`, { method: "DELETE" });
       toast.success("Student deleted successfully!");
       section_id = -1;
       await invalidateAll();

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
+
   const { data } = $props();
 
   import { onMount, onDestroy } from "svelte";
@@ -19,7 +21,7 @@
 
   const poller = createPoller(async () => {
     const result = await api<{ statuses: GetEvaluationsResponse[] }>(
-      `/api/student_answers/${data.test_id}/statuses`
+      `${API_URL}/api/student_answers/${data.test_id}/statuses`
     );
     perStudentStatuses = result.statuses;
     return perStudentStatuses.length > 0 && perStudentStatuses.every(s => s.is_done_rendering);

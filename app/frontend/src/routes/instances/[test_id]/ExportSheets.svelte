@@ -1,5 +1,6 @@
 <script lang="ts">
-  
+  import { API_URL } from '$lib/constants.ts';
+
   const { test_id } = $props();
 
   import { Button } from '$lib/components/ui/button/index.ts';
@@ -15,7 +16,7 @@
 
     try {
       const response = await fetch(
-            `/api/test_instances/${test_id}/export`,
+            `${API_URL}/api/test_instances/${test_id}/export`,
             {
               method: "GET",
               headers: { 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }

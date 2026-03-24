@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   let { data } = $props();
 
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
   const GET_NAME_ONLY = (s: string) => s.substring(0, s.lastIndexOf('.'));
   const GET_EXTENSION_ONLY = (s: string) => s.substring(s.lastIndexOf('.'));
@@ -55,7 +56,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`/api/sections/${data.test_instance!.section_id}`);
+      const response = await fetch(`${API_URL}/api/sections/${data.test_instance!.section_id}`);
       const results = await response.json();
       students = results;
     } catch (e) {
@@ -112,7 +113,7 @@
             formData.append('files', r.file);
           }
           const response = await fetch(
-                `/api/student_answers/${data.test_id}/${studentNo}/image_preprocess`,
+                `${API_URL}/api/student_answers/${data.test_id}/${studentNo}/image_preprocess`,
                 { method: "POST", body: formData, }
               );
           console.log(`${studentNo}: ${response.status}`);

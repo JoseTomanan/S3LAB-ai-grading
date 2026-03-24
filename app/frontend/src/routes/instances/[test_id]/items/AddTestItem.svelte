@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
+
   const { test_id } = $props();
 
   import { invalidateAll } from '$app/navigation';
@@ -38,7 +40,7 @@
     }
 
     try {
-      const result = await api<{ items: string }>(`/api/test_items/${test_id}/items`, {
+      const result = await api<{ items: string }>(`${API_URL}/api/test_items/${test_id}/items`, {
         method: "POST",
         body: JSON.stringify({
           label: formItemLabel,

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   const { data } = $props();
 
   import { onDestroy } from 'svelte';
@@ -48,7 +49,7 @@
 
   const cropPoller = createPoller(async () => {
     const result = await api<StudentAnswer[]>(
-      `/api/student_answers/${data.test_id}/${data.student_no}`
+      `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}`
     );
     for (const itemId of pollingItemIds) {
       const answer = result.find(a => a.item_id === itemId);
@@ -75,7 +76,7 @@
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
       const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
-            `/api/answers/${answer_id}/reevaluate`,
+            `${API_URL}/api/answers/${answer_id}/reevaluate`,
             { method: "PATCH" }
             );
       studentItems = studentItems.map(ans =>
@@ -92,7 +93,7 @@
 
   async function deleteAnswer(item_id: number) {
     try {
-      await api(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
+      await api(`${API_URL}/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
       toast.success(`Deletion of ${item_id} for ${data.student_no} successful.`);
       await invalidateAll();
     } catch (e) {
@@ -135,7 +136,7 @@
               <MdiPaperOff class="size-8 opacity-50" />
             {:else}
               <img class="max-h-70 w-auto mx-auto"
-                    src={`${studentItem.image_directory}`}
+                    src={`${API_URL}${studentItem.image_directory}`}
                     alt={studentItem.label}/>
             {/if}
           </span>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   const { data } = $props();
 
   import { onDestroy } from 'svelte';
@@ -87,7 +88,7 @@
 
     try {
       const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(
-            `/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
+            `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
             formData
             );
       supposedScans = (result.boxes ?? [])
@@ -105,7 +106,7 @@
 
   const commitPoller = createPoller(async () => {
     const result = await api<{ statuses: { student_no: string, is_done_rendering: boolean }[] }>(
-      `/api/student_answers/${data.test_id}/statuses`
+      `${API_URL}/api/student_answers/${data.test_id}/statuses`
     );
     const thisStudent = result.statuses.find(
       (s) => s.student_no === data.student_no
@@ -128,7 +129,7 @@
     isCommitmentOngoing = true;
     try {
       if (accept) {
-        await api(`/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
+        await api(`${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
           method: "POST",
           body: JSON.stringify({ boxes: supposedScans }),
         });

@@ -1,5 +1,6 @@
 <script lang="ts">
-	
+	import { API_URL } from '$lib/constants.ts';
+
 	let { section_id, isAddDialogOpen = $bindable() } = $props();
 
 	import { invalidateAll } from '$app/navigation';
@@ -17,7 +18,7 @@
 	async function addNewStudent() {
 		isLoading = true;
 		try {
-			const result = await api('/api/students', {
+			const result = await api(`${API_URL}/api/students`, {
 				method: "POST",
 				body: JSON.stringify({
 					student_no: formStudentNo,

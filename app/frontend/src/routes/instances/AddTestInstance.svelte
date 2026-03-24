@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   import { onMount } from "svelte";
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
@@ -25,7 +26,7 @@
   onMount(async () => {
     isItemsLoading = true;
     try {
-      dropdownItems = await api<Section[]>('/api/sections/');
+      dropdownItems = await api<Section[]>(`${API_URL}/api/sections/`);
     } catch (e) {
       toast.error(e instanceof ApiError
         ? `${e.status} ${e.statusText}`
@@ -37,7 +38,7 @@
 
   async function addNewTestInstance(name: string, section_id: string) {
     try {
-      await api('/api/test_instances', {
+      await api(`${API_URL}/api/test_instances`, {
         method: "POST",
         body: JSON.stringify({
           name,

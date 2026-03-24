@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { API_URL } from '$lib/constants.ts';
   const { test_id, student_no } = $props();
 
   import { getContext, onMount } from "svelte";
@@ -29,7 +30,7 @@
     REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
     try {
       const result = await api<{ evaluations: GetSpecificEvaluationResponse[] }>(
-            `/api/student_answers/${test_id}/results/${student_no}`
+            `${API_URL}/api/student_answers/${test_id}/results/${student_no}`
             );
       questionItemEvals = result.evaluations;
       REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
@@ -44,7 +45,7 @@
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
       const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
-            `/api/answers/${answer_id}/reevaluate`,
+            `${API_URL}/api/answers/${answer_id}/reevaluate`,
             { method: "PATCH" }
             );
       questionItemEvals = questionItemEvals.map(ans =>

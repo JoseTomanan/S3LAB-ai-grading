@@ -1,5 +1,6 @@
 <script lang="ts">
-    
+  import { API_URL } from '$lib/constants.ts';
+  
   import { untrack } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
@@ -53,7 +54,7 @@
     }
 
     try {
-      const result = await api<{ item_id: string }>(`/api/test_items/${test_id}/items/${submittedTestItem.item_id}`, {
+      const result = await api<{ item_id: string }>(`${API_URL}/api/test_items/${test_id}/items/${submittedTestItem.item_id}`, {
         method: "PATCH",
         body: JSON.stringify({
           label: submittedTestItem.label,
@@ -70,7 +71,7 @@
 
   async function deleteTestItem() {
     try {
-      await api(`/api/test_items/${test_id}/items/${formTestItem.item_id}`, { method: "DELETE" });
+      await api(`${API_URL}/api/test_items/${test_id}/items/${formTestItem.item_id}`, { method: "DELETE" });
       toast.success("Test item deleted.");
       await invalidateAll();
     } catch (e) {
