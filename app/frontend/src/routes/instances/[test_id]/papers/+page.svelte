@@ -12,6 +12,9 @@
   import { createPoller } from '$lib/utils/poller.ts';
 
   let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);
+  $effect(() => {
+    perStudentStatuses = data.statuses;
+  });
   let isPolling = $derived(perStudentStatuses.some(s => !s.is_done_rendering));
 
   const poller = createPoller(async () => {
@@ -35,9 +38,12 @@
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
   <h1 class="text-left font-semibold w-full flex justify-between items-center gap-x-2">
     Test papers
+    <!-- Removed for now because not working properly. FIXME: fix polling stuffs -->
+    <!--
     {#if isPolling}
       <Spinner class="size-4 text-muted-foreground/80"/>
     {/if}
+    -->
   </h1>
   {#if perStudentStatuses.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>

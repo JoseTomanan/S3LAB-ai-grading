@@ -4,6 +4,7 @@
   import { onDestroy } from 'svelte';
   import { goto, invalidateAll } from '$app/navigation';
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import { dataUrlToFile } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
@@ -94,7 +95,7 @@
       isAskingForValidation = true;
       isReviewDialogOpen = true;
     } catch(e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send raw image for processing:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send raw image for processing:\n" + e);
     } finally {
       isOperationOngoing = false;
     }
@@ -139,7 +140,7 @@
 
     // TODO: handle the otherwise case
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
     } finally {
       if (!commitPoller.active) isCommitmentOngoing = false;
     }

@@ -16,7 +16,7 @@ from logic.utility import populate_spreadsheet_logic
 router = APIRouter()
 
 
-#region Test Instance Endpoints
+#region Endpoints
 @router.get("", response_model=List[TestInstanceResponse])
 def get_test_instances(session: Session = Depends(get_session)):
     """Get all test instances with their items"""

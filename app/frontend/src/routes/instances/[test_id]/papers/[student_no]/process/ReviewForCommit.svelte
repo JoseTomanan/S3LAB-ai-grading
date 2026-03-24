@@ -30,7 +30,10 @@
       {:else if hasDuplicateLabels}
         <i>Please fix duplicate labels first</i>
       {:else if !isAcceptableLabels}
-        <i>Labels must match test items</i>
+        <i>
+          Labels must match test items:
+          {Array.from(validLabels).join(", ")}
+        </i>
       {:else}
         Accept and evaluate
       {/if}

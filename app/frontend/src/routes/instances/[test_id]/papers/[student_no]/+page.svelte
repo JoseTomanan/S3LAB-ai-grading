@@ -4,6 +4,7 @@
   import { onDestroy } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import { createPoller } from '$lib/utils/poller.ts';
   import MdiPaperOff from '~icons/mdi/paper-off';
   import MdiImagePlus from '~icons/mdi/image-plus';
@@ -70,8 +71,6 @@
     cropPoller.start();
   }
 
-
-
   async function reevaluateAnswer(answer_id: number) {
     isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
     try {
@@ -85,7 +84,7 @@
               : ans
             );
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
@@ -94,10 +93,10 @@
   async function deleteAnswer(item_id: number) {
     try {
       await api(`/api/student_answers/${item_id}/${data.student_no}`, { method: "DELETE" });
-      alert(`Deletion of ${item_id} for ${data.student_no} successful.`);
+      toast.success(`Deletion of ${item_id} for ${data.student_no} successful.`);
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
     }
   }
 </script>
@@ -121,13 +120,14 @@
   {:else}
     <div class="overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
+      {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
         <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
                       flex justify-center items-center relative">
           <Label for={studentItem.label}
-                  class="absolute top-0 left-0 bg-white px-1.5 text-lg">
+                  class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
           </Label>
           <span>
@@ -167,16 +167,16 @@
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
-              {@const answerScore = GET_SCORES(studentItem)[index]}
-              {@const isHasScore = answerScore && answerScore != ""}
               <span class="flex flex-wrap justify-between items-center [&>h5]:opacity-60">
                 <h5 class="italic">{e_a_r_q}</h5>
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
-                  <h5 class="font-bold">
-                    {isHasScore ? answerScore : "—"}
-                  </h5>
+                  <h4 class="font-semibold">
+                    {isEvalNotError
+                      ? GET_SCORES(studentItem)[index] || "—"
+                      : "⚠️"}
+                  </h4>
                 {/if}
               </span>
             {/if}

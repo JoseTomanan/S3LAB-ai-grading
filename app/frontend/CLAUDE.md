@@ -54,9 +54,8 @@ npm run format  # prettier --write
 /instances/[test_id]        - Specific test instance
 /instances/[test_id]/items  - Test items (questions/rubrics)
 /instances/[test_id]/papers - Student papers list
-/instances/[test_id]/papers/upload    - Upload papers
-/instances/[test_id]/papers/[student_no]          - Student paper view
-/instances/[test_id]/papers/[student_no]/manual   - Manual grading
+/instances/[test_id]/upload  - Upload papers
+/instances/[test_id]/papers/[student_no]          - Student paper view (includes ManualCrop dialog)
 /instances/[test_id]/papers/[student_no]/process  - Auto-grading/processing
 /sections                   - Section management
 /sections/[section_id]      - Specific section
@@ -67,8 +66,11 @@ npm run format  # prettier --write
 - `src/lib/types/schemas.ts` — API response schemas
 - `src/lib/utils/ai_evaluations.ts` — AI evaluation parsing/display helpers
 - `src/lib/utils/image_functions.ts` — Image rotation/flip utilities using canvas API
+- `src/lib/utils/api.ts` — HTTP utility wrapper (`apiForm`, `ApiError`)
+- `src/lib/utils/poller.ts` — Polling utility
 - `src/lib/components/IrregularCropper.svelte` — Polygon cropping for answer regions
 - `src/lib/components/GetAIEvaluation.svelte` — Displays AI grading results
+- `src/routes/.../[student_no]/ManualCrop.svelte` — Manual crop dialog using cropperjs
 
 ### State Management
 - Svelte context API for cross-component data sharing (e.g., `TestItemsContext`)

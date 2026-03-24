@@ -4,6 +4,7 @@
 
   import { Button } from '$lib/components/ui/button/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  import toast from 'svelte-5-french-toast';
 
   let isNotClicked: boolean = $state(true);
   let isLoading: boolean = $state(false);
@@ -37,10 +38,10 @@
           break;
         
         default:
-          alert(`${response.status} ${response.statusText}`);
+          toast.error(`${response.status} ${response.statusText}`);
       }
     } catch (e) {
-      alert("Failed to export spreadsheet:\n"+e);
+      toast.error("Failed to export spreadsheet:\n"+e);
       isNotClicked = true;
     } finally {
       isLoading = false;

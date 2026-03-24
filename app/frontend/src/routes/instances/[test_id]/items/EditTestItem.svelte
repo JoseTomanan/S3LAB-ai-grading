@@ -1,7 +1,9 @@
 <script lang="ts">
     
+  import { untrack } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import type { TestItem } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Button } from '$lib/components/ui/button/index.ts';
@@ -23,6 +25,19 @@
         expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
       });
 
+  // NOTE: This resets the form on any testItem prop change, including invalidateAll().
+  // Safe because the dialog is always closed before invalidateAll() runs.
+  $effect(() => {
+    const updated = {
+      item_id: testItem.item_id,
+      label: testItem.label,
+      question: testItem.question,
+      is_problem_solving: testItem.is_problem_solving,
+      expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
+    };
+    untrack(() => { formTestItem = updated; });
+  });
+
   let isWantsToDelete = $state(false);
   $effect(() => {
     formTestItem.label;
@@ -33,7 +48,7 @@
 
   async function editTestItem(submittedTestItem: TestItem) {
     if (testItem == submittedTestItem) {
-      alert("No changes were made.");
+      toast("No changes were made.", { icon: "⚠️" });
       return;
     }
 
@@ -46,20 +61,20 @@
           expected_answer_rubric_questions: submittedTestItem.expected_answer_rubric_questions,
         }),
       });
-      alert("Success: " + result.item_id);
+      toast.success("Test item updated successfully!");
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit test item:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit test item:\n" + e);
     }
   }
 
   async function deleteTestItem() {
     try {
       await api(`/api/test_items/${test_id}/items/${formTestItem.item_id}`, { method: "DELETE" });
-      alert("Delete success.");
+      toast.success("Test item deleted.");
       await invalidateAll();
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete test item:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete test item:\n" + e);
     }
   }
 </script>

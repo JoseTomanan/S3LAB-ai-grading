@@ -2,7 +2,7 @@
   import logo from "$lib/assets/android-chrome-512x512.png";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
 
-  import toast, { Toaster } from "svelte-5-french-toast";
+  import toast from "svelte-5-french-toast";
   
   import IconPaper from '~icons/mdi/paper';
   import IconSection from '~icons/mdi/person';
@@ -10,7 +10,6 @@
 </script>
 
 
-<Toaster/>
 <div class="container w-full h-[93vh] flex flex-col items-center justify-center gap-y-10">
   <div class="relative w-full py-8 flex flex-col items-center justify-center gap-y-3">
     <span class="absolute inset-0 m-auto size-28 object-contain -z-50 block left-0 right-0 top-0 bottom-0">

@@ -5,6 +5,7 @@
   import 'cropperjs/dist/cropper.css';
 
   import { apiForm, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -128,7 +129,7 @@
       canvasImageUrl = null;
       onCropSubmitted?.(result.image_directory);
     } catch(e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
+      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
     } finally {
       isOperationOngoing = false;
     }
