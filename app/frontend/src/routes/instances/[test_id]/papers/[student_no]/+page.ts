@@ -1,6 +1,7 @@
 import type { PageLoad } from "./$types.js";
 import type { GetSpecificEvaluationResponse, StudentAnswer, TestItem } from "$lib/index.ts";
 import { REPOPULATE_UNANSWERED_ITEMS } from "$lib/utils/ai_evaluations.ts";
+import { error } from "@sveltejs/kit";
 
 
 
@@ -28,7 +29,8 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
         console.log(`CALL 1: ${responseOne.status} ${responseOne.statusText}`);
     }
   } catch (e) {
-    console.log("Failed to fetch student answers:\n"+e)
+    console.log("Failed to fetch student answers:\n"+e);
+    throw error(500, "Failed to fetch student answers.");
   }
   
   try {
