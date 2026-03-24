@@ -36,6 +36,7 @@
 </script>
 
 
+
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-3">
     <span class="flex flex-row items-center justify-between">
@@ -49,19 +50,16 @@
       </a>
     </span>
     <Separator/>
-    <div id="change-instance-details"
-          class="space-y-1 *:flex *:justify-between [&>*>h4]:font-normal [&>*>h4]:opacity-85 [&>*>h4]:leading-none">
+    <div class="flex flex-wrap gap-x-4 gap-y-1
+              *:flex-1 *:flex *:justify-between
+              [&>*>h4]:font-normal [&>*>h4]:opacity-85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
       <span>
+        <h4>TestID: {activeTestInstance.test_id}</h4>
         <h4>
-          TestID: {activeTestInstance.test_id}
-        </h4>
-        <h4 class="flex gap-1">
           Status:
-          {#if activeTestInstance.is_done_rendering}
-            &check;
-          {:else}
-            &cross;
-          {/if}
+          {activeTestInstance.is_done_rendering 
+            ? "☑️" 
+            : "✖️" }
         </h4>
       </span>
       <span>
@@ -71,9 +69,7 @@
             ? new Date(activeTestInstance.date).toLocaleDateString()
             : "" }
         </h4>
-        <h4>
-          SectionID: { activeTestInstance.section_id }
-        </h4>
+        <h4>SectionID: { activeTestInstance.section_id }</h4>
       </span>
     </div>
     <div id="thisOne"
