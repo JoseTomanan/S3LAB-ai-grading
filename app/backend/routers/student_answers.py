@@ -187,23 +187,25 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 detail=f"Test instance '{test_id}' not found"
                 )
     
-    # Get all students in the section
+    ## Get all students in the section
     students = session.exec(
             select(Student).where(Student.section_id == instance.section_id)
             ).all()
     
-    # Get all items for this test
+    ## Get all items for this test
     items = session.exec(
             select(TestItem).where(TestItem.test_id == test_id)
             ).all()
     
-    # Build status response
     statuses = []
     for student in students:
         total_score = 0
         max_score = 0
 
-        # Check if ALL items have processed answers
+        ## We use 'all_items_processed' to check if this student has valid (rendered) answers for every item in the test
+        ## 'all_items_processed' starts as True and is set to False if any test item is missing a corresponding answer, 
+        ## or if the AI evaluation of any answer is not finished (is_done_rendering == False).
+        ## 'has_any_answer' tracks if student has >=1 answer for any item -- distinguish between "no answers yet" vs "all answers processed".
         all_items_processed = True
         has_any_answer = False
         for item in items:
@@ -218,13 +220,17 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                         ).first()
 
             if not answer:
+                ## No answer was found for this item (by this student); update state.
                 all_items_processed = False
                 continue
 
+            ## There is at least one answer for this test+student.
             has_any_answer = True
             if not answer.is_done_rendering:
+                ## This answer exists but is still being processed by the AI (not fully evaluated yet)
                 all_items_processed = False
             else:
+                ## This answer is done and has an AI rubric evaluation; aggregate scores.
                 _parsed_scores = get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
                 total_score += _parsed_scores[0]
                 max_score += _parsed_scores[1]
@@ -232,7 +238,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
         statuses.append({
                 "student_no": student.student_no,
                 "name": student.name,
-                "is_done_rendering": all_items_processed or not has_any_answer,
+                "is_done_rendering": all_items_processed and has_any_answer,
                 "total_score": f"{total_score}/{max_score}",
                 })
     
@@ -665,7 +671,7 @@ def _evaluate_answers_background(answer_ids: list[int]):
             try:
                 evaluate_image_logic(answer_id, session)
             except Exception as e:
-                print(f"INFO:\tAI evaluation failed for answer {answer_id}: {e}")
+                print(f"INFO:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
                 answer = session.get(StudentAnswer, answer_id)
                 if answer:
                     answer.is_done_rendering = True
