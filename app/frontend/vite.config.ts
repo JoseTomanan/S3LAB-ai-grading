@@ -6,14 +6,17 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   server: {
-    // FIXME: allow host when done
-    // host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
       }
     }
+  },
+  preview: {
+    allowedHosts: [
+      's3lab-frontend.onrender.com',
+    ],
   },
 	plugins: [
 		tailwindcss(),
