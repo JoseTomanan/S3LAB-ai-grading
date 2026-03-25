@@ -155,7 +155,8 @@ async def update_answer_segmentation(
     contents = await file.read()
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
-    img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
+    # img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
+    img_bytes = img_bytes_crop
 
     # ===== SAVE IMAGE =====
     safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
@@ -527,12 +528,13 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
 
     all_processed: list[bytes] = []
     for page_idx, contents in enumerate(contents_list):
-        # ======== DOCUMENT SCANNING ========
+        ## ======== DOCUMENT SCANNING ========
         scanned_page = DOCUMENT_SCANNER.scan_page(contents)
 
-        # ======== BOX SEGMENTING ========
+        ## ======== BOX SEGMENTING ========
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
-        processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+        # processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+        processed_list = segmented_list
 
         print(f"INFO:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
