@@ -40,7 +40,11 @@
         question: evalData.question,
         expected_answer_rubric_questions: evalData.expected_answer_rubric_questions,
         scores: evalData.scores};
-    })
+      }).sort((a, b) => {
+        if (a.label < b.label) return -1;
+        if (a.label > b.label) return 1;
+        return 0;
+      });
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
@@ -85,7 +89,9 @@
               : ans
             );
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to reevaluate answer:\n" + String(e));
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
@@ -97,10 +103,13 @@
       toast.success(`Deletion of ${item_id} for ${data.student_no} successful.`);
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to delete answer:\n" + String(e));
     }
   }
 </script>
+
 
 
 <div class="flex flex-col gap-3">
@@ -124,6 +133,7 @@
       {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
+      
       <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
         <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
                       flex justify-center items-center relative">
@@ -135,12 +145,14 @@
             {#if studentItem.image_directory == ""}
               <MdiPaperOff class="size-8 opacity-50" />
             {:else}
+              <!-- FIXME: not working in production (but working in dev somehow??) -->
               <img class="max-h-70 w-auto mx-auto"
                     src={`${API_URL}${studentItem.image_directory}`}
                     alt={studentItem.label}/>
             {/if}
           </span>
         </span>
+        
         <div class="flex-1 w-full h-full space-y-2">
           <span class="flex flex-row space-x-1 justify-end">
             <SafeDelete toggle={isWantsToDelete}
@@ -165,6 +177,7 @@
               <IconReevaluate />
             </button>
           </span>
+          
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
@@ -183,6 +196,7 @@
             {/if}
             {/each}
           </div>
+
         </div>
       </div>
     {/each}
