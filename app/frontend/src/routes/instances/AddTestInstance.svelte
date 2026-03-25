@@ -37,6 +37,11 @@
   });
 
   async function addNewTestInstance(name: string, section_id: string) {
+    if (newInstanceName === "" || newInstanceSectionId === "") {
+      toast("Please do not leave any fields empty");
+      return;
+    }
+
     try {
       await api(`${API_URL}/api/test_instances`, {
         method: "POST",

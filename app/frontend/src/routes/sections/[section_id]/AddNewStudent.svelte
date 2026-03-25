@@ -16,6 +16,11 @@
 	let formStudentNo: string = $state("");
 
 	async function addNewStudent() {
+    if (formStudentNo === "" || formName === "") {
+      toast("Please do not leave empty fields");
+      return;
+    }
+
 		isLoading = true;
 		try {
 			const result = await api(`${API_URL}/api/students`, {

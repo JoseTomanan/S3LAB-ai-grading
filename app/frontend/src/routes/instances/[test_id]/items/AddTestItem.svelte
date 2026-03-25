@@ -26,6 +26,11 @@
   let submittableEARQ: string = "";
 
   async function addTestItem() {
+    if (formItemLabel === "" || formItemQuestion === "") {
+      toast("Please do not leave any fields empty")
+      return;
+    }
+
     isOperationOngoing = true;
 
     if (formItemIsProblemSolving) {
