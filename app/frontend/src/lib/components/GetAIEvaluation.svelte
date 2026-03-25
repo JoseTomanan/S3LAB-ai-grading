@@ -13,6 +13,7 @@
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import { GET_E_A_R_Q, GET_SCORES, REPOPULATE_UNANSWERED_ITEMS } from '$lib/utils/ai_evaluations.ts';
+	import toast from "svelte-5-french-toast";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
@@ -20,9 +21,8 @@
   let testItems: TestItem[] = $state(testItemsContext.items);
 
   let questionItemEvals: GetSpecificEvaluationResponse[] = $state([]);
-  $effect(() => {
-    questionItemEvals.sort((a, b) => a.label.localeCompare(b.label))
-  });
+  let questionItemEvalsUseable: GetSpecificEvaluationResponse[] = $derived(questionItemEvals.toSorted((a, b) => a.label.localeCompare(b.label)));
+
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
 
   onMount(async () => {
@@ -35,7 +35,10 @@
       questionItemEvals = result.evaluations;
       REPOPULATE_UNANSWERED_ITEMS(questionItemEvals, testItems);
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to fetch AI evaluations:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to fetch AI evaluations:\n" + String(e)
+        );
     } finally {
       isPageLoading = false;
     }
@@ -54,7 +57,10 @@
               : ans
             );
     } catch (e) {
-      alert(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to reevaluate answer:\n" + String(e)
+        );
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
@@ -105,7 +111,7 @@
       {/each}
     
     {:else}
-      {#each questionItemEvals as evalItem}
+      {#each questionItemEvalsUseable as evalItem}
         <div class="card space-y-1">
           {#if evalItem.answer_id == -1}
             <h4 class="truncate text-ellipsis w-fill">

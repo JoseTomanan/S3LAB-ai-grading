@@ -80,3 +80,19 @@ export async function flipImage(record: FileRecord, isFlipHorizontal: boolean): 
     statusCode: record.statusCode,
   };
 }
+
+
+async function handleRotateCommand(singleRecord: FileRecord, records: FileRecord[], isCw: boolean) {
+  if (!singleRecord)
+    return;
+  const recordResponse = await rotateImage(singleRecord, isCw);
+  records = records.map(i => i.name == recordResponse.name ? recordResponse : i);
+}
+
+
+async function handleFlipCommand(singleRecord: FileRecord, records: FileRecord[], isFlipHorizontally: boolean) {
+  if (!singleRecord)
+    return;
+  const recordResponse = await flipImage(singleRecord, isFlipHorizontally);
+  records = records.map(i => i.name == recordResponse.name ? recordResponse : i);
+}

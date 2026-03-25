@@ -26,7 +26,10 @@
       toast.success("Section added successfully!");
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new section:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to add new section:\n" + String(e)
+        );
     } finally {
       isOperationOngoing = false;
     }
@@ -39,13 +42,12 @@
   </Dialog.Header>
 
   <Label for="section_name">Section name</Label>
-  <Input
-    id="section_name"
-    type="text"
-    placeholder="e.g. Grade 10 - Einstein"
-    required
-    bind:value={formSectionName}
-  />
+  <Input id="section_name"
+          type="text"
+          placeholder="e.g., 3-Einstein"
+          required
+          bind:value={formSectionName}
+          />
 
   <Dialog.Footer>
     <Button variant="outline" disabled={isOperationOngoing} onclick={addSection}>
