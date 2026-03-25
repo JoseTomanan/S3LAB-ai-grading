@@ -41,6 +41,17 @@
     if (!formFiles || formFiles.length == 0)
       return;
 
+    // Check all files: only allow .png, .jpeg, .jpg (case-insensitive)
+    // FIXME: remove once validated that working as intended
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const isInvalid: boolean = Array.from(formFiles).some(
+      (f) => !validTypes.includes(f.type)
+    );
+    if (isInvalid) {
+      toast.error("Please upload only .png, .jpeg, or .jpg");
+      return;
+    }
+
     formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
     formFileRecords = Array.from(formFiles).map((f, i) => ({
       file: f,
@@ -61,6 +72,7 @@
     }];
   }
 
+  // TODO: Use import
   async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
     if (!formFileRecord)
       return;
