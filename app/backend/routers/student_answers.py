@@ -27,6 +27,7 @@ async def process_student_answer_image(
                 background_tasks: BackgroundTasks,
                 files: List[UploadFile] = File(...),
                 num_boxes: Optional[int] = Query(None),
+                is_scanned_already: bool = Query(False),
                 session: Session = Depends(get_session)
                 ):
     """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
@@ -34,7 +35,7 @@ async def process_student_answer_image(
     contents_list = await _validate_files(files)
 
     print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
-    processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
+    processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INFO:\tProceeding to labeling the boxes.")
@@ -58,6 +59,7 @@ async def scan_then_label_save_boxes(
                 student_no: str,
                 files: List[UploadFile] = File(...),
                 num_boxes: Optional[int] = Query(None),
+                is_scanned_already: bool = Query(False),
                 session: Session = Depends(get_session)
                 ):
     """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
@@ -66,7 +68,7 @@ async def scan_then_label_save_boxes(
 
     print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
-        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
+        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except:
         raise HTTPException(status_code=500, detail="Could not find any boxes.")
 
@@ -522,14 +524,14 @@ async def _validate_files(files: List[UploadFile]) -> list[bytes]:
     return contents_list
 
 
-async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optional[int]) -> list[bytes]:
+async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optional[int], is_scanned_already: bool = False) -> list[bytes]:
     DOCUMENT_SCANNER = DocumentScanner()
     BOX_SEGMENTER = BoxSegmenter()
 
     all_processed: list[bytes] = []
     for page_idx, contents in enumerate(contents_list):
         ## ======== DOCUMENT SCANNING ========
-        scanned_page = DOCUMENT_SCANNER.scan_page(contents)
+        scanned_page = contents if is_scanned_already else DOCUMENT_SCANNER.scan_page(contents)
 
         ## ======== BOX SEGMENTING ========
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
