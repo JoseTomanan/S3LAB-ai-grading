@@ -36,6 +36,7 @@
   import type { FileRecord, Student } from '$lib/index.ts';
 
   import { rotateImage, flipImage } from '$lib/utils.ts';
+	import toast from 'svelte-5-french-toast';
   
   let isOperationStarted: boolean = $state(false);
   let formFiles: FileList | undefined = $state();
@@ -43,16 +44,15 @@
   let students: Student[] = $state([]);
   let numBoxesPerStudent: Map<string, number | null> = $state(new Map());
 
-  // TODO: finish API side, then wire API call
   const IS_FIRST_PAGE = (name: string): boolean => {
     const studentNo = GET_STUDENT_NO(name);
     const nameOnly = GET_NAME_ONLY(name);
     const dashIdx = nameOnly.lastIndexOf('-');
-    if (dashIdx === -1) return true;
+    if (dashIdx === -1)
+      return true;
     const afterDash = nameOnly.substring(dashIdx + 1);
     return !(/^\d+$/.test(afterDash)) || afterDash === '1';
   };
-
 
   onMount(async () => {
     try {
@@ -64,10 +64,20 @@
     }
   });
 
-
   function handleFiles() {
     if (!formFiles || formFiles.length == 0)
       return;
+
+    // Check all files: only allow .png, .jpeg, .jpg (case-insensitive)
+    // FIXME: remove once validated that working as intended
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const isInvalid: boolean = Array.from(formFiles).some(
+      (f) => !validTypes.includes(f.type)
+    );
+    if (isInvalid) {
+      toast.error("Please upload only .png, .jpeg, or .jpg");
+      return;
+    }
 
     formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
     formFileRecords = Array.from(formFiles).map(f => ({
@@ -143,6 +153,7 @@
 </script>
 
 
+
 <div class="space-y-2">
   <h1 class="text-left font-semibold">Bulk upload</h1>
   <Input type="file"
@@ -160,7 +171,6 @@
       <br>
       For ease, name by student no, e.g., 202011111.jpeg (single page) 202011111-1.jpeg (multi-page)
     </h6>
-  
   {:else if !isOperationStarted}
     <div class="space-y-1">
       <span class="flex flex-row justify-between items-center">
@@ -173,6 +183,7 @@
           <IconSend class="size-4" />
         </Button>
       </span>
+      
       <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
         {#each formFileRecords as p}
@@ -203,6 +214,7 @@
               <BulkUploadRename filename={supposedId}
                         onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
             </Dialog.Root>
+            
             {#if IS_FIRST_PAGE(p.name)}
               <span class="absolute bottom-2 right-2 bg-white/80 backdrop-blur-md">
                 <input type="number"
@@ -219,6 +231,7 @@
                     />
               </span>
             {/if}
+            
             <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
               <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
                 <IconRotateCW />
