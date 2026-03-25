@@ -91,7 +91,6 @@
     formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
   }
 
-  // TODO: use paramScannedAlready in function. Do this after respective changes in backend are done
   async function sendImageForValidation() {
     if (formFileRecords.length === 0)
       return;
@@ -104,16 +103,16 @@
     }
 
     try {
-      const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(
-            `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
-            formData
-            );
+      const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}&is_scanned_already=${paramScannedAlready}`;
+      const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(url, formData);
       supposedScans = (result.boxes ?? [])
                         .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
       isAskingForValidation = true;
       isReviewDialogOpen = true;
     } catch(e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send raw image for processing:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to send raw image for processing:\n" + String(e));
     } finally {
       isOperationOngoing = false;
     }
@@ -208,19 +207,18 @@
       </Dialog.Root>
     </div>
     
-    <div class="subcontainer flex flex-col sm:flex-row gap-x-4 gap-y-2">
+    <div class="subcontainer flex flex-row gap-x-4 gap-y-2">
       <Input id="numBoxes" type="number"
-              class="flex-2/3"
+              class="flex-1 xs:flex-2"
               placeholder="Number of boxes (default: 2)..."
               disabled={isAskingForValidation}
               bind:value={paramNumBoxes}
           />
       
-      <span class="flex-1/3 flex flex-row gap-x-2 items-center">
-        <Switch id="isAlreadyScanned"
-                bind:checked={paramScannedAlready}/>
+      <span class="flex-1 flex flex-row gap-x-2 items-center">
+        <Switch id="isAlreadyScanned" bind:checked={paramScannedAlready}/>
         <Label for="isAlreadyScanned">
-          Page scanned already
+          Scanned already
         </Label>
       </span>
     </div>
