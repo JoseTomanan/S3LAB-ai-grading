@@ -25,7 +25,7 @@
 
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
   import { createPoller } from '$lib/utils/poller.ts';
-  import { rotateImage, flipImage } from '$lib/utils.ts';
+  import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import ReviewForCommit from './ReviewForCommit.svelte';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 
@@ -76,20 +76,6 @@
     }];
   }
 
-  // TODO: Use import
-  async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await rotateImage(formFileRecord, isCw);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
-
-  async function handleFlipCommand(formFileRecord: FileRecord, isFlipHorizontally: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
 
   async function sendImageForValidation() {
     if (formFileRecords.length === 0)
@@ -257,16 +243,20 @@
                     class="aspect-auto block"
                     />
               <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-                <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
+                        class="button-outline">
                   <IconRotateCW />
                 </button>
-                <button onclick={() => handleRotateCommand(p, false)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
+                        class="button-outline">
                   <IconRotateCCW />
                 </button>
-                <button onclick={() => handleFlipCommand(p, true)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
+                        class="button-outline">
                   <IconFlipHorizontally />
                 </button>
-                <button onclick={() => handleFlipCommand(p, false)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
+                        class="button-outline">
                   <IconFlipVertically />
                 </button>
               </span>

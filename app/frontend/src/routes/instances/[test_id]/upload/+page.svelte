@@ -35,7 +35,7 @@
   import BulkUploadRename from './BulkUploadRename.svelte';
   import type { FileRecord, Student } from '$lib/index.ts';
 
-  import { rotateImage, flipImage } from '$lib/utils.ts';
+  import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import toast from 'svelte-5-french-toast';
   
   let isOperationStarted: boolean = $state(false);
@@ -136,20 +136,6 @@
       console.log("Bulk upload operation failed:\n"+e);
     }
   }
-
-  async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await rotateImage(formFileRecord, isCw);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
-
-  async function handleFlipCommand(formFileRecord: FileRecord, isFlipHorizontally: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
 </script>
 
 
@@ -233,16 +219,20 @@
             {/if}
             
             <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-              <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
+                      class="button-outline">
                 <IconRotateCW />
               </button>
-              <button onclick={() => handleRotateCommand(p, false)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
+                      class="button-outline">
                 <IconRotateCCW />
               </button>
-              <button onclick={() => handleFlipCommand(p, true)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
+                      class="button-outline">
                 <IconFlipHorizontally />
               </button>
-              <button onclick={() => handleFlipCommand(p, false)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
+                      class="button-outline">
                 <IconFlipVertically />
               </button>
             </span>
