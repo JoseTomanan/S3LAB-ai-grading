@@ -158,19 +158,21 @@
       if (!commitPoller.active) isCommitmentOngoing = false;
     }
   }
-
 </script>
 
 
-<div class="flex flex-col gap-y-2">
-  <span class="flex flex-row justify-between items-baseline
-            [&>h1]:font-semibold [&>h5]:opacity-60">
+
+<div class="flex flex-col gap-y-2 items-center">
+  <span class="flex flex-row justify-between items-baseline w-full
+                [&>h1]:font-semibold [&>h5]:opacity-60">
     <h1>Process image</h1>
     <h5>For {data.student_no}</h5>
   </span>
-    <div class="flex flex-row gap-2 min-w-0">
+
+  <!-- <div> -->
+    <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-        class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
+              class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
         <span class="shrink-0 whitespace-nowrap text-sm pl-1">
           {formFileRecords.length > 0
             ? `Uploaded ${formFileRecords.length} image(s):`
@@ -182,13 +184,16 @@
           </span>
         {/if}
       </Label>
+      
       <Input id="sendImage"
               type="file"
               accept="image/*"
               multiple
               class="hidden"
               onchange={handleFiles}
-              bind:files={formFiles}/>
+              bind:files={formFiles}
+          />
+      
       <Dialog.Root bind:open={isCameraDialogOpen}>
         <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
@@ -197,15 +202,20 @@
                     onImageCapture={getImageFromComponent} />
       </Dialog.Root>
     </div>
-    <div class="flex flex-col sm:flex-row gap-x-4 gap-y-2">
+    
+    <div class="subcontainer flex flex-col sm:flex-row gap-x-4 gap-y-2
+                *:flex-1">
       <Input id="numBoxes"
-              class="flex-1"
               type="number"
               placeholder="Number of boxes (default: 2)..."
               disabled={isAskingForValidation}
               bind:value={paramNumBoxes}
           />
+      
     </div>
+  <!-- </div> -->
+
+  <div class="subcontainer flex flex-col gap-y-2">
   {#if isAskingForValidation === false}
     <Button variant="outline"
             onclick={sendImageForValidation}
@@ -277,5 +287,5 @@
       <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
     {/if}
   {/if}
+  </div>
 </div>
-
