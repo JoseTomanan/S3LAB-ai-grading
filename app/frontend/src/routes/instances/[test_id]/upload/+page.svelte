@@ -16,10 +16,11 @@
     return /^\d+$/.test(afterDash) ? nameOnly.substring(0, dashIdx) : nameOnly;
   };
 
-  import IconCheck from "~icons/mdi/check";
   import IconAccepted from "~icons/mdi/cloud-check-variant-outline";
   import IconExclamation from "~icons/mdi/exclamation-thick";
   import IconNotFound from "~icons/mdi/account-question-outline";
+  import IconUnprocessable from "~icons/mdi/paper-off";
+
   import IconSend from "~icons/mdi/send";
   import IconPerson from "~icons/mdi/person";
   import IconRotateCW from "~icons/mdi/rotate-clockwise";
@@ -127,7 +128,13 @@
                 { method: "POST", body: formData, }
               );
           console.log(`${studentNo}: ${response.status}`);
-          records.forEach(r => r.statusCode = response.status);
+          if (!response.ok) {
+            const body = await response.json().catch(() => null);
+            const detail: string = body?.detail ?? response.statusText;
+            records.forEach(r => { r.statusCode = response.status; r.statusDetail = detail; });
+          } else {
+            records.forEach(r => r.statusCode = response.status);
+          }
         })().catch(() => {
           records.forEach(r => r.statusCode = 500);
         });
@@ -151,12 +158,13 @@
       />
   <Separator/>
   
-  {#if !formFiles}
+  {#if !formFiles || formFiles.length == 0}
     <h6 class="opacity-60 text-left">
       Uploads will appear here.
       <br>
       For ease, name by student no, e.g., 202011111.jpeg (single page) 202011111-1.jpeg (multi-page)
     </h6>
+  
   {:else if !isOperationStarted}
     <div class="space-y-1">
       <span class="flex flex-row justify-between items-center">
@@ -245,23 +253,43 @@
   {:else}
     <div class="flex flex-col space-y-1">
       {#each formFileRecords as p}
-        <span class="flex flex-row justify-start items-center gap-x-1.5">
-          <span>
+        <span class="flex flex-row justify-start items-center gap-x-2
+                      [&>span]:flex [&>span]:flex-row [&>span]:items-baseline [&>span]:size-5
+                      [&>h4]:truncate [&>h4]:w-fit
+                      [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2">
+          <!-- <span> -->
             {#if p.statusCode == 200 || p.statusCode == 202}
-              <IconAccepted class="size-5"/>
+              <span> <IconAccepted/> </span>
+              <h4>{ p.name }</h4>
             {:else if p.statusCode == 404}
-              <IconNotFound class="size-5" />
+              <span> <IconNotFound/> </span>
+              <h4>{ p.name }</h4>
+              <i>Student no. not recognized</i>
+            {:else if p.statusCode == 422}
+              <span> <IconUnprocessable class="text-destructive"/> </span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? "Unprocessable image"}</i>
+            {:else if p.statusCode == 500}
+              <span> <IconExclamation class="text-destructive"/> </span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? "Unspecified server error"}</i>
             {:else if p.statusCode == 501}
-              <IconExclamation class="size-5" />
+              <span> <IconExclamation/> </span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? ""}</i>
+            
             {:else if p.statusCode == -1}
-              <Spinner class="text-primary size-4"/>
+              <span> <Spinner class="text-primary"/> </span>
+              <h4>{ p.name }</h4>
             {:else}
               <span class="font-mono -tracking-[0.08em]">{p.statusCode}</span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? ""}</i>
             {/if}
-          </span>
-          <h4 class="truncate w-fit">{p.name}</h4>
+          <!-- </span> -->
         </span>
       {/each}
+
     </div>
   {/if}
 </div>
