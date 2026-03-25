@@ -21,18 +21,22 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import Switch from '$lib/LightSwitch.svelte';
+
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
   import { createPoller } from '$lib/utils/poller.ts';
-
   import { rotateImage, flipImage } from '$lib/utils.ts';
 	import ReviewForCommit from './ReviewForCommit.svelte';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
+  
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
+  let paramScannedAlready: boolean = $state(false);
   let formFileRecords: FileRecord[] = $state([]);
+  
   let isAskingForValidation: boolean = $state(false);
   let isReviewDialogOpen: boolean = $state(false);
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
@@ -87,6 +91,7 @@
     formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
   }
 
+  // TODO: use paramScannedAlready in function. Do this after respective changes in backend are done
   async function sendImageForValidation() {
     if (formFileRecords.length === 0)
       return;
@@ -203,15 +208,21 @@
       </Dialog.Root>
     </div>
     
-    <div class="subcontainer flex flex-col sm:flex-row gap-x-4 gap-y-2
-                *:flex-1">
-      <Input id="numBoxes"
-              type="number"
+    <div class="subcontainer flex flex-col sm:flex-row gap-x-4 gap-y-2">
+      <Input id="numBoxes" type="number"
+              class="flex-2/3"
               placeholder="Number of boxes (default: 2)..."
               disabled={isAskingForValidation}
               bind:value={paramNumBoxes}
           />
       
+      <span class="flex-1/3 flex flex-row gap-x-2 items-center">
+        <Switch id="isAlreadyScanned"
+                bind:checked={paramScannedAlready}/>
+        <Label for="isAlreadyScanned">
+          Page scanned already
+        </Label>
+      </span>
     </div>
   <!-- </div> -->
 
