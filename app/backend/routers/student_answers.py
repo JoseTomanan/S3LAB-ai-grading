@@ -35,7 +35,10 @@ async def process_student_answer_image(
     contents_list = await _validate_files(files)
 
     print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
-    processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
+    try:
+        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INFO:\tProceeding to labeling the boxes.")
@@ -69,8 +72,8 @@ async def scan_then_label_save_boxes(
     print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
-    except:
-        raise HTTPException(status_code=500, detail="Could not find any boxes.")
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
     print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)

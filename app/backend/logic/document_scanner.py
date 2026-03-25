@@ -49,7 +49,7 @@ class DocumentScanner:
             image_good_contour = self._fallback_otsu_detection(image_original)
 
         if image_good_contour is None:
-            raise ValueError("INFO:\tCould not find document outline.")
+            raise ValueError("Could not find document outline.")
 
         image_warped = self._warp_from_original(image_good_contour, image_original)
 
