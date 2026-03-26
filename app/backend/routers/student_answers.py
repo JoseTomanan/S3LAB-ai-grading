@@ -590,6 +590,7 @@ def _label_save_boxes(
 
         test_item = session.exec(
                         select(TestItem).where(
+                            TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
         
@@ -597,15 +598,14 @@ def _label_save_boxes(
             print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
             continue
 
-        item_id = test_item.item_id
-        print(f"INFO:\tLabel {item_number} will be stored in {item_id}")
+        print(f"INFO:\tLabel {item_number} will be stored in {test_item.item_id}")
 
-        # Generate filename
+        ## Generate filename
         safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{i}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
         filepath = TEMP_DIR / safe_filename
         
-        # Save image file
+        ## Save image file
         with open(filepath, "wb") as f:
             f.write(img_bytes)
         
@@ -648,6 +648,7 @@ def _create_answer_records(
         item_number = box["item_number"]
         item = session.exec(
                         select(TestItem).where(
+                            TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
         assert item is not None
