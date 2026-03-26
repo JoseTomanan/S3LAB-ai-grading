@@ -69,12 +69,11 @@
     if (!formFiles || formFiles.length == 0)
       return;
 
-    // Check all files: only allow .png, .jpeg, .jpg (case-insensitive)
     // FIXME: remove once validated that working as intended
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const validTypes = ['image/png', 'image/jpeg'];
     const isInvalid: boolean = Array.from(formFiles).some(
       (f) => !validTypes.includes(f.type)
-    );
+      );
     if (isInvalid) {
       toast.error("Please upload only .png, .jpeg, or .jpg");
       return;
