@@ -276,10 +276,12 @@
                         onReject={() => validateAndCommit(false)}
                         />
     </Dialog.Root>
+
+    <!-- Polling is not working properly hence temporarily removed. FIXME: Bring back polling -->
     {#if isCommitmentOngoing}
       <div class="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
-        <Spinner class="size-4"/>
-        Evaluating answers...
+        <!-- <Spinner class="size-4"/> -->
+        Answers are being evaluated in the background. You may go back to the Papers screen now.
       </div>
     {:else}
       <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
