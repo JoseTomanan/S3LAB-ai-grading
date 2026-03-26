@@ -535,6 +535,7 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
     all_processed: list[bytes] = []
     for page_idx, contents in enumerate(contents_list):
         ## ======== DOCUMENT SCANNING ========
+        contents = DOCUMENT_SCANNER.normalize_bytes(contents)
         scanned_page = contents if is_scanned_already else DOCUMENT_SCANNER.scan_page(contents)
 
         ## ======== BOX SEGMENTING ========

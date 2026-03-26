@@ -68,6 +68,11 @@ class DocumentScanner:
             raise ValueError("Failed to encode image")
         return buffer.tobytes()
 
+    def normalize_bytes(self, image_bytes: bytes) -> bytes:
+        """Decode and re-encode image bytes to standardize JPEG encoding (strips metadata, normalizes quality).
+        Necessary to normalize image; as if it was loaded using function load_image."""
+        return self._encode_to_bytes(self._decode_bytes(image_bytes))
+
     def brighten(self, image_bytes: bytes, amount: float) -> bytes:
         """Scale pixel values with (1 + amount). Amount > 0 increases brightness; < 0 decreases it."""
         image = self._decode_bytes(image_bytes)
