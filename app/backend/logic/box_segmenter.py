@@ -133,7 +133,10 @@ class BoxSegmenter(DocumentScanner):
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
-        """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
+        """
+        Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo
+        FIXME: Optimize parameters
+        """
         array = self._decode_bytes(image_bytes)
         img_contrasted = self._adjust_contrast(array, amount=1.60)
         img_brightened = self._brighten(img_contrasted, amount=0.05)

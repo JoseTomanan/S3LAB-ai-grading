@@ -160,6 +160,7 @@ async def update_answer_segmentation(
     contents = await file.read()
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
+    ## removed temporarily; FIXME: optimize parameters/see if it is being double-called
     # img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
     img_bytes = img_bytes_crop
 
@@ -538,6 +539,7 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
 
         ## ======== BOX SEGMENTING ========
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
+        ## removed temporarily; FIXME: optimize parameters/see if it is being double-called
         # processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
         processed_list = segmented_list
 
