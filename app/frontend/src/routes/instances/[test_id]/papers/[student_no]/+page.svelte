@@ -40,11 +40,7 @@
         question: evalData.question,
         expected_answer_rubric_questions: evalData.expected_answer_rubric_questions,
         scores: evalData.scores};
-      }).sort((a, b) => {
-        if (a.label < b.label) return -1;
-        if (a.label > b.label) return 1;
-        return 0;
-      });
+      }).sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
