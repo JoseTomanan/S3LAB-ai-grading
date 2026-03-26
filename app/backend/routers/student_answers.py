@@ -30,7 +30,10 @@ async def process_student_answer_image(
                 is_scanned_already: bool = Query(False),
                 session: Session = Depends(get_session)
                 ):
-    """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
+    """
+    Process raw student assessment image(s) through CV pipeline. Accepts multiple pages.
+    Works in one straight line, without validation --- to be used by Bulk Upload feature.
+    """
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
@@ -65,7 +68,10 @@ async def scan_then_label_save_boxes(
                 is_scanned_already: bool = Query(False),
                 session: Session = Depends(get_session)
                 ):
-    """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
+    """
+    Process raw student assessment image(s) through CV pipeline. Accepts multiple pages.
+    Waits for validation before proceeding --- to be used by (individual) Process Image functionality.
+    """
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
@@ -92,6 +98,7 @@ async def commit_boxes_endpoint(
                 background_tasks: BackgroundTasks,
                 session: Session = Depends(get_session)
                 ):
+    """Second endpoint called in conjunction with scan_then_label_save_boxes endpoint."""
     test_exists = session.exec(
                     select(TestInstance)
                     .where(TestInstance.test_id == test_id)
