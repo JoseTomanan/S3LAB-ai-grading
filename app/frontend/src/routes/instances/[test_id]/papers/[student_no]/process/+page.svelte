@@ -21,7 +21,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
-  import Switch from '$lib/LightSwitch.svelte';
+  import Switch from '$lib/components/LightSwitch.svelte';
 
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
   import { createPoller } from '$lib/utils/poller.ts';
