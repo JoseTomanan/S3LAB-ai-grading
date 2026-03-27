@@ -15,6 +15,8 @@
   let isAcceptableLabels = $derived(
     supposedScans.every((s: { item_number: string }) => validLabels.has(s.item_number))
   );
+
+  const isButtonDisabled = $derived(isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels);
 </script>
 
 
@@ -22,8 +24,8 @@
                 onInteractOutside={(e) => e.preventDefault()}
                 onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
-    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels ? "opacity-50" : ""}"
-            disabled={isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels}
+    <button class="button-secondary flex-1 text-sm {isButtonDisabled ? "opacity-50" : ""}"
+            disabled={isButtonDisabled}
             onclick={onAccept}>
       {#if isCommitmentOngoing}
         Identifying labels...
@@ -44,6 +46,7 @@
     </button>
   </div>
   
+  <div class="max-h-[80vh] overflow-y-auto">
   {#each supposedScans as supposedScan}
     <div class="card relative
                 flex flex-row justify-center items-start gap-x-1">
@@ -63,4 +66,5 @@
             />
     </div>
   {/each}
+  </div>
 </Dialog.Content>
