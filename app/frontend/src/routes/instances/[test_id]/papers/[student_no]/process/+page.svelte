@@ -215,7 +215,7 @@
             onclick={sendImageForValidation}
             disabled={formFileRecords.length === 0 || isOperationOngoing}>
       {isOperationOngoing
-        ? "Sending..."
+        ? "Sending, do not quit..."
         : "Send for processing"}
       {#if isOperationOngoing}
         <Spinner />
