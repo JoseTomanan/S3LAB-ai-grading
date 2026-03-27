@@ -5,6 +5,7 @@
   import type { TestItemsContext } from '$lib/index.ts';
   import IconLabel from "~icons/mdi/label";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
+	import Card from "$lib/components/Card.svelte";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
   let validLabels = $derived(new Set(testItemsContext.items.map(i => i.label)));
@@ -48,8 +49,7 @@
   
   <div class="max-h-[80vh] overflow-y-auto">
   {#each supposedScans as supposedScan}
-    <div class="card relative
-                flex flex-row justify-center items-start gap-x-1">
+    <Card class="relative flex flex-row justify-center items-start gap-x-1">
       <div class="absolute top-1 left-1 bg-white/80 shadow-sm
                   flex flex-row items-center gap-x-0">
         <IconLabel class={validLabels.has(supposedScan.item_number) ? "" : "text-destructive"}/>
@@ -64,7 +64,7 @@
             src={`${supposedScan.image_directory}`}
             alt={supposedScan.item_number}
             />
-    </div>
+    </Card>
   {/each}
   </div>
 </Dialog.Content>

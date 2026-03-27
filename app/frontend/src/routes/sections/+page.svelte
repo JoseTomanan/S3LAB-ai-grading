@@ -7,6 +7,7 @@
 
   import type { Section } from "$lib/index.ts";
   import Pagination from "$lib/components/Pagination.svelte";
+	import Card from "$lib/components/Card.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import AddSection from "./AddSection.svelte";
 
@@ -43,11 +44,11 @@
 
     {:else}
       {#each paginationValues as section}
-        <a href={`/sections/${section.section_id}`}
-            class="card button-outline">
+        <Card href="/sections/{section.section_id}"
+              class="button-outline">
           <h3>{section.section_name}</h3>
           <h4>SectionID: {section.section_id}</h4>
-        </a>
+        </Card>
       {/each}
     {/if}
   </div>

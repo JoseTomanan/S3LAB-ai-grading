@@ -6,6 +6,7 @@
 
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
+	import Card from "$lib/components/Card.svelte";
 	import AddNewStudent from './AddNewStudent.svelte';
 	import EditStudent from './EditStudent.svelte';
 
@@ -35,7 +36,7 @@
     </Dialog.Root>
 
     {#each students as student}
-      <div class="card">
+      <Card>
         <span class="flex flex-row items-center justify-between">
           <h3>{student.name}</h3>
           <!-- TODO: add dialog bindable; close upon operation done. something similar to add new student-->
@@ -49,7 +50,7 @@
           </Dialog.Root>
         </span>
         <h5>{student.student_no}</h5>
-      </div>
+      </Card>
     {/each}
   </div>
 </div>

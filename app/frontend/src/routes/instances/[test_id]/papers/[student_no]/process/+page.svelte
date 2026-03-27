@@ -22,6 +22,7 @@
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import Switch from '$lib/components/LightSwitch.svelte';
+	import Card from '$lib/components/Card.svelte';
 
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
   import { createPoller } from '$lib/utils/poller.ts';
@@ -223,7 +224,7 @@
     </Button>
 
     <Separator/>
-    <div class="subcontainer card flex flex-col items-center justify-center mx-auto">
+    <Card class="subcontainer flex flex-col items-center justify-center mx-auto">
       {#if formFileRecords.length === 0}
         <IconImagePreview class="size-12 opacity-60"/>
         <h6 class="opacity-60">
@@ -263,7 +264,7 @@
           {/each}
         </div>
       {/if}
-    </div>
+    </Card>
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>

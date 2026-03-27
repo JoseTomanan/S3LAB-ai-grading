@@ -18,6 +18,7 @@
 	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';
 
   if (!data.student_items)
@@ -131,7 +132,7 @@
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
-      <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
+      <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
         <span class="flex-1
                       flex justify-center items-center relative">
           <Label for={studentItem.label}
@@ -196,7 +197,7 @@
           </div>
 
         </div>
-      </div>
+      </Card>
     {/each}
     </div>
   {/if}
