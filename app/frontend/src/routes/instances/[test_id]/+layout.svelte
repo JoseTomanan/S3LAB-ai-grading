@@ -25,6 +25,7 @@
 
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
+  const isRouteUpload = $derived(page.route.id!.includes('/upload'));
 
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
 
@@ -72,14 +73,13 @@
         <h4>SectionID: { activeTestInstance.section_id }</h4>
       </span>
     </div>
-    <div id="thisOne"
-          class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
+    <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
-        <a class={`button-primary ${isRouteItems ? "underline" : ""}`}
+        <a class="button-primary {isRouteItems ? "ring-2 ring-primary-foreground" : ""}"
             href="/instances/{data.test_id}/items">
           Items
         </a>
-        <a class={`button-primary ${isRoutePapers ? "underline" : ""}`}
+        <a class="button-primary {isRoutePapers ? "ring-2 ring-primary-foreground" : ""}"
             href="/instances/{data.test_id}/papers">
           Papers
         </a>
@@ -91,7 +91,8 @@
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
-        <a href="/instances/{data.test_id}/upload" class="button-primary">
+        <a class="button-primary {isRouteUpload ? "ring-2 ring-primary-foreground/80" : ""}"
+            href="/instances/{data.test_id}/upload">
           <IconUpload class="size-6"/>
         </a>
       </span>
