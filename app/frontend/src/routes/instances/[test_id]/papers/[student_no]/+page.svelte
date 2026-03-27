@@ -142,7 +142,7 @@
           <!-- TODO: Click to open image in a dialog -->
           <span class="w-5/6 sm:w-full">
             {#if studentItem.image_directory == ""}
-              <MdiPaperOff class="size-8 opacity-50" />
+              <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
               <!-- FIXME: not working in production (but working in dev somehow??) -->
               <img class="max-h-70 w-auto mx-auto"
