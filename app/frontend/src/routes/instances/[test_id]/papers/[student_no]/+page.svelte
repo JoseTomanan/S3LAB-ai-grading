@@ -108,7 +108,8 @@
 
 
 
-<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-3
+            [&>*>img]:object-fit">
   <span class="flex flex-row justify-between items-center">
     <span class="flex flex-wrap items-baseline gap-x-4 [&>h5]:opacity-60">
       <h1 class="font-semibold">Test answers</h1>
@@ -131,13 +132,14 @@
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
       <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
-        <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
+        <span class="flex-1
                       flex justify-center items-center relative">
           <Label for={studentItem.label}
                   class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
           </Label>
-          <span>
+          <!-- TODO: Click to open image in a dialog -->
+          <span class="w-5/6 sm:w-full">
             {#if studentItem.image_directory == ""}
               <MdiPaperOff class="size-8 opacity-50" />
             {:else}
