@@ -139,8 +139,8 @@
 </script>
 
 
-<Sheet.Content side="bottom"
-                class="max-w-3xl">
+<Sheet.Content side="right"
+                class="max-w-64">
   <Sheet.Header>
     <Sheet.Title>Manually crop image</Sheet.Title>
     <Sheet.Description>
@@ -179,19 +179,22 @@
           </div>
         {/if}
       </div>
+    
     {:else if canvasImageUrl}
       <div id="canvasArea"
-            class="relative flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
-        <img
-          use:initCropper={canvasImageUrl}
-          src={canvasImageUrl}
-          alt="cropper_image"
-          style="max-width: 100%; opacity: 0;"
-        />
+            class="relative flex justify-center w-auto -mx-2">
+        <img src={canvasImageUrl}
+              use:initCropper={canvasImageUrl}
+              alt="cropper_image"
+              style="max-width: 100%; opacity: 0;"
+            />
       </div>
+      <h6>Scroll/pinch to zoom</h6>
+    
     {:else if responseImage != ""}
       <img class="border"
             src={responseImage} alt="Test item"/>
+    
     {:else}
       <Card class="py-4 border flex flex-col items-center">
         <MdiUpload class="h-8 w-full opacity-75"/>
