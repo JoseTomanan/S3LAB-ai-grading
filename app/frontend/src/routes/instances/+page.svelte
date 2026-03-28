@@ -1,12 +1,9 @@
 <script lang="ts">
   const { data } = $props();
 
-  import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-circle-outline';
-  import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-circle-outline';
   import MdiPaperAddOutline from '~icons/mdi/paper-add';
   import IconHome from '~icons/mdi/home-outline';
   import IconSections from '~icons/mdi/people';
-  import IconArrow from '~icons/mdi/arrow-up';
 
   import type { TestInstance } from '$lib/index.ts';
 
@@ -20,6 +17,7 @@
 </script>
 
 
+
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
     <span class="flex flex-row gap-x-2">
@@ -29,7 +27,7 @@
     </span>
     <h1>Test instances</h1>
     <a href="/sections">
-      <IconSections class="size-8 text-secondary saturate-150 brightness-60"/>
+      <IconSections class="size-8 text-secondary saturate-150 brightness-55"/>
     </a>
   </span>
 
@@ -45,9 +43,8 @@
     
     {#if instances.length == 0}
       <div class="absolute top-0 right-0
-                  flex flex-col items-end text-right mt-2 opacity-60">
-        <IconArrow class="size-10"/>
-        <p>No test instances yet.<br>Tap here to add one!</p>
+                  flex flex-col items-center text-center mt-2 opacity-60">
+        <p>No test instances yet. Tap above to add one!</p>
       </div>
     
     {:else}
@@ -55,11 +52,10 @@
         <Card href="/instances/{instance.test_id}/items"
               class="button-outline">
           <h3 class="flex flex-row items-center gap-1">
-            {instance.name}
+            {instance.name} &middot; {instance.test_id.split("_")[0]}
           </h3>
-          <h5 class="opacity-60">
-            {instance.test_id.split("_")[0]}
-            &middot; {new Date(instance.date).toLocaleDateString()}
+          <h5 class="font-normal">
+            Created {new Date(instance.date).toLocaleDateString()}
           </h5>
         </Card>
       {/each}

@@ -3,7 +3,6 @@
 
   import MdiPeopleAdd from "~icons/mdi/people-add";
   import IconHome from '~icons/mdi/home-outline';
-  import IconArrow from '~icons/mdi/arrow-up';
   import IconPapers from '~icons/mdi/paper';
 
   import type { Section } from "$lib/index.ts";
@@ -24,7 +23,7 @@
     </a>
     <h1>Sections</h1>
     <a href="/instances">
-      <IconPapers class="size-8 text-secondary saturate-150 brightness-60"/>
+      <IconPapers class="size-7 text-secondary saturate-200 brightness-60"/>
     </a>
   </span>
   <div class="flex flex-col gap-3 relative">
@@ -39,9 +38,8 @@
     
     {#if sections.length == 0}
       <div class="absolute top-0 right-0
-                  flex flex-col items-end text-right mt-2 opacity-60">
-        <IconArrow class="size-10"/>
-        <p>No test instances yet.<br>Tap here to add one!</p>
+                  flex flex-col items-center text-center mt-2 opacity-60">
+        <p>No test instances yet. Tap above to add one!</p>
       </div>
 
     {:else}
@@ -49,7 +47,9 @@
         <Card href="/sections/{section.section_id}"
               class="button-outline">
           <h3>{section.section_name}</h3>
-          <h4>SectionID: {section.section_id}</h4>
+          <h5 class="font-normal">
+            SectionID: {section.section_id}
+          </h5>
         </Card>
       {/each}
     {/if}
