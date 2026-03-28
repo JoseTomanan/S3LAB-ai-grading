@@ -180,8 +180,9 @@
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
-              <span class="flex flex-wrap justify-between items-center [&>h5]:opacity-60">
-                <h5 class="italic">{e_a_r_q}</h5>
+              <span class="flex flex-row justify-between items-baseline-last gap-x-1
+                            [&>h5]:opacity-60">
+                <h5 class="italic flex-1">{e_a_r_q}</h5>
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
