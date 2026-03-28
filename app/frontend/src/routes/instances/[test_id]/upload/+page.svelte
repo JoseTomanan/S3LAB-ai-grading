@@ -191,25 +191,25 @@
             <img src={p.url}
                   class="aspect-auto block"
                   alt={p.name} />
-            <Dialog.Root>
-              <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
-                                  hover:underline cursor-pointer
-                                  absolute bottom-2 left-2">
-                {#if IS_IN_STUDENTS(supposedId)}
-                  <IconPerson class="size-4"/>
-                {:else}
-                  <IconNotFound class="size-4" />
-                {/if}
-                <h4 class="text-left w-fit truncate">
-                  {nameOnly ? nameOnly : "Add student no..."}
-                </h4>
-              </Dialog.Trigger>
-              <BulkUploadRename filename={supposedId}
-                        onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
-            </Dialog.Root>
-            
-            {#if IS_FIRST_PAGE(p.name)}
-              <span class="absolute bottom-2 right-2 bg-white/80 backdrop-blur-md">
+            <div class="absolute top-2 left-2 space-y-1">
+              <Dialog.Root>
+                <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
+                                    hover:underline cursor-pointer">
+                  {#if IS_IN_STUDENTS(supposedId)}
+                    <IconPerson class="size-4"/>
+                  {:else}
+                    <IconNotFound class="size-4" />
+                  {/if}
+                  <h4 class="text-left w-fit truncate">
+                    {nameOnly ? nameOnly : "Add student no..."}
+                  </h4>
+                </Dialog.Trigger>
+                <BulkUploadRename filename={supposedId}
+                          onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
+              </Dialog.Root>
+              
+              {#if IS_FIRST_PAGE(p.name)}
+              <span class="bg-white/80 backdrop-blur-md">
                 <input type="number"
                         class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         placeholder="# of box..."
@@ -223,7 +223,8 @@
                         }}
                     />
               </span>
-            {/if}
+              {/if}
+            </div>
             
             <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
               <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
