@@ -38,14 +38,14 @@ async def process_student_answer_image(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"BACKEND:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    print(f"INFO:\tProceeding to labeling the boxes.")
+    print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
     answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
@@ -76,13 +76,13 @@ async def scan_then_label_save_boxes(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"BACKEND:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-    print(f"INFO:\tProceeding to labeling the boxes.")
+    print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
 
     return {
@@ -105,7 +105,7 @@ async def commit_boxes_endpoint(
                     .where(TestInstance.test_id == test_id)
                     ).first()
     if not test_exists:
-        print("INFO:\ttest_exists failed")
+        print("BACKEND:\ttest_exists failed")
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Test with ID '{test_id}' not found"
@@ -116,7 +116,7 @@ async def commit_boxes_endpoint(
                         .where(Student.student_no == student_no)
                         ).first()
     if not student_exists:
-        print("INFO:\tstudent_exists failed")
+        print("BACKEND:\tstudent_exists failed")
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Student with student_no '{student_no}' not found"
@@ -548,13 +548,13 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
         processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
 
-        print(f"INFO:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
+        print(f"BACKEND:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
 
     if num_boxes is not None:
         all_processed = all_processed[:num_boxes]
 
-    print(f"INFO:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
+    print(f"BACKEND:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
     return all_processed
 
 
@@ -579,7 +579,7 @@ def _label_save_boxes(
                 return (index, "NONE")
             return (index, item_number.strip())
         except Exception as e:
-            print(f"INFO:\tFailed to extract item number for box {index}: {e}")
+            print(f"BACKEND:\tFailed to extract item number for box {index}: {e}")
             return (index, "NONE")
 
     ai_results: list[tuple[int, str]] = [None] * len(processed_list)
@@ -595,7 +595,7 @@ def _label_save_boxes(
     ## Phase C: Sequential post-processing on main thread (DB lookups + file writes)
     boxes_info = []
     for index, item_number in ai_results:
-        print(f"INFO:\t{index}th detected label = {item_number}")
+        print(f"BACKEND:\t{index}th detected label = {item_number}")
 
         test_item = session.exec(
                         select(TestItem).where(
@@ -604,10 +604,10 @@ def _label_save_boxes(
                         )).first()
 
         if test_item is None:
-            print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
+            print(f"BACKEND:\tItem not found because label={item_number} is not valid. Continuing...")
             continue
 
-        print(f"INFO:\tLabel {item_number} will be stored in {test_item.item_id}")
+        print(f"BACKEND:\tLabel {item_number} will be stored in {test_item.item_id}")
 
         ## Generate filename
         img_bytes = processed_list[index]
@@ -699,14 +699,14 @@ def _evaluate_answers_background(answer_ids: list[int]):
             try:
                 evaluate_image_logic(answer_id, session)
             except Exception as e:
-                print(f"INFO:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
+                print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
                 answer = session.get(StudentAnswer, answer_id)
                 if answer:
                     answer.is_done_rendering = True
                     answer.ai_evaluation = f"_ERROR: {e}"
                     session.commit()
     except Exception as e:
-        print(f"INFO:\tBackground evaluation failed: {e}")
+        print(f"BACKEND:\tBackground evaluation failed: {e}")
         session.rollback()
     finally:
         session.close()

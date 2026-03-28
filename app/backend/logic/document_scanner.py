@@ -94,7 +94,7 @@ class DocumentScanner:
             ret = f.write(image_bytes)
         if not ret:
             raise ValueError(f"Failed to save image to {save_path}")
-        print(f"INFO:\tImage saved --> {save_path}")
+        print(f"BACKEND:\tImage saved --> {save_path}")
     #endregion
 
 

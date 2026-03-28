@@ -95,7 +95,7 @@ class BlobDetector:
     """Note that name is a misnomer; FIXME: Rename to CircleBlobDetector"""
     def __init__(self, image_canny: MatLike):
         line_thickness = measure_line_thickness(image_canny)
-        print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
+        print(f"BACKEND:\tMeasured ruled line thickness: {line_thickness:.1f}px")
 
         if line_thickness > 0:
             min_dot_diameter = line_thickness * 3
@@ -351,7 +351,7 @@ class OversimplifiedBlobDetector:
         params.filterByArea = True
 
         line_thickness = measure_line_thickness(image_canny)
-        print(f"INFO:\tMeasured ruled line thickness: {line_thickness:.1f}px")
+        print(f"BACKEND:\tMeasured ruled line thickness: {line_thickness:.1f}px")
 
         if line_thickness > 0:
             min_dot_diameter = line_thickness * 2
@@ -359,7 +359,7 @@ class OversimplifiedBlobDetector:
             params.minArea = math.pi * (min_dot_diameter / 2) ** 2
             params.maxArea  = math.pi * (max_dot_diameter / 2) ** 2
         else:
-            print("INFO:\tpre naman")
+            print("BACKEND:\tpre naman")
             params.minArea = AREA_FACTOR * 30
             params.maxArea  = AREA_FACTOR * 6250
         
