@@ -1,8 +1,8 @@
 <script lang="ts">
   const { data } = $props();
 
-  import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
-  import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
+  import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-circle-outline';
+  import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-circle-outline';
   import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
   import IconHome from '~icons/mdi/home-outline';
   import IconArrow from '~icons/mdi/arrow-up';
@@ -48,15 +48,13 @@
       {#each paginationValues as instance}
         <Card href="/instances/{instance.test_id}/items"
               class="button-outline">
-          <span class="flex flex-row items-center gap-1">
-            {#if instance.is_done_rendering}
-              <MdiCheckboxMarkedOutline/>
-            {:else}
-              <MdiCheckboxBlankOutline/>
-            {/if}
-            <h3>{ instance.name }</h3>
-          </span>
-          <h5>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h5>
+          <h3 class="flex flex-row items-center gap-1">
+            {instance.name}
+          </h3>
+          <h5 class="opacity-60">
+            {instance.test_id.split("_")[0]}
+            &middot; {new Date(instance.date).toLocaleDateString()}
+          </h5>
         </Card>
       {/each}
     {/if}
