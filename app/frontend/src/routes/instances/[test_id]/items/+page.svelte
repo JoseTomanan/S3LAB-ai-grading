@@ -30,37 +30,38 @@
 </script>
 
 
+
 <div class="space-y-3 overflow-visible">
-  <h1 class="text-left font-semibold">Test items</h1>
+  <span class="flex flex-row w-full justify-between">
+    <h1 class="text-left font-semibold">Test items</h1>
+    <Dialog.Root>
+      <Dialog.Trigger class="button-secondary">
+        <MdiPlus class="size-5"/>
+      </Dialog.Trigger>
+      <AddTestItem test_id={data.test_id} />
+    </Dialog.Root>
+  </span>
+
   {#if testItemsContext.isLoading}
     {#each { length: 2 } as _}
       <Skeleton class="h-24 w-full grayscale-100 rounded-none"/>
     {/each}
+  
   {:else}
     {#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
       <Card class="p-2 space-y-1">
-        <span class="flex flex-row items-center w-full justify-between">
-          <h4 class="font-medium">{ bigItem.a }</h4>
-          <Dialog.Root>
-            <Dialog.Trigger class="button-secondary">
-              <MdiPlus class="size-5"/>
-            </Dialog.Trigger>
-            <AddTestItem test_id={data.test_id} />
-          </Dialog.Root>
-        </span>
+        <h4 class="font-medium">{ bigItem.a }</h4>
         <div class="ml-2">
           {#each bigItem.b as smallItem}
-            <span class="flex flex-row items-center justify-between gap-x-0.5">
-              <p class="truncate text-ellipsis w-fill">
-                ({smallItem.label}) {smallItem.question}
-              </p>
-              <Dialog.Root>
-                <Dialog.Trigger>
-                  <MdiEditOutline class="size-4"/>
-                </Dialog.Trigger>
-                <EditTestItem testItem={smallItem} test_id={data.test_id}/>
-              </Dialog.Root>
-            </span>
+            <Dialog.Root>
+              <Dialog.Trigger class="flex flex-row items-center justify-between gap-x-0.5 w-full">
+                <p class="truncate text-ellipsis w-fill">
+                  ({smallItem.label}) {smallItem.question}
+                </p>
+                <MdiEditOutline class="size-4"/>
+              </Dialog.Trigger>
+              <EditTestItem testItem={smallItem} test_id={data.test_id}/>
+            </Dialog.Root>
           {/each}
           {#if bigItem.b.length == 0}
             <p class="italic">Nothing to see here. If this is a mistake, check your network connection.</p>
@@ -69,4 +70,5 @@
       </Card>
     {/each}
   {/if}
+
 </div>
