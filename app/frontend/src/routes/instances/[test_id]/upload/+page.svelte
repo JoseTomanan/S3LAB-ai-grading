@@ -134,7 +134,10 @@
             records.forEach(r => r.statusCode = response.status);
           }
         })().catch(() => {
-          records.forEach(r => r.statusCode = 500);
+          records.forEach(r => {
+            r.statusCode = 500;
+            r.statusDetail = "Unexpectedly caught server-side error"
+          });
         });
       }
     } catch (e) {
@@ -183,7 +186,9 @@
           {@const nameOnly = GET_NAME_ONLY(p.name)}
           {@const fileExtension = GET_EXTENSION_ONLY(p.name)}
           {@const dashIdx = nameOnly.lastIndexOf('-')}
-          {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1)) ? nameOnly.substring(dashIdx) : ''}
+          {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1))
+            ? nameOnly.substring(dashIdx)
+            : ""}
 
           <div class="relative flex flex-col justify-end
                       min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
