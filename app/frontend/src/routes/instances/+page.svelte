@@ -3,8 +3,9 @@
 
   import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-circle-outline';
   import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-circle-outline';
-  import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
+  import MdiPaperAddOutline from '~icons/mdi/paper-add';
   import IconHome from '~icons/mdi/home-outline';
+  import IconSections from '~icons/mdi/people';
   import IconArrow from '~icons/mdi/arrow-up';
 
   import type { TestInstance } from '$lib/index.ts';
@@ -27,23 +28,28 @@
       </a>
     </span>
     <h1>Test instances</h1>
+    <a href="/sections">
+      <IconSections class="size-8 text-secondary saturate-150 brightness-60"/>
+    </a>
+  </span>
+
+  <div class="flex flex-col gap-3 relative">
     <Dialog.Root>
-      <Dialog.Trigger class="button-primary">
-        <MdiPaperAddOutline class="size-6"/>
+      <Dialog.Trigger class="button-outline flex flex-row gap-x-2 items-center justify-center font-semibold
+                              *:opacity-90 *:font-semibold">
+        <MdiPaperAddOutline class="size-5"/>
+        <b>Add new test instance</b>
       </Dialog.Trigger>
       <AddTestInstance />
     </Dialog.Root>
-  </span>
-  <div class="flex flex-col gap-3 relative">
-    <a href="/sections" class="w-fit text-base opacity-60 hover:underline">
-      Go to sections ↗
-    </a>
+    
     {#if instances.length == 0}
       <div class="absolute top-0 right-0
                   flex flex-col items-end text-right mt-2 opacity-60">
         <IconArrow class="size-10"/>
         <p>No test instances yet.<br>Tap here to add one!</p>
       </div>
+    
     {:else}
       {#each paginationValues as instance}
         <Card href="/instances/{instance.test_id}/items"
