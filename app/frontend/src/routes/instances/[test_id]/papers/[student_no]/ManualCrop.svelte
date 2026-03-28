@@ -12,6 +12,7 @@
   import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import Card from '$lib/components/Card.svelte';
+	import { isNotPngOrJpg } from '$lib/utils.ts';
 
   let { test_id, student_no, item_id, onCropSubmitted } = $props<{
     test_id: string,
@@ -66,6 +67,12 @@
   }
 
   function handleFileUpload(e: Event) {
+    if (!canvasFile || isNotPngOrJpg(canvasFile)) {
+      toast.error("Please upload only .png, .jpeg, or .jpg");
+      canvasFile = undefined;
+      return;
+    }
+    
     const target = e.target as HTMLInputElement;
     const file = target.files?.[0];
 
@@ -115,7 +122,7 @@
   }
 
   async function sendCropRequest() {
-    if (!formData)
+    if (!formData || !canvasFile)
       return;
 
     isOperationOngoing = true;
@@ -145,7 +152,7 @@
 
 
 <Sheet.Content side="right"
-                class="max-w-64">
+                class="max-w-11/12 w-100 sm:w-135">
   <Sheet.Header>
     <Sheet.Title>Manually crop image</Sheet.Title>
     <Sheet.Description>
