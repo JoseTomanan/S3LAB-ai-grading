@@ -1,7 +1,5 @@
 import os
 from dotenv import load_dotenv
-import cv2
-import numpy as np
 from google import genai
 from google.genai import types
 
@@ -37,6 +35,13 @@ class AIAnswerEvaluator:
         return self._send_image_prompt(
                         image_bytes,
                         f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nPROMPT: \"{rubric}\": can this be said about the answer?"
+                        )
+
+    def evaluate_multi_rubric(self, image_bytes: bytes, question: str, rubrics: list[str]):
+        rubrics_formatted = json.dumps(rubrics)
+        return self._send_image_prompt(
+                        image_bytes,
+                        f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nRUBRICS: {rubrics_formatted}"
                         )
     
     def find_four_points(self, image_bytes: bytes) -> list[tuple[int, int]] | None:
@@ -80,6 +85,14 @@ Your answer should be clear and concise, and directly relate to the image.
 If a question can be answered with a yes or no, only generate your answer as `YES` or `NO`.
 Otherwise, generate your answer as raw text, with no prefixes or sentences (e.g. `3x+2=8` or `5`).
 If multiple questions are given in the prompt, separate your answers for each with `; `."""
+
+
+ANSWER_MULTI_RUBRIC_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
+Included in this prompt, preceded by `QUESTION:`, is the math problem the student is answering.
+You will also receive a list of grading criteria, preceded by `RUBRICS:` and formatted as a list of strings in brackets (e.g., `["Correct equation setup", "Calculated correct final answer"]`). Each rubric item is a declarative phrase or statement.
+Your task is to evaluate whether each rubric statement accurately describes the visual content of the student's work.
+For each rubric item, output strictly `YES` if the statement is true/present, or `NO` if it is false/missing.
+Format your final output as a single string of `YES` or `NO` responses, separated by semicolons with no spaces, corresponding to the exact order of the given rubrics (e.g., `YES;YES;NO`). Do not generate any additional text, sentences, prefixes, or explanations."""
 
 
 COMPARE_EXPECTED_FINAL_ANSWER_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
