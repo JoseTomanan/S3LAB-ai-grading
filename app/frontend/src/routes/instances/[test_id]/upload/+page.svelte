@@ -128,7 +128,7 @@
           console.log(`${studentNo}: ${response.status}`);
           if (!response.ok) {
             const body = await response.json().catch(() => null);
-            const detail: string = body?.detail ?? response.statusText;
+            const detail: string = typeof body?.detail === 'string' ? body.detail : JSON.stringify(body?.detail);
             records.forEach(r => { r.statusCode = response.status; r.statusDetail = detail; });
           } else {
             records.forEach(r => r.statusCode = response.status);
