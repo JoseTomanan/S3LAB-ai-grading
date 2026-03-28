@@ -17,6 +17,7 @@ export type FileRecord = {
   name: string;
   url: string;
   statusCode: number;
+  statusDetail?: string;
 };
 
 // ================ CONTEXT ================

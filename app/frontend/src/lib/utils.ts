@@ -37,7 +37,15 @@ export function redownloadFile(file: File) {
 		URL.revokeObjectURL(url);
 }
 
-export { rotateImage, flipImage } from "./utils/image_functions.ts";
+export const isNotPngOrJpg = (x: FileList) => {
+  const validTypes = ['image/png', 'image/jpeg'];
+  const isInvalid: boolean = Array.from(x).some(
+    (f) => !validTypes.includes(f.type)
+  );
+  return isInvalid;
+};
+
+export { rotateImage, flipImage, handleRotateCommand, handleFlipCommand } from "./utils/image_functions.ts";
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

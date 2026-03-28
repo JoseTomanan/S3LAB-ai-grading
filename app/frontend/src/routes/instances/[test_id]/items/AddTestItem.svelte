@@ -26,6 +26,11 @@
   let submittableEARQ: string = "";
 
   async function addTestItem() {
+    if (formItemLabel === "" || formItemQuestion === "") {
+      toast("Please do not leave any fields empty")
+      return;
+    }
+
     isOperationOngoing = true;
 
     if (formItemIsProblemSolving) {
@@ -60,7 +65,7 @@
 </script>
 
 
-<Dialog.Content>
+<Dialog.Content class="max-h-[80vh] overflow-scroll">
   <Dialog.Header>
     <Dialog.Title>Add new test item</Dialog.Title>
   </Dialog.Header>
@@ -68,17 +73,20 @@
   <Input id="item_label" bind:value={formItemLabel} />
   <Label for="item_question">Question</Label>
   <Textarea id="item_question" rows={4} bind:value={formItemQuestion} />
+  
   <Label>Type of question</Label>
   <RadioGroup.Root value="short_form"
-                  class="flex flex-row justify-between"
+                  class="flex flex-row justify-between
+                          *:flex *:flex-row *:gap-2
+                          [&>*>Label]:font-normal"
                   onValueChange={(v) => formItemIsProblemSolving = (v == "prob_sol")}>
-    <span class="flex flex-row gap-2 w-2/5">
+    <span class="w-2/5">
       <RadioGroup.Item value="short_form" id="short_form"/>
-      <Label for="short_form" class="font-normal">Short form</Label>
+      <Label for="short_form">Short form</Label>
     </span>
-    <span class="flex flex-row gap-2 w-3/5">
+    <span class="w-3/5">
       <RadioGroup.Item value="prob_sol" id="prob_sol"/>
-      <Label for="prob_sol" class="font-normal">Problem solving</Label>
+      <Label for="prob_sol">Problem solving</Label>
     </span>
   </RadioGroup.Root>
   

@@ -49,7 +49,7 @@ class DocumentScanner:
             image_good_contour = self._fallback_otsu_detection(image_original)
 
         if image_good_contour is None:
-            raise ValueError("INFO:\tCould not find document outline.")
+            raise ValueError("Could not find document outline.")
 
         image_warped = self._warp_from_original(image_good_contour, image_original)
 
@@ -67,6 +67,11 @@ class DocumentScanner:
         if not ret:
             raise ValueError("Failed to encode image")
         return buffer.tobytes()
+
+    def normalize_bytes(self, image_bytes: bytes) -> bytes:
+        """Decode and re-encode image bytes to standardize JPEG encoding (strips metadata, normalizes quality).
+        Necessary to normalize image; as if it was loaded using function load_image."""
+        return self._encode_to_bytes(self._decode_bytes(image_bytes))
 
     def brighten(self, image_bytes: bytes, amount: float) -> bytes:
         """Scale pixel values with (1 + amount). Amount > 0 increases brightness; < 0 decreases it."""

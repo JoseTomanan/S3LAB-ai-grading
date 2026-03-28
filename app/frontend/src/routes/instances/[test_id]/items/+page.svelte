@@ -11,6 +11,7 @@
   import EditTestItem from './EditTestItem.svelte';
   import AddTestItem from './AddTestItem.svelte';
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
+	import Card from "$lib/components/Card.svelte";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
   let allItems: TestItem[] = $state(testItemsContext.items);
@@ -37,7 +38,7 @@
     {/each}
   {:else}
     {#each [{a: "Short Form Items", b: shortFormItems}, {a: "Problem-Solving Items", b: probSolItems}] as bigItem}
-      <div class="card p-2 space-y-1">
+      <Card class="p-2 space-y-1">
         <span class="flex flex-row items-center w-full justify-between">
           <h4 class="font-medium">{ bigItem.a }</h4>
           <Dialog.Root>
@@ -65,7 +66,7 @@
             <p class="italic">Nothing to see here. If this is a mistake, check your network connection.</p>
           {/if}
         </div>
-      </div>
+      </Card>
     {/each}
   {/if}
 </div>

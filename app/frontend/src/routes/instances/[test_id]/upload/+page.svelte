@@ -16,10 +16,11 @@
     return /^\d+$/.test(afterDash) ? nameOnly.substring(0, dashIdx) : nameOnly;
   };
 
-  import IconCheck from "~icons/mdi/check";
   import IconAccepted from "~icons/mdi/cloud-check-variant-outline";
   import IconExclamation from "~icons/mdi/exclamation-thick";
   import IconNotFound from "~icons/mdi/account-question-outline";
+  import IconUnprocessable from "~icons/mdi/paper-off";
+
   import IconSend from "~icons/mdi/send";
   import IconPerson from "~icons/mdi/person";
   import IconRotateCW from "~icons/mdi/rotate-clockwise";
@@ -35,7 +36,9 @@
   import BulkUploadRename from './BulkUploadRename.svelte';
   import type { FileRecord, Student } from '$lib/index.ts';
 
-  import { rotateImage, flipImage } from '$lib/utils.ts';
+  import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
+	import toast from 'svelte-5-french-toast';
+	import { isNotPngOrJpg } from '$lib/utils.ts';
   
   let isOperationStarted: boolean = $state(false);
   let formFiles: FileList | undefined = $state();
@@ -43,16 +46,15 @@
   let students: Student[] = $state([]);
   let numBoxesPerStudent: Map<string, number | null> = $state(new Map());
 
-  // TODO: finish API side, then wire API call
   const IS_FIRST_PAGE = (name: string): boolean => {
     const studentNo = GET_STUDENT_NO(name);
     const nameOnly = GET_NAME_ONLY(name);
     const dashIdx = nameOnly.lastIndexOf('-');
-    if (dashIdx === -1) return true;
+    if (dashIdx === -1)
+      return true;
     const afterDash = nameOnly.substring(dashIdx + 1);
     return !(/^\d+$/.test(afterDash)) || afterDash === '1';
   };
-
 
   onMount(async () => {
     try {
@@ -64,10 +66,17 @@
     }
   });
 
-
   function handleFiles() {
     if (!formFiles || formFiles.length == 0)
       return;
+
+    if (isNotPngOrJpg(formFiles)) {
+      toast.error("Please upload only .png, .jpeg, or .jpg");
+      // reinitialize
+      formFiles = undefined;
+      formFileRecords = [];
+      return;
+    }
 
     formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
     formFileRecords = Array.from(formFiles).map(f => ({
@@ -117,7 +126,13 @@
                 { method: "POST", body: formData, }
               );
           console.log(`${studentNo}: ${response.status}`);
-          records.forEach(r => r.statusCode = response.status);
+          if (!response.ok) {
+            const body = await response.json().catch(() => null);
+            const detail: string = typeof body?.detail === 'string' ? body.detail : JSON.stringify(body?.detail);
+            records.forEach(r => { r.statusCode = response.status; r.statusDetail = detail; });
+          } else {
+            records.forEach(r => r.statusCode = response.status);
+          }
         })().catch(() => {
           records.forEach(r => r.statusCode = 500);
         });
@@ -126,21 +141,8 @@
       console.log("Bulk upload operation failed:\n"+e);
     }
   }
-
-  async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await rotateImage(formFileRecord, isCw);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
-
-  async function handleFlipCommand(formFileRecord: FileRecord, isFlipHorizontally: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
 </script>
+
 
 
 <div class="space-y-2">
@@ -154,7 +156,7 @@
       />
   <Separator/>
   
-  {#if !formFiles}
+  {#if !formFiles || formFiles.length == 0}
     <h6 class="opacity-60 text-left">
       Uploads will appear here.
       <br>
@@ -173,6 +175,7 @@
           <IconSend class="size-4" />
         </Button>
       </span>
+      
       <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
         {#each formFileRecords as p}
@@ -187,24 +190,25 @@
             <img src={p.url}
                   class="aspect-auto block"
                   alt={p.name} />
-            <Dialog.Root>
-              <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
-                                  hover:underline cursor-pointer
-                                  absolute bottom-2 left-2">
-                {#if IS_IN_STUDENTS(supposedId)}
-                  <IconPerson class="size-4"/>
-                {:else}
-                  <IconNotFound class="size-4" />
-                {/if}
-                <h4 class="text-left w-fit truncate">
-                  {nameOnly ? nameOnly : "Add student no..."}
-                </h4>
-              </Dialog.Trigger>
-              <BulkUploadRename filename={supposedId}
-                        onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
-            </Dialog.Root>
-            {#if IS_FIRST_PAGE(p.name)}
-              <span class="absolute bottom-2 right-2 bg-white/80 backdrop-blur-md">
+            <div class="absolute top-2 left-2 space-y-1">
+              <Dialog.Root>
+                <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
+                                    hover:underline cursor-pointer">
+                  {#if IS_IN_STUDENTS(supposedId)}
+                    <IconPerson class="size-4"/>
+                  {:else}
+                    <IconNotFound class="size-4" />
+                  {/if}
+                  <h4 class="text-left w-fit truncate">
+                    {nameOnly ? nameOnly : "Add student no..."}
+                  </h4>
+                </Dialog.Trigger>
+                <BulkUploadRename filename={supposedId}
+                          onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
+              </Dialog.Root>
+              
+              {#if IS_FIRST_PAGE(p.name)}
+              <span class="bg-white/80 backdrop-blur-md">
                 <input type="number"
                         class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         placeholder="# of box..."
@@ -218,18 +222,24 @@
                         }}
                     />
               </span>
-            {/if}
+              {/if}
+            </div>
+            
             <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-              <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
+                      class="button-outline">
                 <IconRotateCW />
               </button>
-              <button onclick={() => handleRotateCommand(p, false)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
+                      class="button-outline">
                 <IconRotateCCW />
               </button>
-              <button onclick={() => handleFlipCommand(p, true)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
+                      class="button-outline">
                 <IconFlipHorizontally />
               </button>
-              <button onclick={() => handleFlipCommand(p, false)} class="button-outline" >
+              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
+                      class="button-outline">
                 <IconFlipVertically />
               </button>
             </span>
@@ -241,24 +251,49 @@
   
   {:else}
     <div class="flex flex-col space-y-1">
+      <span class="flex flex-row justify-between opacity-80">
+        <b>File</b>
+        <b>Evaluation status</b>
+      </span>
       {#each formFileRecords as p}
-        <span class="flex flex-row justify-start items-center gap-x-1.5">
-          <span>
+        <span class="flex flex-row justify-start items-center gap-x-2
+                      [&>span]:flex [&>span]:justify-center [&>span]:items-center [&>span]:size-5
+                      [&>h4]:truncate [&>h4]:w-fit
+                      [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2">
+          <!-- <span> -->
             {#if p.statusCode == 200 || p.statusCode == 202}
-              <IconAccepted class="size-5"/>
+              <span> <IconAccepted/> </span>
+              <h4>{ p.name }</h4>
+              <i>Success</i>
             {:else if p.statusCode == 404}
-              <IconNotFound class="size-5" />
+              <span> <IconNotFound/> </span>
+              <h4>{ p.name }</h4>
+              <i>Student no. not recognized</i>
+            {:else if p.statusCode == 422}
+              <span> <IconUnprocessable class="text-destructive"/> </span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? "Unprocessable image"}</i>
+            {:else if p.statusCode == 500}
+              <span> <IconExclamation class="text-destructive"/> </span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? "Unspecified server error"}</i>
             {:else if p.statusCode == 501}
-              <IconExclamation class="size-5" />
+              <span> <IconExclamation/> </span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? ""}</i>
+            
             {:else if p.statusCode == -1}
-              <Spinner class="text-primary size-4"/>
+              <span> <Spinner class="text-primary"/> </span>
+              <h4>{ p.name }</h4>
             {:else}
               <span class="font-mono -tracking-[0.08em]">{p.statusCode}</span>
+              <h4>{ p.name }</h4>
+              <i>{p.statusDetail ?? ""}</i>
             {/if}
-          </span>
-          <h4 class="truncate w-fit">{p.name}</h4>
+          <!-- </span> -->
         </span>
       {/each}
+
     </div>
   {/if}
 </div>

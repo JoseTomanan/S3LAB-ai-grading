@@ -11,6 +11,7 @@
   import { Button } from '$lib/components/ui/button/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
+	import Card from '$lib/components/Card.svelte';
 
   let { test_id, student_no, item_id, onCropSubmitted } = $props<{
     test_id: string,
@@ -193,10 +194,10 @@
       <img class="border"
             src={responseImage} alt="Test item"/>
     {:else}
-      <span class="py-4 border card flex flex-col items-center">
+      <Card class="py-4 border flex flex-col items-center">
         <MdiUpload class="h-8 w-full opacity-75"/>
         <p>Upload an image to start cropping.</p>
-      </span>
+      </Card>
     {/if}
   </div>
 </Dialog.Content>

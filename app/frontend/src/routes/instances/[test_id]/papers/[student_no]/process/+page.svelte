@@ -6,7 +6,7 @@
   import { goto, invalidateAll } from '$app/navigation';
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
-  import { dataUrlToFile } from '$lib/utils.ts';
+  import { dataUrlToFile, isNotPngOrJpg } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
   import IconCamera from "~icons/mdi/camera";
@@ -21,18 +21,23 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import Switch from '$lib/components/LightSwitch.svelte';
+	import Card from '$lib/components/Card.svelte';
+
 	import type { CommitBoxesResponseItem, FileRecord } from '$lib/index.ts';
   import { createPoller } from '$lib/utils/poller.ts';
-
-  import { rotateImage, flipImage } from '$lib/utils.ts';
+  import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import ReviewForCommit from './ReviewForCommit.svelte';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
+  
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
+  let paramScannedAlready: boolean = $state(false);
   let formFileRecords: FileRecord[] = $state([]);
+  
   let isAskingForValidation: boolean = $state(false);
   let isReviewDialogOpen: boolean = $state(false);
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
@@ -40,6 +45,12 @@
   function handleFiles() {
     if (!formFiles || formFiles.length == 0)
       return;
+
+    if (isNotPngOrJpg(formFiles)) {
+      toast.error("Please upload only .png, .jpeg, or .jpg");
+      formFiles = undefined;
+      return;
+    }
 
     formFileRecords.forEach(r => URL.revokeObjectURL(r.url));
     formFileRecords = Array.from(formFiles).map((f, i) => ({
@@ -61,19 +72,6 @@
     }];
   }
 
-  async function handleRotateCommand(formFileRecord: FileRecord, isCw: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await rotateImage(formFileRecord, isCw);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
-
-  async function handleFlipCommand(formFileRecord: FileRecord, isFlipHorizontally: boolean) {
-    if (!formFileRecord)
-      return;
-    const recordResponse = await flipImage(formFileRecord, isFlipHorizontally);
-    formFileRecords = formFileRecords.map(i => i.name == recordResponse.name ? recordResponse : i);
-  }
 
   async function sendImageForValidation() {
     if (formFileRecords.length === 0)
@@ -87,16 +85,16 @@
     }
 
     try {
-      const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(
-            `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}`,
-            formData
-            );
+      const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}&is_scanned_already=${paramScannedAlready}`;
+      const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(url, formData);
       supposedScans = (result.boxes ?? [])
                         .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
       isAskingForValidation = true;
       isReviewDialogOpen = true;
     } catch(e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send raw image for processing:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to send raw image for processing:\n" + String(e));
     } finally {
       isOperationOngoing = false;
     }
@@ -146,19 +144,21 @@
       if (!commitPoller.active) isCommitmentOngoing = false;
     }
   }
-
 </script>
 
 
-<div class="flex flex-col gap-y-2">
-  <span class="flex flex-row justify-between items-baseline
-            [&>h1]:font-semibold [&>h5]:opacity-60">
+
+<div class="flex flex-col gap-y-2 items-center">
+  <span class="flex flex-row justify-between items-baseline w-full
+                [&>h1]:font-semibold [&>h5]:opacity-60">
     <h1>Process image</h1>
     <h5>For {data.student_no}</h5>
   </span>
-    <div class="flex flex-row gap-2 min-w-0">
+
+  <!-- <div> -->
+    <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-        class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
+              class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
         <span class="shrink-0 whitespace-nowrap text-sm pl-1">
           {formFileRecords.length > 0
             ? `Uploaded ${formFileRecords.length} image(s):`
@@ -170,13 +170,16 @@
           </span>
         {/if}
       </Label>
+      
       <Input id="sendImage"
               type="file"
               accept="image/*"
               multiple
               class="hidden"
               onchange={handleFiles}
-              bind:files={formFiles}/>
+              bind:files={formFiles}
+          />
+      
       <Dialog.Root bind:open={isCameraDialogOpen}>
         <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
           <IconCamera class="size-6 opacity-80"/>
@@ -185,21 +188,31 @@
                     onImageCapture={getImageFromComponent} />
       </Dialog.Root>
     </div>
-    <div class="flex flex-col sm:flex-row gap-x-4 gap-y-2">
-      <Input id="numBoxes"
-              class="flex-1"
-              type="number"
+    
+    <div class="subcontainer flex flex-row gap-x-4 gap-y-2">
+      <Input id="numBoxes" type="number"
+              class="flex-1 xs:flex-2"
               placeholder="Number of boxes (default: 2)..."
               disabled={isAskingForValidation}
               bind:value={paramNumBoxes}
           />
+      
+      <span class="flex-1 flex flex-row gap-x-2 items-center">
+        <Switch id="isAlreadyScanned" bind:checked={paramScannedAlready}/>
+        <Label for="isAlreadyScanned">
+          Scanned already
+        </Label>
+      </span>
     </div>
+  <!-- </div> -->
+
+  <div class="subcontainer flex flex-col gap-y-2">
   {#if isAskingForValidation === false}
     <Button variant="outline"
             onclick={sendImageForValidation}
             disabled={formFileRecords.length === 0 || isOperationOngoing}>
       {isOperationOngoing
-        ? "Sending..."
+        ? "Sending, do not quit..."
         : "Send for processing"}
       {#if isOperationOngoing}
         <Spinner />
@@ -207,7 +220,7 @@
     </Button>
 
     <Separator/>
-    <div class="subcontainer card flex flex-col items-center justify-center mx-auto">
+    <Card class="subcontainer flex flex-col items-center justify-center mx-auto">
       {#if formFileRecords.length === 0}
         <IconImagePreview class="size-12 opacity-60"/>
         <h6 class="opacity-60">
@@ -226,16 +239,20 @@
                     class="aspect-auto block"
                     />
               <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-                <button onclick={() => handleRotateCommand(p, true)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
+                        class="button-outline">
                   <IconRotateCW />
                 </button>
-                <button onclick={() => handleRotateCommand(p, false)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
+                        class="button-outline">
                   <IconRotateCCW />
                 </button>
-                <button onclick={() => handleFlipCommand(p, true)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
+                        class="button-outline">
                   <IconFlipHorizontally />
                 </button>
-                <button onclick={() => handleFlipCommand(p, false)} class="button-outline" >
+                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
+                        class="button-outline">
                   <IconFlipVertically />
                 </button>
               </span>
@@ -243,7 +260,7 @@
           {/each}
         </div>
       {/if}
-    </div>
+    </Card>
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>
@@ -256,14 +273,16 @@
                         onReject={() => validateAndCommit(false)}
                         />
     </Dialog.Root>
+
+    <!-- Polling is not working properly hence temporarily removed. FIXME: Bring back polling -->
     {#if isCommitmentOngoing}
       <div class="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
-        <Spinner class="size-4"/>
-        Evaluating answers...
+        <!-- <Spinner class="size-4"/> -->
+        Answers are being evaluated in the background. You may go back to the Papers screen now.
       </div>
     {:else}
       <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
     {/if}
   {/if}
+  </div>
 </div>
-

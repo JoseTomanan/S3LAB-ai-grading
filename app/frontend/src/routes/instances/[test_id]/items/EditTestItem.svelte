@@ -18,6 +18,7 @@
     test_id: string
   }>();
 
+  let isOperationOngoing: boolean = $state(false);
   let formTestItem: TestItem = $state({
         item_id: testItem.item_id,
         label: testItem.label,
@@ -53,6 +54,15 @@
       return;
     }
 
+    if (!formTestItem.label || !formTestItem.question || !formTestItem.expected_answer_rubric_questions) {
+      toast("Please do not leave any fields empty.");
+      return;
+    }
+
+    if (isOperationOngoing)
+      return;
+
+    isOperationOngoing = true;
     try {
       const result = await api<{ item_id: string }>(`${API_URL}/api/test_items/${test_id}/items/${submittedTestItem.item_id}`, {
         method: "PATCH",
@@ -66,6 +76,8 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit test item:\n" + e);
+    } finally {
+      isOperationOngoing = false;
     }
   }
 
@@ -90,15 +102,15 @@
       For expected answer/rubric questions, add points in brackets at end. Example: "Correct setup [1pts]"
     </Dialog.Description>
   </Dialog.Header>
+  
   <Label for="label">Label</Label>
-  <Input id="label"
-          bind:value={ formTestItem.label }
+  <Input id="label" bind:value={formTestItem.label}
           required />
   <Label for="question">Question</Label>
-  <Textarea id="question"
-          rows={4}
-          bind:value={ formTestItem.question }
+  <Textarea id="question" rows={4}
+          bind:value={formTestItem.question}
           required />
+  
   {#if testItem.is_problem_solving}
     <Label for="r_q">Rubric questions (separate with `; `)</Label>
     <Textarea id="r_q"
@@ -112,10 +124,12 @@
               bind:value={ formTestItem.expected_answer_rubric_questions }
               required />
   {/if}
+  
   <Dialog.Footer>
     <div class="flex flex-wrap w-full gap-1.5">
       <Button variant="outline"
               class="flex-1"
+              disabled={isOperationOngoing}
               onclick={() => editTestItem(formTestItem)}>
         Save changes
       </Button>

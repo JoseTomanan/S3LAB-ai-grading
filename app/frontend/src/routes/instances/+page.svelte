@@ -12,6 +12,7 @@
   import Pagination from '$lib/components/Pagination.svelte';
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import AddTestInstance from './AddTestInstance.svelte';
+	import Card from '$lib/components/Card.svelte';
 
   let instances: TestInstance[] = $derived(data.instances);
   let paginationValues: TestInstance[] = $state([]);
@@ -45,8 +46,8 @@
       </div>
     {:else}
       {#each paginationValues as instance}
-        <a href={`/instances/${instance.test_id}/items`}
-            class="card button-outline">
+        <Card href="/instances/{instance.test_id}/items"
+              class="button-outline">
           <span class="flex flex-row items-center gap-1">
             {#if instance.is_done_rendering}
               <MdiCheckboxMarkedOutline/>
@@ -56,7 +57,7 @@
             <h3>{ instance.name }</h3>
           </span>
           <h5>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h5>
-        </a>
+        </Card>
       {/each}
     {/if}
   </div>

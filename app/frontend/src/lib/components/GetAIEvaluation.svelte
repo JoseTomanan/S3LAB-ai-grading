@@ -14,6 +14,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import { GET_E_A_R_Q, GET_SCORES, REPOPULATE_UNANSWERED_ITEMS } from '$lib/utils/ai_evaluations.ts';
 	import toast from "svelte-5-french-toast";
+	import Card from './Card.svelte';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
@@ -112,7 +113,7 @@
     
     {:else}
       {#each questionItemEvalsUseable as evalItem}
-        <div class="card space-y-1">
+        <Card class="space-y-1">
           {#if evalItem.answer_id == -1}
             <h4 class="truncate text-ellipsis w-fill">
               ({evalItem.label}) {evalItem.question}
@@ -152,7 +153,7 @@
               {/if}
             {/each}
           {/if}
-        </div>
+        </Card>
       {/each}
     {/if}
   </div>

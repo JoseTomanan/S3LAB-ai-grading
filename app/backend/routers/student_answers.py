@@ -27,14 +27,21 @@ async def process_student_answer_image(
                 background_tasks: BackgroundTasks,
                 files: List[UploadFile] = File(...),
                 num_boxes: Optional[int] = Query(None),
+                is_scanned_already: bool = Query(False),
                 session: Session = Depends(get_session)
                 ):
-    """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
+    """
+    Process raw student assessment image(s) through CV pipeline. Accepts multiple pages.
+    Works in one straight line, without validation --- to be used by Bulk Upload feature.
+    """
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
     print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
-    processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
+    try:
+        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"INFO:\tProceeding to labeling the boxes.")
@@ -58,17 +65,21 @@ async def scan_then_label_save_boxes(
                 student_no: str,
                 files: List[UploadFile] = File(...),
                 num_boxes: Optional[int] = Query(None),
+                is_scanned_already: bool = Query(False),
                 session: Session = Depends(get_session)
                 ):
-    """Process raw student assessment image(s) through CV pipeline. Accepts multiple pages."""
+    """
+    Process raw student assessment image(s) through CV pipeline. Accepts multiple pages.
+    Waits for validation before proceeding --- to be used by (individual) Process Image functionality.
+    """
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
     print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
-        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes)
-    except:
-        raise HTTPException(status_code=500, detail="Could not find any boxes.")
+        processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
     print(f"INFO:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
@@ -87,6 +98,7 @@ async def commit_boxes_endpoint(
                 background_tasks: BackgroundTasks,
                 session: Session = Depends(get_session)
                 ):
+    """Second endpoint called in conjunction with scan_then_label_save_boxes endpoint."""
     test_exists = session.exec(
                     select(TestInstance)
                     .where(TestInstance.test_id == test_id)
@@ -155,7 +167,9 @@ async def update_answer_segmentation(
     contents = await file.read()
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
-    img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
+    ## removed temporarily; FIXME: optimize parameters/see if it is being double-called
+    # img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
+    img_bytes = img_bytes_crop
 
     # ===== SAVE IMAGE =====
     safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
@@ -521,18 +535,21 @@ async def _validate_files(files: List[UploadFile]) -> list[bytes]:
     return contents_list
 
 
-async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optional[int]) -> list[bytes]:
+async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optional[int], is_scanned_already: bool = False) -> list[bytes]:
     DOCUMENT_SCANNER = DocumentScanner()
     BOX_SEGMENTER = BoxSegmenter()
 
     all_processed: list[bytes] = []
     for page_idx, contents in enumerate(contents_list):
-        # ======== DOCUMENT SCANNING ========
-        scanned_page = DOCUMENT_SCANNER.scan_page(contents)
+        ## ======== DOCUMENT SCANNING ========
+        contents = DOCUMENT_SCANNER.normalize_bytes(contents)
+        scanned_page = contents if is_scanned_already else DOCUMENT_SCANNER.scan_page(contents)
 
-        # ======== BOX SEGMENTING ========
+        ## ======== BOX SEGMENTING ========
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
-        processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+        ## removed temporarily; FIXME: optimize parameters/see if it is being double-called
+        # processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+        processed_list = segmented_list
 
         print(f"INFO:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
@@ -573,6 +590,7 @@ def _label_save_boxes(
 
         test_item = session.exec(
                         select(TestItem).where(
+                            TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
         
@@ -580,15 +598,14 @@ def _label_save_boxes(
             print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
             continue
 
-        item_id = test_item.item_id
-        print(f"INFO:\tLabel {item_number} will be stored in {item_id}")
+        print(f"INFO:\tLabel {item_number} will be stored in {test_item.item_id}")
 
-        # Generate filename
+        ## Generate filename
         safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{i}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
         filepath = TEMP_DIR / safe_filename
         
-        # Save image file
+        ## Save image file
         with open(filepath, "wb") as f:
             f.write(img_bytes)
         
@@ -631,6 +648,7 @@ def _create_answer_records(
         item_number = box["item_number"]
         item = session.exec(
                         select(TestItem).where(
+                            TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
         assert item is not None

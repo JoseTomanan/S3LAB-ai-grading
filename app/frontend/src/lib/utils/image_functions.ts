@@ -82,17 +82,17 @@ export async function flipImage(record: FileRecord, isFlipHorizontal: boolean): 
 }
 
 
-async function handleRotateCommand(singleRecord: FileRecord, records: FileRecord[], isCw: boolean) {
+export async function handleRotateCommand(singleRecord: FileRecord, records: FileRecord[], isCw: boolean): Promise<FileRecord[]> {
   if (!singleRecord)
-    return;
+    return records;
   const recordResponse = await rotateImage(singleRecord, isCw);
-  records = records.map(i => i.name == recordResponse.name ? recordResponse : i);
+  return records.map(i => i.name == recordResponse.name ? recordResponse : i);
 }
 
 
-async function handleFlipCommand(singleRecord: FileRecord, records: FileRecord[], isFlipHorizontally: boolean) {
+export async function handleFlipCommand(singleRecord: FileRecord, records: FileRecord[], isFlipHorizontally: boolean): Promise<FileRecord[]> {
   if (!singleRecord)
-    return;
+    return records;
   const recordResponse = await flipImage(singleRecord, isFlipHorizontally);
-  records = records.map(i => i.name == recordResponse.name ? recordResponse : i);
+  return records.map(i => i.name == recordResponse.name ? recordResponse : i);
 }

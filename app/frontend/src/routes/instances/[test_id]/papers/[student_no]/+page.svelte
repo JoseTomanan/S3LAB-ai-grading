@@ -18,6 +18,7 @@
 	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';
 
   if (!data.student_items)
@@ -40,7 +41,7 @@
         question: evalData.question,
         expected_answer_rubric_questions: evalData.expected_answer_rubric_questions,
         scores: evalData.scores};
-    })
+      }).sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
@@ -85,7 +86,9 @@
               : ans
             );
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to reevaluate answer:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to reevaluate answer:\n" + String(e));
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
     }
@@ -97,13 +100,17 @@
       toast.success(`Deletion of ${item_id} for ${data.student_no} successful.`);
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete answer:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to delete answer:\n" + String(e));
     }
   }
 </script>
 
 
-<div class="flex flex-col gap-3">
+
+<div class="flex flex-col gap-3
+            [&>*>img]:object-fit">
   <span class="flex flex-row justify-between items-center">
     <span class="flex flex-wrap items-baseline gap-x-4 [&>h5]:opacity-60">
       <h1 class="font-semibold">Test answers</h1>
@@ -124,23 +131,27 @@
       {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
-      <div class="subcontainer card flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
-        <span class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3
+      
+      <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
+        <span class="flex-1
                       flex justify-center items-center relative">
           <Label for={studentItem.label}
                   class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
           </Label>
-          <span>
+          <!-- TODO: Click to open image in a dialog -->
+          <span class="w-5/6 sm:w-full">
             {#if studentItem.image_directory == ""}
-              <MdiPaperOff class="size-8 opacity-50" />
+              <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
+              <!-- FIXME: not working in production (but working in dev somehow??) -->
               <img class="max-h-70 w-auto mx-auto"
                     src={`${API_URL}${studentItem.image_directory}`}
                     alt={studentItem.label}/>
             {/if}
           </span>
         </span>
+        
         <div class="flex-1 w-full h-full space-y-2">
           <span class="flex flex-row space-x-1 justify-end">
             <SafeDelete toggle={isWantsToDelete}
@@ -165,6 +176,7 @@
               <IconReevaluate />
             </button>
           </span>
+          
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
@@ -183,8 +195,9 @@
             {/if}
             {/each}
           </div>
+
         </div>
-      </div>
+      </Card>
     {/each}
     </div>
   {/if}

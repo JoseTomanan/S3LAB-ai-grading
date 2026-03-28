@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { API_URL } from "$lib/constants.ts";
   let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
 
   import { getContext } from "svelte";
   import type { TestItemsContext } from '$lib/index.ts';
   import IconLabel from "~icons/mdi/label";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
+	import Card from "$lib/components/Card.svelte";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
   let validLabels = $derived(new Set(testItemsContext.items.map(i => i.label)));
@@ -15,6 +17,8 @@
   let isAcceptableLabels = $derived(
     supposedScans.every((s: { item_number: string }) => validLabels.has(s.item_number))
   );
+
+  const isButtonDisabled = $derived(isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels);
 </script>
 
 
@@ -22,8 +26,8 @@
                 onInteractOutside={(e) => e.preventDefault()}
                 onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
-    <button class="button-secondary flex-1 text-sm {isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels ? "opacity-50" : ""}"
-            disabled={isCommitmentOngoing || hasDuplicateLabels || !isAcceptableLabels}
+    <button class="button-secondary flex-1 text-sm {isButtonDisabled ? "opacity-50" : ""}"
+            disabled={isButtonDisabled}
             onclick={onAccept}>
       {#if isCommitmentOngoing}
         Identifying labels...
@@ -44,9 +48,9 @@
     </button>
   </div>
   
+  <div class="max-h-[80vh] overflow-y-auto">
   {#each supposedScans as supposedScan}
-    <div class="card relative
-                flex flex-row justify-center items-start gap-x-1">
+    <Card class="relative flex flex-row justify-center items-start gap-x-1">
       <div class="absolute top-1 left-1 bg-white/80 shadow-sm
                   flex flex-row items-center gap-x-0">
         <IconLabel class={validLabels.has(supposedScan.item_number) ? "" : "text-destructive"}/>
@@ -58,9 +62,10 @@
       </div>
       
       <img class="block sm:max-w-3/4 md:max-w-2/3"
-            src={`${supposedScan.image_directory}`}
+            src="{API_URL}{supposedScan.image_directory}"
             alt={supposedScan.item_number}
             />
-    </div>
+    </Card>
   {/each}
+  </div>
 </Dialog.Content>

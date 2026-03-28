@@ -54,6 +54,12 @@
       toast("No changes were made.", { icon: "⚠️" });
       return;
     }
+
+    if (formName === "") {
+      toast("Please do not leave name empty.")
+      return;
+    }
+
     isRequestLoading = true;
     try {
       await api(`${API_URL}/api/students/${student_no}`, {
@@ -68,7 +74,9 @@
       section_id = Number(formSectionId);
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit student: " + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to edit student: " + String(e));
     } finally {
       isRequestLoading = false;
     }
@@ -82,7 +90,9 @@
       section_id = -1;
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete student: " + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status} ${e.statusText}`
+        : "Failed to delete student: " + String(e));
     } finally {
       isRequestLoading = false;
     }
