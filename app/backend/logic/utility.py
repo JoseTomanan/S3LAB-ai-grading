@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlmodel import Session, delete, select
+from sqlmodel import Session, select
 
 import numpy as np
 import cv2
@@ -51,18 +51,23 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
         case True:
             rubric_questions = test_item.expected_answer_rubric_questions.split(";")
             cleaned_rubrics = [_STRIP_POINTS(r) for r in rubric_questions if r.strip() != ""]
-            expected_count = len(cleaned_rubrics)
 
-            while True:
-                response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
-                    image_bytes, test_item.question, cleaned_rubrics
-                )
-                if response:
-                    parts = response.strip().split(";")
-                    if len(parts) == expected_count and all(_VALID_R_Q_RESPONSE(p) for p in parts):
-                        break
+            BATCH_SIZE = 4
+            batches = [cleaned_rubrics[i:i+BATCH_SIZE] for i in range(0, len(cleaned_rubrics), BATCH_SIZE)]
 
-            ai_evaluation = response.strip() + ";"
+            all_parts = []
+            for batch in batches:
+                while True:
+                    response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
+                                    image_bytes, test_item.question, batch
+                                    )
+                    if response:
+                        parts = response.strip().split(";")
+                        if len(parts) == len(batch) and all(_VALID_R_Q_RESPONSE(p) for p in parts):
+                            all_parts.extend(parts)
+                            break
+
+            ai_evaluation = ";".join(all_parts) + ";"
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
