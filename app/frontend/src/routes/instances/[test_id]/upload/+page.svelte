@@ -254,15 +254,20 @@
   
   {:else}
     <div class="flex flex-col space-y-1">
+      <span class="flex flex-row justify-between opacity-80">
+        <b>File</b>
+        <b>Evaluation status</b>
+      </span>
       {#each formFileRecords as p}
         <span class="flex flex-row justify-start items-center gap-x-2
-                      [&>span]:flex [&>span]:flex-row [&>span]:items-baseline [&>span]:size-5
+                      [&>span]:flex [&>span]:justify-center [&>span]:items-center [&>span]:size-5
                       [&>h4]:truncate [&>h4]:w-fit
-                      [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2">
+                      [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2">
           <!-- <span> -->
             {#if p.statusCode == 200 || p.statusCode == 202}
               <span> <IconAccepted/> </span>
               <h4>{ p.name }</h4>
+              <i>Success</i>
             {:else if p.statusCode == 404}
               <span> <IconNotFound/> </span>
               <h4>{ p.name }</h4>
