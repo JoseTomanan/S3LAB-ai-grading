@@ -9,7 +9,7 @@
   import toast from 'svelte-5-french-toast';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
-  import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import Card from '$lib/components/Card.svelte';
 
@@ -139,16 +139,15 @@
 </script>
 
 
-<Dialog.Content class="max-w-3xl">
-  <Dialog.Header>
-    <Dialog.Title>
-      Manually crop image
-    </Dialog.Title>
-    <Dialog.Description>
+<Sheet.Content side="bottom"
+                class="max-w-3xl">
+  <Sheet.Header>
+    <Sheet.Title>Manually crop image</Sheet.Title>
+    <Sheet.Description>
       {test_id} &middot; {student_no} &middot; ITEM_ID {item_id}
-    </Dialog.Description>
-  </Dialog.Header>
-  <div class="flex flex-col space-y-2">
+    </Sheet.Description>
+  </Sheet.Header>
+  <div class="flex flex-col space-y-2 px-2 pb-4">
     <span class="flex flex-row space-x-1 w-full">
       <Input id="croppable"
             type="file" accept="image/*"
@@ -200,7 +199,7 @@
       </Card>
     {/if}
   </div>
-</Dialog.Content>
+</Sheet.Content>
 
 <style>
   :global(.cropper-modal) {
