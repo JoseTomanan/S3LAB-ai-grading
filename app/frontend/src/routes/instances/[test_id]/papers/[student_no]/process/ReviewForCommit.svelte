@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { API_URL } from "$lib/constants.ts";
   let { supposedScans, onAccept, onReject, isCommitmentOngoing} = $props();
 
   import { getContext } from "svelte";
@@ -61,7 +62,7 @@
       </div>
       
       <img class="block sm:max-w-3/4 md:max-w-2/3"
-            src={`${supposedScan.image_directory}`}
+            src="{API_URL}{supposedScan.image_directory}"
             alt={supposedScan.item_number}
             />
     </Card>
