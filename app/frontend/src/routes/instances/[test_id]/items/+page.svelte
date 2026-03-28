@@ -55,7 +55,7 @@
           {#each bigItem.b as smallItem}
             <Dialog.Root>
               <Dialog.Trigger class="flex flex-row items-center justify-between gap-x-0.5 w-full">
-                <p class="truncate text-ellipsis w-fill">
+                <p class="truncate text-ellipsis flex-1">
                   ({smallItem.label}) {smallItem.question}
                 </p>
                 <MdiEditOutline class="size-4"/>
