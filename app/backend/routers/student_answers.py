@@ -172,7 +172,7 @@ async def update_answer_segmentation(
     img_bytes = img_bytes_crop
 
     # ===== SAVE IMAGE =====
-    safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
+    safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{item_id}.jpg"
     filepath = TEMP_DIR / safe_filename
     with open(filepath, "wb") as f:
         f.write(img_bytes)
