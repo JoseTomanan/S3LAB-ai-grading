@@ -17,6 +17,7 @@
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
+	import { goto } from '$app/navigation';
 
   if (!data.test_instance)
     throw new Error("Test instance not loaded.");
@@ -41,14 +42,14 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
+      <a href="/instances">
+        <IconHome class="size-8 opacity-85" />
+      </a>
+      <h1>{ activeTestInstance.name }</h1>
       <button class="p-0 size-8 cursor-pointer"
-              onclick={() => history.back()}>
+              onclick={() => goto("..")}>
         <IconBack class="size-full" />
       </button>
-      <h1>{ activeTestInstance.name }</h1>
-      <a href="/instances">
-        <IconHome class="size-7 opacity-85" />
-      </a>
     </span>
     <Separator/>
     <div class="flex flex-col sm:flex-row gap-x-4 gap-y-1
