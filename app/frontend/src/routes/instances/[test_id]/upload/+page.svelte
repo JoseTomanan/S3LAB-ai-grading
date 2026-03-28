@@ -38,6 +38,7 @@
 
   import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import toast from 'svelte-5-french-toast';
+	import { isNotPngOrJpg } from '$lib/utils.ts';
   
   let isOperationStarted: boolean = $state(false);
   let formFiles: FileList | undefined = $state();
@@ -69,11 +70,7 @@
     if (!formFiles || formFiles.length == 0)
       return;
 
-    const validTypes = ['image/png', 'image/jpeg'];
-    const isInvalid: boolean = Array.from(formFiles).some(
-      (f) => !validTypes.includes(f.type)
-      );
-    if (isInvalid) {
+    if (isNotPngOrJpg(formFiles)) {
       toast.error("Please upload only .png, .jpeg, or .jpg");
       // reinitialize
       formFiles = undefined;
@@ -131,7 +128,7 @@
           console.log(`${studentNo}: ${response.status}`);
           if (!response.ok) {
             const body = await response.json().catch(() => null);
-            const detail: string = body?.detail ?? response.statusText;
+            const detail: string = typeof body?.detail === 'string' ? body.detail : JSON.stringify(body?.detail);
             records.forEach(r => { r.statusCode = response.status; r.statusDetail = detail; });
           } else {
             records.forEach(r => r.statusCode = response.status);

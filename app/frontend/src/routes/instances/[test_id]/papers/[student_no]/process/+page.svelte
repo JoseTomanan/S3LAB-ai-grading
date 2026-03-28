@@ -6,7 +6,7 @@
   import { goto, invalidateAll } from '$app/navigation';
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
-  import { dataUrlToFile } from '$lib/utils.ts';
+  import { dataUrlToFile, isNotPngOrJpg } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
   import IconCamera from "~icons/mdi/camera";
@@ -46,13 +46,9 @@
     if (!formFiles || formFiles.length == 0)
       return;
 
-    // FIXME: remove once validated that working as intended
-    const validTypes = ['image/png', 'image/jpeg'];
-    const isInvalid: boolean = Array.from(formFiles).some(
-      (f) => !validTypes.includes(f.type)
-      );
-    if (isInvalid) {
+    if (isNotPngOrJpg(formFiles)) {
       toast.error("Please upload only .png, .jpeg, or .jpg");
+      formFiles = undefined;
       return;
     }
 
