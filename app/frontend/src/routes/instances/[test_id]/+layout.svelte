@@ -54,8 +54,8 @@
     <Separator/>
     <div class="flex flex-col sm:flex-row gap-x-4 gap-y-1
               *:flex *:justify-between
-              [&>*>h4]:font-medium [&>*>h4]:text-foreground/80 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
-      <span class="flex-3/5">
+              [&>*>h4]:font-normal [&>*>h4]:text-foreground/85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
+      <span class="flex-3/5 tracking-tight">
         <h4>TestID: {activeTestInstance.test_id}</h4>
         <h4>
           Status:
