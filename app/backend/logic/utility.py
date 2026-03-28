@@ -50,13 +50,19 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
     match test_item.is_problem_solving:
         case True:
             rubric_questions = test_item.expected_answer_rubric_questions.split(";")
-            for rubric in rubric_questions:
-                if rubric.strip() != "":
-                    while True:
-                        response = AI_ANSWER_EVALUATOR.evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
-                        if response and _VALID_R_Q_RESPONSE(response):
-                            break
-                    ai_evaluation += f"{response};"
+            cleaned_rubrics = [_STRIP_POINTS(r) for r in rubric_questions if r.strip() != ""]
+            expected_count = len(cleaned_rubrics)
+
+            while True:
+                response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
+                    image_bytes, test_item.question, cleaned_rubrics
+                )
+                if response:
+                    parts = response.strip().split(";")
+                    if len(parts) == expected_count and all(_VALID_R_Q_RESPONSE(p) for p in parts):
+                        break
+
+            ai_evaluation = response.strip() + ";"
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions

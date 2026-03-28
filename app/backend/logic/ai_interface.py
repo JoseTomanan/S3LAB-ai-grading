@@ -41,7 +41,7 @@ class AIAnswerEvaluator:
         rubrics_formatted = json.dumps(rubrics)
         return self._send_image_prompt(
                         image_bytes,
-                        f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nRUBRICS: {rubrics_formatted}"
+                        f"{ANSWER_MULTI_RUBRIC_PROMPT}\nQUESTION: {question}\nRUBRICS: {rubrics_formatted}"
                         )
     
     def find_four_points(self, image_bytes: bytes) -> list[tuple[int, int]] | None:
