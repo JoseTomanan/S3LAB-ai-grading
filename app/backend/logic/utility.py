@@ -164,10 +164,7 @@ def crop_image(contents: bytes, points_data: dict):
     M = cv2.getPerspectiveTransform(src_pts, dst_pts)
     warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
     
-    enhanced = IMAGE_MODIFIER.brighten(warped, amount=0.2)
-    enhanced = IMAGE_MODIFIER.adjust_contrast(enhanced, amount=1.2)
-    
-    success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+    success, buffer = cv2.imencode('.jpg', warped, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
     if not success:
         raise ValueError("Failed to encode processed image")
     
