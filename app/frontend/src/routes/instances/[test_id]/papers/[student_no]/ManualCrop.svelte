@@ -115,7 +115,9 @@
   }
 
   async function sendCropRequest() {
-    if (!formData) return;
+    if (!formData)
+      return;
+
     isOperationOngoing = true;
     try {
       const result = await apiForm<{ image_directory: string }>(
@@ -130,6 +132,9 @@
       }
       canvasImageUrl = null;
       onCropSubmitted?.(result.image_directory);
+
+      // Reset file
+      canvasFile = undefined;
     } catch(e) {
       toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
     } finally {
