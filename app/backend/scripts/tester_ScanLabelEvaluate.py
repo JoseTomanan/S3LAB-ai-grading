@@ -47,10 +47,10 @@ if __name__ == "__main__":
         image_before = BOX_SEGMENTER.scan_page(image_before_before, debug=False)
         images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=4, debug=True)
 
-        for b in images_after_box:
+        for i, b in enumerate(images_after_box):
             image_beautified = BOX_SEGMENTER.beautify_scan(b)
             label = AI_EVALUATOR.get_nearest_item_number(image_beautified, label_choices=LABEL_CHOICES)
-            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section_{label}.jpg"))
+            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/box{i}_label{label}.jpg"))
 
             ## Question not given is experimental
             ## TODO: Retest with given question
