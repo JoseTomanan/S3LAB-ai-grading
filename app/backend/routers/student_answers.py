@@ -4,6 +4,7 @@ from typing import List, Optional
 import uuid
 import json
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from models import *
 from schemas import *
@@ -563,33 +564,45 @@ def _label_save_boxes(
                 processed_list: list[bytes],
                 session: Session
                 ) -> list[dict]:
-    boxes_info = []
-    for i, img_bytes in enumerate[bytes](processed_list):
-        # Extract item number using AI
-        test_item_labels = [ti.label
-                    for ti in session.exec(
-                        select(TestItem).where(
-                            TestItem.test_id == test_id
-                    )) if ti.label is not None]
+    ## Phase A: Hoist DB query — run once instead of once per box
+    test_item_labels = [ti.label
+                for ti in session.exec(
+                    select(TestItem).where(
+                        TestItem.test_id == test_id
+                )) if ti.label is not None]
 
+    ## Phase B: Parallelize Gemini API calls
+    def _classify_box(index: int, img_bytes: bytes) -> tuple[int, str]:
         try:
             item_number = AI_ANSWER_EVALUATOR.get_nearest_item_number(img_bytes, test_item_labels)
             if not item_number or item_number.strip() == "NONE":
-                item_number = "NONE"
-            else:
-                item_number = item_number.strip()
+                return (index, "NONE")
+            return (index, item_number.strip())
         except Exception as e:
-            print(f"INFO:\tFailed to extract item number for box {i}: {e}")
-            item_number = "NONE"
+            print(f"INFO:\tFailed to extract item number for box {index}: {e}")
+            return (index, "NONE")
 
-        print(f"INFO:\t{i}th detected label = {item_number}")
+    ai_results: list[tuple[int, str]] = [None] * len(processed_list)
+    with ThreadPoolExecutor(max_workers=min(len(processed_list), 10)) as executor:
+        futures = {
+            executor.submit(_classify_box, i, img_bytes): i
+            for i, img_bytes in enumerate(processed_list)
+        }
+        for future in as_completed(futures):
+            index, item_number = future.result()
+            ai_results[index] = (index, item_number)
+
+    ## Phase C: Sequential post-processing on main thread (DB lookups + file writes)
+    boxes_info = []
+    for index, item_number in ai_results:
+        print(f"INFO:\t{index}th detected label = {item_number}")
 
         test_item = session.exec(
                         select(TestItem).where(
                             TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
-        
+
         if test_item is None:
             print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
             continue
@@ -597,18 +610,19 @@ def _label_save_boxes(
         print(f"INFO:\tLabel {item_number} will be stored in {test_item.item_id}")
 
         ## Generate filename
-        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{i}.jpg"
+        img_bytes = processed_list[index]
+        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{index}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
         filepath = TEMP_DIR / safe_filename
-        
+
         ## Save image file
         with open(filepath, "wb") as f:
             f.write(img_bytes)
-        
+
         image_dir = f"/api/temp/{safe_filename}"
 
         boxes_info.append({
-                    "index": i,
+                    "index": index,
                     "image_directory": image_dir,
                     "item_number": item_number
                     })
