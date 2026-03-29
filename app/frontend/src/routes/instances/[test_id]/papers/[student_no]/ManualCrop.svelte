@@ -151,13 +151,14 @@
 
 
 <Sheet.Content side="right"
-                class="max-w-11/12 w-100 sm:w-135">
+                class="w-95/100 sm:max-w-135">
   <Sheet.Header>
     <Sheet.Title>Manually crop image</Sheet.Title>
     <Sheet.Description>
       {test_id} &middot; {student_no} &middot; ITEM_ID {item_id}
     </Sheet.Description>
   </Sheet.Header>
+  
   <div class="flex flex-col space-y-2 px-2 pb-4">
     <span class="flex flex-row space-x-1 w-full">
       <Input id="croppable"
@@ -214,6 +215,8 @@
     {/if}
   </div>
 </Sheet.Content>
+
+
 
 <style>
   :global(.cropper-modal) {
