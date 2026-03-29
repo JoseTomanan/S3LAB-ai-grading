@@ -6,6 +6,7 @@
   import type { Snippet } from 'svelte';
   import { setContext } from 'svelte';
 
+  import BulkUpload from './BulkUpload.svelte';
   import ExportSheets from './ExportSheets.svelte';
 
   import IconBack from '~icons/mdi/arrow-back';
@@ -15,6 +16,7 @@
 
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
+	import * as Sheet from '$lib/components/ui/sheet/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 	import { goto } from '$app/navigation';
@@ -26,7 +28,6 @@
 
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
-  const isRouteUpload = $derived(page.route.id!.includes('/upload'));
 
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
 
@@ -51,10 +52,11 @@
         <IconBack class="size-full" />
       </button>
     </span>
+    
     <Separator/>
     <div class="flex flex-col sm:flex-row gap-x-4 gap-y-1
-              *:flex *:justify-between
-              [&>*>h4]:font-normal [&>*>h4]:text-foreground/85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
+                *:flex *:justify-between
+                [&>*>h4]:font-normal [&>*>h4]:text-foreground/85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
       <span class="flex-3/5 tracking-tight">
         <h4>TestID: {activeTestInstance.test_id}</h4>
         <h4>
@@ -74,6 +76,7 @@
         <h4>SectionID: { activeTestInstance.section_id }</h4>
       </span>
     </div>
+    
     <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
         <a class="button-primary {isRouteItems ? "ring-2 ring-primary-foreground" : ""}"
@@ -85,6 +88,7 @@
           Papers
         </a>
       </span>
+      
       <span class="flex flex-row gap-x-1">
         <Dialog.Root>
           <Dialog.Trigger class="button-primary">
@@ -92,13 +96,16 @@
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
-        <a class="button-primary {isRouteUpload ? "ring-2 ring-primary-foreground/80" : ""}"
-            href="/instances/{data.test_id}/upload">
-          <IconUpload class="size-6"/>
-        </a>
+        <Sheet.Root>
+          <Sheet.Trigger class="button-primary">
+            <IconUpload class="size-6"/>
+          </Sheet.Trigger>
+          <BulkUpload test_instance={activeTestInstance}/>
+        </Sheet.Root>
       </span>
     </div>
   </nav>
+  
   <div class="container -mt-4">
     {#if navigating.to}
       <Skeleton class="grayscale-50 w-full h-64 rounded-none"/>

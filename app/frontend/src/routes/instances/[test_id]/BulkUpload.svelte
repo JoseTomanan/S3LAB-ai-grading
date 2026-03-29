@@ -1,6 +1,7 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
-  let { data } = $props();
+  
+  let { test_instance } = $props<{test_instance: TestInstance}>();
 
   import { onMount } from 'svelte';
 
@@ -29,12 +30,13 @@
   import IconFlipVertically from "~icons/mdi/flip-vertical";
 
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import { Separator } from '$lib/components/ui/separator/index.ts';
   import BulkUploadRename from './BulkUploadRename.svelte';
-  import type { FileRecord, Student } from '$lib/index.ts';
+  import type { FileRecord, Student, TestInstance } from '$lib/index.ts';
 
   import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import toast from 'svelte-5-french-toast';
@@ -58,7 +60,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${data.test_instance!.section_id}`);
+      const response = await fetch(`${API_URL}/api/sections/${test_instance!.section_id}`);
       const results = await response.json();
       students = results;
     } catch (e) {
@@ -122,7 +124,7 @@
             formData.append('files', r.file);
           }
           const response = await fetch(
-                `${API_URL}/api/student_answers/${data.test_id}/${studentNo}/image_preprocess`,
+                `${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`,
                 { method: "POST", body: formData, }
               );
           console.log(`${studentNo}: ${response.status}`);
@@ -148,7 +150,8 @@
 
 
 
-<div class="space-y-2">
+<Sheet.Content side="right"
+                class="w-95/100 sm:max-w-135 px-2 py-4">
   <h1 class="text-left font-semibold">Bulk upload</h1>
   <Input type="file"
           multiple
@@ -161,8 +164,7 @@
   
   {#if !formFiles || formFiles.length == 0}
     <h6 class="opacity-60 text-left">
-      Uploads will appear here.
-      <br>
+      Uploads will appear here. <br>
       For ease, name by student no, e.g., 202011111.jpeg (single page) 202011111-1.jpeg (multi-page)
     </h6>
   
@@ -179,7 +181,7 @@
         </Button>
       </span>
       
-      <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
+      <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-2 px-2 pt-1 pb-3"
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
         {#each formFileRecords as p}
           {@const supposedId = GET_STUDENT_NO(p.name)}
@@ -191,7 +193,7 @@
             : ""}
 
           <div class="relative flex flex-col justify-end
-                      min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
+                      min-w-7/8">
             <img src={p.url}
                   class="aspect-auto block"
                   alt={p.name} />
@@ -301,4 +303,4 @@
 
     </div>
   {/if}
-</div>
+</Sheet.Content>
