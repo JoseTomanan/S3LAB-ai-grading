@@ -2,7 +2,6 @@
 	const { data } = $props();
 
 	import MdiEdit from "~icons/mdi/edit";
-  import IconBack from "~icons/mdi/arrow-left";
   import IconPlus from "~icons/mdi/plus";
 
 	import type { Student } from '$lib/index.ts';
@@ -18,16 +17,6 @@
 
 
 <div class="container">
-	<span class="flex flex-row space-x-4 mb-4">
-		<a href="/sections">
-			<IconBack class="size-8"/>
-		</a>
-    <span class="*:leading-5">
-      <h1 class="align-left italic">Class List</h1>
-      <h6>SECTION_ID {data.section_id}</h6>
-    </span>
-	</span>
-  
   <div class="space-y-2">
     <Dialog.Root bind:open={isAddDialogOpen}>
       <Dialog.Trigger class="button-outline flex flex-row gap-x-1 justify-center items-center w-full font-medium">
