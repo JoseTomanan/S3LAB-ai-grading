@@ -150,8 +150,9 @@
 </script>
 
 
+
 <Sheet.Content side="right"
-                class="w-95/100 sm:max-w-135">
+                class="w-11/12 sm:max-w-135">
   <Sheet.Header>
     <Sheet.Title>Manually crop image</Sheet.Title>
     <Sheet.Description>
@@ -170,7 +171,7 @@
         <Button variant="outline"
               disabled={!canvasFile || !canvasImageUrl}
               onclick={cropImage}>
-          Crop image
+          Crop
         </Button>
       {:else}
         <Button variant="secondary"
@@ -193,8 +194,7 @@
       </div>
     
     {:else if canvasImageUrl}
-      <div id="canvasArea"
-            class="relative flex justify-center w-auto -mx-2">
+      <div class="relative flex justify-center h-[70dvh] w-auto -mx-1.5">
         <img src={canvasImageUrl}
               use:initCropper={canvasImageUrl}
               alt="cropper_image"
@@ -208,9 +208,9 @@
             src={responseImage} alt="Test item"/>
     
     {:else}
-      <Card class="py-4 border flex flex-col items-center">
-        <MdiUpload class="h-8 w-full opacity-75"/>
-        <p>Upload an image to start cropping.</p>
+      <Card class="py-4 border flex flex-col items-center *:opacity-60">
+        <MdiUpload class="h-8 w-full"/>
+        <h6>Upload an image to start cropping</h6>
       </Card>
     {/if}
   </div>
