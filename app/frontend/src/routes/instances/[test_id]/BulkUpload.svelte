@@ -151,112 +151,107 @@
 
 
 <Sheet.Content side="right"
-                class="w-95/100 sm:max-w-135 px-2 py-4">
+                class="w-11/12 sm:max-w-135 px-2 py-4">
   <h1 class="text-left font-semibold">Bulk upload</h1>
-  <Input type="file"
-          multiple
-          accept="image/*"
-          bind:files={formFiles}
-          onchange={handleFiles}
-          disabled={isOperationStarted}
-      />
-  <Separator/>
+  <div class="flex flex-row gap-x-1">
+    <Input type="file"
+            multiple
+            accept="image/*"
+            bind:files={formFiles}
+            onchange={handleFiles}
+            disabled={isOperationStarted}
+        />
+    <Button variant="secondary"
+            disabled={!formFiles || isOperationStarted}
+            onclick={bulkUpload}>
+      Send
+      <IconSend class="size-4" />
+    </Button>
+  </div>
   
   {#if !formFiles || formFiles.length == 0}
+    <Separator />
     <h6 class="opacity-60 text-left">
       Uploads will appear here. <br>
       For ease, name by student no, e.g., 202011111.jpeg (single page) 202011111-1.jpeg (multi-page)
     </h6>
   
   {:else if !isOperationStarted}
-    <div class="space-y-1">
-      <span class="flex flex-row justify-between items-center">
-        <h5>
-          Uploaded {formFileRecords.length} images
-        </h5>
-        <Button variant="secondary"
-                  onclick={bulkUpload}>
-          Send requests
-          <IconSend class="size-4" />
-        </Button>
-      </span>
-      
-      <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-2 px-2 pt-1 pb-3"
-              style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
-        {#each formFileRecords as p}
-          {@const supposedId = GET_STUDENT_NO(p.name)}
-          {@const nameOnly = GET_NAME_ONLY(p.name)}
-          {@const fileExtension = GET_EXTENSION_ONLY(p.name)}
-          {@const dashIdx = nameOnly.lastIndexOf('-')}
-          {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1))
-            ? nameOnly.substring(dashIdx)
-            : ""}
+    <div id="scrollable-area"
+          class="flex flex-col items-center max-w-fit overflow-scroll
+                gap-y-1.5 -mr-1.5 pr-1.5">
+      {#each formFileRecords as p}
+        {@const supposedId = GET_STUDENT_NO(p.name)}
+        {@const nameOnly = GET_NAME_ONLY(p.name)}
+        {@const fileExtension = GET_EXTENSION_ONLY(p.name)}
+        {@const dashIdx = nameOnly.lastIndexOf('-')}
+        {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1))
+          ? nameOnly.substring(dashIdx)
+          : ""}
 
-          <div class="relative flex flex-col justify-end
-                      min-w-7/8">
-            <img src={p.url}
-                  class="aspect-auto block"
-                  alt={p.name} />
-            <div class="absolute top-2 left-2 space-y-1">
-              <Dialog.Root>
-                <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
-                                    hover:underline cursor-pointer">
-                  {#if IS_IN_STUDENTS(supposedId)}
-                    <IconPerson class="size-4"/>
-                  {:else}
-                    <IconNotFound class="size-4" />
-                  {/if}
-                  <h4 class="text-left w-fit truncate">
-                    {nameOnly ? nameOnly : "Add student no..."}
-                  </h4>
-                </Dialog.Trigger>
-                <BulkUploadRename filename={supposedId}
-                          onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
-              </Dialog.Root>
-              
-              {#if IS_FIRST_PAGE(p.name)}
-              <span class="bg-white/80 backdrop-blur-md">
-                <input type="number"
-                        class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        placeholder="# of box..."
-                        value={numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
-                        oninput={(e: Event) => {
-                          const val = (e.target as HTMLInputElement).value;
-                          numBoxesPerStudent = new Map(numBoxesPerStudent.set(
-                            GET_STUDENT_NO(p.name),
-                            val ? parseInt(val) : null
-                          ));
-                        }}
-                    />
-              </span>
-              {/if}
-            </div>
+        <div class="relative flex flex-col justify-end">
+          <img src={p.url}
+                class="aspect-auto block"
+                alt={p.name} />
+          <div class="absolute top-2 left-2 space-y-1">
+            <Dialog.Root>
+              <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
+                                  hover:underline cursor-pointer">
+                {#if IS_IN_STUDENTS(supposedId)}
+                  <IconPerson class="size-4"/>
+                {:else}
+                  <IconNotFound class="size-4" />
+                {/if}
+                <h4 class="text-left w-fit truncate">
+                  {nameOnly ? nameOnly : "Add student no..."}
+                </h4>
+              </Dialog.Trigger>
+              <BulkUploadRename filename={supposedId}
+                        onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
+            </Dialog.Root>
             
-            <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
-                      class="button-outline">
-                <IconRotateCW />
-              </button>
-              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
-                      class="button-outline">
-                <IconRotateCCW />
-              </button>
-              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
-                      class="button-outline">
-                <IconFlipHorizontally />
-              </button>
-              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
-                      class="button-outline">
-                <IconFlipVertically />
-              </button>
+            {#if IS_FIRST_PAGE(p.name)}
+            <span class="bg-white/80 backdrop-blur-md">
+              <input type="number"
+                      class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      placeholder="# of box..."
+                      value={numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
+                      oninput={(e: Event) => {
+                        const val = (e.target as HTMLInputElement).value;
+                        numBoxesPerStudent = new Map(numBoxesPerStudent.set(
+                          GET_STUDENT_NO(p.name),
+                          val ? parseInt(val) : null
+                        ));
+                      }}
+                  />
             </span>
+            {/if}
           </div>
-        {/each}
-      </div>
-      <Separator/>
+          
+          <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
+            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
+                    class="button-outline">
+              <IconRotateCW />
+            </button>
+            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
+                    class="button-outline">
+              <IconRotateCCW />
+            </button>
+            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
+                    class="button-outline">
+              <IconFlipHorizontally />
+            </button>
+            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
+                    class="button-outline">
+              <IconFlipVertically />
+            </button>
+          </span>
+        </div>
+      {/each}
     </div>
   
   {:else}
+    <Separator />
     <div class="flex flex-col space-y-1">
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
@@ -266,7 +261,7 @@
         <span class="flex flex-row justify-start items-center gap-x-2
                       [&>span]:flex [&>span]:justify-center [&>span]:items-center [&>span]:size-5
                       [&>h4]:truncate [&>h4]:w-fit
-                      [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2">
+                      [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2 [&>i]:truncate">
           <!-- <span> -->
             {#if p.statusCode == 200 || p.statusCode == 202}
               <span> <IconAccepted/> </span>
@@ -304,3 +299,12 @@
     </div>
   {/if}
 </Sheet.Content>
+
+
+
+<style>
+  #scrollable-area {
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--chart-3) transparent;
+  }
+</style>
