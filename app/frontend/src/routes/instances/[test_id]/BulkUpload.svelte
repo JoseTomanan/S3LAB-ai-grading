@@ -41,6 +41,7 @@
   import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import toast from 'svelte-5-french-toast';
 	import { isNotPngOrJpg } from '$lib/utils.ts';
+  import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   
   let isOperationStarted: boolean = $state(false);
   let formFiles: FileList | undefined = $state();
@@ -60,9 +61,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${test_instance!.section_id}`);
-      const results = await response.json();
-      students = results;
+      students = await api<Student[]>(`${API_URL}/api/sections/${test_instance!.section_id}`);
     } catch (e) {
       console.log("Failed to fetch students for this section.");
     }
@@ -123,24 +122,20 @@
           for (const r of records) {
             formData.append('files', r.file);
           }
-          const response = await fetch(
-                `${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`,
-                { method: "POST", body: formData, }
-              );
-          console.log(`${studentNo}: ${response.status}`);
-          if (!response.ok) {
-            const body = await response.json().catch(() => null);
-            const detail: string = typeof body?.detail === 'string' ? body.detail : JSON.stringify(body?.detail);
-            records.forEach(r => { r.statusCode = response.status; r.statusDetail = detail; });
-          } else {
-            records.forEach(r => r.statusCode = response.status);
+          try {
+            await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`, formData);
+            records.forEach(r => r.statusCode = 200);
+          } catch (e) {
+            if (e instanceof ApiError) {
+              records.forEach(r => { r.statusCode = e.status; r.statusDetail = e.detail; });
+            } else {
+              records.forEach(r => {
+                r.statusCode = 500;
+                r.statusDetail = "Unexpectedly caught server-side error"
+              });
+            }
           }
-        })().catch(() => {
-          records.forEach(r => {
-            r.statusCode = 500;
-            r.statusDetail = "Unexpectedly caught server-side error"
-          });
-        });
+        })();
       }
     } catch (e) {
       console.log("Bulk upload operation failed:\n"+e);
