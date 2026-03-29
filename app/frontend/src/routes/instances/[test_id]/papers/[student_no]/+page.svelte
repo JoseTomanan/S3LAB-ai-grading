@@ -203,7 +203,7 @@
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
-                  <h4 class="font-semibold">
+                  <h4 class="font-semibold text-foreground/60">
                     {isEvalNotError
                       ? GET_SCORES(studentItem)[index] || "—"
                       : "⚠️"}
