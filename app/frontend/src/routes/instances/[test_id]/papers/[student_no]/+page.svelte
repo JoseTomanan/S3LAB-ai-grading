@@ -48,6 +48,7 @@
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
   let pollingItemIds: Set<number> = $state(new Set());
   let cropDialogOpen: Map<number, boolean> = $state(new Map());
+  let zoomLevel: number = $state(1);
 
   const cropPoller = createPoller(async () => {
     const result = await api<StudentAnswer[]>(
@@ -140,15 +141,31 @@
                   class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
           </Label>
-          <!-- TODO: Click to open image in a dialog -->
           <span class="w-5/6 sm:w-full">
             {#if studentItem.image_directory == ""}
               <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
-              <!-- FIXME: not working in production (but working in dev somehow??) -->
-              <img class="max-h-70 w-auto mx-auto"
-                    src={`${API_URL}${studentItem.image_directory}`}
-                    alt={studentItem.label}/>
+            <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
+              <Dialog.Trigger class="w-full cursor-zoom-in">
+                <!-- FIXME: not working in production (but working in dev somehow??) -->
+                <img class="max-h-70 w-auto mx-auto"
+                        src={`${API_URL}${studentItem.image_directory}`}
+                        alt={studentItem.label}/>
+                </Dialog.Trigger>
+                <Dialog.Content class="sm:max-w-[90vw] p-2 gap-1">
+                  <Dialog.Title class="sr-only">{studentItem.label}</Dialog.Title>
+                  <div class="flex max-h-[85vh] justify-center overflow-auto"
+                       onwheel={(e) => {
+                         e.preventDefault();
+                         zoomLevel = Math.min(5, Math.max(0.5, zoomLevel - e.deltaY * 0.001));
+                       }}>
+                    <img style={`zoom: ${zoomLevel};`}
+                         class="block"
+                         src={`${API_URL}${studentItem.image_directory}`}
+                         alt={studentItem.label}/>
+                  </div>
+                </Dialog.Content>
+              </Dialog.Root>
             {/if}
           </span>
         </span>
