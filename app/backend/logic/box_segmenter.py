@@ -136,8 +136,7 @@ class BoxSegmenter(DocumentScanner):
         """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
         array = self._decode_bytes(image_bytes)
         img_contrasted = self._adjust_contrast(array, amount=1.3)
-        img_brightened = self._brighten(img_contrasted, amount=0.05)
-        return self._encode_to_bytes(img_brightened)
+        return self._encode_to_bytes(img_contrasted)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
