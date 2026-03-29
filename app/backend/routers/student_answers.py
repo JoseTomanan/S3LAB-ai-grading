@@ -582,7 +582,10 @@ def _label_save_boxes(
             print(f"BACKEND:\tFailed to extract item number for box {index}: {e}")
             return (index, "NONE")
 
-    ai_results: list[tuple[int, str]] = [None] * len(processed_list)
+    if not processed_list:
+        return []
+
+    ai_results: list[tuple[int, str] | None] = [None] * len(processed_list)
     with ThreadPoolExecutor(max_workers=min(len(processed_list), 10)) as executor:
         futures = {
             executor.submit(_classify_box, i, img_bytes): i

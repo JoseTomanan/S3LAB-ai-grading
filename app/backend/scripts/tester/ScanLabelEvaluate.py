@@ -67,5 +67,5 @@ if __name__ == "__main__":
             else:
                 res = "NONE"
         
-            print("INFO:\t", res)
+            print(f"BACKEND:\t{res}")
         print("================================")

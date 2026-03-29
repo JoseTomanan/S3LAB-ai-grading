@@ -67,15 +67,14 @@
   }
 
   function handleFileUpload(e: Event) {
-    if (!canvasFile || isNotPngOrJpg(canvasFile)) {
+    const target = e.target as HTMLInputElement;
+    if (!target.files || isNotPngOrJpg(target.files)) {
       toast.error("Please upload only .png, .jpeg, or .jpg");
       canvasFile = undefined;
       return;
     }
-    
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
 
+    const file = target.files[0];
     if (file) {
       if (croppedPreviewUrl) {
         URL.revokeObjectURL(croppedPreviewUrl);

@@ -66,6 +66,7 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                         if len(parts) == len(batch) and all(_VALID_R_Q_RESPONSE(p) for p in parts):
                             all_parts.extend(parts)
                             break
+                    print("BACKEND:\tRetrying rubric eval...")
 
             ai_evaluation = ";".join(all_parts) + ";"
     
@@ -75,6 +76,7 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                 response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
+                print("BACKEND:\tRetrying answer eval...")
             
             ai_evaluation = response
 
