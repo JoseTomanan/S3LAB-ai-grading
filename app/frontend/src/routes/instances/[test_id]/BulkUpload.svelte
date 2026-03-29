@@ -178,8 +178,8 @@
   
   {:else if !isOperationStarted}
     <div id="scrollable-area"
-          class="flex flex-col items-center max-w-fit overflow-scroll
-                gap-y-1.5 -mr-1.5 pr-1.5">
+          class="flex flex-col items-center max-w-fit overflow-scroll gap-y-1.5
+                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-foreground/40">
       {#each formFileRecords as p}
         {@const supposedId = GET_STUDENT_NO(p.name)}
         {@const nameOnly = GET_NAME_ONLY(p.name)}
@@ -211,20 +211,24 @@
             </Dialog.Root>
             
             {#if IS_FIRST_PAGE(p.name)}
-            <span class="bg-white/80 backdrop-blur-md">
-              <input type="number"
-                      class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      placeholder="# of box..."
-                      value={numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
-                      oninput={(e: Event) => {
-                        const val = (e.target as HTMLInputElement).value;
-                        numBoxesPerStudent = new Map(numBoxesPerStudent.set(
-                          GET_STUDENT_NO(p.name),
-                          val ? parseInt(val) : null
-                        ));
-                      }}
-                  />
-            </span>
+              {@const oninput = (e: Event) => {
+                  const val = (e.target as HTMLInputElement).value;
+                  numBoxesPerStudent = new Map(numBoxesPerStudent.set(
+                    GET_STUDENT_NO(p.name),
+                    val ? parseInt(val) : null
+                  ));
+                }}
+              {@const value = numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
+              <span class="bg-white/80 backdrop-blur-md">
+                <input type="number"
+                        class="w-20 px-1.5 py-0 leading-none bg-transparent shadow-none
+                                [appearance:textfield]
+                                [&::-webkit-inner-spin-button]:appearance-none
+                                [&::-webkit-outer-spin-button]:appearance-none"
+                        placeholder="# of box"
+                        {value} {oninput}
+                      />
+              </span>
             {/if}
           </div>
           
