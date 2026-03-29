@@ -55,11 +55,11 @@
     <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
         class="flex-1 button-outline subcontainer
                 flex flex-row justify-between items-center">
-      <h4 class="truncate">
-        {testPaper.student_no}
-        <span class="font-normal tracking-tight">&middot; {testPaper.name}</span>
+      <h4 class="truncate space-x-1">
+        <span class="tracking-tighter">{testPaper.student_no}</span>
+        <span class="font-normal">{testPaper.name}</span>
       </h4>
-      <h5 class="flex flex-row gap-x-1.5 items-center tracking-tight">
+      <h5 class="flex flex-row gap-x-1.5 items-center tracking-tighter">
         {testPaper.total_score}
         {#if testPaper.is_done_rendering}
           <MdiPaperCheckOutline class="size-5"/>
