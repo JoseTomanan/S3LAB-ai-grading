@@ -148,7 +148,7 @@
               <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
                 <Dialog.Trigger class="w-full cursor-zoom-in">
                   <!-- FIXME: Not working in production. Remove this when validated that it's good -->
-                  <img class="max-h-70 w-auto mx-auto"
+                  <enhanced:img class="max-h-70 w-auto mx-auto"
                         src={`${API_URL}${studentItem.image_directory}`}
                         alt={studentItem.label}/>
                 </Dialog.Trigger>
@@ -159,7 +159,7 @@
                          e.preventDefault();
                          zoomLevel = Math.min(5, Math.max(0.5, zoomLevel - e.deltaY * 0.001));
                        }}>
-                    <img style={`zoom: ${zoomLevel};`}
+                    <enhanced:img style={`zoom: ${zoomLevel};`}
                          class="block"
                          src={`${API_URL}${studentItem.image_directory}`}
                          alt={studentItem.label}/>

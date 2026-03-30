@@ -60,7 +60,7 @@
                 />
       </div>
       
-      <img class="block sm:max-w-3/4 md:max-w-2/3"
+      <enhanced:img class="block sm:max-w-3/4 md:max-w-2/3"
             src="{API_URL}{supposedScan.image_directory}"
             alt={supposedScan.item_number}
             />
