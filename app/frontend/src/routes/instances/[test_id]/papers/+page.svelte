@@ -7,12 +7,17 @@
 
   import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
   import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
+  import IconPlus from '~icons/mdi/plus';
 
   import type { GetEvaluationsResponse } from '$lib/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+  import * as Dialog from '$lib/components/ui/dialog/index.ts';
   import { api } from '$lib/utils/api.ts';
   import { createPoller } from '$lib/utils/poller.ts';
 
+	import AddNewStudent from '../../../sections/[section_id]/AddNewStudent.svelte';
+
+  let isAddStudentDialogOpen: boolean = $state(false);
   let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);
   $effect(() => {
     perStudentStatuses = data.statuses;
@@ -37,13 +42,22 @@
 </script>
 
 
+
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
   <h1 class="text-left font-semibold w-full flex justify-between items-center">
     Test papers
     {#if isPolling}
-      <Spinner class="size-6 text-chart-3"/>
+      <Spinner class="size-8 text-chart-3"/>
     {/if}
+    <Dialog.Root bind:open={isAddStudentDialogOpen}>
+      <Dialog.Trigger class="button-secondary">
+        <IconPlus class="size-5"/>
+      </Dialog.Trigger>
+      <AddNewStudent bind:isAddDialogOpen={isAddStudentDialogOpen}
+                      section_id={data.test_instance?.section_id}/>
+    </Dialog.Root>
   </h1>
+  
   {#if perStudentStatuses.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
 
