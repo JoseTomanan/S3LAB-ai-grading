@@ -17,7 +17,7 @@
   $effect(() => {
     perStudentStatuses = data.statuses;
   });
-  let isPolling = $derived(perStudentStatuses.some(s => !s.is_done_rendering));
+  let isPolling = $derived(perStudentStatuses.some(s => s.has_any_answer && !s.is_done_rendering));
 
   const poller = createPoller(async () => {
     const result = await api<{ statuses: GetEvaluationsResponse[] }>(
@@ -40,12 +40,9 @@
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
   <h1 class="text-left font-semibold w-full flex justify-between items-center gap-x-2">
     Test papers
-    <!-- Removed for now because not working properly. FIXME: fix polling stuffs -->
-    <!--
     {#if isPolling}
-      <Spinner class="size-4 text-muted-foreground/80"/>
+      <Spinner class="size-6 text-chart-3"/>
     {/if}
-    -->
   </h1>
   {#if perStudentStatuses.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
