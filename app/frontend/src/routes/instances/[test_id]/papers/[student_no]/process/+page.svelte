@@ -33,6 +33,8 @@
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
   
+  const defaultNumBoxes = data.test_items?.length ?? 2;
+
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
   let paramScannedAlready: boolean = $state(false);
@@ -85,7 +87,7 @@
     }
 
     try {
-      const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}&is_scanned_already=${paramScannedAlready}`;
+      const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? defaultNumBoxes}&is_scanned_already=${paramScannedAlready}`;
       const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(url, formData);
       supposedScans = (result.boxes ?? [])
                         .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
@@ -191,16 +193,18 @@
     
     <div class="subcontainer flex flex-row gap-x-4 gap-y-2">
       <Input id="numBoxes" type="number"
-              class="flex-1 xs:flex-2"
-              placeholder="Number of boxes (default: 2)..."
+              class="flex-1"
+              placeholder="# of boxes (default {defaultNumBoxes})..."
               disabled={isAskingForValidation}
               bind:value={paramNumBoxes}
           />
       
-      <span class="flex-1 flex flex-row gap-x-2 items-center">
-        <Switch id="isAlreadyScanned" bind:checked={paramScannedAlready}/>
+      <span class="w-fit flex flex-row gap-x-2 items-center">
+        <Switch id="isAlreadyScanned"
+                bind:checked={paramScannedAlready}
+              />
         <Label for="isAlreadyScanned">
-          Scanned already
+          Pre-scanned
         </Label>
       </span>
     </div>
