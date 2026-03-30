@@ -9,6 +9,7 @@
   import { dataUrlToFile, isNotPngOrJpg } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
+  import IconUpload from "~icons/mdi/paperclip";
   import IconCamera from "~icons/mdi/camera";
   import IconImagePreview from "~icons/mdi/image";
   import IconRotateCW from "~icons/mdi/rotate-clockwise";
@@ -164,7 +165,8 @@
     <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
               class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
-        <span class="shrink-0 whitespace-nowrap text-sm pl-1">
+        <IconUpload/>
+        <span class="shrink-0 whitespace-nowrap text-sm">
           {formFileRecords.length > 0
             ? `Uploaded ${formFileRecords.length} image(s):`
             : "Choose image(s)..." }
