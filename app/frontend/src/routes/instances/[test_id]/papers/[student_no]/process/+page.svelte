@@ -272,7 +272,7 @@
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>
-      <Dialog.Trigger class="button-secondary text-sm"
+      <Dialog.Trigger class="button-secondary text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
                       disabled={isCommitmentOngoing}>
         Open segmentation results
       </Dialog.Trigger>

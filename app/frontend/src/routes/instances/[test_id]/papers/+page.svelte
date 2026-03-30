@@ -45,9 +45,6 @@
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
   <h1 class="text-left font-semibold w-full flex justify-between items-center">
     Test papers
-    {#if isPolling}
-      <Spinner class="size-8 text-chart-3"/>
-    {/if}
     <Dialog.Root bind:open={isAddStudentDialogOpen}>
       <Dialog.Trigger class="button-secondary">
         <IconPlus class="size-5"/>
@@ -71,7 +68,9 @@
       </h4>
       <h5 class="flex flex-row gap-x-1.5 items-center tracking-tighter">
         {testPaper.total_score}
-        {#if testPaper.is_done_rendering}
+        {#if testPaper.has_any_answer && !testPaper.is_done_rendering}
+          <Spinner class="size-5 text-chart-3"/>
+        {:else if testPaper.is_done_rendering}
           <MdiPaperCheckOutline class="size-5"/>
         {:else}
           <MdiPaperAlertOutline class="size-5"/>
