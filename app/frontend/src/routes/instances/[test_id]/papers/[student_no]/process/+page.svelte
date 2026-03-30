@@ -216,7 +216,7 @@
             onclick={sendImageForValidation}
             disabled={formFileRecords.length === 0 || isOperationOngoing}>
       {isOperationOngoing
-        ? "Sending, do not quit..."
+        ? "Processing, do not quit..."
         : "Send for processing"}
       {#if isOperationOngoing}
         <Spinner />
@@ -268,7 +268,8 @@
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>
-      <Dialog.Trigger class="button-secondary text-sm">
+      <Dialog.Trigger class="button-secondary text-sm"
+                      disabled={isCommitmentOngoing}>
         Open segmentation results
       </Dialog.Trigger>
       <ReviewForCommit supposedScans={supposedScans}
@@ -285,7 +286,7 @@
         Answers are being evaluated in the background. You may go back to the Papers screen now.
       </div>
     {:else}
-      <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
+      <h6>Note that segmentation results are ephemeral, and switching out of this screen will discard them.</h6>
     {/if}
   {/if}
   </div>

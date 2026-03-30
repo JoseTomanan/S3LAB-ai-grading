@@ -23,7 +23,6 @@
 
 
 <Dialog.Content showCloseButton={false}
-                onInteractOutside={(e) => e.preventDefault()}
                 onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
     <button class="button-secondary flex-1 text-sm {isButtonDisabled ? "opacity-50" : ""}"
