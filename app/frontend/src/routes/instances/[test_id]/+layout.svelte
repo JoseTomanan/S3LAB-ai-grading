@@ -45,7 +45,7 @@
     <span class="flex flex-row items-center justify-between">
       <a href="/instances"
           class="bg-white shadow-sm rounded-full">
-        <IconHome class="size-8 opacity-90 text-primary foregroundize" />
+        <IconHome class="size-8 text-primary foregroundize" />
       </a>
       <h1>{ activeTestInstance.name }</h1>
       <button class="p-0 size-8 cursor-pointer"
