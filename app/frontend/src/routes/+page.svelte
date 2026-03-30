@@ -1,7 +1,6 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
-
   import toast from "svelte-5-french-toast";
   
   import IconPaper from '~icons/mdi/paper';
@@ -14,7 +13,7 @@
   <div class="relative w-full py-8 flex flex-col items-center justify-center gap-y-3">
     <span class="absolute inset-0 m-auto size-28 object-contain -z-50 block left-0 right-0 top-0 bottom-0">
       <span class="slow-spin bg-accent/40 rounded-full">
-        <img src={logo}
+        <enhanced:img src={logo}
               alt="Llama mascot"
               class="size-28"
           />
