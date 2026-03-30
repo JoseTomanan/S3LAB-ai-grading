@@ -79,11 +79,11 @@
     
     <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
-        <a class="button-primary {isRouteItems ? "ring-2 ring-primary-foreground" : ""}"
+        <a class="button-primary ring-chart-3 {isRouteItems ? "ring-2" : ""}"
             href="/instances/{data.test_id}/items">
           Items
         </a>
-        <a class="button-primary {isRoutePapers ? "ring-2 ring-primary-foreground" : ""}"
+        <a class="button-primary ring-chart-3 {isRoutePapers ? "ring-2" : ""}"
             href="/instances/{data.test_id}/papers">
           Papers
         </a>
