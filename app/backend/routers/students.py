@@ -3,7 +3,6 @@ from sqlmodel import Session, delete, select
 
 from models import *
 from schemas import *
-
 from core.database import get_session
 
 
