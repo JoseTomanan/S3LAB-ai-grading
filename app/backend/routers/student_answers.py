@@ -1,8 +1,7 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends, File, UploadFile, Form, Query
 from sqlmodel import Session, select
 from typing import List, Optional
 import uuid
-import json
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -21,7 +20,7 @@ TEMP_DIR = Path("static/images")
 
 # ==============================
 #region Endpoints
-@router.post("/{test_id}/{student_no}/image_preprocess")
+@router.post("/{test_id}/{student_no}/image_preprocess", response_model=ImagePreprocessResponse, status_code=status.HTTP_202_ACCEPTED)
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
@@ -50,17 +49,13 @@ async def process_student_answer_image(
     answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
-    return Response(
-            status_code=status.HTTP_202_ACCEPTED,
-            content=json.dumps({
-                "num_boxes": len(processed_list),
-                "boxes": boxes_info,
-            }),
-            media_type="application/json"
+    return ImagePreprocessResponse(
+            num_boxes=len(processed_list),
+            boxes=[BoxesItem(**b) for b in boxes_info],
             )
 
 
-@router.post("/{test_id}/{student_no}/label_save_boxes")
+@router.post("/{test_id}/{student_no}/label_save_boxes", response_model=LabelSaveBoxesResponse)
 async def scan_then_label_save_boxes(
                 test_id: str,
                 student_no: str,
@@ -85,10 +80,10 @@ async def scan_then_label_save_boxes(
     print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
 
-    return {
-            "num_boxes": len(processed_list),
-            "boxes": boxes_info,
-            }
+    return LabelSaveBoxesResponse(
+            num_boxes=len(processed_list),
+            boxes=[BoxesItem(**b) for b in boxes_info],
+            )
 
 
 @router.post("/{test_id}/{student_no}/commit_boxes")
@@ -129,7 +124,7 @@ async def commit_boxes_endpoint(
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
-@router.patch("/{test_id}/{student_no}/{item_id}")
+@router.patch("/{test_id}/{student_no}/{item_id}", response_model=UpdateSegmentationResponse, status_code=status.HTTP_202_ACCEPTED)
 async def update_answer_segmentation(
             test_id: str,
             student_no: str,
@@ -183,14 +178,10 @@ async def update_answer_segmentation(
     answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
-    return Response(
-            status_code=status.HTTP_202_ACCEPTED,
-            content=json.dumps({"image_directory": image_dir}),
-            media_type="application/json"
-            )
+    return UpdateSegmentationResponse(image_directory=image_dir)
 
 
-@router.get("/{test_id}/statuses")
+@router.get("/{test_id}/statuses", response_model=TestStatusesResponse)
 def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session)):
     """Return per-student rendering status for a test instance"""
     instance = session.get(TestInstance, test_id)
@@ -248,20 +239,17 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 total_score += _parsed_scores[0]
                 max_score += _parsed_scores[1]
 
-        statuses.append({
-                "student_no": student.student_no,
-                "name": student.name,
-                "is_done_rendering": all_items_processed and has_any_answer,
-                "total_score": f"{total_score}/{max_score}",
-                })
-    
-    return {
-            "test_id": test_id,
-            "statuses": statuses
-            }
+        statuses.append(StudentStatusItem(
+                student_no=student.student_no,
+                name=student.name,
+                is_done_rendering=all_items_processed and has_any_answer,
+                total_score=f"{total_score}/{max_score}",
+                ))
+
+    return TestStatusesResponse(test_id=test_id, statuses=statuses)
 
 
-@router.get("/{test_id}/results")
+@router.get("/{test_id}/results", response_model=TestResultsResponse)
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
     """Return AI evaluations per contract"""
     instance = session.get(TestInstance, test_id)
@@ -289,35 +277,32 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
             answers = session.exec(
                         select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
                         ).all()
-            
+
             for answer in answers:
                 respectiveItem = session.exec(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
                 assert isinstance(respectiveItem, TestItem)
 
-                ai_evaluations.append({
-                            "item_id": answer.item_id,
-                            "answer_id": answer.answer_id,
-                            "label": respectiveItem.label,
-                            "question": respectiveItem.question,
-                            "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
-                            "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-                            })
-        
-        student_stores.append({
-                "student_no": student.student_no,
-                "name": student.name,
-                "evaluations": ai_evaluations
-                })
-    
-    return {
-            "test_id": test_id,
-            "students": student_stores
-            }
+                ai_evaluations.append(AIEvaluationItem(
+                            item_id=answer.item_id,
+                            answer_id=answer.answer_id,
+                            label=respectiveItem.label,
+                            question=respectiveItem.question,
+                            expected_answer_rubric_questions=respectiveItem.expected_answer_rubric_questions,
+                            ai_evaluation=answer.ai_evaluation if answer.ai_evaluation else "",
+                            ))
+
+        student_stores.append(StudentEvaluationsStore(
+                student_no=student.student_no,
+                name=student.name,
+                evaluations=ai_evaluations,
+                ))
+
+    return TestResultsResponse(test_id=test_id, students=student_stores)
 
 
-@router.get("/{test_id}/results/{student_no}")
+@router.get("/{test_id}/results/{student_no}", response_model=StudentResultsResponse)
 def get_ai_evaluation_results_per_student(
                 test_id: str,
                 student_no: str,
@@ -378,22 +363,22 @@ def get_ai_evaluation_results_per_student(
                                 answer.ai_evaluation
                                 )
             
-            ai_evaluations.append({
-                        "item_id": answer.item_id,
-                        "answer_id": answer.answer_id,
-                        "label": respectiveItem.label,
-                        "question": respectiveItem.question,
-                        "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
-                        "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else "",
-                        "scores": scores,
-                        })
-    
-    return {
-        "test_id": test_id,
-        "student_no": student_no,
-        "name": student.name,
-        "evaluations": ai_evaluations
-        }
+            ai_evaluations.append(AIEvaluationItemWithScores(
+                        item_id=answer.item_id,
+                        answer_id=answer.answer_id,
+                        label=respectiveItem.label,
+                        question=respectiveItem.question,
+                        expected_answer_rubric_questions=respectiveItem.expected_answer_rubric_questions,
+                        ai_evaluation=answer.ai_evaluation if answer.ai_evaluation else "",
+                        scores=scores,
+                        ))
+
+    return StudentResultsResponse(
+        test_id=test_id,
+        student_no=student_no,
+        name=student.name,
+        evaluations=ai_evaluations,
+        )
 
 
 @router.get("/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
