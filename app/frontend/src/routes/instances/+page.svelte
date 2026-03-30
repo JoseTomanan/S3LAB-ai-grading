@@ -4,6 +4,8 @@
   import MdiPaperAddOutline from '~icons/mdi/paper-add';
   import IconHome from '~icons/mdi/home-outline';
   import IconSections from '~icons/mdi/people';
+  import IconDone from '~icons/mdi/checkbox-marked-circle';
+  import IconNotDone from '~icons/mdi/checkbox-blank-circle';
 
   import type { TestInstance } from '$lib/index.ts';
 
@@ -21,8 +23,8 @@
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
     <span class="flex flex-row gap-x-2">
-      <a href="/">
-        <IconHome class="size-8"/>
+      <a href="/" class="bg-white shadow-sm rounded-full">
+        <IconHome class="size-8 text-primary foregroundize" />
       </a>
     </span>
     <h1>Test instances</h1>
@@ -51,10 +53,16 @@
       {#each paginationValues as instance}
         <Card href="/instances/{instance.test_id}/items"
               class="button-outline">
-          <h3 class="flex flex-row items-center gap-1">
+          <h3>
             {instance.name} &middot; {instance.test_id.split("_")[0]}
           </h3>
-          <h5 class="font-normal">
+          <h5 class="font-normal flex flex-row items-center gap-x-2 ml-0.5
+                      *:size-3 *:opacity-60">
+            {#if instance.is_done_rendering}
+              <IconDone/>
+            {:else}
+              <IconNotDone/>
+            {/if}
             Created {new Date(instance.date).toLocaleDateString()}
           </h5>
         </Card>

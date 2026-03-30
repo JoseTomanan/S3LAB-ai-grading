@@ -18,8 +18,8 @@
 
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
-    <a href="/">
-      <IconHome class="size-8"/>
+    <a href="/" class="bg-white shadow-sm rounded-full">
+      <IconHome class="size-8 text-primary foregroundize" />
     </a>
     <h1>Sections</h1>
     <a href="/instances">

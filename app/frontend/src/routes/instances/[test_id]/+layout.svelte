@@ -12,7 +12,7 @@
   import IconBack from '~icons/mdi/arrow-back';
   import IconTable from '~icons/mdi/table';
   import IconUpload from '~icons/mdi/tray-upload';
-  import IconHome from '~icons/mdi/home-outline';
+  import IconHome from '~icons/mdi/home';
 
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
@@ -43,8 +43,9 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
-      <a href="/instances">
-        <IconHome class="size-8 opacity-85" />
+      <a href="/instances"
+          class="bg-white shadow-sm rounded-full">
+        <IconHome class="size-8 opacity-90 text-primary foregroundize" />
       </a>
       <h1>{ activeTestInstance.name }</h1>
       <button class="p-0 size-8 cursor-pointer"
@@ -58,9 +59,9 @@
                 *:flex *:justify-between
                 [&>*>h4]:font-normal [&>*>h4]:text-foreground/85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
       <span class="flex-3/5 tracking-tight">
-        <h4>TestID: {activeTestInstance.test_id}</h4>
+        <h4 class="italic">{activeTestInstance.test_id}</h4>
         <h4>
-          Status:
+          Rendered?
           {activeTestInstance.is_done_rendering 
             ? "☑️" 
             : "✖️" }
@@ -68,7 +69,7 @@
       </span>
       <span class="flex-2/5">
         <h4>
-          Date:
+          Created
           {activeTestInstance.date
             ? new Date(activeTestInstance.date).toLocaleDateString()
             : "" }
