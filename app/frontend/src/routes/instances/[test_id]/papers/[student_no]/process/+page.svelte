@@ -140,6 +140,9 @@
       }
 
     // TODO: handle the otherwise case
+    /* TODO: fix backend side of things to allow incomplete input
+     * (i.e., discard unincluded) 
+     */
     } catch (e) {
       toast.error(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
     } finally {
@@ -232,6 +235,7 @@
         </h6>
       
       {:else}
+        <!-- TODO: Add function to disregard individual item (i.e. just evaluate the rest) -->
         <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 pt-1 pb-3
                     -mx-6 px-6 md:-mx-18 md:px-18 "
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
@@ -278,16 +282,12 @@
                         onReject={() => validateAndCommit(false)}
                         />
     </Dialog.Root>
-
-    <!-- Polling is not working properly hence temporarily removed. FIXME: Bring back polling -->
-    {#if isCommitmentOngoing}
-      <div class="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
-        <!-- <Spinner class="size-4"/> -->
-        Answers are being evaluated in the background. You may go back to the Papers screen now.
-      </div>
-    {:else}
-      <h6>Note that segmentation results are ephemeral, and switching out of this screen will discard them.</h6>
-    {/if}
+    <h6>
+      {isCommitmentOngoing
+        ? "Answers are being evaluated in the background. You may go back to the Papers screen now."
+        : "Note that segmentation results are ephemeral, and switching out of this screen will discard them."}
+    </h6>
+  
   {/if}
   </div>
 </div>
