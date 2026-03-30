@@ -1,15 +1,14 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from pathlib import Path
 
 from core.database import create_db_and_tables, get_session
 from models import *
 from schemas import *
-
 from logic.utility import *
-
 from routers import sections, students, test_instances, test_items, student_answers
 
 
@@ -24,10 +23,8 @@ app = FastAPI(
 
 app.add_middleware(
         CORSMiddleware,
+        ## TODO: Replace allow_origins with non-wildcard
         allow_origins=["*"],
-        # The allow_credentials parameter controls whether browsers are allowed to send credentials 
-        # (such as cookies, authorization headers, or TLS client certificates) along with cross-origin requests.
-        # Here, we set it to False so that credentials will not be accepted in CORS requests.
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -46,6 +43,12 @@ app.include_router(sections.router, prefix="/api/sections", tags=["Sections"])
 
 
 #region Endpoints
+@app.get("/health")
+def health_check():
+    """Health check."""
+    return {"status": "ok"}
+
+
 @app.get("/api/temp/{filename}")
 async def get_processed_image(filename: str):
     """Serve processed images from temp directory"""
