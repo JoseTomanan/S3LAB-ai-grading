@@ -41,16 +41,18 @@
       <a href="/sections" class="button-outline">
         <IconSection />
         <b>Sections</b>
-        <p>Manage student rosters</p>
+        <p>Manage class list</p>
       </a>
     </div>
     <Dialog.Root>
-      <Dialog.Trigger class="w-full text-center text-sm text-muted-foreground hover:underline cursor-pointer py-1"
+      <Dialog.Trigger class="w-full flex flex-row justify-center items-center
+                              text-base text-muted-foreground font-medium hover:underline cursor-pointer py-1"
                       onclick={() => {toast("Coming soon!", {icon: "🚧"})}}>
-        User manual
+        Open user manual
       </Dialog.Trigger>
+      <!-- TODO: Add content to manual then bring it back -->
       <!-- <Manual /> -->
     </Dialog.Root>
   </div>
 </div>
-<h6 class="opacity-25">Made for CS199 by Tomanan and Tuan, with love.</h6>
+<h6 class="font-light opacity-60">Made for CS199 by Tomanan and Tuan, with love.</h6>
