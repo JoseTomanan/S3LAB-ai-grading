@@ -243,6 +243,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 student_no=student.student_no,
                 name=student.name,
                 is_done_rendering=all_items_processed and has_any_answer,
+                has_any_answer=has_any_answer,
                 total_score=f"{total_score}/{max_score}",
                 ))
 
