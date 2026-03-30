@@ -91,13 +91,15 @@
       
       <span class="flex flex-row gap-x-1">
         <Dialog.Root>
-          <Dialog.Trigger class="button-primary">
+          <Dialog.Trigger class="button-primary"
+                          title={"Export sheets"}>
             <IconTable class="size-6" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
         <Sheet.Root>
-          <Sheet.Trigger class="button-primary">
+          <Sheet.Trigger class="button-primary"
+                          title={"Bulk upload"}>
             <IconUpload class="size-6"/>
           </Sheet.Trigger>
           <BulkUpload test_instance={activeTestInstance}/>
