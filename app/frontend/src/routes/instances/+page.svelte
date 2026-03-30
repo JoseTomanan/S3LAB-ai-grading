@@ -27,7 +27,7 @@
     </span>
     <h1>Test instances</h1>
     <a href="/sections">
-      <IconSections class="size-8 text-primary saturate-200 brightness-60"/>
+      <IconSections class="size-8 text-primary foregroundize"/>
     </a>
   </span>
 
