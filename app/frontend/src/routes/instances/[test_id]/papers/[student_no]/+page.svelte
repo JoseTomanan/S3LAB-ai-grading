@@ -118,9 +118,10 @@
       <h1 class="font-semibold">Test answers</h1>
       <h5>{data.student_no}</h5>
     </span>
-    <a class="button-secondary"
+    <a class="button-secondary flex flex-row items-center gap-x-1"
         href="/instances/{data.test_id}/papers/{data.student_no}/process">
-      <MdiImagePlus class="size-5 mx-2"/>
+      <span class="text-sm">Upload</span>
+      <MdiImagePlus class="size-5"/>
     </a>
   </span>
 
@@ -135,8 +136,7 @@
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
       <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
-        <span class="flex-1
-                      flex justify-center items-center relative">
+        <span class="flex-1 flex justify-center items-center relative">
           <Label for={studentItem.label}
                   class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
@@ -145,10 +145,10 @@
             {#if studentItem.image_directory == ""}
               <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
-            <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
-              <Dialog.Trigger class="w-full cursor-zoom-in">
-                <!-- FIXME: not working in production (but working in dev somehow??) -->
-                <img class="max-h-70 w-auto mx-auto"
+              <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
+                <Dialog.Trigger class="w-full cursor-zoom-in">
+                  <!-- FIXME: Not working in production. Remove this when validated that it's good -->
+                  <img class="max-h-70 w-auto mx-auto"
                         src={`${API_URL}${studentItem.image_directory}`}
                         alt={studentItem.label}/>
                 </Dialog.Trigger>
