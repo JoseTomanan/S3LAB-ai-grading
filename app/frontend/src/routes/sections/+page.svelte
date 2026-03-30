@@ -23,7 +23,7 @@
     </a>
     <h1>Sections</h1>
     <a href="/instances">
-      <IconPapers class="size-7 text-secondary saturate-200 brightness-60"/>
+      <IconPapers class="size-7 text-primary saturate-200 brightness-60"/>
     </a>
   </span>
   <div class="flex flex-col gap-3 relative">
