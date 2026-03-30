@@ -1,6 +1,5 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
-
   const { data } = $props();
 
   import { onMount, onDestroy } from "svelte";
@@ -15,7 +14,7 @@
   import { api } from '$lib/utils/api.ts';
   import { createPoller } from '$lib/utils/poller.ts';
 
-	import AddNewStudent from '../../../sections/[section_id]/AddNewStudent.svelte';
+	import AddNewStudent from '@/routes/sections/[section_id]/AddNewStudent.svelte';
 
   let isAddStudentDialogOpen: boolean = $state(false);
   let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);

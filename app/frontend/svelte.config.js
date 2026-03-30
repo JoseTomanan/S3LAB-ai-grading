@@ -11,6 +11,7 @@ const config = {
 	kit: {
 		alias: {
 			$lib: 'src/lib',
+      '@': 'src',
 		},
 		adapter: adapter()
 	}
