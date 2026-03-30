@@ -1,13 +1,8 @@
 """
 Development database seeder.
 Run ONLY in development environment to populate test.db with mock data.
-Usage from project root:
-    python -m app.backend.functionality.seed_dev_db
-Usage from app/backend directory:
-    python functionality/seed_dev_db.py
 """
 import sys
-import os
 from pathlib import Path
 
 
@@ -50,9 +45,10 @@ MOCK_DATA = {
             {"student_no": "201990011", "name": "Amanda Nuñes", "section_id": 1},
             {"student_no": "201990022", "name": "Anthony Hernandez", "section_id": 1},
             {"student_no": "201990033", "name": "Michael Morales", "section_id": 1},
-            {"student_no": "202090011", "name": "Dominick Reyes", "section_id": 2},
+            {"student_no": "202090011", "name": "David Amdahl", "section_id": 2},
             {"student_no": "202090022", "name": "Olivia Rodrigo Duterte", "section_id": 2},
-            {"student_no": "202090033", "name": "Paulo Costa", "section_id": 2},
+            {"student_no": "202090033", "name": "Jhillian Palis", "section_id": 2},
+            {"student_no": "202090044", "name": "Paulo Costa", "section_id": 2},
         ],
         "test_instances": [
             {
