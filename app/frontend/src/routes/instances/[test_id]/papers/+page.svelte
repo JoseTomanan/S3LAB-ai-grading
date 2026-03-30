@@ -4,8 +4,8 @@
 
   import { onMount, onDestroy } from "svelte";
 
-  import MdiPaperAlertOutline from '~icons/mdi/paper-alert-outline';
-  import MdiPaperCheckOutline from '~icons/mdi/paper-check-outline';
+  import IconStatusDone from '~icons/mdi/paper-check-outline';
+  import IconStatusUndone from '~icons/mdi/paper-outline';
   import IconPlus from '~icons/mdi/plus';
 
   import type { GetEvaluationsResponse } from '$lib/index.ts';
@@ -66,14 +66,15 @@
         <span class="tracking-tighter">{testPaper.student_no}</span>
         <span class="font-normal">{testPaper.name}</span>
       </h4>
-      <h5 class="flex flex-row gap-x-1.5 items-center tracking-tighter">
+      <h5 class="flex flex-row gap-x-1.5 items-center tracking-tighter
+                  *:size-5">
         {testPaper.total_score}
         {#if testPaper.has_any_answer && !testPaper.is_done_rendering}
-          <Spinner class="size-5 text-chart-3"/>
+          <Spinner class="text-chart-3"/>
         {:else if testPaper.is_done_rendering}
-          <MdiPaperCheckOutline class="size-5"/>
+          <IconStatusDone/>
         {:else}
-          <MdiPaperAlertOutline class="size-5"/>
+          <IconStatusUndone/>
         {/if}
       </h5>
     </a>
