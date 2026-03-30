@@ -32,15 +32,15 @@
 
 
 <div class="space-y-3 overflow-visible">
-  <span class="flex flex-row w-full justify-between">
-    <h1 class="text-left font-semibold">Test items</h1>
+  <h1 class="text-left font-semibold w-full flex justify-between items-center">
+    Test items
     <Dialog.Root>
       <Dialog.Trigger class="button-secondary">
         <MdiPlus class="size-5"/>
       </Dialog.Trigger>
       <AddTestItem test_id={data.test_id} />
     </Dialog.Root>
-  </span>
+  </h1>
 
   {#if testItemsContext.isLoading}
     {#each { length: 2 } as _}

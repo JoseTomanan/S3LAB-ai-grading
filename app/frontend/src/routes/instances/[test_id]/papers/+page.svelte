@@ -38,7 +38,7 @@
 
 
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
-  <h1 class="text-left font-semibold w-full flex justify-between items-center gap-x-2">
+  <h1 class="text-left font-semibold w-full flex justify-between items-center">
     Test papers
     {#if isPolling}
       <Spinner class="size-6 text-chart-3"/>
