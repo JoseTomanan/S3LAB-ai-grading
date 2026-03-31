@@ -110,7 +110,8 @@ class BoxSegmenter(DocumentScanner):
                 if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
                     print(f"BACKEND:\tAccepted dot-quad {i} (area={area:.0f}, AR={aspect_ratio:.2f})")
                     valid_quads.append(q)
-                else:
+                elif 1/(MAX_ASPECT_RATIO*2) <= aspect_ratio <= MAX_ASPECT_RATIO*2:
+                    ## Only debug print those that were actually close to the expected value 
                     print(f"BACKEND:\tBad ratio, AR={aspect_ratio:.2f}.")
             else:
                 continue
