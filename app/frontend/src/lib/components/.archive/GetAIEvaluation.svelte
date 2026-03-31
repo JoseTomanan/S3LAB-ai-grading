@@ -14,7 +14,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import { GET_E_A_R_Q, GET_SCORES, REPOPULATE_UNANSWERED_ITEMS } from '$lib/utils/ai_evaluations.ts';
 	import toast from "svelte-5-french-toast";
-	import Card from './Card.svelte';
+	import Card from '../Card.svelte';
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
 
