@@ -19,18 +19,12 @@ uvicorn main:app --reload
 pip install -r requirements.txt
 ```
 
-### Run API tests
-```bash
-cd app/backend
-pytest test_api.py -v
-```
-
 ### Run CV module standalone tests
-The `+test_*.py` files and `logic/*.py` files with `if __name__ == "__main__"` blocks are run directly:
+The `logic/*.py` files with `if __name__ == "__main__"` blocks and scripts in `scripts/tester/` are run directly:
 ```bash
 python logic/box_segmenter.py    # Tests box segmentation pipeline
 python logic/document_scanner.py # Tests document scanning
-python +test_BlobDetector.py     # Tests blob detection
+python scripts/tester/Proper.py  # Tests on current dataset
 ```
 These use images from `TEMP/input/` and output debug images to `TEMP/output/`.
 

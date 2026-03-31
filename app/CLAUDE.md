@@ -30,7 +30,6 @@ Both servers must be running — the frontend proxies all `/api/*` requests to t
 ```bash
 cd app/backend
 uvicorn main:app --reload          # Dev server
-pytest test_api.py -v              # API tests
 python logic/box_segmenter.py      # CV standalone test (uses TEMP/input/)
 python logic/document_scanner.py   # Document scanner standalone test
 ```
@@ -88,5 +87,5 @@ Section ──┬── Student
 
 ### Backend
 - FastAPI dependency injection for database sessions (`get_session()`)
-- Router files in `routers/`, CV/AI logic in `logic/`, models in `models.py`, schemas in `schemas.py`
+- Router files in `routers/`, CV/AI logic in `logic/`, models in `models.py`, schemas in `schemas/`
 - CV standalone tests use `TEMP/input/` and `TEMP/output/` directories
