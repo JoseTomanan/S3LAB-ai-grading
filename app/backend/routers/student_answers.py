@@ -583,12 +583,20 @@ def _label_save_boxes(
             for i, img_bytes in enumerate(processed_list)
         }
         for future in as_completed(futures):
-            index, item_number = future.result()
-            ai_results[index] = (index, item_number)
+            try:
+                index, item_number = future.result()
+                ai_results[index] = (index, item_number)
+            except Exception as e:
+                i = futures[future]
+                print(f"BACKEND:\tUnexpected error classifying box {i}: {e}")
+                ai_results[i] = (i, "NONE")
 
     ## Phase C: Sequential post-processing on main thread (DB lookups + file writes)
     boxes_info = []
-    for index, item_number in ai_results:
+    for result in ai_results:
+        if result is None:
+            continue
+        index, item_number = result
         print(f"BACKEND:\t{index}th detected label = {item_number}")
 
         test_item = session.exec(
