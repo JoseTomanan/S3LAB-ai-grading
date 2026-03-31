@@ -55,9 +55,10 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
             BATCH_SIZE = 4
             batches = [cleaned_rubrics[i:i+BATCH_SIZE] for i in range(0, len(cleaned_rubrics), BATCH_SIZE)]
 
+            MAX_RUBRIC_RETRIES = 5
             all_parts = []
             for batch in batches:
-                while True:
+                for attempt in range(MAX_RUBRIC_RETRIES):
                     response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
                                     image_bytes, test_item.question, batch
                                     )
@@ -66,7 +67,11 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                         if len(parts) == len(batch) and all(_VALID_R_Q_RESPONSE(p) for p in parts):
                             all_parts.extend(parts)
                             break
-                    print("BACKEND:\tRetrying rubric eval...")
+                    print(f"BACKEND:\tRetrying rubric eval (attempt {attempt + 1}/{MAX_RUBRIC_RETRIES})...")
+                else:
+                    ## All retries exhausted — fill batch with NO so grading can continue
+                    print(f"BACKEND:\tRubric eval failed after {MAX_RUBRIC_RETRIES} attempts; defaulting to NO for {len(batch)} rubric(s)")
+                    all_parts.extend(["NO"] * len(batch))
 
             ai_evaluation = ";".join(all_parts) + ";"
     
