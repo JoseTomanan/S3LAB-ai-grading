@@ -69,6 +69,8 @@
 
   $effect(() => {
     if (isAddDialogOpen) {
+      formItemLabel = "";
+      formItemQuestion = "";
       formItemIsProblemSolving = false;
       formItemRQ = [{question: "", points: 1}];
       formItemEA = {question: "", points: 1};
