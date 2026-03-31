@@ -200,7 +200,7 @@
   }
   .button-floating > * {
     @apply size-8;
-    color: var(--primary);
+    color: var(--sidebar-primary);
     @apply saturate-200;
     @apply brightness-60;
   }

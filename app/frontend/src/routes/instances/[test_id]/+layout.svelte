@@ -9,10 +9,10 @@
   import BulkUpload from './BulkUpload.svelte';
   import ExportSheets from './ExportSheets.svelte';
 
-  import IconBack from '~icons/mdi/arrow-back';
+  import IconInstancesList from '~icons/mdi/format-list-bulleted';
+  import IconBack from '~icons/mdi/chevron-left';
   import IconTable from '~icons/mdi/table';
   import IconUpload from '~icons/mdi/tray-upload';
-  import IconHome from '~icons/mdi/home';
 
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
@@ -38,14 +38,14 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
-      <a href="/instances" class="button-floating">
-        <IconHome/>
-      </a>
-      <h1>{ activeTestInstance.name }</h1>
       <button class="button-floating"
               onclick={() => goto("..")}>
         <IconBack/>
       </button>
+      <h1>{ activeTestInstance.name }</h1>
+      <a href="/instances" class="button-floating">
+        <IconInstancesList class="size-7 m-0.5"/>
+      </a>
     </span>
     
     <Separator/>
