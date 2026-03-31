@@ -12,7 +12,8 @@ MIN_PAGE_AREA = AREA * 0.30
 MAX_PAGE_AREA = AREA * 0.95
 BORDER_MARGIN_RATIO = 0.02
 
-## For box segmentation utility functions (as found in utils)
+## For box_segmenter utility functions (as found in utils)
+## Values are overridden by document_scanner path
 MAX_SKEW_DEG = 5.0
 MAX_TILT_DEG = 15.0
-SECTION_CORNER_ANGLE_TOL = 12.0
+SECTION_CORNER_ANGLE_TOL = 5.0
