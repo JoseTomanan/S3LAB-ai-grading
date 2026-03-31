@@ -18,13 +18,15 @@
     test_id: string
   }>();
 
+  let activeTestItem = $state(untrack(() => testItem));
+
   let isOperationOngoing: boolean = $state(false);
   let formTestItem: TestItem = $state({
-        item_id: testItem.item_id,
-        label: testItem.label,
-        question: testItem.question,
-        is_problem_solving: testItem.is_problem_solving,
-        expected_answer_rubric_questions: testItem.expected_answer_rubric_questions,
+        item_id: activeTestItem.item_id,
+        label: activeTestItem.label,
+        question: activeTestItem.question,
+        is_problem_solving: activeTestItem.is_problem_solving,
+        expected_answer_rubric_questions: activeTestItem.expected_answer_rubric_questions,
       });
 
   // NOTE: This resets the form on any testItem prop change, including invalidateAll().

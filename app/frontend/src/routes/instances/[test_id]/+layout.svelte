@@ -4,7 +4,7 @@
   import { navigating, page } from '$app/state';
   import type { LayoutData } from './$types.d.ts';
   import type { Snippet } from 'svelte';
-  import { setContext } from 'svelte';
+  import { setContext, untrack } from 'svelte';
 
   import BulkUpload from './BulkUpload.svelte';
   import ExportSheets from './ExportSheets.svelte';
@@ -21,17 +21,12 @@
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 	import { goto } from '$app/navigation';
 
-  if (!data.test_instance)
-    throw new Error("Test instance not loaded.");
-  if (!data.test_items)
-    throw new Error("Test items not loaded.");
-
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
 
-  let testItemsContext: TestItemsContext = $state({items: data.test_items!, isLoading: false});
+  let testItemsContext: TestItemsContext = $state({items: untrack(() => data.test_items!), isLoading: false});
   $effect(() => {
     testItemsContext.items = data.test_items!;
   });

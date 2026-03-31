@@ -34,7 +34,7 @@
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
   
-  const defaultNumBoxes = (() => data)().test_items?.length ?? 2;
+  const defaultNumBoxes = $derived(data.test_items?.length ?? 2);
 
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);

@@ -22,11 +22,6 @@
 	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';
 
-  if (!data.student_items)
-    throw new Error("Student items failed to load");
-  if (!data.student_ai_evaluations)
-    throw new Error("Student AI evaluations failed to load");
-
   let isWantsToDelete: boolean = $state(false);
   let studentItems: (StudentAnswer & GetSpecificEvaluationResponse)[] = $derived((() => {
     const evalMap = new Map<number, GetSpecificEvaluationResponse>();

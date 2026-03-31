@@ -2,7 +2,7 @@
   import { API_URL } from '$lib/constants.ts';
   const { data } = $props();
 
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, untrack } from "svelte";
 
   import IconStatusDone from '~icons/mdi/paper-check-outline';
   import IconStatusUndone from '~icons/mdi/paper-outline';
@@ -17,7 +17,7 @@
 	import AddNewStudent from '@/routes/sections/[section_id]/AddNewStudent.svelte';
 
   let isAddStudentDialogOpen: boolean = $state(false);
-  let perStudentStatuses: GetEvaluationsResponse[] = $state(data.statuses);
+  let perStudentStatuses: GetEvaluationsResponse[] = $state(untrack(() => data.statuses));
   $effect(() => {
     perStudentStatuses = data.statuses;
   });

@@ -3,10 +3,10 @@
   import IconBack from "~icons/mdi/arrow-left";
   import IconHome from '~icons/mdi/home';
 
-  const sectionId = Number(data.section_id);
-  const sectionName = data.sections.find(
+  const sectionId = $derived(Number(data.section_id));
+  const sectionName = $derived(data.sections.find(
     (section) => section.section_id === sectionId
-  )!.section_name;
+  )!.section_name);
 </script>
 
 
