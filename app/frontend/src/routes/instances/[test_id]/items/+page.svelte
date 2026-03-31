@@ -13,6 +13,8 @@
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
 	import Card from "$lib/components/Card.svelte";
 
+  let isAddDialogOpen = $state(false);
+
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
   let allItems: TestItem[] = $state(testItemsContext.items);
   $effect(() => {
@@ -34,11 +36,12 @@
 <div class="space-y-3 overflow-visible">
   <h1 class="text-left font-semibold w-full flex justify-between items-center">
     Test items
-    <Dialog.Root>
+    <Dialog.Root bind:open={isAddDialogOpen}>
       <Dialog.Trigger class="button-secondary">
         <MdiPlus class="size-5"/>
       </Dialog.Trigger>
-      <AddTestItem test_id={data.test_id} />
+      <AddTestItem {isAddDialogOpen}
+                    test_id={data.test_id} />
     </Dialog.Root>
   </h1>
 
