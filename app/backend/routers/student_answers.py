@@ -118,7 +118,12 @@ async def commit_boxes_endpoint(
                     )
 
     boxes_info = [box.model_dump() for box in request_body.boxes]
-    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    boxes_info_bad = [b for b in boxes_info if b["index"] < 0]
+    boxes_info_good = [b for b in boxes_info if b["index"] >= 0]
+
+    _delete_disregarded_record_imgs(boxes_info_bad)
+
+    answer_ids = _create_answer_records(boxes_info_good, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -617,6 +622,22 @@ def _label_save_boxes(
                     })
 
     return boxes_info
+
+
+def _delete_disregarded_record_imgs(boxes_info: list[dict]):
+    """Delete image files for boxes marked as discarded (index < 0)."""
+    for box in boxes_info:
+        image_dir = box.get("image_directory")
+        if not image_dir:
+            continue
+        filename = image_dir.split("/")[-1]
+        if filename:
+            image_path = TEMP_DIR / filename
+            if image_path.exists():
+                try:
+                    image_path.unlink()
+                except Exception as e:
+                    print(f"BACKEND:\tFailed to delete discarded image {filename}: {e}")
 
 
 def _create_answer_records(
