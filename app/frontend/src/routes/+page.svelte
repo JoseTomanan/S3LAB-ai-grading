@@ -1,7 +1,6 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
-  import * as Dialog from "$lib/components/ui/dialog/index.ts";
-  import toast from "svelte-5-french-toast";
+  import * as Sheet from "$lib/components/ui/sheet/index.ts";
   
   import IconPaper from '~icons/mdi/paper';
   import IconSection from '~icons/mdi/person';
@@ -13,12 +12,12 @@
 <div class="container w-full h-[93dvh] flex flex-col items-center justify-center gap-y-10">
   <span class="pt-1"></span>
   
-  <Dialog.Root>
-    <Dialog.Trigger class="button-floating absolute top-6 left-4">
+  <Sheet.Root>
+    <Sheet.Trigger class="button-floating absolute top-6 left-4">
       <IconManual/>
-    </Dialog.Trigger>
+    </Sheet.Trigger>
     <Manual />
-  </Dialog.Root>
+  </Sheet.Root>
 
   <div class="relative w-full py-8 flex flex-col items-center justify-center gap-y-3">
     <span class="absolute inset-0 m-auto size-28 object-contain -z-50 block left-0 right-0 top-0 bottom-0">
@@ -53,17 +52,6 @@
         <p>Manage class list</p>
       </a>
     </div>
-    <!-- TODO: Add content to manual then bring it back -->
-    <!--
-    <Dialog.Root>
-      <Dialog.Trigger class="w-full flex flex-row justify-center items-center
-                              text-base text-muted-foreground font-medium hover:underline cursor-pointer py-1"
-                      onclick={() => {toast("Coming soon!", {icon: "🚧"})}}>
-        Open user manual
-      </Dialog.Trigger>
-      <Manual />
-    </Dialog.Root>
-    -->
   </div>
 </div>
 
