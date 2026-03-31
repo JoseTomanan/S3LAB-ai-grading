@@ -23,13 +23,13 @@
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
     <span class="flex flex-row gap-x-2">
-      <a href="/" class="bg-white shadow-sm rounded-full">
-        <IconHome class="size-8 text-primary foregroundize" />
+      <a href="/" class="button-floating">
+        <IconHome/>
       </a>
     </span>
     <h1>Test instances</h1>
-    <a href="/sections">
-      <IconSections class="size-8 text-primary foregroundize"/>
+    <a href="/sections" class="button-floating">
+      <IconSections class="size-7 m-0.5"/>
     </a>
   </span>
 

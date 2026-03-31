@@ -191,6 +191,19 @@
   .button-destructive:hover {
     opacity: 80%;
   }
+
+  .button-floating {
+    background-color: var(--color-white);
+    @apply shadow-sm;
+    @apply rounded-full;
+    @apply h-fit;
+  }
+  .button-floating > * {
+    @apply size-8;
+    color: var(--primary);
+    @apply saturate-200;
+    @apply brightness-60;
+  }
 }
 
 

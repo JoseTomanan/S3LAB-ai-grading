@@ -38,14 +38,13 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
-      <a href="/instances"
-          class="bg-white shadow-sm rounded-full">
-        <IconHome class="size-8 text-primary foregroundize" />
+      <a href="/instances" class="button-floating">
+        <IconHome/>
       </a>
       <h1>{ activeTestInstance.name }</h1>
-      <button class="p-0 size-8 cursor-pointer"
+      <button class="button-floating"
               onclick={() => goto("..")}>
-        <IconBack class="size-full" />
+        <IconBack/>
       </button>
     </span>
     

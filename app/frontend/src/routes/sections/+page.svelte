@@ -18,12 +18,12 @@
 
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
-    <a href="/" class="bg-white shadow-sm rounded-full">
-      <IconHome class="size-8 text-primary foregroundize" />
+    <a href="/" class="button-floating">
+      <IconHome/>
     </a>
     <h1>Sections</h1>
-    <a href="/instances">
-      <IconPapers class="size-7 text-primary foregroundize"/>
+    <a href="/instances" class="button-floating">
+      <IconPapers class="size-7 m-0.5"/>
     </a>
   </span>
   <div class="flex flex-col gap-3 relative">
