@@ -128,22 +128,22 @@
       return;
 
     isCommitmentOngoing = true;
-    try {
-      if (accept) {
-        await api(`${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
-          method: "POST",
-          body: JSON.stringify({ boxes: supposedScans }),
-        });
 
-        isReviewDialogOpen = false;
-        commitPoller.start();
-        return;
-      }
-
-    // TODO: handle the otherwise case
+    // TODO: handle the case where accept=false
     /* TODO: fix backend side of things to allow incomplete input
      * (i.e., discard unincluded) 
      */
+    const boxes = accept ? supposedScans : [];
+
+    try {
+      await api(`${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
+        method: "POST",
+        body: JSON.stringify({ boxes: boxes }),
+      });
+
+      isReviewDialogOpen = false;
+      commitPoller.start();
+      return;
     } catch (e) {
       toast.error(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
     } finally {
