@@ -34,7 +34,7 @@
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
   
-  const defaultNumBoxes = data.test_items?.length ?? 2;
+  const defaultNumBoxes = (() => data)().test_items?.length ?? 2;
 
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
@@ -43,7 +43,7 @@
   
   let isAskingForValidation: boolean = $state(false);
   let isReviewDialogOpen: boolean = $state(false);
-  let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
+  let supposedScans: (CommitBoxesResponseItem & { editing: boolean; isDiscarded: boolean })[] = $state([]);
 
   function handleFiles() {
     if (!formFiles || formFiles.length == 0)
@@ -91,7 +91,7 @@
       const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? defaultNumBoxes}&is_scanned_already=${paramScannedAlready}`;
       const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(url, formData);
       supposedScans = (result.boxes ?? [])
-                        .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
+                        .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false, isDiscarded: false }));
       isAskingForValidation = true;
       isReviewDialogOpen = true;
     } catch(e) {
@@ -129,11 +129,10 @@
 
     isCommitmentOngoing = true;
 
-    // TODO: handle the case where accept=false
-    /* TODO: fix backend side of things to allow incomplete input
-     * (i.e., discard unincluded) 
-     */
-    const boxes = accept ? supposedScans : [];
+    const boxes = supposedScans.map(s => ({
+      ...s,
+      index: (!accept || s.isDiscarded) ? -1 : s.index,
+    }));
 
     try {
       await api(`${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
