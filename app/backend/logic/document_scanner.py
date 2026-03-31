@@ -229,7 +229,8 @@ class DocumentScanner:
 
 if __name__ == "__main__":  
     # ================ DEFINITIONS ================
-    FILENAME = "testRuledDottedF.jpeg"
+    import sys
+    FILENAME = sys.argv[1] if len(sys.argv) > 1 else "properTest1.jpeg"
     GET_INPUT = lambda x : f"./TEMP/input/{x}"
     GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
     
@@ -244,5 +245,5 @@ if __name__ == "__main__":
 
     DOCUMENT_SCANNER.save_image(
                     image_after,
-                    GET_OUTPUT(f"{_onlyfilename}/scan.jpg")
+                    GET_OUTPUT(f"{_onlyfilename}/_00_SCANNED.jpg")
                     )
