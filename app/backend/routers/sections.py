@@ -11,11 +11,11 @@ router = APIRouter()
 
 
 #region Endpoints
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=List[SectionResponse])
 def get_all_sections(session: Session = Depends(get_session)):
     """Get all sections"""
     sections = session.exec(select(Section)).all()
-    return [{"section_id": s.section_id, "section_name": s.section} for s in sections]
+    return [SectionResponse(section_id=s.section_id, section_name=s.section) for s in sections]
 
 
 @router.get("/{section_id}", response_model=List[StudentResponse])
@@ -42,7 +42,7 @@ def get_students_in_section(section_id: int, session: Session = Depends(get_sess
         ]
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SectionResponse, status_code=status.HTTP_201_CREATED)
 def add_new_section(section: SectionCreate, session: Session = Depends(get_session)):
     """Add a new section"""
     # Check if section with this name already exists
@@ -57,5 +57,5 @@ def add_new_section(section: SectionCreate, session: Session = Depends(get_sessi
     session.add(new_section)
     session.commit()
     session.refresh(new_section)
-    return {"section_id": new_section.section_id, "section_name": new_section.section}
+    return SectionResponse(section_id=new_section.section_id, section_name=new_section.section)
 #endregion

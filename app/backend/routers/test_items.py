@@ -1,10 +1,9 @@
-from fastapi import APIRouter, HTTPException, Response, status, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, HTTPException, Response, status, Depends
 from sqlmodel import Session, delete, select
 
 from models import *
 from schemas import *
 from core.database import get_session
-
 from logic.utility import *
 
 
@@ -13,7 +12,7 @@ router = APIRouter()
 
 
 #region Endpoints
-@router.get("/{test_id}/items")
+@router.get("/{test_id}/items", response_model=TestItemsResponse)
 def get_test_instance_items(
             test_id: str,
             session: Session = Depends(get_session),
@@ -26,28 +25,25 @@ def get_test_instance_items(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Test instance '{test_id}' not found"
         )
-    
+
     # Get items
     items = session.exec(
         select(TestItem).where(TestItem.test_id == test_id)
     ).all()
-    
-    # Build items list
-    items_list = [
-        {
-            "item_id": item.item_id,
-            "label": item.label,
-            "question": item.question,
-            "is_problem_solving": item.is_problem_solving,
-            "expected_answer_rubric_questions": item.expected_answer_rubric_questions,
-        }
-        for item in items
-    ]
-    
-    return {
-        "test_id": test_id,
-        "items": items_list
-    }
+
+    return TestItemsResponse(
+        test_id=test_id,
+        items=[
+            TestItemSummary(
+                item_id=item.item_id,
+                label=item.label,
+                question=item.question,
+                is_problem_solving=item.is_problem_solving,
+                expected_answer_rubric_questions=item.expected_answer_rubric_questions,
+            )
+            for item in items
+        ]
+    )
 
 @router.post("/{test_id}/items", response_model=NewTestItemResponse)
 def add_test_item(

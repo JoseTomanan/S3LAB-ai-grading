@@ -18,13 +18,9 @@
 	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Sheet from '$lib/components/ui/sheet/index.ts';
 	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';
-
-  if (!data.student_items)
-    throw new Error("Student items failed to load");
-  if (!data.student_ai_evaluations)
-    throw new Error("Student AI evaluations failed to load");
 
   let isWantsToDelete: boolean = $state(false);
   let studentItems: (StudentAnswer & GetSpecificEvaluationResponse)[] = $derived((() => {
@@ -47,6 +43,7 @@
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
   let pollingItemIds: Set<number> = $state(new Set());
   let cropDialogOpen: Map<number, boolean> = $state(new Map());
+  let zoomLevel: number = $state(1);
 
   const cropPoller = createPoller(async () => {
     const result = await api<StudentAnswer[]>(
@@ -116,9 +113,10 @@
       <h1 class="font-semibold">Test answers</h1>
       <h5>{data.student_no}</h5>
     </span>
-    <a class="button-secondary"
+    <a class="button-secondary flex flex-row items-center gap-x-1"
         href="/instances/{data.test_id}/papers/{data.student_no}/process">
-      <MdiImagePlus class="size-5 mx-2"/>
+      <span class="text-sm">Upload</span>
+      <MdiImagePlus class="size-5"/>
     </a>
   </span>
 
@@ -133,21 +131,36 @@
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
       <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
-        <span class="flex-1
-                      flex justify-center items-center relative">
+        <span class="flex-1 flex justify-center items-center relative">
           <Label for={studentItem.label}
                   class="absolute top-1 -left-1 bg-white px-1.5 text-base shadow-sm">
             {studentItem.label}
           </Label>
-          <!-- TODO: Click to open image in a dialog -->
           <span class="w-5/6 sm:w-full">
             {#if studentItem.image_directory == ""}
               <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
-              <!-- FIXME: not working in production (but working in dev somehow??) -->
-              <img class="max-h-70 w-auto mx-auto"
-                    src={`${API_URL}${studentItem.image_directory}`}
-                    alt={studentItem.label}/>
+              <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
+                <Dialog.Trigger class="w-full cursor-zoom-in">
+                  <!-- FIXME: Not working in production. Remove this when validated that it's good -->
+                  <enhanced:img class="max-h-70 w-auto mx-auto"
+                        src={`${API_URL}${studentItem.image_directory}`}
+                        alt={studentItem.label}/>
+                </Dialog.Trigger>
+                <Dialog.Content class="sm:max-w-[90vw] p-2 gap-1">
+                  <Dialog.Title class="sr-only">{studentItem.label}</Dialog.Title>
+                  <div class="flex max-h-[85vh] justify-center overflow-auto"
+                       onwheel={(e) => {
+                         e.preventDefault();
+                         zoomLevel = Math.min(5, Math.max(0.5, zoomLevel - e.deltaY * 0.001));
+                       }}>
+                    <enhanced:img style={`zoom: ${zoomLevel};`}
+                         class="block"
+                         src={`${API_URL}${studentItem.image_directory}`}
+                         alt={studentItem.label}/>
+                  </div>
+                </Dialog.Content>
+              </Dialog.Root>
             {/if}
           </span>
         </span>
@@ -158,17 +171,16 @@
                         onDelete={() => deleteAnswer(studentItem.item_id)}
                         size={4}
                         />
-            <Dialog.Root
-              open={cropDialogOpen.get(studentItem.item_id) ?? false}
-              onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
-              <Dialog.Trigger class="button-outline">
+            <Sheet.Root open={cropDialogOpen.get(studentItem.item_id) ?? false}
+                          onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
+              <Sheet.Trigger class="button-outline">
                 <MdiCrop/>
-              </Dialog.Trigger>
+              </Sheet.Trigger>
               <ManualCrop test_id={data.test_id}
                           student_no={data.student_no}
                           item_id={studentItem.item_id}
                           onCropSubmitted={() => handleCropSubmitted(studentItem.item_id)}/>
-            </Dialog.Root>
+            </Sheet.Root>
             <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
                             button-outline px-0 py-0`}
                     onclick={() => reevaluateAnswer(studentItem.answer_id)}
@@ -180,12 +192,13 @@
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
-              <span class="flex flex-wrap justify-between items-center [&>h5]:opacity-60">
-                <h5 class="italic">{e_a_r_q}</h5>
+              <span class="flex flex-row justify-between items-baseline-last gap-x-1
+                            [&>h5]:opacity-60">
+                <h5 class="italic flex-1">{e_a_r_q}</h5>
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
-                  <h4 class="font-semibold">
+                  <h4 class="font-semibold text-foreground/60">
                     {isEvalNotError
                       ? GET_SCORES(studentItem)[index] || "—"
                       : "⚠️"}

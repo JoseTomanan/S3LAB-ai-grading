@@ -1,7 +1,6 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
-
   import toast from "svelte-5-french-toast";
   
   import IconPaper from '~icons/mdi/paper';
@@ -14,7 +13,7 @@
   <div class="relative w-full py-8 flex flex-col items-center justify-center gap-y-3">
     <span class="absolute inset-0 m-auto size-28 object-contain -z-50 block left-0 right-0 top-0 bottom-0">
       <span class="slow-spin bg-accent/40 rounded-full">
-        <img src={logo}
+        <enhanced:img src={logo}
               alt="Llama mascot"
               class="size-28"
           />
@@ -41,16 +40,18 @@
       <a href="/sections" class="button-outline">
         <IconSection />
         <b>Sections</b>
-        <p>Manage student rosters</p>
+        <p>Manage class list</p>
       </a>
     </div>
     <Dialog.Root>
-      <Dialog.Trigger class="w-full text-center text-sm text-muted-foreground hover:underline cursor-pointer py-1"
+      <Dialog.Trigger class="w-full flex flex-row justify-center items-center
+                              text-base text-muted-foreground font-medium hover:underline cursor-pointer py-1"
                       onclick={() => {toast("Coming soon!", {icon: "🚧"})}}>
-        User manual
+        Open user manual
       </Dialog.Trigger>
+      <!-- TODO: Add content to manual then bring it back -->
       <!-- <Manual /> -->
     </Dialog.Root>
   </div>
 </div>
-<h6 class="opacity-25">Made for CS199 by Tomanan and Tuan, with love.</h6>
+<h6 class="font-light opacity-60">Made for CS199 by Tomanan and Tuan, with love.</h6>

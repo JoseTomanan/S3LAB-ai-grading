@@ -9,6 +9,7 @@
   import { dataUrlToFile, isNotPngOrJpg } from '$lib/utils.ts';
   import OpenCamera from './OpenCamera.svelte';
 
+  import IconUpload from "~icons/mdi/paperclip";
   import IconCamera from "~icons/mdi/camera";
   import IconImagePreview from "~icons/mdi/image";
   import IconRotateCW from "~icons/mdi/rotate-clockwise";
@@ -33,6 +34,8 @@
   let isCameraDialogOpen: boolean = $state(false);
   let isOperationOngoing: boolean = $state(false);
   
+  const defaultNumBoxes = $derived(data.test_items?.length ?? 2);
+
   let formFiles: FileList | undefined = $state();
   let paramNumBoxes: number | null = $state(null);
   let paramScannedAlready: boolean = $state(false);
@@ -40,7 +43,7 @@
   
   let isAskingForValidation: boolean = $state(false);
   let isReviewDialogOpen: boolean = $state(false);
-  let supposedScans: (CommitBoxesResponseItem & { editing: boolean })[] = $state([]);
+  let supposedScans: (CommitBoxesResponseItem & { editing: boolean; isDiscarded: boolean })[] = $state([]);
 
   function handleFiles() {
     if (!formFiles || formFiles.length == 0)
@@ -85,10 +88,10 @@
     }
 
     try {
-      const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? 2}&is_scanned_already=${paramScannedAlready}`;
+      const url = `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/label_save_boxes?num_boxes=${paramNumBoxes ?? defaultNumBoxes}&is_scanned_already=${paramScannedAlready}`;
       const result = await apiForm<{ boxes: CommitBoxesResponseItem[] }>(url, formData);
       supposedScans = (result.boxes ?? [])
-                        .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false }));
+                        .map((i: CommitBoxesResponseItem) => ({ ...i, editing: false, isDiscarded: false }));
       isAskingForValidation = true;
       isReviewDialogOpen = true;
     } catch(e) {
@@ -125,19 +128,21 @@
       return;
 
     isCommitmentOngoing = true;
+
+    const boxes = supposedScans.map(s => ({
+      ...s,
+      index: (!accept || s.isDiscarded) ? -1 : s.index,
+    }));
+
     try {
-      if (accept) {
-        await api(`${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
-          method: "POST",
-          body: JSON.stringify({ boxes: supposedScans }),
-        });
+      await api(`${API_URL}/api/student_answers/${data.test_id}/${data.student_no}/commit_boxes`, {
+        method: "POST",
+        body: JSON.stringify({ boxes: boxes }),
+      });
 
-        isReviewDialogOpen = false;
-        commitPoller.start();
-        return;
-      }
-
-    // TODO: handle the otherwise case
+      isReviewDialogOpen = false;
+      commitPoller.start();
+      return;
     } catch (e) {
       toast.error(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
     } finally {
@@ -159,7 +164,8 @@
     <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
               class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
-        <span class="shrink-0 whitespace-nowrap text-sm pl-1">
+        <IconUpload/>
+        <span class="shrink-0 whitespace-nowrap text-sm">
           {formFileRecords.length > 0
             ? `Uploaded ${formFileRecords.length} image(s):`
             : "Choose image(s)..." }
@@ -191,16 +197,18 @@
     
     <div class="subcontainer flex flex-row gap-x-4 gap-y-2">
       <Input id="numBoxes" type="number"
-              class="flex-1 xs:flex-2"
-              placeholder="Number of boxes (default: 2)..."
+              class="flex-1"
+              placeholder="# of boxes (default {defaultNumBoxes})..."
               disabled={isAskingForValidation}
               bind:value={paramNumBoxes}
           />
       
-      <span class="flex-1 flex flex-row gap-x-2 items-center">
-        <Switch id="isAlreadyScanned" bind:checked={paramScannedAlready}/>
+      <span class="w-fit flex flex-row gap-x-2 items-center">
+        <Switch id="isAlreadyScanned"
+                bind:checked={paramScannedAlready}
+              />
         <Label for="isAlreadyScanned">
-          Scanned already
+          Pre-scanned
         </Label>
       </span>
     </div>
@@ -212,7 +220,7 @@
             onclick={sendImageForValidation}
             disabled={formFileRecords.length === 0 || isOperationOngoing}>
       {isOperationOngoing
-        ? "Sending, do not quit..."
+        ? "Processing, do not quit..."
         : "Send for processing"}
       {#if isOperationOngoing}
         <Spinner />
@@ -228,6 +236,7 @@
         </h6>
       
       {:else}
+        <!-- TODO: Add function to disregard individual item (i.e. just evaluate the rest) -->
         <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 pt-1 pb-3
                     -mx-6 px-6 md:-mx-18 md:px-18 "
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
@@ -264,7 +273,8 @@
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>
-      <Dialog.Trigger class="button-secondary text-sm">
+      <Dialog.Trigger class="button-secondary text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
+                      disabled={isCommitmentOngoing}>
         Open segmentation results
       </Dialog.Trigger>
       <ReviewForCommit supposedScans={supposedScans}
@@ -273,16 +283,12 @@
                         onReject={() => validateAndCommit(false)}
                         />
     </Dialog.Root>
-
-    <!-- Polling is not working properly hence temporarily removed. FIXME: Bring back polling -->
-    {#if isCommitmentOngoing}
-      <div class="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
-        <!-- <Spinner class="size-4"/> -->
-        Answers are being evaluated in the background. You may go back to the Papers screen now.
-      </div>
-    {:else}
-      <h6>Note that segmentation results are ephemeral and will be disregarded when not accepted.</h6>
-    {/if}
+    <h6>
+      {isCommitmentOngoing
+        ? "Answers are being evaluated in the background. You may go back to the Papers screen now."
+        : "Note that segmentation results are ephemeral, and switching out of this screen will discard them."}
+    </h6>
+  
   {/if}
   </div>
 </div>

@@ -9,9 +9,10 @@
   import toast from 'svelte-5-french-toast';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
-  import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import Card from '$lib/components/Card.svelte';
+	import { isNotPngOrJpg } from '$lib/utils.ts';
 
   let { test_id, student_no, item_id, onCropSubmitted } = $props<{
     test_id: string,
@@ -67,8 +68,13 @@
 
   function handleFileUpload(e: Event) {
     const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
+    if (!target.files || isNotPngOrJpg(target.files)) {
+      toast.error("Please upload only .png, .jpeg, or .jpg");
+      canvasFile = undefined;
+      return;
+    }
 
+    const file = target.files[0];
     if (file) {
       if (croppedPreviewUrl) {
         URL.revokeObjectURL(croppedPreviewUrl);
@@ -115,7 +121,9 @@
   }
 
   async function sendCropRequest() {
-    if (!formData) return;
+    if (!formData || !canvasFile)
+      return;
+
     isOperationOngoing = true;
     try {
       const result = await apiForm<{ image_directory: string }>(
@@ -130,6 +138,9 @@
       }
       canvasImageUrl = null;
       onCropSubmitted?.(result.image_directory);
+
+      // Reset file
+      canvasFile = undefined;
     } catch(e) {
       toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
     } finally {
@@ -139,16 +150,17 @@
 </script>
 
 
-<Dialog.Content class="max-w-3xl">
-  <Dialog.Header>
-    <Dialog.Title>
-      Manually crop image
-    </Dialog.Title>
-    <Dialog.Description>
+
+<Sheet.Content side="right"
+                class="w-11/12 sm:max-w-135">
+  <Sheet.Header>
+    <Sheet.Title>Manually crop image</Sheet.Title>
+    <Sheet.Description>
       {test_id} &middot; {student_no} &middot; ITEM_ID {item_id}
-    </Dialog.Description>
-  </Dialog.Header>
-  <div class="flex flex-col space-y-2">
+    </Sheet.Description>
+  </Sheet.Header>
+  
+  <div class="flex flex-col space-y-2 px-2 pb-4">
     <span class="flex flex-row space-x-1 w-full">
       <Input id="croppable"
             type="file" accept="image/*"
@@ -159,7 +171,7 @@
         <Button variant="outline"
               disabled={!canvasFile || !canvasImageUrl}
               onclick={cropImage}>
-          Crop image
+          Crop
         </Button>
       {:else}
         <Button variant="secondary"
@@ -180,27 +192,31 @@
           </div>
         {/if}
       </div>
+    
     {:else if canvasImageUrl}
-      <div id="canvasArea"
-            class="relative flex justify-center max-w-[95vh] md:max-h-[95vh] mx-auto">
-        <img
-          use:initCropper={canvasImageUrl}
-          src={canvasImageUrl}
-          alt="cropper_image"
-          style="max-width: 100%; opacity: 0;"
-        />
+      <div class="relative flex justify-center h-[70dvh] w-auto -mx-1.5">
+        <img src={canvasImageUrl}
+              use:initCropper={canvasImageUrl}
+              alt="cropper_image"
+              style="max-width: 100%; opacity: 0;"
+            />
       </div>
+      <h6>Scroll/pinch to zoom</h6>
+    
     {:else if responseImage != ""}
       <img class="border"
             src={responseImage} alt="Test item"/>
+    
     {:else}
-      <Card class="py-4 border flex flex-col items-center">
-        <MdiUpload class="h-8 w-full opacity-75"/>
-        <p>Upload an image to start cropping.</p>
+      <Card class="py-4 border flex flex-col items-center *:opacity-60">
+        <MdiUpload class="h-8 w-full"/>
+        <h6>Upload an image to start cropping</h6>
       </Card>
     {/if}
   </div>
-</Dialog.Content>
+</Sheet.Content>
+
+
 
 <style>
   :global(.cropper-modal) {

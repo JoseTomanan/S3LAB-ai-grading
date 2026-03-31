@@ -12,6 +12,7 @@
 
 /* ============THEME============ */
 @import './lib/styles/theme.css';
+@import './lib/styles/bg.css';
 
 
 /* ============RESPONSIVENESS============ */
@@ -90,6 +91,7 @@
   
   body {
     background-color: var(--background);
+    background-image: var(--background-graph-paper);
     color: var(--foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -153,12 +155,8 @@
     @apply lg:w-5/6;
     @apply xl:w-4/5;
   }
-}
 
-
-/* ============UTILITIES============ */
-@layer utilities {
-	.button-primary {
+  .button-primary {
     background-color: var(--primary);
     color: var(--primary-foreground);
     text-align: center;
@@ -180,18 +178,6 @@
     cursor: pointer;
 	}
 
-  .button-outline {
-    background-color: var(--card);
-    color: var(--card-foreground);
-    /* text-align: center; */
-    font-weight: 500;
-    @apply py-1 px-2;
-    @apply rounded;
-    @apply shadow-xs;
-    @apply ring ring-border border-0;
-    cursor: pointer;
-  }
-  
   .button-destructive {
     background-color: var(--destructive);
     color: var(--color-white);
@@ -204,6 +190,27 @@
   }
   .button-destructive:hover {
     opacity: 80%;
+  }
+}
+
+
+/* ============UTILITIES============ */
+@layer utilities {
+  .button-outline {
+    background-color: var(--card);
+    color: var(--card-foreground);
+    /* text-align: center; */
+    font-weight: 500;
+    @apply py-1 px-2;
+    @apply rounded;
+    @apply shadow-xs;
+    @apply ring ring-border border-0;
+    cursor: pointer;
+  }
+
+  .foregroundize {
+    @apply saturate-200;
+    @apply brightness-60;
   }
 }
 

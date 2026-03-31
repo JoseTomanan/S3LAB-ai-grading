@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Response, status, Depends
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, delete, select
 from typing import List
 
@@ -8,7 +8,6 @@ import io
 from models import *
 from schemas import *
 from core.database import get_session
-
 from logic.utility import populate_spreadsheet_logic
 
 

@@ -3,7 +3,7 @@
 
   import MdiPeopleAdd from "~icons/mdi/people-add";
   import IconHome from '~icons/mdi/home-outline';
-  import IconArrow from '~icons/mdi/arrow-up';
+  import IconPapers from '~icons/mdi/paper';
 
   import type { Section } from "$lib/index.ts";
   import Pagination from "$lib/components/Pagination.svelte";
@@ -18,28 +18,28 @@
 
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
-    <span class="flex flex-row gap-x-2">
-      <a href="/">
-        <IconHome class="size-8"/>
-      </a>
-    </span>
-    <h1 class="italic">Sections</h1>
+    <a href="/" class="bg-white shadow-sm rounded-full">
+      <IconHome class="size-8 text-primary foregroundize" />
+    </a>
+    <h1>Sections</h1>
+    <a href="/instances">
+      <IconPapers class="size-7 text-primary foregroundize"/>
+    </a>
+  </span>
+  <div class="flex flex-col gap-3 relative">
     <Dialog.Root>
-      <Dialog.Trigger class="button-secondary">
+      <Dialog.Trigger class="button-outline flex flex-row gap-x-2 justify-center 
+                              *:opacity-90 *:font-semibold">
         <MdiPeopleAdd class="size-6"/>
+        <b>Add new section</b>
       </Dialog.Trigger>
       <AddSection />
     </Dialog.Root>
-  </span>
-  <div class="flex flex-col gap-3 relative">
-    <a href="/instances" class="w-fit text-base opacity-60 hover:underline">
-      Go to test instances ↗
-    </a>
+    
     {#if sections.length == 0}
       <div class="absolute top-0 right-0
-                  flex flex-col items-end text-right mt-2 opacity-60">
-        <IconArrow class="size-10"/>
-        <p>No test instances yet.<br>Tap here to add one!</p>
+                  flex flex-col items-center text-center mt-2 opacity-60">
+        <p>No test instances yet. Tap above to add one!</p>
       </div>
 
     {:else}
@@ -47,11 +47,14 @@
         <Card href="/sections/{section.section_id}"
               class="button-outline">
           <h3>{section.section_name}</h3>
-          <h4>SectionID: {section.section_id}</h4>
+          <h5 class="font-normal">
+            SectionID: {section.section_id}
+          </h5>
         </Card>
       {/each}
     {/if}
   </div>
+  
   <Pagination rows={sections}
               perPage={6}
               bind:trimmedRows={paginationValues} />

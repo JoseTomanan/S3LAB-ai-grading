@@ -18,9 +18,11 @@ export class ApiError extends Error {
  */
 export async function api<T>(
 	url: string,
-	options?: RequestInit
+	options?: RequestInit,
+	customFetch?: typeof fetch
 ): Promise<T> {
-	const response = await fetch(url, {
+	const fetchFn = customFetch ?? fetch;
+	const response = await fetchFn(url, {
 		headers: { 'Content-Type': 'application/json', ...options?.headers },
 		...options
 	});

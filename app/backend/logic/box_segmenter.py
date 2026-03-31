@@ -62,7 +62,7 @@ class BoxSegmenter(DocumentScanner):
 
         ## Consensus: keep only dots both methods agree on
         pts_consensus = BlobDetector.intersect_points(pts_pass1_contour, pts_pass2_blob)
-        print(f"INFO:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)})")
+        print(f"BACKEND:\tConsensus dots: {len(pts_consensus)} (contour={len(pts_pass1_contour)})")
 
         if debug:
             debug_sets = [
@@ -79,7 +79,7 @@ class BoxSegmenter(DocumentScanner):
                                     f"{self.debug_dir}/{filename}")
 
         if len(pts_consensus) < 4:
-            print(f"INFO:\tOnly {len(pts_consensus)} blobs detected")
+            print(f"BACKEND:\tOnly {len(pts_consensus)} blobs detected")
             return []
 
         pts = self._filter_out_dup_pts(pts_consensus)
@@ -96,7 +96,7 @@ class BoxSegmenter(DocumentScanner):
     def _segment_dots_into_boxes(self, image_original: MatLike, pts: list[list[float]], debug: bool = False) -> list[MatLike]:
         """From list of points, crop what seems the most like the dotted boxes (answer sections), and return this."""
         quads = self._group_dots_into_quads(np.array(pts))
-        print(f"INFO:\tObtained total of {len(quads)} quads")
+        print(f"BACKEND:\tObtained total of {len(quads)} quads")
 
         ## Step 1: Collect all valid quads (no approxPolyDP — input is already 4 points)
         valid_quads = []
@@ -108,16 +108,16 @@ class BoxSegmenter(DocumentScanner):
                 ## Use get_robust_aspect_ratio instead of axis-aligned boundingRect
                 aspect_ratio = get_robust_aspect_ratio(q)
                 if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
-                    print(f"INFO:\tAccepted dot-quad {i} (area={area:.0f}, AR={aspect_ratio:.2f})")
+                    print(f"BACKEND:\tAccepted dot-quad {i} (area={area:.0f}, AR={aspect_ratio:.2f})")
                     valid_quads.append(q)
                 else:
-                    print(f"INFO:\tBad ratio, AR={aspect_ratio:.2f}.")
+                    print(f"BACKEND:\tBad ratio, AR={aspect_ratio:.2f}.")
             else:
                 continue
 
         ## Step 2: Deduplicate overlapping quads (keep the one with larger area)
         deduped_quads = self._deduplicate_quads(valid_quads)
-        print(f"INFO:\tAfter dedup: {len(deduped_quads)} quads (was {len(valid_quads)})")
+        print(f"BACKEND:\tAfter dedup: {len(deduped_quads)} quads (was {len(valid_quads)})")
 
         ## Step 3: Sort by vertical position (top of page first)
         deduped_quads.sort(key=lambda q: np.min(q[:, 1]))
@@ -133,14 +133,10 @@ class BoxSegmenter(DocumentScanner):
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
-        """
-        Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo
-        FIXME: Optimize parameters
-        """
+        """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
         array = self._decode_bytes(image_bytes)
-        img_contrasted = self._adjust_contrast(array, amount=1.60)
-        img_brightened = self._brighten(img_contrasted, amount=0.05)
-        return self._encode_to_bytes(img_brightened)
+        img_contrasted = self._adjust_contrast(array, amount=1.3)
+        return self._encode_to_bytes(img_contrasted)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
@@ -292,7 +288,7 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
         if images_good_contours == []:
             raise ValueError("Could not find any boxes.")
         
-        print(f"INFO:\tResult # of boxes: {len(images_good_contours)} (take top {num_boxes})")
+        print(f"BACKEND:\tResult # of boxes: {len(images_good_contours)} (take top {num_boxes})")
         images_good_contours = sorted(images_good_contours, key=lambda b : cv2.boundingRect(b)[1])
         images_warped = [self._warp_from_original(c, image_original) for c in images_good_contours]
 
@@ -323,14 +319,14 @@ class BoxSegmenterOldFunctions(BoxSegmenter):
                     (_, _, w, h) = cv2.boundingRect(approximate)
                     aspect_ratio = w / float(h)
                     if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
-                        print(f"INFO:\tAccepted and stored contour {i}")
+                        print(f"BACKEND:\tAccepted and stored contour {i}")
                         images_good_contours.append(approximate)
                     else:
-                        print(f"INFO:\tBad ratio, AR={aspect_ratio}.")
+                        print(f"BACKEND:\tBad ratio, AR={aspect_ratio}.")
                 else:
-                    print(f"INFO:\tFound non-box at approxPolyDP of contour {i}")
+                    print(f"BACKEND:\tFound non-box at approxPolyDP of contour {i}")
             else:
-                print(f"INFO:\tDid not pass for area={area}")
+                print(f"BACKEND:\tDid not pass for area={area}")
 
         return images_good_contours
 

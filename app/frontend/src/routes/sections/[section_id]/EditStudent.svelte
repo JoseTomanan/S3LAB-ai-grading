@@ -124,7 +124,7 @@
       {#each dropdownSections as s (s.section_id)}
         <Select.Item value={s.section_id.toString()}
                       label={s.section_name}>
-          {s.section_name} ({s.section_id})
+          {s.section_name}
         </Select.Item>
       {/each}
     </Select.Content>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
-  let { data } = $props();
+  
+  let { test_instance } = $props<{test_instance: TestInstance}>();
 
   import { onMount } from 'svelte';
 
@@ -29,16 +30,18 @@
   import IconFlipVertically from "~icons/mdi/flip-vertical";
 
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Button } from '$lib/components/ui/button/index.ts';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import { Separator } from '$lib/components/ui/separator/index.ts';
   import BulkUploadRename from './BulkUploadRename.svelte';
-  import type { FileRecord, Student } from '$lib/index.ts';
+  import type { FileRecord, Student, TestInstance } from '$lib/index.ts';
 
   import { handleRotateCommand, handleFlipCommand } from '$lib/utils/image_functions.ts';
 	import toast from 'svelte-5-french-toast';
 	import { isNotPngOrJpg } from '$lib/utils.ts';
+  import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   
   let isOperationStarted: boolean = $state(false);
   let formFiles: FileList | undefined = $state();
@@ -58,9 +61,7 @@
 
   onMount(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/sections/${data.test_instance!.section_id}`);
-      const results = await response.json();
-      students = results;
+      students = await api<Student[]>(`${API_URL}/api/sections/${test_instance!.section_id}`);
     } catch (e) {
       console.log("Failed to fetch students for this section.");
     }
@@ -121,21 +122,20 @@
           for (const r of records) {
             formData.append('files', r.file);
           }
-          const response = await fetch(
-                `${API_URL}/api/student_answers/${data.test_id}/${studentNo}/image_preprocess`,
-                { method: "POST", body: formData, }
-              );
-          console.log(`${studentNo}: ${response.status}`);
-          if (!response.ok) {
-            const body = await response.json().catch(() => null);
-            const detail: string = typeof body?.detail === 'string' ? body.detail : JSON.stringify(body?.detail);
-            records.forEach(r => { r.statusCode = response.status; r.statusDetail = detail; });
-          } else {
-            records.forEach(r => r.statusCode = response.status);
+          try {
+            await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`, formData);
+            records.forEach(r => r.statusCode = 200);
+          } catch (e) {
+            if (e instanceof ApiError) {
+              records.forEach(r => { r.statusCode = e.status; r.statusDetail = e.detail; });
+            } else {
+              records.forEach(r => {
+                r.statusCode = 500;
+                r.statusDetail = "Unexpectedly caught server-side error"
+              });
+            }
           }
-        })().catch(() => {
-          records.forEach(r => r.statusCode = 500);
-        });
+        })();
       }
     } catch (e) {
       console.log("Bulk upload operation failed:\n"+e);
@@ -145,111 +145,112 @@
 
 
 
-<div class="space-y-2">
+<Sheet.Content side="right"
+                class="w-11/12 sm:max-w-135 px-2 py-4">
   <h1 class="text-left font-semibold">Bulk upload</h1>
-  <Input type="file"
-          multiple
-          accept="image/*"
-          bind:files={formFiles}
-          onchange={handleFiles}
-          disabled={isOperationStarted}
-      />
-  <Separator/>
+  <div class="flex flex-row gap-x-1">
+    <Input type="file"
+            multiple
+            accept="image/*"
+            bind:files={formFiles}
+            onchange={handleFiles}
+            disabled={isOperationStarted}
+        />
+    <Button variant="secondary"
+            disabled={!formFiles || isOperationStarted}
+            onclick={bulkUpload}>
+      Send
+      <IconSend class="size-4" />
+    </Button>
+  </div>
   
   {#if !formFiles || formFiles.length == 0}
+    <Separator />
     <h6 class="opacity-60 text-left">
-      Uploads will appear here.
-      <br>
+      Uploads will appear here. <br>
       For ease, name by student no, e.g., 202011111.jpeg (single page) 202011111-1.jpeg (multi-page)
     </h6>
   
   {:else if !isOperationStarted}
-    <div class="space-y-1">
-      <span class="flex flex-row justify-between items-center">
-        <h5>
-          Uploaded {formFileRecords.length} images
-        </h5>
-        <Button variant="secondary"
-                  onclick={bulkUpload}>
-          Send requests
-          <IconSend class="size-4" />
-        </Button>
-      </span>
-      
-      <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 -mx-6 px-6 pt-1 pb-3"
-              style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
-        {#each formFileRecords as p}
-          {@const supposedId = GET_STUDENT_NO(p.name)}
-          {@const nameOnly = GET_NAME_ONLY(p.name)}
-          {@const fileExtension = GET_EXTENSION_ONLY(p.name)}
-          {@const dashIdx = nameOnly.lastIndexOf('-')}
-          {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1)) ? nameOnly.substring(dashIdx) : ''}
+    <div id="scrollable-area"
+          class="flex flex-col items-center max-w-fit overflow-scroll gap-y-1.5
+                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-foreground/40">
+      {#each formFileRecords as p}
+        {@const supposedId = GET_STUDENT_NO(p.name)}
+        {@const nameOnly = GET_NAME_ONLY(p.name)}
+        {@const fileExtension = GET_EXTENSION_ONLY(p.name)}
+        {@const dashIdx = nameOnly.lastIndexOf('-')}
+        {@const pageSuffix = dashIdx !== -1 && /^\d+$/.test(nameOnly.substring(dashIdx + 1))
+          ? nameOnly.substring(dashIdx)
+          : ""}
 
-          <div class="relative flex flex-col justify-end
-                      min-w-full sm:min-w-2/3 md:min-w-1/2 lg:min-w-1/3">
-            <img src={p.url}
-                  class="aspect-auto block"
-                  alt={p.name} />
-            <div class="absolute top-2 left-2 space-y-1">
-              <Dialog.Root>
-                <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
-                                    hover:underline cursor-pointer">
-                  {#if IS_IN_STUDENTS(supposedId)}
-                    <IconPerson class="size-4"/>
-                  {:else}
-                    <IconNotFound class="size-4" />
-                  {/if}
-                  <h4 class="text-left w-fit truncate">
-                    {nameOnly ? nameOnly : "Add student no..."}
-                  </h4>
-                </Dialog.Trigger>
-                <BulkUploadRename filename={supposedId}
-                          onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
-              </Dialog.Root>
-              
-              {#if IS_FIRST_PAGE(p.name)}
+        <div class="relative flex flex-col justify-end">
+          <img src={p.url}
+                class="aspect-auto block"
+                alt={p.name} />
+          <div class="absolute top-2 left-2 space-y-1">
+            <Dialog.Root>
+              <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
+                                  hover:underline cursor-pointer">
+                {#if IS_IN_STUDENTS(supposedId)}
+                  <IconPerson class="size-4"/>
+                {:else}
+                  <IconNotFound class="size-4" />
+                {/if}
+                <h4 class="text-left w-fit truncate">
+                  {nameOnly ? nameOnly : "Add student no..."}
+                </h4>
+              </Dialog.Trigger>
+              <BulkUploadRename filename={supposedId}
+                        onchange={(studentNo: string) => p.name = studentNo + pageSuffix + fileExtension} />
+            </Dialog.Root>
+            
+            {#if IS_FIRST_PAGE(p.name)}
+              {@const oninput = (e: Event) => {
+                  const val = (e.target as HTMLInputElement).value;
+                  numBoxesPerStudent = new Map(numBoxesPerStudent.set(
+                    GET_STUDENT_NO(p.name),
+                    val ? parseInt(val) : null
+                  ));
+                }}
+              {@const value = numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
               <span class="bg-white/80 backdrop-blur-md">
                 <input type="number"
-                        class="w-16 px-1.5 py-0 leading-none bg-transparent outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        placeholder="# of box..."
-                        value={numBoxesPerStudent.get(GET_STUDENT_NO(p.name)) ?? ''}
-                        oninput={(e: Event) => {
-                          const val = (e.target as HTMLInputElement).value;
-                          numBoxesPerStudent = new Map(numBoxesPerStudent.set(
-                            GET_STUDENT_NO(p.name),
-                            val ? parseInt(val) : null
-                          ));
-                        }}
-                    />
+                        class="w-20 px-1.5 py-0 leading-none bg-transparent shadow-none
+                                [appearance:textfield]
+                                [&::-webkit-inner-spin-button]:appearance-none
+                                [&::-webkit-outer-spin-button]:appearance-none"
+                        placeholder="# of box"
+                        {value} {oninput}
+                      />
               </span>
-              {/if}
-            </div>
-            
-            <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
-                      class="button-outline">
-                <IconRotateCW />
-              </button>
-              <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
-                      class="button-outline">
-                <IconRotateCCW />
-              </button>
-              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
-                      class="button-outline">
-                <IconFlipHorizontally />
-              </button>
-              <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
-                      class="button-outline">
-                <IconFlipVertically />
-              </button>
-            </span>
+            {/if}
           </div>
-        {/each}
-      </div>
-      <Separator/>
+          
+          <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
+            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
+                    class="button-outline">
+              <IconRotateCW />
+            </button>
+            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
+                    class="button-outline">
+              <IconRotateCCW />
+            </button>
+            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
+                    class="button-outline">
+              <IconFlipHorizontally />
+            </button>
+            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
+                    class="button-outline">
+              <IconFlipVertically />
+            </button>
+          </span>
+        </div>
+      {/each}
     </div>
   
   {:else}
+    <Separator />
     <div class="flex flex-col space-y-1">
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
@@ -259,7 +260,7 @@
         <span class="flex flex-row justify-start items-center gap-x-2
                       [&>span]:flex [&>span]:justify-center [&>span]:items-center [&>span]:size-5
                       [&>h4]:truncate [&>h4]:w-fit
-                      [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2">
+                      [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2 [&>i]:truncate">
           <!-- <span> -->
             {#if p.statusCode == 200 || p.statusCode == 202}
               <span> <IconAccepted/> </span>
@@ -296,4 +297,13 @@
 
     </div>
   {/if}
-</div>
+</Sheet.Content>
+
+
+
+<style>
+  #scrollable-area {
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--chart-3) transparent;
+  }
+</style>

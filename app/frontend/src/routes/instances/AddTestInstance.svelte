@@ -12,11 +12,9 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/ui/button/index.ts';
 
-  let isItemsLoading: boolean = $state(true);
   let dropdownItems: Section[] = $state([]);
 
-  // svelte-ignore non_reactive_update
-  let newInstanceName: string = "";
+  let newInstanceName: string = $state("");
   let newInstanceSectionId: string = $state("");
 
   const triggerContent = $derived(
@@ -24,15 +22,12 @@
         );
 
   onMount(async () => {
-    isItemsLoading = true;
     try {
       dropdownItems = await api<Section[]>(`${API_URL}/api/sections/`);
     } catch (e) {
       toast.error(e instanceof ApiError
         ? `${e.status} ${e.statusText}`
         : "Failed to fetch sections.\n" + String(e));
-    } finally {
-      isItemsLoading = false;
     }
   });
 
@@ -66,11 +61,13 @@
   <Dialog.Header>
     <Dialog.Title>Add new test instance</Dialog.Title>
   </Dialog.Header>
+  
   <Label for="name">Test name</Label>
   <Input id="name" type="text"
           placeholder="Test name..."
           required
           bind:value={newInstanceName}/>
+  
   <Label for="section">Section</Label>
   <Select.Root type="single"
                 name="section"
@@ -87,11 +84,12 @@
       {/each}
     </Select.Content>
   </Select.Root>
+  
   <Dialog.Footer>
     <Button variant="outline"
             onclick={() => addNewTestInstance(newInstanceName, newInstanceSectionId)}>
-      Save changes
-  </Button>
+      Create test instance
+    </Button>
     <Dialog.Description>Note that the name and section cannot be changed after creation.</Dialog.Description>
   </Dialog.Footer>
 </Dialog.Content>

@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlmodel import Session, delete, select
+from sqlmodel import Session, select
 
 import numpy as np
 import cv2
@@ -50,13 +50,30 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
     match test_item.is_problem_solving:
         case True:
             rubric_questions = test_item.expected_answer_rubric_questions.split(";")
-            for rubric in rubric_questions:
-                if rubric.strip() != "":
-                    while True:
-                        response = AI_ANSWER_EVALUATOR.evaluate_rubric(image_bytes, test_item.question, _STRIP_POINTS(rubric))
-                        if response and _VALID_R_Q_RESPONSE(response):
+            cleaned_rubrics = [_STRIP_POINTS(r) for r in rubric_questions if r.strip() != ""]
+
+            BATCH_SIZE = 4
+            batches = [cleaned_rubrics[i:i+BATCH_SIZE] for i in range(0, len(cleaned_rubrics), BATCH_SIZE)]
+
+            MAX_RUBRIC_RETRIES = 5
+            all_parts = []
+            for batch in batches:
+                for attempt in range(MAX_RUBRIC_RETRIES):
+                    response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
+                                    image_bytes, test_item.question, batch
+                                    )
+                    if response:
+                        parts = response.strip().split(";")
+                        if len(parts) == len(batch) and all(_VALID_R_Q_RESPONSE(p) for p in parts):
+                            all_parts.extend(parts)
                             break
-                    ai_evaluation += f"{response};"
+                    print(f"BACKEND:\tRetrying rubric eval (attempt {attempt + 1}/{MAX_RUBRIC_RETRIES})...")
+                else:
+                    ## All retries exhausted — fill batch with NO so grading can continue
+                    print(f"BACKEND:\tRubric eval failed after {MAX_RUBRIC_RETRIES} attempts; defaulting to NO for {len(batch)} rubric(s)")
+                    all_parts.extend(["NO"] * len(batch))
+
+            ai_evaluation = ";".join(all_parts) + ";"
     
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
@@ -64,6 +81,7 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                 response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
+                print("BACKEND:\tRetrying answer eval...")
             
             ai_evaluation = response
 
@@ -164,10 +182,7 @@ def crop_image(contents: bytes, points_data: dict):
     M = cv2.getPerspectiveTransform(src_pts, dst_pts)
     warped = cv2.warpPerspective(image, M, (OUT_WIDTH, OUT_HEIGHT))
     
-    enhanced = IMAGE_MODIFIER.brighten(warped, amount=0.2)
-    enhanced = IMAGE_MODIFIER.adjust_contrast(enhanced, amount=1.2)
-    
-    success, buffer = cv2.imencode('.jpg', enhanced, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+    success, buffer = cv2.imencode('.jpg', warped, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
     if not success:
         raise ValueError("Failed to encode processed image")
     

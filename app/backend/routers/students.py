@@ -1,9 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Body, Response
+from fastapi import APIRouter, HTTPException, Depends, status, Response
 from sqlmodel import Session, delete, select
 
 from models import *
 from schemas import *
-
 from core.database import get_session
 
 
@@ -12,48 +11,39 @@ router = APIRouter()
 
 
 #region Endpoints
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 def add_new_student(
-                student_data: dict = Body(...),
+                student_data: NewStudentRequest,
                 session: Session = Depends(get_session)
                 ):
     """Add new student (section_id provided in body per contract)"""
-    # Validate required fields per contract
-    required_fields = ["name", "student_no", "section_id"]
-    for field in required_fields:
-        if field not in student_data:
-            raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Missing required field: {field}"
-                    )
-    
     # Verify section exists FIRST (critical FK validation)
-    section = session.get(Section, student_data["section_id"])
+    section = session.get(Section, student_data.section_id)
     if not section:
         raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Section with ID {student_data['section_id']} not found"
+                detail=f"Section with ID {student_data.section_id} not found"
                 )
-    
+
     # Check for duplicate student ID
     existing = session.exec(
-            select(Student).where(Student.student_no == student_data["student_no"])
+            select(Student).where(Student.student_no == student_data.student_no)
             ).first()
     if existing:
         raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Student with ID '{student_data['student_no']}' already exists"
+                detail=f"Student with ID '{student_data.student_no}' already exists"
                 )
-    
+
     new_student = Student(
-            student_no=student_data["student_no"],
-            name=student_data["name"],
-            section_id=student_data["section_id"],
+            student_no=student_data.student_no,
+            name=student_data.name,
+            section_id=student_data.section_id,
             )
     session.add(new_student)
     session.commit()
     session.refresh(new_student)
-    
+
     return StudentResponse(
             student_no=new_student.student_no,
             name=new_student.name,
@@ -64,7 +54,7 @@ def add_new_student(
 @router.patch("/{student_no}", response_model=StudentResponse)
 def edit_student_details(
                 student_no: str,
-                update_data: dict,
+                update_data: UpdateStudentRequest,
                 session: Session = Depends(get_session)
                 ):
     """Edit student details"""
@@ -74,23 +64,23 @@ def edit_student_details(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Student with ID '{student_no}' not found"
                 )
-    
-    if "name" in update_data:
-        student.name = update_data["name"]
-    
-    if "section_id" in update_data:
-        section = session.get(Section, update_data["section_id"])
+
+    if update_data.name is not None:
+        student.name = update_data.name
+
+    if update_data.section_id is not None:
+        section = session.get(Section, update_data.section_id)
         if not section:
             raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Section with ID {update_data['section_id']} not found"
+                    detail=f"Section with ID {update_data.section_id} not found"
                     )
-        student.section_id = update_data["section_id"]
-    
+        student.section_id = update_data.section_id
+
     session.add(student)
     session.commit()
     session.refresh(student)
-    
+
     return StudentResponse(
             student_no=student.student_no,
             name=student.name,

@@ -1,12 +1,10 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
 
-  const { test_id } = $props();
-
+  const { test_id, isAddDialogOpen } = $props();
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
-  import MdiPlus from "~icons/mdi/plus";
 
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
@@ -62,17 +60,42 @@
       isOperationOngoing = false;
     }
   }
+
+  $effect(() => {
+    formItemIsProblemSolving;
+    formItemRQ = [{question: "", points: 1}];
+    formItemEA = {question: "", points: 1};
+  })
+
+  $effect(() => {
+    if (isAddDialogOpen) {
+      formItemLabel = "";
+      formItemQuestion = "";
+      formItemIsProblemSolving = false;
+      formItemRQ = [{question: "", points: 1}];
+      formItemEA = {question: "", points: 1};
+    }
+  });
 </script>
 
 
-<Dialog.Content class="max-h-[80vh] overflow-scroll">
+
+<Dialog.Content class="max-h-[80dvh] overflow-scroll">
   <Dialog.Header>
     <Dialog.Title>Add new test item</Dialog.Title>
   </Dialog.Header>
+  
   <Label for="item_label">Item label</Label>
-  <Input id="item_label" bind:value={formItemLabel} />
+  <Input id="item_label"
+          placeholder="Label..."
+          bind:value={formItemLabel}
+          />
+  
   <Label for="item_question">Question</Label>
-  <Textarea id="item_question" rows={4} bind:value={formItemQuestion} />
+  <Textarea id="item_question" rows={4}
+            placeholder="Question..."
+            bind:value={formItemQuestion}
+          />
   
   <Label>Type of question</Label>
   <RadioGroup.Root value="short_form"
@@ -93,32 +116,43 @@
   {#if formItemIsProblemSolving}
     <Label for="r_q"
             class="flex flex-row justify-between">
-      Rubric questions
-      <button class="px-1 py-0 m-0 bg-secondary"
-              onclick={() => {formItemRQ.push({question: "", points: 1})}}>
-        <MdiPlus class="size-3"/>
-      </button>
+      <span>
+        Rubric questions
+        <button class="rounded-sm px-1 py-0 my-0 ml-0.5
+                bg-secondary text-secondary-foreground/90"
+                onclick={() => {formItemRQ.push({question: "", points: 1})}}>
+          + Add
+        </button>
+      </span>
+      <span>Points</span>
     </Label>
     <div class="space-y-1">
-      {#each formItemRQ as item}
+      {#each formItemRQ as item, idx}
         <span class="flex flex-row gap-1">
           <Input id="r_q"
                   class="w-5/6"
-                  pattern="[^();]*"
+                  placeholder="Rubric {idx+1}..."
+                  pattern="[^\[\];]*"
                   bind:value={item.question} />
           <Input id="r_q" class="w-1/6"
                   type="number"
+                  placeholder="Points..."
                   bind:value={item.points} />
         </span>
       {/each}
     </div>
   
   {:else}
-    <Label for="e_a">Expected answer</Label>
+    <Label for="e_a"
+            class="flex flex-row justify-between">
+      <span>Expected answer</span>
+      <span>Points</span>
+    </Label>
     <span class="flex flex-row gap-1">
       <Input id="e_a"
               class="w-5/6"
-              pattern="[^();]*"
+              placeholder="Expected answer..."
+              pattern="[^\[\];]*"
               bind:value={formItemEA.question} />
       <Input id="e_a"
               class="w-1/6"
@@ -126,11 +160,12 @@
               bind:value={formItemEA.points} />
     </span>
   {/if}
+  
   <Dialog.Footer>
     <Button variant="outline"
             disabled={isOperationOngoing}
             onclick={() => addTestItem()}>
-      {isOperationOngoing ? "Adding..." : "Add item"}
+      {isOperationOngoing ? "Creating..." : "Create item"}
     </Button>
   </Dialog.Footer>
 </Dialog.Content>

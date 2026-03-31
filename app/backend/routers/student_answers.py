@@ -2,8 +2,8 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Response, status,
 from sqlmodel import Session, select
 from typing import List, Optional
 import uuid
-import json
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from models import *
 from schemas import *
@@ -20,7 +20,7 @@ TEMP_DIR = Path("static/images")
 
 # ==============================
 #region Endpoints
-@router.post("/{test_id}/{student_no}/image_preprocess")
+@router.post("/{test_id}/{student_no}/image_preprocess", response_model=ImagePreprocessResponse, status_code=status.HTTP_202_ACCEPTED)
 async def process_student_answer_image(
                 test_id: str,
                 student_no: str,
@@ -37,29 +37,25 @@ async def process_student_answer_image(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"BACKEND:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    print(f"INFO:\tProceeding to labeling the boxes.")
+    print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
     answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
-    return Response(
-            status_code=status.HTTP_202_ACCEPTED,
-            content=json.dumps({
-                "num_boxes": len(processed_list),
-                "boxes": boxes_info,
-            }),
-            media_type="application/json"
+    return ImagePreprocessResponse(
+            num_boxes=len(processed_list),
+            boxes=[BoxesItem(**b) for b in boxes_info],
             )
 
 
-@router.post("/{test_id}/{student_no}/label_save_boxes")
+@router.post("/{test_id}/{student_no}/label_save_boxes", response_model=LabelSaveBoxesResponse)
 async def scan_then_label_save_boxes(
                 test_id: str,
                 student_no: str,
@@ -75,19 +71,19 @@ async def scan_then_label_save_boxes(
     await _validate_request(test_id, student_no, session)
     contents_list = await _validate_files(files)
 
-    print(f"INFO:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
+    print(f"BACKEND:\tValidation checks have passed. Processing and segmenting {len(contents_list)} page(s) now.")
     try:
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-    print(f"INFO:\tProceeding to labeling the boxes.")
+    print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
 
-    return {
-            "num_boxes": len(processed_list),
-            "boxes": boxes_info,
-            }
+    return LabelSaveBoxesResponse(
+            num_boxes=len(processed_list),
+            boxes=[BoxesItem(**b) for b in boxes_info],
+            )
 
 
 @router.post("/{test_id}/{student_no}/commit_boxes")
@@ -104,7 +100,7 @@ async def commit_boxes_endpoint(
                     .where(TestInstance.test_id == test_id)
                     ).first()
     if not test_exists:
-        print("INFO:\ttest_exists failed")
+        print("BACKEND:\ttest_exists failed")
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Test with ID '{test_id}' not found"
@@ -115,20 +111,25 @@ async def commit_boxes_endpoint(
                         .where(Student.student_no == student_no)
                         ).first()
     if not student_exists:
-        print("INFO:\tstudent_exists failed")
+        print("BACKEND:\tstudent_exists failed")
         raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Student with student_no '{student_no}' not found"
                     )
 
     boxes_info = [box.model_dump() for box in request_body.boxes]
-    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    boxes_info_bad = [b for b in boxes_info if b["index"] < 0]
+    boxes_info_good = [b for b in boxes_info if b["index"] >= 0]
+
+    _delete_disregarded_record_imgs(boxes_info_bad)
+
+    answer_ids = _create_answer_records(boxes_info_good, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
-@router.patch("/{test_id}/{student_no}/{item_id}")
+@router.patch("/{test_id}/{student_no}/{item_id}", response_model=UpdateSegmentationResponse, status_code=status.HTTP_202_ACCEPTED)
 async def update_answer_segmentation(
             test_id: str,
             student_no: str,
@@ -167,12 +168,10 @@ async def update_answer_segmentation(
     contents = await file.read()
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
-    ## removed temporarily; FIXME: optimize parameters/see if it is being double-called
-    # img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
-    img_bytes = img_bytes_crop
+    img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
 
     # ===== SAVE IMAGE =====
-    safe_filename = f"{test_id}_{student_no}_{item_id}_{uuid.uuid4().hex}.jpg"
+    safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{item_id}.jpg"
     filepath = TEMP_DIR / safe_filename
     with open(filepath, "wb") as f:
         f.write(img_bytes)
@@ -184,14 +183,10 @@ async def update_answer_segmentation(
     answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
-    return Response(
-            status_code=status.HTTP_202_ACCEPTED,
-            content=json.dumps({"image_directory": image_dir}),
-            media_type="application/json"
-            )
+    return UpdateSegmentationResponse(image_directory=image_dir)
 
 
-@router.get("/{test_id}/statuses")
+@router.get("/{test_id}/statuses", response_model=TestStatusesResponse)
 def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session)):
     """Return per-student rendering status for a test instance"""
     instance = session.get(TestInstance, test_id)
@@ -249,20 +244,18 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 total_score += _parsed_scores[0]
                 max_score += _parsed_scores[1]
 
-        statuses.append({
-                "student_no": student.student_no,
-                "name": student.name,
-                "is_done_rendering": all_items_processed and has_any_answer,
-                "total_score": f"{total_score}/{max_score}",
-                })
-    
-    return {
-            "test_id": test_id,
-            "statuses": statuses
-            }
+        statuses.append(StudentStatusItem(
+                student_no=student.student_no,
+                name=student.name,
+                is_done_rendering=all_items_processed and has_any_answer,
+                has_any_answer=has_any_answer,
+                total_score=f"{total_score}/{max_score}",
+                ))
+
+    return TestStatusesResponse(test_id=test_id, statuses=statuses)
 
 
-@router.get("/{test_id}/results")
+@router.get("/{test_id}/results", response_model=TestResultsResponse)
 def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_session)):
     """Return AI evaluations per contract"""
     instance = session.get(TestInstance, test_id)
@@ -290,35 +283,32 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
             answers = session.exec(
                         select(StudentAnswer).where(StudentAnswer.paper_id == paper.paper_id)
                         ).all()
-            
+
             for answer in answers:
                 respectiveItem = session.exec(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
                 assert isinstance(respectiveItem, TestItem)
 
-                ai_evaluations.append({
-                            "item_id": answer.item_id,
-                            "answer_id": answer.answer_id,
-                            "label": respectiveItem.label,
-                            "question": respectiveItem.question,
-                            "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
-                            "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else ""
-                            })
-        
-        student_stores.append({
-                "student_no": student.student_no,
-                "name": student.name,
-                "evaluations": ai_evaluations
-                })
-    
-    return {
-            "test_id": test_id,
-            "students": student_stores
-            }
+                ai_evaluations.append(AIEvaluationItem(
+                            item_id=answer.item_id,
+                            answer_id=answer.answer_id,
+                            label=respectiveItem.label,
+                            question=respectiveItem.question,
+                            expected_answer_rubric_questions=respectiveItem.expected_answer_rubric_questions,
+                            ai_evaluation=answer.ai_evaluation if answer.ai_evaluation else "",
+                            ))
+
+        student_stores.append(StudentEvaluationsStore(
+                student_no=student.student_no,
+                name=student.name,
+                evaluations=ai_evaluations,
+                ))
+
+    return TestResultsResponse(test_id=test_id, students=student_stores)
 
 
-@router.get("/{test_id}/results/{student_no}")
+@router.get("/{test_id}/results/{student_no}", response_model=StudentResultsResponse)
 def get_ai_evaluation_results_per_student(
                 test_id: str,
                 student_no: str,
@@ -379,22 +369,22 @@ def get_ai_evaluation_results_per_student(
                                 answer.ai_evaluation
                                 )
             
-            ai_evaluations.append({
-                        "item_id": answer.item_id,
-                        "answer_id": answer.answer_id,
-                        "label": respectiveItem.label,
-                        "question": respectiveItem.question,
-                        "expected_answer_rubric_questions": respectiveItem.expected_answer_rubric_questions,
-                        "ai_evaluation": answer.ai_evaluation if answer.ai_evaluation else "",
-                        "scores": scores,
-                        })
-    
-    return {
-        "test_id": test_id,
-        "student_no": student_no,
-        "name": student.name,
-        "evaluations": ai_evaluations
-        }
+            ai_evaluations.append(AIEvaluationItemWithScores(
+                        item_id=answer.item_id,
+                        answer_id=answer.answer_id,
+                        label=respectiveItem.label,
+                        question=respectiveItem.question,
+                        expected_answer_rubric_questions=respectiveItem.expected_answer_rubric_questions,
+                        ai_evaluation=answer.ai_evaluation if answer.ai_evaluation else "",
+                        scores=scores,
+                        ))
+
+    return StudentResultsResponse(
+        test_id=test_id,
+        student_no=student_no,
+        name=student.name,
+        evaluations=ai_evaluations,
+        )
 
 
 @router.get("/{test_id}/{student_no}", response_model=List[StudentAnswerSummary])
@@ -547,17 +537,15 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
 
         ## ======== BOX SEGMENTING ========
         segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
-        ## removed temporarily; FIXME: optimize parameters/see if it is being double-called
-        # processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
-        processed_list = segmented_list
+        processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
 
-        print(f"INFO:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
+        print(f"BACKEND:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
 
     if num_boxes is not None:
         all_processed = all_processed[:num_boxes]
 
-    print(f"INFO:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
+    print(f"BACKEND:\tTotal boxes across {len(contents_list)} page(s): {len(all_processed)}")
     return all_processed
 
 
@@ -567,57 +555,97 @@ def _label_save_boxes(
                 processed_list: list[bytes],
                 session: Session
                 ) -> list[dict]:
-    boxes_info = []
-    for i, img_bytes in enumerate[bytes](processed_list):
-        # Extract item number using AI
-        test_item_labels = [ti.label
-                    for ti in session.exec(
-                        select(TestItem).where(
-                            TestItem.test_id == test_id
-                    )) if ti.label is not None]
+    ## Phase A: Hoist DB query — run once instead of once per box
+    test_item_labels = [ti.label
+                for ti in session.exec(
+                    select(TestItem).where(
+                        TestItem.test_id == test_id
+                )) if ti.label is not None]
 
+    ## Phase B: Parallelize Gemini API calls
+    def _classify_box(index: int, img_bytes: bytes) -> tuple[int, str]:
         try:
             item_number = AI_ANSWER_EVALUATOR.get_nearest_item_number(img_bytes, test_item_labels)
             if not item_number or item_number.strip() == "NONE":
-                item_number = "NONE"
-            else:
-                item_number = item_number.strip()
+                return (index, "NONE")
+            return (index, item_number.strip())
         except Exception as e:
-            print(f"INFO:\tFailed to extract item number for box {i}: {e}")
-            item_number = "NONE"
+            print(f"BACKEND:\tFailed to extract item number for box {index}: {e}")
+            return (index, "NONE")
 
-        print(f"INFO:\t{i}th detected label = {item_number}")
+    if not processed_list:
+        return []
+
+    ai_results: list[tuple[int, str] | None] = [None] * len(processed_list)
+    with ThreadPoolExecutor(max_workers=min(len(processed_list), 10)) as executor:
+        futures = {
+            executor.submit(_classify_box, i, img_bytes): i
+            for i, img_bytes in enumerate(processed_list)
+        }
+        for future in as_completed(futures):
+            try:
+                index, item_number = future.result()
+                ai_results[index] = (index, item_number)
+            except Exception as e:
+                i = futures[future]
+                print(f"BACKEND:\tUnexpected error classifying box {i}: {e}")
+                ai_results[i] = (i, "NONE")
+
+    ## Phase C: Sequential post-processing on main thread (DB lookups + file writes)
+    boxes_info = []
+    for result in ai_results:
+        if result is None:
+            continue
+        index, item_number = result
+        print(f"BACKEND:\t{index}th detected label = {item_number}")
 
         test_item = session.exec(
                         select(TestItem).where(
                             TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
-        
+
         if test_item is None:
-            print(f"INFO:\tItem not found because label={item_number} is not valid. Continuing...")
+            print(f"BACKEND:\tItem not found because label={item_number} is not valid. Continuing...")
             continue
 
-        print(f"INFO:\tLabel {item_number} will be stored in {test_item.item_id}")
+        print(f"BACKEND:\tLabel {item_number} will be stored in {test_item.item_id}")
 
         ## Generate filename
-        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{i}.jpg"
+        img_bytes = processed_list[index]
+        safe_filename = f"{test_id}_{student_no}_{uuid.uuid4().hex[:6]}_{index}.jpg"
         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._-")
         filepath = TEMP_DIR / safe_filename
-        
+
         ## Save image file
         with open(filepath, "wb") as f:
             f.write(img_bytes)
-        
+
         image_dir = f"/api/temp/{safe_filename}"
 
         boxes_info.append({
-                    "index": i,
+                    "index": index,
                     "image_directory": image_dir,
                     "item_number": item_number
                     })
 
     return boxes_info
+
+
+def _delete_disregarded_record_imgs(boxes_info: list[dict]):
+    """Delete image files for boxes marked as discarded (index < 0)."""
+    for box in boxes_info:
+        image_dir = box.get("image_directory")
+        if not image_dir:
+            continue
+        filename = image_dir.split("/")[-1]
+        if filename:
+            image_path = TEMP_DIR / filename
+            if image_path.exists():
+                try:
+                    image_path.unlink()
+                except Exception as e:
+                    print(f"BACKEND:\tFailed to delete discarded image {filename}: {e}")
 
 
 def _create_answer_records(
@@ -689,14 +717,14 @@ def _evaluate_answers_background(answer_ids: list[int]):
             try:
                 evaluate_image_logic(answer_id, session)
             except Exception as e:
-                print(f"INFO:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
+                print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
                 answer = session.get(StudentAnswer, answer_id)
                 if answer:
                     answer.is_done_rendering = True
                     answer.ai_evaluation = f"_ERROR: {e}"
                     session.commit()
     except Exception as e:
-        print(f"INFO:\tBackground evaluation failed: {e}")
+        print(f"BACKEND:\tBackground evaluation failed: {e}")
         session.rollback()
     finally:
         session.close()

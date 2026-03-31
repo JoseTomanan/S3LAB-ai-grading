@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
   let { filename, onchange } = $props();
 
 	import { Input } from '$lib/components/ui/input/index.ts';
@@ -6,7 +7,7 @@
   import IconCheck from "~icons/mdi/check";
 	import { Label } from '$lib/components/ui/label/index.ts';
 
-  let newFilename: string = $state(filename);
+  let newFilename: string = $state(untrack(() => filename));
 </script>
 
 

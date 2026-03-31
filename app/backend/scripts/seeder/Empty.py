@@ -1,10 +1,6 @@
 """
 Development database seeder for an EMPTY dev DB.
 Run ONLY in development environment to create/reset an empty test.db (no rows).
-Usage from project root:
-    python -m app.backend.functionality.seeder_Empty
-Usage from app/backend directory:
-    python functionality/seeder_Empty.py
 """
 import sys
 from pathlib import Path

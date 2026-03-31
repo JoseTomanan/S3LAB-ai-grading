@@ -85,3 +85,6 @@ npm run format  # prettier --write
 ### Code Style
 - Tabs for indentation, single quotes (configured in `.prettierrc`)
 - shadcn-svelte components live in `src/lib/components/ui/` — add new ones via `npx shadcn-svelte@latest add <component>`
+
+## Browser automation
+For any UI review, testing, or visual verification tasks, read PLAYWRIGHT.md first.

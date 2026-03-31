@@ -1,11 +1,11 @@
 <script lang="ts">
   const { data } = $props();
 
-  import MdiCheckboxBlankOutline from '~icons/mdi/checkbox-blank-outline';
-  import MdiCheckboxMarkedOutline from '~icons/mdi/checkbox-marked-outline';
-  import MdiPaperAddOutline from '~icons/mdi/paper-add-outline';
+  import MdiPaperAddOutline from '~icons/mdi/paper-add';
   import IconHome from '~icons/mdi/home-outline';
-  import IconArrow from '~icons/mdi/arrow-up';
+  import IconSections from '~icons/mdi/people';
+  import IconDone from '~icons/mdi/checkbox-marked-circle';
+  import IconNotDone from '~icons/mdi/checkbox-blank-circle';
 
   import type { TestInstance } from '$lib/index.ts';
 
@@ -19,44 +19,52 @@
 </script>
 
 
+
 <div class="container">
   <span class="flex flex-row items-center justify-between mb-4">
     <span class="flex flex-row gap-x-2">
-      <a href="/">
-        <IconHome class="size-8"/>
+      <a href="/" class="bg-white shadow-sm rounded-full">
+        <IconHome class="size-8 text-primary foregroundize" />
       </a>
     </span>
     <h1>Test instances</h1>
+    <a href="/sections">
+      <IconSections class="size-8 text-primary foregroundize"/>
+    </a>
+  </span>
+
+  <div class="flex flex-col gap-3 relative">
     <Dialog.Root>
-      <Dialog.Trigger class="button-primary">
-        <MdiPaperAddOutline class="size-6"/>
+      <Dialog.Trigger class="button-outline flex flex-row gap-x-2 items-center justify-center font-semibold
+                              *:opacity-90 *:font-semibold">
+        <MdiPaperAddOutline class="size-5"/>
+        <b>Add new test instance</b>
       </Dialog.Trigger>
       <AddTestInstance />
     </Dialog.Root>
-  </span>
-  <div class="flex flex-col gap-3 relative">
-    <a href="/sections" class="w-fit text-base opacity-60 hover:underline">
-      Go to sections ↗
-    </a>
+    
     {#if instances.length == 0}
       <div class="absolute top-0 right-0
-                  flex flex-col items-end text-right mt-2 opacity-60">
-        <IconArrow class="size-10"/>
-        <p>No test instances yet.<br>Tap here to add one!</p>
+                  flex flex-col items-center text-center mt-2 opacity-60">
+        <p>No test instances yet. Tap above to add one!</p>
       </div>
+    
     {:else}
       {#each paginationValues as instance}
         <Card href="/instances/{instance.test_id}/items"
               class="button-outline">
-          <span class="flex flex-row items-center gap-1">
+          <h3>
+            {instance.name} &middot; {instance.test_id.split("_")[0]}
+          </h3>
+          <h5 class="font-normal flex flex-row items-center gap-x-2 ml-0.5
+                      *:size-3 *:opacity-60">
             {#if instance.is_done_rendering}
-              <MdiCheckboxMarkedOutline/>
+              <IconDone/>
             {:else}
-              <MdiCheckboxBlankOutline/>
+              <IconNotDone/>
             {/if}
-            <h3>{ instance.name }</h3>
-          </span>
-          <h5>{ instance.test_id.split("_")[0] } &middot; { new Date(instance.date).toLocaleDateString() }</h5>
+            Created {new Date(instance.date).toLocaleDateString()}
+          </h5>
         </Card>
       {/each}
     {/if}

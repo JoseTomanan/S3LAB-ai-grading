@@ -14,7 +14,7 @@ GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
 
 if __name__ == "__main__":
     BOX_SEGMENTER = BoxSegmenter()
-    AI_EVALUATOR = AIAnswerEvaluator()
+
     for file in FILENAMES:
         _onlyfilename = file.split(".")[0]
         BOX_SEGMENTER.debug_dir = f"./TEMP/output/{_onlyfilename}"
