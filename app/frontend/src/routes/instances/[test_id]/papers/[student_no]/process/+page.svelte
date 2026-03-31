@@ -17,6 +17,7 @@
   import IconFlipHorizontally from "~icons/mdi/flip-horizontal";
   import IconFlipVertically from "~icons/mdi/flip-vertical";
 
+  import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
@@ -207,9 +208,14 @@
         <Switch id="isAlreadyScanned"
                 bind:checked={paramScannedAlready}
               />
-        <Label for="isAlreadyScanned">
-          Pre-scanned
-        </Label>
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            <Label for="isAlreadyScanned">Pre-scanned</Label>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            Document has already been scanned
+          </Tooltip.Content>
+        </Tooltip.Root>
       </span>
     </div>
   <!-- </div> -->
