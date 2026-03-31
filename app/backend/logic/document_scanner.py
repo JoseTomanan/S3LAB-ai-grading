@@ -3,7 +3,7 @@ from typing import Callable
 import numpy as np
 import cv2
 from cv2.typing import MatLike
-from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_AREA, MAX_ASPECT_RATIO
+from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_PAGE_AREA, MAX_ASPECT_RATIO, BORDER_MARGIN_RATIO
 from utils import mapp, get_robust_aspect_ratio, is_valid_quad
 
 
@@ -11,6 +11,8 @@ from utils import mapp, get_robust_aspect_ratio, is_valid_quad
 # ================================
 #region Class
 class DocumentScanner:
+    debug_dir = "./TEMP/output/DEBUG"
+
     def scan_page(self,
                     image_bytes: bytes,
                     debug: bool = False,
@@ -22,31 +24,47 @@ class DocumentScanner:
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_cannied),
-                        "./TEMP/output/DEBUG/CANNY.jpg"
+                        f"{self.debug_dir}/CANNY.jpg"
                         )
 
         contours, _ = cv2.findContours(image_cannied, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
 
-        image_good_contour = None
+        candidates = []
         for i, c in enumerate(contours):
             perimeter = cv2.arcLength(c, True)
             approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
-            
+
             if debug:
                 debug_img = self._highlight_contours(image_cannied, approximate, c)
                 self.save_image(
                             self._encode_to_bytes(debug_img),
-                            f"./TEMP/output/DEBUG/CONTOUR_{i}.jpg"
+                            f"{self.debug_dir}/CONTOUR_{i}.jpg"
                             )
             if len(approximate) == 4:
                 candidate = approximate.reshape(4, 2)
-                if self._is_good_page_contour(candidate):
-                    image_good_contour = candidate
-                    break
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    is_border = self._is_border_contour(candidate, image_cannied.shape)
+                    candidates.append((candidate, is_border, c))
+
+        image_good_contour = self._pick_best_contour(candidates)
+
+        if image_good_contour is not None and debug:
+            selected_quad, _, selected_c = next(
+                (item for item in candidates if np.array_equal(item[0], image_good_contour)), (image_good_contour, None, None)
+            )
+            contour_img = self._highlight_contours(image_original, image_good_contour.reshape((-1, 1, 2)).astype(np.int32), selected_c if selected_c is not None else image_good_contour.reshape((-1, 1, 2)).astype(np.int32))
+            self.save_image(
+                        self._encode_to_bytes(contour_img),
+                        f"{self.debug_dir}/_00_SCANNEDCONTOUR.jpg"
+                        )
 
         if image_good_contour is None:
             image_good_contour = self._fallback_otsu_detection(image_original)
+
+        if image_good_contour is None:
+            image_good_contour = self._fallback_low_contrast_detection(image_original)
 
         if image_good_contour is None:
             raise ValueError("Could not find document outline.")
@@ -119,7 +137,8 @@ class DocumentScanner:
                           image_mat: MatLike,
                           canny_thresholds: tuple[int,int] = (75, 200),
                           gaussian_blur_kernel_size: tuple[int,int] | None = (5,5),
-                          additional_pre_canny_step: Callable[[MatLike], MatLike] | None = None
+                          additional_pre_canny_step: Callable[[MatLike], MatLike] | None = None,
+                          clahe_clip_limit: float = 0.5
                           ) -> list[MatLike]:
         """Step before contour ranking. Resize, greyscale, blur, then canny to reduce noises in image."""
         h, w, _ = image_mat.shape
@@ -129,7 +148,7 @@ class DocumentScanner:
                                     (int(NORMAL_SIZE*ratio), NORMAL_SIZE)
                                     )
         iterated_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-        iterated_img = cv2.createCLAHE(clipLimit=0.5, tileGridSize=(8,8)) \
+        iterated_img = cv2.createCLAHE(clipLimit=clahe_clip_limit, tileGridSize=(8,8)) \
                             .apply(iterated_img)    # CLAHE
 
         if gaussian_blur_kernel_size is not None:
@@ -176,11 +195,15 @@ class DocumentScanner:
 
         return image_warped
 
-    def _is_good_page_contour(self, approximate: MatLike) -> bool:
+    def _is_good_page_contour(self, approximate: MatLike, original_contour_area: float | None = None) -> bool:
         """Validate that a 4-point contour is a plausible page outline."""
         contour = approximate.reshape((-1, 1, 2)).astype(np.int32)
         area = cv2.contourArea(contour)
-        if not (MIN_PAGE_AREA <= area <= MAX_AREA):
+        if not (MIN_PAGE_AREA <= area <= MAX_PAGE_AREA):
+            return False
+        ## Also reject if the original (un-approximated) contour is too large;
+        ## rounded shapes like binder edges can approximate to a smaller quad that passes the area check.
+        if original_contour_area is not None and original_contour_area > MAX_PAGE_AREA:
             return False
 
         quad = approximate.reshape(4, 2)
@@ -193,6 +216,33 @@ class DocumentScanner:
 
         return True
 
+    def _is_border_contour(self, quad: MatLike, image_shape: tuple) -> bool:
+        """Return True if 3 or more corners of quad are near the image border.
+        Contours hugging the border are likely the scene boundary (e.g. binder edge), not the paper."""
+        h, w = image_shape[:2]
+        margin = BORDER_MARGIN_RATIO * max(h, w)
+        is_near_border_count = sum(
+            1 for (x, y) in quad
+            if x < margin or x > w - margin or y < margin or y > h - margin
+        )
+        return is_near_border_count >= 3
+
+    def _pick_best_contour(self, candidates: list) -> MatLike | None:
+        """From a list of (quad, is_border, original_contour) tuples, return the best quad.
+        Prefers non-border contours. Among ties, picks the first (largest by area, since
+        candidates are already in descending area order)."""
+        if not candidates:
+            return None
+        if len(candidates) == 1:
+            return candidates[0][0]
+
+        non_border = [quad for quad, is_border, _ in candidates if not is_border]
+        if non_border:
+            return non_border[0]
+
+        ## All candidates are border contours — fall back to the largest (first)
+        return candidates[0][0]
+
     def _fallback_otsu_detection(self, image_original: MatLike):
         """Fallback: use Otsu threshold to find white paper on dark background."""
         gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
@@ -202,15 +252,45 @@ class DocumentScanner:
         contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
 
+        candidates = []
         for c in contours:
             perimeter = cv2.arcLength(c, True)
             approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
             if len(approximate) == 4:
                 candidate = approximate.reshape(4, 2)
-                if self._is_good_page_contour(candidate):
-                    return candidate
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    is_border = self._is_border_contour(candidate, binary.shape)
+                    candidates.append((candidate, is_border, c))
 
-        return None
+        return self._pick_best_contour(candidates)
+
+    def _fallback_low_contrast_detection(self, image_original: MatLike):
+        """Fallback for low-contrast scenes (e.g. cream paper on gray desk).
+        Uses bilateral filter (edge-preserving) + boosted CLAHE + lower Canny thresholds."""
+        _, enhanced_edges = self._regularize_image(
+            image_original,
+            canny_thresholds=(25, 75),
+            gaussian_blur_kernel_size=None,
+            additional_pre_canny_step=lambda img: cv2.bilateralFilter(img, 9, 75, 75),
+            clahe_clip_limit=2.0
+        )
+
+        contours, _ = cv2.findContours(enhanced_edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        candidates = []
+        for c in contours:
+            perimeter = cv2.arcLength(c, True)
+            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            if len(approximate) == 4:
+                candidate = approximate.reshape(4, 2)
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    is_border = self._is_border_contour(candidate, enhanced_edges.shape)
+                    candidates.append((candidate, is_border, c))
+
+        return self._pick_best_contour(candidates)
 
     def _highlight_contours(self, image_mat: MatLike, approxPolyDpResult: MatLike, contour: MatLike) -> MatLike:
         """FOR DEBUGGING; Highlight contours and add detected # of verts."""
