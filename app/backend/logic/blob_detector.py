@@ -245,14 +245,15 @@ class BlobDetector:
             if not (min_area <= area <= max_area):
                 continue
 
-            perimeter = cv2.arcLength(contour, True)
-            if perimeter == 0:
+            hull = cv2.convexHull(contour)
+            hull_perimeter = cv2.arcLength(hull, True)
+            if hull_perimeter == 0:
                 continue
-            circularity = 4 * math.pi * area / (perimeter * perimeter)
+            circularity = 4 * math.pi * area / (hull_perimeter * hull_perimeter)
             if circularity < MIN_CIRCULARITY:
                 continue
 
-            hull_area = cv2.contourArea(cv2.convexHull(contour))
+            hull_area = cv2.contourArea(hull)
             if hull_area == 0:
                 continue
             solidity = area / hull_area

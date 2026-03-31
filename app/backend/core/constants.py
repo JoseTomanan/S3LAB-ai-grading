@@ -1,3 +1,10 @@
+"""
+To the next consumers of this code:
+The size/complexity of the backend codebase is absolutely impossible to digest without the help of an LLM CLI.
+I kid you not, the way I developed the technology behind this, is by creating sample images that I want it to 'pass for', then make Claude iterate itself from there.
+So this is --- quite practically --- a CNN if you think about it.
+If you are looking for a nudge to go ahead and get a subscription : here's your sign.
+"""
 import math
 
 
@@ -25,7 +32,7 @@ SECTION_CORNER_ANGLE_TOL = 9.0
 AREA_FACTOR = (NORMAL_SIZE/1000)**2
 MIN_DOT_AREA = AREA_FACTOR * 50
 MAX_DOT_AREA = AREA_FACTOR * 8000
-MIN_CIRCULARITY = 0.35  # TEMPORARY REDUCTION FROM 0.40; TODO: Add antialiasing then bring back orig value
+MIN_CIRCULARITY = 0.40
 MIN_SOLIDITY = 0.65
 MIN_BBOX_ASPECT = 0.35
 DOT_DEDUP_DIST = math.sqrt(MAX_DOT_AREA) / 2.5  # ~73px at NORMAL_SIZE=2048
