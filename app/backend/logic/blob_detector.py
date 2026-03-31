@@ -3,18 +3,8 @@ import math
 from cv2.typing import MatLike
 import cv2
 import numpy as np
-from core.constants import NORMAL_SIZE
+from core.constants import *
 
-
-
-AREA_FACTOR = (NORMAL_SIZE/1000)**2
-MIN_DOT_AREA = AREA_FACTOR * 50
-MAX_DOT_AREA = AREA_FACTOR * 8000
-MIN_CIRCULARITY = 0.40
-MIN_SOLIDITY = 0.65
-MIN_BBOX_ASPECT = 0.35
-DOT_DEDUP_DIST = math.sqrt(MAX_DOT_AREA) / 2.5  # ~73px at NORMAL_SIZE=2048
-MAX_RING_DENSITY = 0.30  # max white-pixel density in ring around dot (filters handwriting clutter)
 
 
 #region Auxiliary functions
