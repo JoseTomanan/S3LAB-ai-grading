@@ -1,14 +1,13 @@
+from pathlib import Path
+
 from logic.ai_interface import AIAnswerEvaluator
 from logic.box_segmenter import BoxSegmenter
 
 
 
-FILENAMES = [
-    "properTest1.jpeg",
-    "properTest2.jpeg",
-    ]
 GET_INPUT = lambda x : f"./TEMP/input/{x}"
 GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
+FILENAMES = [f.name for f in Path("./TEMP/input").iterdir() if f.name.lower().startswith("proper")]
 
 
 
