@@ -40,7 +40,7 @@ class BoxSegmenter(DocumentScanner):
         """From image, use marker dots to find section corners."""
         BLOB_DETECTOR = BlobDetector(image_cannied)
 
-        image_binarized = ImageModifier().pseudocanny(image_original)
+        image_binarized = ImageModifier().pseudocanny(image_original, C=18, gaussian_blur_kernel_size=(7, 7))
         if debug:
             self.save_image(self._encode_to_bytes(image_binarized), f"{self.debug_dir}/_01B_binarized.jpg")
 
@@ -128,7 +128,7 @@ class BoxSegmenter(DocumentScanner):
                 contour = q.reshape((-1, 1, 2)).astype(np.int32)
                 debug_img = self._highlight_contours(image_original, contour, contour)
                 self.save_image(self._encode_to_bytes(debug_img),
-                                    f"{self.debug_dir}/_06_sections/box{i}.jpg" )
+                                    f"{self.debug_dir}/_06_section{i}.jpg" )
 
         return deduped_quads
 
@@ -406,4 +406,4 @@ if __name__ == "__main__":
     images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
-        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
+        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/boxed/{i}.jpg"))

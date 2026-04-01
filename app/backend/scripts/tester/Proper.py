@@ -24,5 +24,5 @@ if __name__ == "__main__":
 
         for i, b in enumerate(images_after_box):
             image_beautified = BOX_SEGMENTER.beautify_scan(b)
-            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section_{i}.jpg"))
+            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/boxed/{i}.jpg"))
         print("================================")
