@@ -235,7 +235,7 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
     for s in students:
         rowKey = s.name
         print(f"INTERNAL:\tEvaluating {rowKey}...")
-        SHEETS_EXPORTER.add_student(rowKey)
+        SHEETS_EXPORTER.add_student(rowKey, s.student_no)
         paper = session.exec(
                             select(TestPaperInstance)
                             .where(TestPaperInstance.student_no == s.student_no)

@@ -8,9 +8,11 @@ class SheetsExporter:
         self.columns: list[str] = columns
         self.sheet_items: dict[str, dict[str,float|None]] = {}
         self.max_scores: dict[str, float | int] | None = max_scores
+        self.student_numbers: dict[str, str] = {}
 
-    def add_student(self, key_name: str):
+    def add_student(self, key_name: str, student_no: str):
         self.sheet_items[key_name] = {i: -1 for i in self.columns}
+        self.student_numbers[key_name] = student_no
 
     def append(self, key_name: str, num_to_score: dict[str, float|None]):
         if key_name not in self.sheet_items:
@@ -23,12 +25,13 @@ class SheetsExporter:
 
         sheet = wb.active
         assert sheet is not None
-        sheet.column_dimensions['A'].width = 25
+        sheet.column_dimensions['A'].width = 15
+        sheet.column_dimensions['B'].width = 25
 
         for item in self.columns:
             sheet.cell(
                     row=1,
-                    column=self.columns.index(item)+2,
+                    column=self.columns.index(item)+3,
                     value=item
                     )
 
@@ -38,17 +41,20 @@ class SheetsExporter:
 
         data_start_row = 2
         if self.max_scores is not None:
+            sheet.cell(row=2, column=1).border = medium_bottom
+            sheet.cell(row=2, column=2).border = medium_both
             for item in self.columns:
-                col = self.columns.index(item)+2
+                col = self.columns.index(item)+3
                 cell = sheet.cell(row=2, column=col, value=self.max_scores.get(item, ""))
                 cell.border = medium_bottom
-            sheet.cell(row=2, column=1).border = medium_both
             data_start_row = 3
 
         students_list = list(self.sheet_items.keys())
 
         for idx, key_name in enumerate(students_list):
-            cell = sheet.cell(row=idx+data_start_row, column=1, value=key_name)
+            row = idx+data_start_row
+            sheet.cell(row=row, column=1, value=self.student_numbers[key_name])
+            cell = sheet.cell(row=row, column=2, value=key_name)
             cell.border = medium_right
 
         for idx, key_name in enumerate(students_list):
@@ -56,7 +62,7 @@ class SheetsExporter:
                 value = self.sheet_items[key_name][item]
                 sheet.cell(
                         row=idx+data_start_row,
-                        column=self.columns.index(item)+2,
+                        column=self.columns.index(item)+3,
                         value=value if value is not None else ""
                         )
 
