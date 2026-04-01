@@ -6,18 +6,16 @@
 /TEMP/input/quads/**/*
 /TEMP/input/*
 /TEMP/output/**/*.jpg
+/TEMP/**.py
 ## ================================
 
 
 /static/images/*
 !/static/images/.gitkeep
 
-/backend/test_report.txt
 *.pyc
 
 test.db
 database.db
-
-**/test_*.py
 
 # THERES MORE TO ADD IM JUST FORGETTING
