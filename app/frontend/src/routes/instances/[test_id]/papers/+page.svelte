@@ -2,7 +2,7 @@
   import { API_URL } from '$lib/constants.ts';
   const { data } = $props();
 
-  import { onMount, onDestroy, untrack } from "svelte";
+  import { onDestroy, untrack } from "svelte";
 
   import IconStatusDone from '~icons/mdi/paper-check-outline';
   import IconStatusUndone from '~icons/mdi/paper-outline';
@@ -31,7 +31,7 @@
     return perStudentStatuses.length > 0 && perStudentStatuses.every(s => !s.has_any_answer || s.is_all_answers_evaluated);
   }, 5000);
 
-  onMount(() => {
+  $effect(() => {
     if (isPolling) {
       poller.start();
     }
