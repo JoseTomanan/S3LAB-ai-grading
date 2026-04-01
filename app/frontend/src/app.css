@@ -191,6 +191,30 @@
   .button-destructive:hover {
     opacity: 80%;
   }
+
+  .button-floating {
+    background-color: var(--color-white);
+    @apply shadow;
+    /* @apply shadow-chart-5/20; */
+    @apply rounded-full;
+    @apply h-fit;
+  }
+  .button-floating > * {
+    @apply size-8;
+    color: var(--chart-4);
+  }
+
+  .button-floating-secondary {
+    background-color: var(--color-white);
+    @apply shadow;
+    /* @apply shadow-chart-2/20; */
+    @apply rounded-full;
+    @apply h-fit;
+  }
+  .button-floating-secondary > * {
+    @apply size-8;
+    color: var(--chart-2);
+  }
 }
 
 
@@ -206,11 +230,6 @@
     @apply shadow-xs;
     @apply ring ring-border border-0;
     cursor: pointer;
-  }
-
-  .foregroundize {
-    @apply saturate-200;
-    @apply brightness-60;
   }
 }
 

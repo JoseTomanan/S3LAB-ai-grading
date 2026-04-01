@@ -9,22 +9,23 @@
   import BulkUpload from './BulkUpload.svelte';
   import ExportSheets from './ExportSheets.svelte';
 
-  import IconBack from '~icons/mdi/arrow-back';
+  import IconInstancesList from '~icons/mdi/format-list-bulleted';
+  import IconBack from '~icons/mdi/chevron-left';
   import IconTable from '~icons/mdi/table';
   import IconUpload from '~icons/mdi/tray-upload';
-  import IconHome from '~icons/mdi/home';
 
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
+  let isBulkUploadOpen: boolean = $state(false);
 
   let testItemsContext: TestItemsContext = $state({items: untrack(() => data.test_items!), isLoading: false});
   $effect(() => {
@@ -38,15 +39,14 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
-      <a href="/instances"
-          class="bg-white shadow-sm rounded-full">
-        <IconHome class="size-8 text-primary foregroundize" />
-      </a>
-      <h1>{ activeTestInstance.name }</h1>
-      <button class="p-0 size-8 cursor-pointer"
+      <button class="button-floating"
               onclick={() => goto("..")}>
-        <IconBack class="size-full" />
+        <IconBack/>
       </button>
+      <h1>{ activeTestInstance.name }</h1>
+      <a href="/instances" class="button-floating">
+        <IconInstancesList class="size-7 m-0.5"/>
+      </a>
     </span>
     
     <Separator/>
@@ -93,12 +93,16 @@
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
-        <Sheet.Root>
+        <Sheet.Root bind:open={isBulkUploadOpen}>
           <Sheet.Trigger class="button-primary"
                           title={"Bulk upload"}>
             <IconUpload class="size-6"/>
           </Sheet.Trigger>
-          <BulkUpload test_instance={activeTestInstance}/>
+          <BulkUpload test_instance={activeTestInstance}
+                      defaultNumBoxes={data.test_items?.length ?? 2}
+                      onuploadcomplete={invalidateAll}
+                      open={isBulkUploadOpen}
+                  />
         </Sheet.Root>
       </span>
     </div>

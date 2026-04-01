@@ -17,6 +17,7 @@
   import IconFlipHorizontally from "~icons/mdi/flip-horizontal";
   import IconFlipVertically from "~icons/mdi/flip-vertical";
 
+  import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
@@ -123,6 +124,15 @@
 
   onDestroy(() => commitPoller.stop());
 
+  function resetPage() {
+    commitPoller.stop();
+    isCommitmentOngoing = false;
+    isAskingForValidation = false;
+    supposedScans = [];
+    formFileRecords = [];
+    formFiles = undefined;
+  }
+
   async function validateAndCommit(accept: boolean) {
     if (isCommitmentOngoing === true)
       return;
@@ -207,9 +217,14 @@
         <Switch id="isAlreadyScanned"
                 bind:checked={paramScannedAlready}
               />
-        <Label for="isAlreadyScanned">
-          Pre-scanned
-        </Label>
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            <Label for="isAlreadyScanned">Pre-scanned</Label>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            Document has already been scanned
+          </Tooltip.Content>
+        </Tooltip.Root>
       </span>
     </div>
   <!-- </div> -->
@@ -288,7 +303,13 @@
         ? "Answers are being evaluated in the background. You may go back to the Papers screen now."
         : "Note that segmentation results are ephemeral, and switching out of this screen will discard them."}
     </h6>
-  
+
+    {#if isCommitmentOngoing}
+      <Button variant="outline" onclick={resetPage}>
+        Reset page
+      </Button>
+    {/if}
+
   {/if}
   </div>
 </div>

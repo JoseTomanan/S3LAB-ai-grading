@@ -2,8 +2,8 @@
   const { data } = $props();
 
   import MdiPeopleAdd from "~icons/mdi/people-add";
-  import IconHome from '~icons/mdi/home-outline';
-  import IconPapers from '~icons/mdi/paper';
+  import IconHome from '~icons/mdi/home';
+  import IconPapers from '~icons/mdi/text-box-multiple-outline';
 
   import type { Section } from "$lib/index.ts";
   import Pagination from "$lib/components/Pagination.svelte";
@@ -16,16 +16,19 @@
 </script>
 
 
+<nav class="w-full flex flex-row items-center justify-between mb-4
+            px-4 pt-6">
+  <a href="/" class="button-floating">
+    <IconHome/>
+  </a>
+  <h1>Sections</h1>
+  <a href="/instances" class="button-floating">
+    <IconPapers class="size-6 m-1"/>
+  </a>
+</nav>
+<span class="-my-7"></span>
+
 <div class="container">
-  <span class="flex flex-row items-center justify-between mb-4">
-    <a href="/" class="bg-white shadow-sm rounded-full">
-      <IconHome class="size-8 text-primary foregroundize" />
-    </a>
-    <h1>Sections</h1>
-    <a href="/instances">
-      <IconPapers class="size-7 text-primary foregroundize"/>
-    </a>
-  </span>
   <div class="flex flex-col gap-3 relative">
     <Dialog.Root>
       <Dialog.Trigger class="button-outline flex flex-row gap-x-2 justify-center 

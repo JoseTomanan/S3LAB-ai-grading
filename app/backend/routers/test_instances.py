@@ -246,6 +246,13 @@ def delete_test_instance(test_id: str, session: Session = Depends(get_session)):
 @router.get("/{test_id}/export")
 def export_test_results(test_id: str, session: Session = Depends(get_session)):
     """Export test results as Excel spreadsheet"""
+    instance = session.get(TestInstance, test_id)
+    if not instance:
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Test instance with ID '{test_id}' not found"
+                )
+
     workbook = populate_spreadsheet_logic(test_id, session)
     
     # Create DataFrame and Excel file

@@ -18,8 +18,16 @@ class BoxSegmenter(DocumentScanner):
     debug_dir = "./TEMP/output/DEBUG"
 
     def get_answer_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """Use dots to find section corners, then lines to verify rectangle that serves as section."""
+        """
+        [WRAPPER] Use dots to find section corners, then lines to verify rectangle that serves as section.
+        """
         image = self._decode_bytes(image_bytes)
+        list_images_processed = self.get_answer_sections_mat(image, num_boxes, debug)
+        return [self._encode_to_bytes(i) for i in list_images_processed]
+
+    def get_answer_sections_mat(self, image: MatLike, num_boxes: int, debug: bool = False) -> list[MatLike]:
+        """Use dots to find section corners, then lines to verify rectangle.
+        MatLike in, list[MatLike] out."""
         image_original, image_cannied = self._regularize_image(image, canny_thresholds=(30,150),
                                                                 gaussian_blur_kernel_size=None)
         # image_dilated = self._dilate_edges(image_cannied)
@@ -33,14 +41,13 @@ class BoxSegmenter(DocumentScanner):
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
 
-        images_warped = [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
-        return [self._encode_to_bytes(i) for i in images_warped]
+        return [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
 
     def _detect_dots(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False) -> list[list[float]]:
         """From image, use marker dots to find section corners."""
         BLOB_DETECTOR = BlobDetector(image_cannied)
 
-        image_binarized = ImageModifier().pseudocanny(image_original)
+        image_binarized = ImageModifier().pseudocanny(image_original, C=18, gaussian_blur_kernel_size=(7, 7))
         if debug:
             self.save_image(self._encode_to_bytes(image_binarized), f"{self.debug_dir}/_01B_binarized.jpg")
 
@@ -110,7 +117,8 @@ class BoxSegmenter(DocumentScanner):
                 if 1/MAX_ASPECT_RATIO <= aspect_ratio <= MAX_ASPECT_RATIO:
                     print(f"BACKEND:\tAccepted dot-quad {i} (area={area:.0f}, AR={aspect_ratio:.2f})")
                     valid_quads.append(q)
-                else:
+                elif 1/(MAX_ASPECT_RATIO*2) <= aspect_ratio <= MAX_ASPECT_RATIO*2:
+                    ## Only debug print those that were actually close to the expected value 
                     print(f"BACKEND:\tBad ratio, AR={aspect_ratio:.2f}.")
             else:
                 continue
@@ -127,16 +135,23 @@ class BoxSegmenter(DocumentScanner):
                 contour = q.reshape((-1, 1, 2)).astype(np.int32)
                 debug_img = self._highlight_contours(image_original, contour, contour)
                 self.save_image(self._encode_to_bytes(debug_img),
-                                    f"{self.debug_dir}/_06_sections/box{i}.jpg" )
+                                    f"{self.debug_dir}/_06_section{i}.jpg" )
 
         return deduped_quads
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
-        """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
-        array = self._decode_bytes(image_bytes)
-        img_contrasted = self._adjust_contrast(array, amount=1.3)
-        return self._encode_to_bytes(img_contrasted)
+        """
+        [WRAPPER] Enhance scan by adjusting contrast and brightening.
+        """
+        image = self._decode_bytes(image_bytes)
+        image_processed = self.beautify_scan_mat(image)
+        return self._encode_to_bytes(image_processed)
+
+    def beautify_scan_mat(self, image: MatLike) -> MatLike:
+        """Enhance scan by adjusting contrast.
+        MatLike in, MatLike out."""
+        return self._adjust_contrast(image, amount=1.3)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""
@@ -405,4 +420,4 @@ if __name__ == "__main__":
     images_after_box = BOX_SEGMENTER.get_answer_sections(image_before, num_boxes=3, debug=True)
 
     for i, b in enumerate(images_after_box):
-        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section{i}.jpg"))
+        BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/boxed/{i}.jpg"))

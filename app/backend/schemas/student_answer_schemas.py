@@ -51,6 +51,7 @@ class StudentStatusItem(BaseModel):
     student_no: str
     name: str
     is_done_rendering: bool
+    is_all_answers_evaluated: bool
     has_any_answer: bool
     total_score: str
 

@@ -3,18 +3,8 @@ import math
 from cv2.typing import MatLike
 import cv2
 import numpy as np
-from core.constants import NORMAL_SIZE
+from core.constants import *
 
-
-
-AREA_FACTOR = (NORMAL_SIZE/1000)**2
-MIN_DOT_AREA = AREA_FACTOR * 50
-MAX_DOT_AREA = AREA_FACTOR * 8000
-MIN_CIRCULARITY = 0.40
-MIN_SOLIDITY = 0.65
-MIN_BBOX_ASPECT = 0.35
-DOT_DEDUP_DIST = math.sqrt(MAX_DOT_AREA) / 2.5  # ~73px at NORMAL_SIZE=2048
-MAX_RING_DENSITY = 0.30  # max white-pixel density in ring around dot (filters handwriting clutter)
 
 
 #region Auxiliary functions
@@ -255,14 +245,15 @@ class BlobDetector:
             if not (min_area <= area <= max_area):
                 continue
 
-            perimeter = cv2.arcLength(contour, True)
-            if perimeter == 0:
+            hull = cv2.convexHull(contour)
+            hull_perimeter = cv2.arcLength(hull, True)
+            if hull_perimeter == 0:
                 continue
-            circularity = 4 * math.pi * area / (perimeter * perimeter)
+            circularity = 4 * math.pi * area / (hull_perimeter * hull_perimeter)
             if circularity < MIN_CIRCULARITY:
                 continue
 
-            hull_area = cv2.contourArea(cv2.convexHull(contour))
+            hull_area = cv2.contourArea(hull)
             if hull_area == 0:
                 continue
             solidity = area / hull_area

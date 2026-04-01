@@ -24,11 +24,60 @@ IMAGE_MODIFIER = ImageModifier()
 
 # ==============================
 #region Auxiliary Functions
-def evaluate_image_logic(answer_id_input: int, session: Session):
+def compute_ai_evaluation(image_bytes: bytes, is_problem_solving: bool, question: str, expected_answer_rubric_questions: str) -> str:
+    """Run AI evaluation for a single answer. Pure AI call — no DB access.
+    Accepts primitives instead of a TestItem ORM object so it is safe to call from worker threads."""
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
+    ai_evaluation = ""
+    match is_problem_solving:
+        case True:
+            rubric_questions = expected_answer_rubric_questions.split(";")
+            cleaned_rubrics = [_STRIP_POINTS(r) for r in rubric_questions if r.strip() != ""]
+
+            BATCH_SIZE = 4
+            batches = [cleaned_rubrics[i:i+BATCH_SIZE] for i in range(0, len(cleaned_rubrics), BATCH_SIZE)]
+
+            all_parts = []
+            for batch in batches:
+                for attempt in range(MAX_RUBRIC_RETRIES):
+                    response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
+                                    image_bytes, question, batch
+                                    )
+                    if response:
+                        parts = response.strip().split(";")
+                        if len(parts) == len(batch) and all(_VALID_R_Q_RESPONSE(p) for p in parts):
+                            all_parts.extend(parts)
+                            break
+                    print(f"BACKEND:\tRetrying rubric eval (attempt {attempt + 1}/{MAX_RUBRIC_RETRIES})...")
+                else:
+                    ## All retries exhausted — fill batch with NO so grading can continue
+                    print(f"BACKEND:\tRubric eval failed after {MAX_RUBRIC_RETRIES} attempts; defaulting to NO for {len(batch)} rubric(s)")
+                    all_parts.extend(["NO"] * len(batch))
+
+            ai_evaluation = ";".join(all_parts) + ";"
+
+        case _:
+            expected_answer = expected_answer_rubric_questions
+            response = None
+            for attempt in range(MAX_ANSWER_RETRIES):
+                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, question, _STRIP_POINTS(expected_answer))
+                if response and _VALID_E_A_RESPONSE(response):
+                    break
+                print(f"BACKEND:\tRetrying answer eval (attempt {attempt + 1}/{MAX_ANSWER_RETRIES})...")
+            else:
+                ## All retries exhausted — default to UNCLEAR so grading can continue
+                print(f"BACKEND:\tAnswer eval failed after {MAX_ANSWER_RETRIES} attempts; defaulting to UNCLEAR")
+                response = "UNCLEAR"
+
+            ai_evaluation = response
+
+    return ai_evaluation
+
+
+def evaluate_image_logic(answer_id_input: int, session: Session):
     print(f"INTERNAL:\tFunction evaluate_image({answer_id_input}) is being executed...")
 
     answer = session.exec(
@@ -46,48 +95,9 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                     ).first()
     assert test_item is not None
 
-    ai_evaluation = ""
-    match test_item.is_problem_solving:
-        case True:
-            rubric_questions = test_item.expected_answer_rubric_questions.split(";")
-            cleaned_rubrics = [_STRIP_POINTS(r) for r in rubric_questions if r.strip() != ""]
+    ai_evaluation = compute_ai_evaluation(image_bytes, test_item.is_problem_solving, test_item.question, test_item.expected_answer_rubric_questions)
+    all_scores = calculate_score(test_item.expected_answer_rubric_questions, ai_evaluation)
 
-            BATCH_SIZE = 4
-            batches = [cleaned_rubrics[i:i+BATCH_SIZE] for i in range(0, len(cleaned_rubrics), BATCH_SIZE)]
-
-            MAX_RUBRIC_RETRIES = 5
-            all_parts = []
-            for batch in batches:
-                for attempt in range(MAX_RUBRIC_RETRIES):
-                    response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
-                                    image_bytes, test_item.question, batch
-                                    )
-                    if response:
-                        parts = response.strip().split(";")
-                        if len(parts) == len(batch) and all(_VALID_R_Q_RESPONSE(p) for p in parts):
-                            all_parts.extend(parts)
-                            break
-                    print(f"BACKEND:\tRetrying rubric eval (attempt {attempt + 1}/{MAX_RUBRIC_RETRIES})...")
-                else:
-                    ## All retries exhausted — fill batch with NO so grading can continue
-                    print(f"BACKEND:\tRubric eval failed after {MAX_RUBRIC_RETRIES} attempts; defaulting to NO for {len(batch)} rubric(s)")
-                    all_parts.extend(["NO"] * len(batch))
-
-            ai_evaluation = ";".join(all_parts) + ";"
-    
-        case _:
-            expected_answer = test_item.expected_answer_rubric_questions
-            while True:
-                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
-                if response and _VALID_E_A_RESPONSE(response):
-                    break
-                print("BACKEND:\tRetrying answer eval...")
-            
-            ai_evaluation = response
-
-    all_scores = calculate_score(test_item.expected_answer_rubric_questions,
-                                 ai_evaluation)
-    
     answer.ai_evaluation = ai_evaluation
     answer.is_done_rendering = True
 
@@ -129,6 +139,20 @@ def calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -
         print(f"INTERNAL:\tScore is {scores}")
 
     return scores
+
+
+def get_max_score(expected_answer_rubric_questions: str) -> int | float:
+    max_score = 0
+    for part in expected_answer_rubric_questions.split(";"):
+        part = part.strip()
+        if part:
+            idx_start = part.find("[")
+            idx_end = idx_start + part[idx_start:].find("p")
+            if idx_start != -1 and idx_end > idx_start:
+                points = part[idx_start + 1 : idx_end]
+                val = float(points)
+                max_score += int(val) if val % 1 == 0 else val
+    return max_score
 
 
 def get_total_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> tuple[int|float, int|float]:
@@ -198,7 +222,8 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
                             ).all()
     test_items_labels = [item.label for item in test_items]
 
-    SHEETS_EXPORTER = SheetsExporter(columns=test_items_labels)
+    max_scores = {item.label: get_max_score(item.expected_answer_rubric_questions) for item in test_items}
+    SHEETS_EXPORTER = SheetsExporter(columns=test_items_labels, max_scores=max_scores)
 
     test_instance = session.exec(
                             select(TestInstance)
@@ -213,9 +238,9 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
     assert students is not None
     
     for s in students:
-        rowKey = s.name
+        rowKey = s.student_no
         print(f"INTERNAL:\tEvaluating {rowKey}...")
-        SHEETS_EXPORTER.add_student(rowKey)
+        SHEETS_EXPORTER.add_student(rowKey, s.name)
         paper = session.exec(
                             select(TestPaperInstance)
                             .where(TestPaperInstance.student_no == s.student_no)

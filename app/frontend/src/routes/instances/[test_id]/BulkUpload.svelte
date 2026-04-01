@@ -1,7 +1,11 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
   
-  let { test_instance } = $props<{test_instance: TestInstance}>();
+  let { test_instance, defaultNumBoxes = 2, onuploadcomplete, open = false } = $props<{test_instance: TestInstance, defaultNumBoxes?: number, onuploadcomplete?: () => void, open?: boolean}>();
+
+  $effect(() => {
+    if (!open) resetPage();
+  });
 
   import { onMount } from 'svelte';
 
@@ -19,7 +23,8 @@
 
   import IconAccepted from "~icons/mdi/cloud-check-variant-outline";
   import IconExclamation from "~icons/mdi/exclamation-thick";
-  import IconNotFound from "~icons/mdi/account-question-outline";
+  import IconNoPerson from "~icons/mdi/account-question-outline";
+  import IconNotFound from "~icons/mdi/question-mark";
   import IconUnprocessable from "~icons/mdi/paper-off";
 
   import IconSend from "~icons/mdi/send";
@@ -44,10 +49,18 @@
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   
   let isOperationStarted: boolean = $state(false);
+
+  function resetPage() {
+    isOperationStarted = false;
+    formFiles = undefined;
+    formFileRecords = [];
+  }
   let formFiles: FileList | undefined = $state();
   let formFileRecords: FileRecord[] = $state([]);
   let students: Student[] = $state([]);
   let numBoxesPerStudent: Map<string, number | null> = $state(new Map());
+
+  let isAllDone: boolean = $derived(isOperationStarted && formFileRecords.every(r => r.statusCode !== -1));
 
   const IS_FIRST_PAGE = (name: string): boolean => {
     const studentNo = GET_STUDENT_NO(name);
@@ -64,6 +77,7 @@
       students = await api<Student[]>(`${API_URL}/api/sections/${test_instance!.section_id}`);
     } catch (e) {
       console.log("Failed to fetch students for this section.");
+      toast.error("Failed to load student list. Bulk upload may not work correctly.");
     }
   });
 
@@ -91,54 +105,60 @@
 
   async function bulkUpload() {
     isOperationStarted = true;
-    try {
-      // Group files by student number
-      const grouped = new Map<string, FileRecord[]>();
-      for (const p of formFileRecords) {
-        const studentNo = GET_STUDENT_NO(p.name);
-        if (!grouped.has(studentNo)) grouped.set(studentNo, []);
-        grouped.get(studentNo)!.push(p);
+
+    // Group files by student number
+    const grouped = new Map<string, FileRecord[]>();
+    for (const p of formFileRecords) {
+      const studentNo = GET_STUDENT_NO(p.name);
+      if (!grouped.has(studentNo)) grouped.set(studentNo, []);
+      grouped.get(studentNo)!.push(p);
+    }
+
+    const promises: Promise<void>[] = [];
+
+    for (const [studentNo, records] of grouped) {
+      if (!IS_IN_STUDENTS(studentNo)) {
+        records.forEach(r => r.statusCode = 404);
+        continue;
       }
 
-      for (const [studentNo, records] of grouped) {
-        if (!IS_IN_STUDENTS(studentNo)) {
-          records.forEach(r => r.statusCode = 404);
-          continue;
+      // Sort by page number for correct ordering
+      records.sort((a, b) => {
+        const aName = GET_NAME_ONLY(a.name);
+        const bName = GET_NAME_ONLY(b.name);
+        const aDash = aName.lastIndexOf('-');
+        const bDash = bName.lastIndexOf('-');
+        const aPage = aDash !== -1 ? parseInt(aName.substring(aDash + 1)) || 0 : 0;
+        const bPage = bDash !== -1 ? parseInt(bName.substring(bDash + 1)) || 0 : 0;
+        return aPage - bPage;
+      });
+
+      promises.push((async () => {
+        const formData = new FormData();
+        for (const r of records) {
+          formData.append('files', r.file);
         }
-
-        // Sort by page number for correct ordering
-        records.sort((a, b) => {
-          const aName = GET_NAME_ONLY(a.name);
-          const bName = GET_NAME_ONLY(b.name);
-          const aDash = aName.lastIndexOf('-');
-          const bDash = bName.lastIndexOf('-');
-          const aPage = aDash !== -1 ? parseInt(aName.substring(aDash + 1)) || 0 : 0;
-          const bPage = bDash !== -1 ? parseInt(bName.substring(bDash + 1)) || 0 : 0;
-          return aPage - bPage;
-        });
-
-        (async () => {
-          const formData = new FormData();
-          for (const r of records) {
-            formData.append('files', r.file);
+        try {
+          await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess?num_boxes=${numBoxesPerStudent.get(studentNo) ?? defaultNumBoxes}`, formData);
+          records.forEach(r => r.statusCode = 200);
+        } catch (e) {
+          if (e instanceof ApiError) {
+            records.forEach(r => { r.statusCode = e.status; r.statusDetail = e.detail; });
+          } else {
+            records.forEach(r => {
+              r.statusCode = 500;
+              r.statusDetail = "Unexpectedly caught server-side error";
+            });
           }
-          try {
-            await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`, formData);
-            records.forEach(r => r.statusCode = 200);
-          } catch (e) {
-            if (e instanceof ApiError) {
-              records.forEach(r => { r.statusCode = e.status; r.statusDetail = e.detail; });
-            } else {
-              records.forEach(r => {
-                r.statusCode = 500;
-                r.statusDetail = "Unexpectedly caught server-side error"
-              });
-            }
-          }
-        })();
-      }
-    } catch (e) {
-      console.log("Bulk upload operation failed:\n"+e);
+        }
+      })());
+    }
+
+    await Promise.allSettled(promises);
+    formFileRecords = [...formFileRecords];
+
+    if (promises.length > 0) {
+      onuploadcomplete?.();
     }
   }
 </script>
@@ -163,7 +183,6 @@
       <IconSend class="size-4" />
     </Button>
   </div>
-  
   {#if !formFiles || formFiles.length == 0}
     <Separator />
     <h6 class="opacity-60 text-left">
@@ -174,7 +193,7 @@
   {:else if !isOperationStarted}
     <div id="scrollable-area"
           class="flex flex-col items-center max-w-fit overflow-scroll gap-y-1.5
-                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-foreground/40">
+                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-border">
       {#each formFileRecords as p}
         {@const supposedId = GET_STUDENT_NO(p.name)}
         {@const nameOnly = GET_NAME_ONLY(p.name)}
@@ -193,9 +212,9 @@
               <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
                                   hover:underline cursor-pointer">
                 {#if IS_IN_STUDENTS(supposedId)}
-                  <IconPerson class="size-4"/>
+                  <IconPerson class="size-4 text-chart-2"/>
                 {:else}
-                  <IconNotFound class="size-4" />
+                  <IconNoPerson class="size-4 text-chart-2" />
                 {/if}
                 <h4 class="text-left w-fit truncate">
                   {nameOnly ? nameOnly : "Add student no..."}
@@ -220,14 +239,15 @@
                                 [appearance:textfield]
                                 [&::-webkit-inner-spin-button]:appearance-none
                                 [&::-webkit-outer-spin-button]:appearance-none"
-                        placeholder="# of box"
+                        placeholder="{defaultNumBoxes} boxes..."
                         {value} {oninput}
                       />
               </span>
             {/if}
           </div>
           
-          <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
+          <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80
+                        [&>button]:backdrop-blur-md">
             <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
                     class="button-outline">
               <IconRotateCW />
@@ -250,7 +270,6 @@
     </div>
   
   {:else}
-    <Separator />
     <div class="flex flex-col space-y-1">
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
@@ -259,6 +278,7 @@
       {#each formFileRecords as p}
         <span class="flex flex-row justify-start items-center gap-x-2
                       [&>span]:flex [&>span]:justify-center [&>span]:items-center [&>span]:size-5
+                      [&>span]:text-chart-5
                       [&>h4]:truncate [&>h4]:w-fit
                       [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2 [&>i]:truncate">
           <!-- <span> -->
@@ -279,7 +299,7 @@
               <h4>{ p.name }</h4>
               <i>{p.statusDetail ?? "Unspecified server error"}</i>
             {:else if p.statusCode == 501}
-              <span> <IconExclamation/> </span>
+              <span> <IconExclamation class="text-destructive"/> </span>
               <h4>{ p.name }</h4>
               <i>{p.statusDetail ?? ""}</i>
             
@@ -296,6 +316,12 @@
       {/each}
 
     </div>
+    
+    <Separator />
+    <h6>Answers will be evaluated in the background. You may close this screen now.</h6>
+    {#if isAllDone}
+      <Button variant="outline" onclick={resetPage}>Reset page</Button>
+    {/if}
   {/if}
 </Sheet.Content>
 

@@ -22,15 +22,16 @@ pip install -r requirements.txt
 ### Run API tests
 ```bash
 cd app/backend
-pytest test_api.py -v
+.venv/bin/python -m pytest tests/test_api.py -v
 ```
+`test_api.py` covers all REST endpoints (sections, students, test instances, test items, student answers). It spins up an in-memory SQLite database per test and does not require a Gemini API key — image processing tests only exercise validation paths (404, 415), not the full CV/AI pipeline.
 
 ### Run CV module standalone tests
-The `+test_*.py` files and `logic/*.py` files with `if __name__ == "__main__"` blocks are run directly:
+The `logic/*.py` files with `if __name__ == "__main__"` blocks and scripts in `scripts/tester/` are run directly:
 ```bash
 python logic/box_segmenter.py    # Tests box segmentation pipeline
 python logic/document_scanner.py # Tests document scanning
-python +test_BlobDetector.py     # Tests blob detection
+python scripts/tester/Proper.py  # Tests on current dataset
 ```
 These use images from `TEMP/input/` and output debug images to `TEMP/output/`.
 

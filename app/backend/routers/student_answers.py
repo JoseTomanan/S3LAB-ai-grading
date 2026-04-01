@@ -42,6 +42,9 @@ async def process_student_answer_image(
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        print(f"BACKEND:\tUnexpected error during image processing: {e}")
+        raise HTTPException(status_code=500, detail="Unexpected server error during segmentation")
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"BACKEND:\tProceeding to labeling the boxes.")
@@ -76,6 +79,9 @@ async def scan_then_label_save_boxes(
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        print(f"BACKEND:\tUnexpected error during image processing: {e}")
+        raise HTTPException(status_code=422, detail="Failed to process image. The file may be corrupted or in an unsupported format.")
 
     print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
@@ -216,6 +222,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
         ## or if the AI evaluation of any answer is not finished (is_done_rendering == False).
         ## 'has_any_answer' tracks if student has >=1 answer for any item -- distinguish between "no answers yet" vs "all answers processed".
         all_items_processed = True
+        is_all_answers_evaluated = True
         has_any_answer = False
         for item in items:
             answer = session.exec(
@@ -238,6 +245,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             if not answer.is_done_rendering:
                 ## This answer exists but is still being processed by the AI (not fully evaluated yet)
                 all_items_processed = False
+                is_all_answers_evaluated = False
             else:
                 ## This answer is done and has an AI rubric evaluation; aggregate scores.
                 _parsed_scores = get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
@@ -248,6 +256,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 student_no=student.student_no,
                 name=student.name,
                 is_done_rendering=all_items_processed and has_any_answer,
+                is_all_answers_evaluated=is_all_answers_evaluated and has_any_answer,
                 has_any_answer=has_any_answer,
                 total_score=f"{total_score}/{max_score}",
                 ))
@@ -531,13 +540,21 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
 
     all_processed: list[bytes] = []
     for page_idx, contents in enumerate(contents_list):
-        ## ======== DOCUMENT SCANNING ========
-        contents = DOCUMENT_SCANNER.normalize_bytes(contents)
-        scanned_page = contents if is_scanned_already else DOCUMENT_SCANNER.scan_page(contents)
+        ## ======== DECODE ONCE ========
+        image_mat = DOCUMENT_SCANNER._decode_bytes(contents)
 
-        ## ======== BOX SEGMENTING ========
-        segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
-        processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+        ## ======== DOCUMENT SCANNING ========
+        ## normalize_bytes previously added a gratuitous encode+decode cycle here to match load_image behavior.
+        ## Using MatLike path avoids that entirely.
+        ## contents = DOCUMENT_SCANNER.normalize_bytes(contents)
+        scanned_mat = image_mat if is_scanned_already else DOCUMENT_SCANNER.scan_page_mat(image_mat)
+
+        ## ======== BOX SEGMENTING + ENCODE ONCE PER BOX ========
+        segmented_mats = BOX_SEGMENTER.get_answer_sections_mat(scanned_mat, num_boxes if num_boxes is not None else 3)
+        processed_list: list[bytes] = [
+            DOCUMENT_SCANNER._encode_to_bytes(BOX_SEGMENTER.beautify_scan_mat(mat))
+            for mat in segmented_mats
+        ]
 
         print(f"BACKEND:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)
@@ -679,7 +696,9 @@ def _create_answer_records(
                             TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
-        assert item is not None
+        if item is None:
+            print(f"BACKEND:\tSkipping box with label '{item_number}' — TestItem not found in DB.")
+            continue
         item_id = item.item_id
 
         answer = session.exec(
@@ -711,18 +730,82 @@ def _create_answer_records(
 
 def _evaluate_answers_background(answer_ids: list[int]):
     """Run AI evaluation on pre-created answer records in a background task."""
+    if not answer_ids:
+        return
+
     session = get_direct_session()
     try:
+        ## Phase A: Sequential DB reads — extract primitives so threads never touch the session
+        eval_tasks: list[tuple[int, bytes, bool, str, str]] = []
+        ## (answer_id, image_bytes, is_problem_solving, question, expected_answer_rubric_questions)
         for answer_id in answer_ids:
             try:
-                evaluate_image_logic(answer_id, session)
-            except Exception as e:
-                print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
                 answer = session.get(StudentAnswer, answer_id)
-                if answer:
+                if answer is None:
+                    continue
+                actual_image_path = f"static/images/{answer.image_directory.split('/')[3]}"
+                image_bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
+                test_item = session.get(TestItem, answer.item_id)
+                if test_item is None:
+                    continue
+                eval_tasks.append((
+                    answer_id,
+                    image_bytes,
+                    test_item.is_problem_solving,
+                    test_item.question,
+                    test_item.expected_answer_rubric_questions,
+                ))
+            except Exception as e:
+                print(f"BACKEND:\tPhase A failed for answer {answer_id} (image missing or corrupted): {e}")
+                answer = session.get(StudentAnswer, answer_id)
+                if answer is not None:
                     answer.is_done_rendering = True
                     answer.ai_evaluation = f"_ERROR: {e}"
+                    session.add(answer)
                     session.commit()
+
+        ## Phase B: Parallel AI calls — no DB access inside threads
+        def _run_ai(answer_id: int, image_bytes: bytes, is_problem_solving: bool, question: str, earq: str) -> tuple[int, str | None, Exception | None]:
+            try:
+                ai_evaluation = compute_ai_evaluation(image_bytes, is_problem_solving, question, earq)
+                return (answer_id, ai_evaluation, None)
+            except Exception as e:
+                print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}")
+                return (answer_id, None, e)
+
+        ai_results: list[tuple[int, str | None, Exception | None] | None] = [None] * len(eval_tasks)
+        with ThreadPoolExecutor(max_workers=min(len(eval_tasks), 10)) as executor:
+            futures = {
+                executor.submit(_run_ai, *task): i
+                for i, task in enumerate(eval_tasks)
+            }
+            for future in as_completed(futures):
+                i = futures[future]
+                try:
+                    ai_results[i] = future.result()
+                except Exception as e:
+                    answer_id = eval_tasks[i][0]
+                    print(f"BACKEND:\tUnexpected error evaluating answer {answer_id}: {e}")
+                    ai_results[i] = (answer_id, None, e)
+
+        ## Phase C: Sequential DB writes
+        for result in ai_results:
+            if result is None:
+                continue
+            answer_id, ai_evaluation, error = result
+            answer = session.get(StudentAnswer, answer_id)
+            if answer is None:
+                continue
+            if error:
+                answer.is_done_rendering = True
+                answer.ai_evaluation = f"_ERROR: {error}"
+            else:
+                assert ai_evaluation is not None
+                answer.ai_evaluation = ai_evaluation
+                answer.is_done_rendering = True
+            session.add(answer)
+            session.commit()
+
     except Exception as e:
         print(f"BACKEND:\tBackground evaluation failed: {e}")
         session.rollback()

@@ -1,7 +1,7 @@
 <script lang="ts">
   const { data, children } = $props();
-  import IconBack from "~icons/mdi/arrow-left";
-  import IconHome from '~icons/mdi/home';
+  import IconBack from "~icons/mdi/chevron-left";
+  import IconSectionList from '~icons/mdi/format-list-bulleted';
 
   const sectionId = $derived(Number(data.section_id));
   const sectionName = $derived(data.sections.find(
@@ -13,16 +13,15 @@
 <nav class="bg-sidebar text-sidebar-foreground
             shadow shadow-sidebar-border
             w-full flex flex-row justify-between p-4 pt-6">
-  <a href="/instances"
-      class="bg-white h-fit shadow-sm rounded-full">
-    <IconHome class="size-8 text-primary foregroundize" />
+  <a href="/sections" class="button-floating">
+    <IconBack/>
   </a>
   <span class="*:leading-5 *:text-center">
     <h1>{sectionName}</h1>
     <h6>Class list</h6>
   </span>
-  <a href="/sections">
-    <IconBack class="size-8"/>
+  <a href="/instances" class="button-floating">
+    <IconSectionList class="size-7 m-0.5"/>
   </a>
 </nav>
 

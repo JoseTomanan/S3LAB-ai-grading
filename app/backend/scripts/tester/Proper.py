@@ -1,14 +1,13 @@
+from pathlib import Path
+
 from logic.ai_interface import AIAnswerEvaluator
 from logic.box_segmenter import BoxSegmenter
 
 
 
-FILENAMES = [
-    "properTest1.jpeg",
-    "properTest2.jpeg",
-    ]
 GET_INPUT = lambda x : f"./TEMP/input/{x}"
 GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
+FILENAMES = [f.name for f in Path("./TEMP/input").iterdir() if f.name.lower().startswith("proper")]
 
 
 
@@ -25,5 +24,5 @@ if __name__ == "__main__":
 
         for i, b in enumerate(images_after_box):
             image_beautified = BOX_SEGMENTER.beautify_scan(b)
-            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/section_{i}.jpg"))
+            BOX_SEGMENTER.save_image(b, GET_OUTPUT(f"{_onlyfilename}/boxed/{i}.jpg"))
         print("================================")
