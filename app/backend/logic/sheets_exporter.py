@@ -1,5 +1,5 @@
 import openpyxl
-from openpyxl.styles import Border, Side
+from openpyxl.styles import Border, Font, Side
 
 
 
@@ -82,6 +82,13 @@ class SheetsExporter:
                         column=total_col,
                         value=f"{_fmt(student_total)}/{_fmt(max_total)}"
                         )
+
+        bold = Font(bold=True)
+        for col in range(1, total_col + 1):
+            sheet.cell(row=1, column=col).font = bold
+        total_rows = data_start_row + len(students_list)
+        for row in range(1, total_rows):
+            sheet.cell(row=row, column=1).font = bold
 
         # sheets_directory = f"./static/sheets/{file_name}.xlsx"
 
