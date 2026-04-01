@@ -711,18 +711,66 @@ def _create_answer_records(
 
 def _evaluate_answers_background(answer_ids: list[int]):
     """Run AI evaluation on pre-created answer records in a background task."""
+    if not answer_ids:
+        return
+
     session = get_direct_session()
     try:
+        ## Phase A: Sequential DB reads — load image bytes and test items for all answers
+        eval_tasks: list[tuple[int, bytes, TestItem]] = []
         for answer_id in answer_ids:
+            answer = session.get(StudentAnswer, answer_id)
+            if answer is None:
+                continue
+            actual_image_path = f"static/images/{answer.image_directory.split('/')[3]}"
+            image_bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
+            test_item = session.get(TestItem, answer.item_id)
+            if test_item is None:
+                continue
+            eval_tasks.append((answer_id, image_bytes, test_item))
+
+        ## Phase B: Parallel AI calls — no DB access inside threads
+        def _run_ai(answer_id: int, image_bytes: bytes, test_item: TestItem) -> tuple[int, str | None, Exception | None]:
             try:
-                evaluate_image_logic(answer_id, session)
+                ai_evaluation = compute_ai_evaluation(image_bytes, test_item)
+                return (answer_id, ai_evaluation, None)
             except Exception as e:
-                print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}; reverting to previous state...")
-                answer = session.get(StudentAnswer, answer_id)
-                if answer:
-                    answer.is_done_rendering = True
-                    answer.ai_evaluation = f"_ERROR: {e}"
-                    session.commit()
+                print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}")
+                return (answer_id, None, e)
+
+        ai_results: list[tuple[int, str | None, Exception | None] | None] = [None] * len(eval_tasks)
+        with ThreadPoolExecutor(max_workers=min(len(eval_tasks), 10)) as executor:
+            futures = {
+                executor.submit(_run_ai, *task): i
+                for i, task in enumerate(eval_tasks)
+            }
+            for future in as_completed(futures):
+                i = futures[future]
+                try:
+                    ai_results[i] = future.result()
+                except Exception as e:
+                    answer_id = eval_tasks[i][0]
+                    print(f"BACKEND:\tUnexpected error evaluating answer {answer_id}: {e}")
+                    ai_results[i] = (answer_id, None, e)
+
+        ## Phase C: Sequential DB writes
+        for result in ai_results:
+            if result is None:
+                continue
+            answer_id, ai_evaluation, error = result
+            answer = session.get(StudentAnswer, answer_id)
+            if answer is None:
+                continue
+            if error:
+                answer.is_done_rendering = True
+                answer.ai_evaluation = f"_ERROR: {error}"
+            else:
+                assert ai_evaluation is not None
+                answer.ai_evaluation = ai_evaluation
+                answer.is_done_rendering = True
+            session.add(answer)
+            session.commit()
+
     except Exception as e:
         print(f"BACKEND:\tBackground evaluation failed: {e}")
         session.rollback()
