@@ -28,6 +28,12 @@ MAX_SKEW_DEG = 5.0
 MAX_TILT_DEG = 10.0
 SECTION_CORNER_ANGLE_TOL = 9.0
 
+## For compute_ai_evaluation() in logic/utility.py
+## Maximum retry attempts per rubric batch before defaulting to NO answers.
+## Applies to both rubric-based (problem-solving) and expected-answer evaluations.
+MAX_RUBRIC_RETRIES = 5   # retries per rubric batch (evaluate_multi_rubric)
+MAX_ANSWER_RETRIES = 5   # retries for expected-answer evaluation (evaluate_expected_answer)
+
 ## For blob_detector.py
 AREA_FACTOR = (NORMAL_SIZE/1000)**2
 MIN_DOT_AREA = AREA_FACTOR * 50

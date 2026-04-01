@@ -39,7 +39,6 @@ def compute_ai_evaluation(image_bytes: bytes, test_item: TestItem) -> str:
             BATCH_SIZE = 4
             batches = [cleaned_rubrics[i:i+BATCH_SIZE] for i in range(0, len(cleaned_rubrics), BATCH_SIZE)]
 
-            MAX_RUBRIC_RETRIES = 5
             all_parts = []
             for batch in batches:
                 for attempt in range(MAX_RUBRIC_RETRIES):
@@ -61,11 +60,16 @@ def compute_ai_evaluation(image_bytes: bytes, test_item: TestItem) -> str:
 
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
-            while True:
+            response = None
+            for attempt in range(MAX_ANSWER_RETRIES):
                 response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
-                print("BACKEND:\tRetrying answer eval...")
+                print(f"BACKEND:\tRetrying answer eval (attempt {attempt + 1}/{MAX_ANSWER_RETRIES})...")
+            else:
+                ## All retries exhausted — default to UNCLEAR so grading can continue
+                print(f"BACKEND:\tAnswer eval failed after {MAX_ANSWER_RETRIES} attempts; defaulting to UNCLEAR")
+                response = "UNCLEAR"
 
             ai_evaluation = response
 
