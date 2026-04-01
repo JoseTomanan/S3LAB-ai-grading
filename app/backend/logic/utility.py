@@ -136,6 +136,20 @@ def calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -
     return scores
 
 
+def get_max_score(expected_answer_rubric_questions: str) -> int | float:
+    max_score = 0
+    for part in expected_answer_rubric_questions.split(";"):
+        part = part.strip()
+        if part:
+            idx_start = part.find("[")
+            idx_end = idx_start + part[idx_start:].find("p")
+            if idx_start != -1 and idx_end > idx_start:
+                points = part[idx_start + 1 : idx_end]
+                val = float(points)
+                max_score += int(val) if val % 1 == 0 else val
+    return max_score
+
+
 def get_total_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> tuple[int|float, int|float]:
     total_score = 0
     max_score = 0
@@ -203,7 +217,8 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
                             ).all()
     test_items_labels = [item.label for item in test_items]
 
-    SHEETS_EXPORTER = SheetsExporter(columns=test_items_labels)
+    max_scores = {item.label: get_max_score(item.expected_answer_rubric_questions) for item in test_items}
+    SHEETS_EXPORTER = SheetsExporter(columns=test_items_labels, max_scores=max_scores)
 
     test_instance = session.exec(
                             select(TestInstance)
