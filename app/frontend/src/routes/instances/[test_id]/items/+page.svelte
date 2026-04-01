@@ -61,7 +61,7 @@
                 <p class="text-left truncate text-ellipsis flex-1">
                   ({smallItem.label}) {smallItem.question}
                 </p>
-                <MdiEditOutline class="size-4 text-chart-2"/>
+                <MdiEditOutline class="size-4"/>
               </Dialog.Trigger>
               <EditTestItem testItem={smallItem} test_id={data.test_id}/>
             </Dialog.Root>
