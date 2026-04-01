@@ -42,6 +42,9 @@ async def process_student_answer_image(
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        print(f"BACKEND:\tUnexpected error during image processing: {e}")
+        raise HTTPException(status_code=422, detail="Unexpected error during segmentation")
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"BACKEND:\tProceeding to labeling the boxes.")
@@ -76,6 +79,9 @@ async def scan_then_label_save_boxes(
         processed_list: list[bytes] = await _scan_and_segment_pages(contents_list, num_boxes, is_scanned_already)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        print(f"BACKEND:\tUnexpected error during image processing: {e}")
+        raise HTTPException(status_code=422, detail="Failed to process image. The file may be corrupted or in an unsupported format.")
 
     print(f"BACKEND:\tProceeding to labeling the boxes.")
     boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
@@ -679,7 +685,9 @@ def _create_answer_records(
                             TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
-        assert item is not None
+        if item is None:
+            print(f"BACKEND:\tSkipping box with label '{item_number}' — TestItem not found in DB.")
+            continue
         item_id = item.item_id
 
         answer = session.exec(
