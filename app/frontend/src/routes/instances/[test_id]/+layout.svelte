@@ -89,14 +89,14 @@
         <Dialog.Root>
           <Dialog.Trigger class="button-primary"
                           title={"Export sheets"}>
-            <IconTable class="size-6" />
+            <IconTable class="size-5" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
         <Sheet.Root bind:open={isBulkUploadOpen}>
           <Sheet.Trigger class="button-primary"
                           title={"Bulk upload"}>
-            <IconUpload class="size-6"/>
+            <IconUpload class="size-5"/>
           </Sheet.Trigger>
           <BulkUpload test_instance={activeTestInstance}
                       defaultNumBoxes={data.test_items?.length ?? 2}
