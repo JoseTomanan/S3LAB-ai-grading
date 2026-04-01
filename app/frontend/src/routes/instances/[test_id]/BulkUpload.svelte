@@ -44,10 +44,18 @@
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   
   let isOperationStarted: boolean = $state(false);
+
+  function resetPage() {
+    isOperationStarted = false;
+    formFiles = undefined;
+    formFileRecords = [];
+  }
   let formFiles: FileList | undefined = $state();
   let formFileRecords: FileRecord[] = $state([]);
   let students: Student[] = $state([]);
   let numBoxesPerStudent: Map<string, number | null> = $state(new Map());
+
+  let isAllDone: boolean = $derived(isOperationStarted && formFileRecords.every(r => r.statusCode !== -1));
 
   const IS_FIRST_PAGE = (name: string): boolean => {
     const studentNo = GET_STUDENT_NO(name);
@@ -257,7 +265,6 @@
   
   {:else}
     <div class="flex flex-col space-y-1">
-      <Separator />
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
         <b>Evaluation status</b>
@@ -301,9 +308,13 @@
         </span>
       {/each}
 
-      <Separator />
     </div>
+    
+    <Separator />
     <h6>Answers are being evaluated in the background. You may close this screen now.</h6>
+    {#if isAllDone}
+      <Button variant="outline" onclick={resetPage}>Reset page</Button>
+    {/if}
   {/if}
 </Sheet.Content>
 

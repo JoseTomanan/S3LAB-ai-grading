@@ -124,6 +124,15 @@
 
   onDestroy(() => commitPoller.stop());
 
+  function resetPage() {
+    commitPoller.stop();
+    isCommitmentOngoing = false;
+    isAskingForValidation = false;
+    supposedScans = [];
+    formFileRecords = [];
+    formFiles = undefined;
+  }
+
   async function validateAndCommit(accept: boolean) {
     if (isCommitmentOngoing === true)
       return;
@@ -294,7 +303,13 @@
         ? "Answers are being evaluated in the background. You may go back to the Papers screen now."
         : "Note that segmentation results are ephemeral, and switching out of this screen will discard them."}
     </h6>
-  
+
+    {#if isCommitmentOngoing}
+      <Button variant="outline" onclick={resetPage}>
+        Reset page
+      </Button>
+    {/if}
+
   {/if}
   </div>
 </div>
