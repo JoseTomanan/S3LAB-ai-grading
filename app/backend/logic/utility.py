@@ -233,9 +233,9 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
     assert students is not None
     
     for s in students:
-        rowKey = s.name
+        rowKey = s.student_no
         print(f"INTERNAL:\tEvaluating {rowKey}...")
-        SHEETS_EXPORTER.add_student(rowKey, s.student_no)
+        SHEETS_EXPORTER.add_student(rowKey, s.name)
         paper = session.exec(
                             select(TestPaperInstance)
                             .where(TestPaperInstance.student_no == s.student_no)

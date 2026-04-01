@@ -8,11 +8,11 @@ class SheetsExporter:
         self.columns: list[str] = columns
         self.sheet_items: dict[str, dict[str,float|None]] = {}
         self.max_scores: dict[str, float | int] | None = max_scores
-        self.student_numbers: dict[str, str] = {}
+        self.student_names: dict[str, str] = {}
 
-    def add_student(self, key_name: str, student_no: str):
+    def add_student(self, key_name: str, student_name: str):
         self.sheet_items[key_name] = {i: -1 for i in self.columns}
-        self.student_numbers[key_name] = student_no
+        self.student_names[key_name] = student_name
 
     def append(self, key_name: str, num_to_score: dict[str, float|None]):
         if key_name not in self.sheet_items:
@@ -64,8 +64,8 @@ class SheetsExporter:
 
         for idx, key_name in enumerate(students_list):
             row = idx+data_start_row
-            sheet.cell(row=row, column=1, value=self.student_numbers[key_name])
-            cell = sheet.cell(row=row, column=2, value=key_name)
+            sheet.cell(row=row, column=1, value=key_name)
+            cell = sheet.cell(row=row, column=2, value=self.student_names[key_name])
             cell.border = medium_right
 
         for idx, key_name in enumerate(students_list):
