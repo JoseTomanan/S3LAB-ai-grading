@@ -19,6 +19,7 @@ export interface GetEvaluationsResponse {
 	student_no: string;
 	name: string;
 	is_done_rendering: boolean;
+	is_all_answers_evaluated: boolean;
 	has_any_answer: boolean;
 	total_score: string;
 }

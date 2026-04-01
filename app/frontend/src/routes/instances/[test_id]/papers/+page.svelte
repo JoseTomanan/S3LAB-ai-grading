@@ -21,14 +21,14 @@
   $effect(() => {
     perStudentStatuses = data.statuses;
   });
-  let isPolling = $derived(perStudentStatuses.some(s => s.has_any_answer && !s.is_done_rendering));
+  let isPolling = $derived(perStudentStatuses.some(s => s.has_any_answer && !s.is_all_answers_evaluated));
 
   const poller = createPoller(async () => {
     const result = await api<{ statuses: GetEvaluationsResponse[] }>(
       `${API_URL}/api/student_answers/${data.test_id}/statuses`
     );
     perStudentStatuses = result.statuses;
-    return perStudentStatuses.length > 0 && perStudentStatuses.every(s => s.is_done_rendering);
+    return perStudentStatuses.length > 0 && perStudentStatuses.every(s => !s.has_any_answer || s.is_all_answers_evaluated);
   }, 5000);
 
   onMount(() => {
@@ -69,7 +69,7 @@
       <h5 class="flex flex-row gap-x-1.5 items-center tracking-tighter
                   *:size-5">
         {testPaper.total_score}
-        {#if testPaper.has_any_answer && !testPaper.is_done_rendering}
+        {#if testPaper.has_any_answer && !testPaper.is_all_answers_evaluated}
           <Spinner class="text-chart-3"/>
         {:else if testPaper.is_done_rendering}
           <IconStatusDone/>
