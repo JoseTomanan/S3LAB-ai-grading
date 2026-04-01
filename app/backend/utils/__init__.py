@@ -95,6 +95,13 @@ def is_valid_quad(pts: np.ndarray, max_skew_deg: float = MAX_SKEW_DEG, max_tilt_
     if avg_tilt > max_tilt_deg:
         return False
 
+    ## Check absolute tilt: left/right edges should be near-vertical
+    angle_left  = np.degrees(np.arctan2(_bl[1] - _tl[1], _bl[0] - _tl[0]))
+    angle_right = np.degrees(np.arctan2(_br[1] - _tr[1], _br[0] - _tr[0]))
+    avg_side_tilt = (abs(abs(angle_left) - 90) + abs(abs(angle_right) - 90)) / 2
+    if avg_side_tilt > max_tilt_deg:
+        return False
+
     #### Check if corner angle is approximately 90 degrees for all
     corners = [
             (_bl, _tl, _tr),   # angle at TL

@@ -25,7 +25,7 @@ BORDER_MARGIN_RATIO = 0.02
 ## For box_segmenter utility functions (as found in utils)
 ## Values are overridden by document_scanner path
 MAX_SKEW_DEG = 5.0
-MAX_TILT_DEG = 15.0
+MAX_TILT_DEG = 10.0
 SECTION_CORNER_ANGLE_TOL = 9.0
 
 ## For blob_detector.py
