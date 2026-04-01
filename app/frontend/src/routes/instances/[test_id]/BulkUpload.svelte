@@ -64,6 +64,7 @@
       students = await api<Student[]>(`${API_URL}/api/sections/${test_instance!.section_id}`);
     } catch (e) {
       console.log("Failed to fetch students for this section.");
+      toast.error("Failed to load student list. Bulk upload may not work correctly.");
     }
   });
 
@@ -91,55 +92,57 @@
 
   async function bulkUpload() {
     isOperationStarted = true;
-    try {
-      // Group files by student number
-      const grouped = new Map<string, FileRecord[]>();
-      for (const p of formFileRecords) {
-        const studentNo = GET_STUDENT_NO(p.name);
-        if (!grouped.has(studentNo)) grouped.set(studentNo, []);
-        grouped.get(studentNo)!.push(p);
-      }
 
-      for (const [studentNo, records] of grouped) {
-        if (!IS_IN_STUDENTS(studentNo)) {
-          records.forEach(r => r.statusCode = 404);
-          continue;
-        }
-
-        // Sort by page number for correct ordering
-        records.sort((a, b) => {
-          const aName = GET_NAME_ONLY(a.name);
-          const bName = GET_NAME_ONLY(b.name);
-          const aDash = aName.lastIndexOf('-');
-          const bDash = bName.lastIndexOf('-');
-          const aPage = aDash !== -1 ? parseInt(aName.substring(aDash + 1)) || 0 : 0;
-          const bPage = bDash !== -1 ? parseInt(bName.substring(bDash + 1)) || 0 : 0;
-          return aPage - bPage;
-        });
-
-        (async () => {
-          const formData = new FormData();
-          for (const r of records) {
-            formData.append('files', r.file);
-          }
-          try {
-            await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`, formData);
-            records.forEach(r => r.statusCode = 200);
-          } catch (e) {
-            if (e instanceof ApiError) {
-              records.forEach(r => { r.statusCode = e.status; r.statusDetail = e.detail; });
-            } else {
-              records.forEach(r => {
-                r.statusCode = 500;
-                r.statusDetail = "Unexpectedly caught server-side error"
-              });
-            }
-          }
-        })();
-      }
-    } catch (e) {
-      console.log("Bulk upload operation failed:\n"+e);
+    // Group files by student number
+    const grouped = new Map<string, FileRecord[]>();
+    for (const p of formFileRecords) {
+      const studentNo = GET_STUDENT_NO(p.name);
+      if (!grouped.has(studentNo)) grouped.set(studentNo, []);
+      grouped.get(studentNo)!.push(p);
     }
+
+    const promises: Promise<void>[] = [];
+
+    for (const [studentNo, records] of grouped) {
+      if (!IS_IN_STUDENTS(studentNo)) {
+        records.forEach(r => r.statusCode = 404);
+        continue;
+      }
+
+      // Sort by page number for correct ordering
+      records.sort((a, b) => {
+        const aName = GET_NAME_ONLY(a.name);
+        const bName = GET_NAME_ONLY(b.name);
+        const aDash = aName.lastIndexOf('-');
+        const bDash = bName.lastIndexOf('-');
+        const aPage = aDash !== -1 ? parseInt(aName.substring(aDash + 1)) || 0 : 0;
+        const bPage = bDash !== -1 ? parseInt(bName.substring(bDash + 1)) || 0 : 0;
+        return aPage - bPage;
+      });
+
+      promises.push((async () => {
+        const formData = new FormData();
+        for (const r of records) {
+          formData.append('files', r.file);
+        }
+        try {
+          await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`, formData);
+          records.forEach(r => r.statusCode = 200);
+        } catch (e) {
+          if (e instanceof ApiError) {
+            records.forEach(r => { r.statusCode = e.status; r.statusDetail = e.detail; });
+          } else {
+            records.forEach(r => {
+              r.statusCode = 500;
+              r.statusDetail = "Unexpectedly caught server-side error";
+            });
+          }
+        }
+      })());
+    }
+
+    await Promise.allSettled(promises);
+    formFileRecords = [...formFileRecords];
   }
 </script>
 
@@ -250,8 +253,8 @@
     </div>
   
   {:else}
-    <Separator />
     <div class="flex flex-col space-y-1">
+      <Separator />
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
         <b>Evaluation status</b>
@@ -295,7 +298,9 @@
         </span>
       {/each}
 
+      <Separator />
     </div>
+    <h6>Answers are being evaluated in the background. You may close this screen now.</h6>
   {/if}
 </Sheet.Content>
 
