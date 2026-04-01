@@ -19,7 +19,7 @@
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
@@ -97,7 +97,10 @@
                           title={"Bulk upload"}>
             <IconUpload class="size-6"/>
           </Sheet.Trigger>
-          <BulkUpload test_instance={activeTestInstance}/>
+          <BulkUpload test_instance={activeTestInstance}
+                      defaultNumBoxes={data.test_items?.length ?? 2}
+                      onuploadcomplete={invalidateAll}
+                  />
         </Sheet.Root>
       </span>
     </div>

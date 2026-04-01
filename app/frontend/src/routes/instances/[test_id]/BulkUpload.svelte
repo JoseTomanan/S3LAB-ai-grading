@@ -1,7 +1,7 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
   
-  let { test_instance } = $props<{test_instance: TestInstance}>();
+  let { test_instance, defaultNumBoxes = 2, onuploadcomplete } = $props<{test_instance: TestInstance, defaultNumBoxes?: number, onuploadcomplete?: () => void}>();
 
   import { onMount } from 'svelte';
 
@@ -126,7 +126,7 @@
           formData.append('files', r.file);
         }
         try {
-          await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess`, formData);
+          await apiForm(`${API_URL}/api/student_answers/${test_instance.test_id}/${studentNo}/image_preprocess?num_boxes=${numBoxesPerStudent.get(studentNo) ?? defaultNumBoxes}`, formData);
           records.forEach(r => r.statusCode = 200);
         } catch (e) {
           if (e instanceof ApiError) {
@@ -143,6 +143,10 @@
 
     await Promise.allSettled(promises);
     formFileRecords = [...formFileRecords];
+
+    if (promises.length > 0) {
+      onuploadcomplete?.();
+    }
   }
 </script>
 
@@ -166,7 +170,6 @@
       <IconSend class="size-4" />
     </Button>
   </div>
-  
   {#if !formFiles || formFiles.length == 0}
     <Separator />
     <h6 class="opacity-60 text-left">
@@ -223,7 +226,7 @@
                                 [appearance:textfield]
                                 [&::-webkit-inner-spin-button]:appearance-none
                                 [&::-webkit-outer-spin-button]:appearance-none"
-                        placeholder="# of box"
+                        placeholder="{defaultNumBoxes} boxes..."
                         {value} {oninput}
                       />
               </span>
