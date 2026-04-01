@@ -730,15 +730,24 @@ def _evaluate_answers_background(answer_ids: list[int]):
         ## Phase A: Sequential DB reads — load image bytes and test items for all answers
         eval_tasks: list[tuple[int, bytes, TestItem]] = []
         for answer_id in answer_ids:
-            answer = session.get(StudentAnswer, answer_id)
-            if answer is None:
-                continue
-            actual_image_path = f"static/images/{answer.image_directory.split('/')[3]}"
-            image_bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
-            test_item = session.get(TestItem, answer.item_id)
-            if test_item is None:
-                continue
-            eval_tasks.append((answer_id, image_bytes, test_item))
+            try:
+                answer = session.get(StudentAnswer, answer_id)
+                if answer is None:
+                    continue
+                actual_image_path = f"static/images/{answer.image_directory.split('/')[3]}"
+                image_bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
+                test_item = session.get(TestItem, answer.item_id)
+                if test_item is None:
+                    continue
+                eval_tasks.append((answer_id, image_bytes, test_item))
+            except Exception as e:
+                print(f"BACKEND:\tPhase A failed for answer {answer_id} (image missing or corrupted): {e}")
+                answer = session.get(StudentAnswer, answer_id)
+                if answer is not None:
+                    answer.is_done_rendering = True
+                    answer.ai_evaluation = f"_ERROR: {e}"
+                    session.add(answer)
+                    session.commit()
 
         ## Phase B: Parallel AI calls — no DB access inside threads
         def _run_ai(answer_id: int, image_bytes: bytes, test_item: TestItem) -> tuple[int, str | None, Exception | None]:
