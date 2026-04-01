@@ -1,7 +1,11 @@
 <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
   
-  let { test_instance, defaultNumBoxes = 2, onuploadcomplete } = $props<{test_instance: TestInstance, defaultNumBoxes?: number, onuploadcomplete?: () => void}>();
+  let { test_instance, defaultNumBoxes = 2, onuploadcomplete, open = false } = $props<{test_instance: TestInstance, defaultNumBoxes?: number, onuploadcomplete?: () => void, open?: boolean}>();
+
+  $effect(() => {
+    if (!open) resetPage();
+  });
 
   import { onMount } from 'svelte';
 

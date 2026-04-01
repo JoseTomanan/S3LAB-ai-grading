@@ -25,6 +25,7 @@
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
+  let isBulkUploadOpen: boolean = $state(false);
 
   let testItemsContext: TestItemsContext = $state({items: untrack(() => data.test_items!), isLoading: false});
   $effect(() => {
@@ -92,7 +93,7 @@
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
-        <Sheet.Root>
+        <Sheet.Root bind:open={isBulkUploadOpen}>
           <Sheet.Trigger class="button-primary"
                           title={"Bulk upload"}>
             <IconUpload class="size-6"/>
@@ -100,6 +101,7 @@
           <BulkUpload test_instance={activeTestInstance}
                       defaultNumBoxes={data.test_items?.length ?? 2}
                       onuploadcomplete={invalidateAll}
+                      open={isBulkUploadOpen}
                   />
         </Sheet.Root>
       </span>
