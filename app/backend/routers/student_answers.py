@@ -44,7 +44,7 @@ async def process_student_answer_image(
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         print(f"BACKEND:\tUnexpected error during image processing: {e}")
-        raise HTTPException(status_code=422, detail="Unexpected error during segmentation")
+        raise HTTPException(status_code=500, detail="Unexpected server error during segmentation")
 
     # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
     print(f"BACKEND:\tProceeding to labeling the boxes.")
