@@ -6,6 +6,8 @@
 
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import Card from "$lib/components/Card.svelte";
 	import AddNewStudent from './AddNewStudent.svelte';
 	import EditStudent from './EditStudent.svelte';
@@ -19,7 +21,7 @@
 <div class="container">
   <div class="space-y-2">
     <Dialog.Root bind:open={isAddDialogOpen}>
-      <Dialog.Trigger class="button-outline flex flex-row gap-x-1 justify-center items-center w-full font-medium">
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-1 justify-center items-center w-full font-medium')}>
         <IconPlus />
         Add new student
       </Dialog.Trigger>
@@ -35,7 +37,7 @@
         </div>
         <!-- TODO: add dialog bindable; close upon operation done. something similar to add new student-->
         <Dialog.Root>
-          <Dialog.Trigger class="button-secondary">
+          <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>
             <MdiEdit class="size-4"/>
           </Dialog.Trigger>
           <EditStudent bind:section_id={data.section_id}

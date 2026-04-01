@@ -8,6 +8,7 @@
   
   import type { TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
   import EditTestItem from './EditTestItem.svelte';
   import AddTestItem from './AddTestItem.svelte';
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
@@ -37,7 +38,7 @@
   <h1 class="text-left font-semibold w-full flex justify-between items-center">
     Test items
     <Dialog.Root bind:open={isAddDialogOpen}>
-      <Dialog.Trigger class="button-secondary">
+      <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>
         <MdiPlus class="size-5"/>
       </Dialog.Trigger>
       <AddTestItem {isAddDialogOpen}

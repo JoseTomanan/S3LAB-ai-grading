@@ -8,6 +8,8 @@
   import IconNotDone from '~icons/mdi/checkbox-blank-circle';
 
   import type { TestInstance } from '$lib/index.ts';
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
 
   import Pagination from '$lib/components/Pagination.svelte';
   import * as Dialog from "$lib/components/ui/dialog/index.js";
@@ -23,13 +25,13 @@
 <nav class="w-full flex flex-row items-center justify-between mb-4
             px-4 pt-6">
   <span class="flex flex-row gap-x-2">
-    <a href="/" class="button-floating">
+    <a href="/" class={buttonVariants({ variant: 'floating' })}>
       <IconHome/>
     </a>
   </span>
   <h1>Test instances</h1>
-  <a href="/sections" class="button-floating">
-    <IconSections class="size-7.5 m-px"/>
+  <a href="/sections" class={buttonVariants({ variant: 'floating' })}>
+    <IconSections/>
   </a>
 </nav>
 <span class="-my-7"></span>
@@ -38,8 +40,7 @@
 
   <div class="flex flex-col gap-3 relative">
     <Dialog.Root>
-      <Dialog.Trigger class="button-outline flex flex-row gap-x-2 items-center justify-center font-semibold
-                              *:opacity-90 *:font-semibold">
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-2 items-center justify-center font-semibold *:opacity-90 *:font-semibold')}>
         <MdiPaperAddOutline class="size-5"/>
         <b>Add new test instance</b>
       </Dialog.Trigger>
@@ -55,7 +56,7 @@
     {:else}
       {#each paginationValues as instance}
         <Card href="/instances/{instance.test_id}/items"
-              class="button-outline">
+              class={buttonVariants({ variant: 'outline' })}>
           <h3>
             {instance.name} &middot; {instance.test_id.split("_")[0]}
           </h3>

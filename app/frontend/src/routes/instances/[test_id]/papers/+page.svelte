@@ -11,6 +11,8 @@
   import type { GetEvaluationsResponse } from '$lib/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
   import { api } from '$lib/utils/api.ts';
   import { createPoller } from '$lib/utils/poller.ts';
 
@@ -46,7 +48,7 @@
   <h1 class="text-left font-semibold w-full flex justify-between items-center">
     Test papers
     <Dialog.Root bind:open={isAddStudentDialogOpen}>
-      <Dialog.Trigger class="button-secondary">
+      <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>
         <IconPlus class="size-5"/>
       </Dialog.Trigger>
       <AddNewStudent bind:isAddDialogOpen={isAddStudentDialogOpen}
@@ -60,8 +62,7 @@
   {:else}
     {#each perStudentStatuses as testPaper}
     <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
-        class="flex-1 button-outline subcontainer
-                flex flex-row justify-between items-center">
+        class={cn(buttonVariants({ variant: 'outline' }), 'flex-1 subcontainer flex flex-row justify-between items-center')}>
       <h4 class="truncate space-x-1">
         <span class="tracking-tighter">{testPaper.student_no}</span>
         <span class="font-normal">{testPaper.name}</span>

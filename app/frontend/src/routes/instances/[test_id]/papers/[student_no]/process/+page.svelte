@@ -20,7 +20,8 @@
   import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
-  import { Button } from '$lib/components/ui/button/index.js';
+  import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+  import { cn } from '$lib/utils.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import Switch from '$lib/components/LightSwitch.svelte';
@@ -173,7 +174,7 @@
   <!-- <div> -->
     <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-              class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
+              class={cn(buttonVariants({ variant: 'outline' }), 'flex-1 flex items-center gap-x-2 min-w-0')}>
         <IconUpload/>
         <span class="shrink-0 whitespace-nowrap text-sm">
           {formFileRecords.length > 0
@@ -197,7 +198,7 @@
           />
       
       <Dialog.Root bind:open={isCameraDialogOpen}>
-        <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
+        <Dialog.Trigger class={cn(buttonVariants({ variant: 'secondary' }), 'w-1/5 flex justify-center items-center')}>
           <IconCamera class="size-6 opacity-80"/>
         </Dialog.Trigger>
         <OpenCamera {isCameraDialogOpen}
@@ -263,22 +264,18 @@
                     class="aspect-auto block"
                     />
               <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
-                        class="button-outline">
+                <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}>
                   <IconRotateCW />
-                </button>
-                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
-                        class="button-outline">
+                </Button>
+                <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}>
                   <IconRotateCCW />
-                </button>
-                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
-                        class="button-outline">
+                </Button>
+                <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}>
                   <IconFlipHorizontally />
-                </button>
-                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
-                        class="button-outline">
+                </Button>
+                <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}>
                   <IconFlipVertically />
-                </button>
+                </Button>
               </span>
             </div>
           {/each}
@@ -288,7 +285,7 @@
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>
-      <Dialog.Trigger class="button-secondary text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'secondary' }), 'text-sm')}
                       disabled={isCommitmentOngoing}>
         Open segmentation results
       </Dialog.Trigger>

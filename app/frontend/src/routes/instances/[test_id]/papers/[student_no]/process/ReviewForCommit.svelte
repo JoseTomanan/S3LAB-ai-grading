@@ -7,6 +7,7 @@
   import IconLabel from "~icons/mdi/label";
 	import IconDiscard from "~icons/mdi/close";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
+  import { Button } from '$lib/components/ui/button/index.ts';
 	import Card from "$lib/components/Card.svelte";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");
@@ -28,7 +29,7 @@
 <Dialog.Content showCloseButton={false}
                 onEscapeKeydown={(e) => e.preventDefault()}>
   <div class="flex flex-row w-full gap-x-1">
-    <button class="button-secondary flex-1 text-sm {isButtonDisabled ? "opacity-50" : ""}"
+    <Button variant="secondary" class="flex-1 text-sm"
             disabled={isButtonDisabled}
             onclick={onAccept}>
       {#if isCommitmentOngoing}
@@ -45,11 +46,11 @@
       {:else}
         Accept and evaluate
       {/if}
-    </button>
-    <button class="button-destructive text-sm"
+    </Button>
+    <Button variant="destructive" class="text-sm"
             onclick={onReject}>
       Discard
-    </button>
+    </Button>
   </div>
   
   <div class="max-h-[80vh] overflow-y-auto">

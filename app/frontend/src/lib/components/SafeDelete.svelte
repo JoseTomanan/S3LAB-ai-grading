@@ -1,16 +1,15 @@
 <script lang="ts">
   let { toggle = $bindable(), onDelete, size = 6 } = $props();
+  import { Button } from '$lib/components/ui/button/index.ts';
   import IconDelete from "~icons/mdi/delete";
 </script>
 
 {#if !toggle}
-  <button class="button-destructive"
-          onclick={() => toggle = true}>
+  <Button variant="destructive" onclick={() => toggle = true}>
     <IconDelete class={`size-${size} mx-auto`} />
-  </button>
+  </Button>
 {:else}
-  <button class="button-destructive {size <= 5 ? "text-xs" : "text-sm"}"
-          onclick={onDelete}>
+  <Button variant="destructive" class={size <= 5 ? 'text-xs' : 'text-sm'} onclick={onDelete}>
     Confirm delete
-  </button>
+  </Button>
 {/if}

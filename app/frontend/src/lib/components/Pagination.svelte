@@ -1,6 +1,7 @@
 <script>
 	import MdiArrowForward from '~icons/mdi/arrow-forward';
 	import MdiArrowBack from '~icons/mdi/arrow-back';
+	import { Button } from '$lib/components/ui/button/index.ts';
 	
 	let { rows = [], perPage = 10, trimmedRows = $bindable() } = $props();
 
@@ -21,24 +22,22 @@
 
 {#if totalRows && totalRows > perPage}
 	<div class='pagination'>
-		<button
-					class="button-secondary"
-					onclick={() => currentPage -= 1} 
-					disabled={currentPage === 0 ? true : false} 
-					aria-label="left arrow icon" 
+		<Button variant="secondary"
+					onclick={() => currentPage -= 1}
+					disabled={currentPage === 0}
+					aria-label="left arrow icon"
 					aria-describedby="prev">
 			<MdiArrowBack />
-		</button>
+		</Button>
 		<span id='prev' class='sr-only'>Load previous {perPage} rows</span>
 		<p>{start + 1} - {end + 1} of {totalRows}</p>
-		<button
-					class="button-secondary"
-					onclick={() => currentPage += 1} 
-					disabled={currentPage === totalPages - 1 ? true : false} 
-					aria-label="right arrow icon" 
+		<Button variant="secondary"
+					onclick={() => currentPage += 1}
+					disabled={currentPage === totalPages - 1}
+					aria-label="right arrow icon"
 					aria-describedby="next">
 			<MdiArrowForward />
-		</button>
+		</Button>
 		<span id='next' class='sr-only'>Load next {perPage} rows</span>
 	</div>
 {/if}
@@ -66,7 +65,5 @@
 			margin: 0 1rem;
 	}
 
-	button {
-		display: flex;
-	}
+
 </style>

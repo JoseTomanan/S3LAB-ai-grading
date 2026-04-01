@@ -19,6 +19,8 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
+  import { Button, buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';
 
@@ -113,7 +115,7 @@
       <h1 class="font-semibold">Test answers</h1>
       <h5>{data.student_no}</h5>
     </span>
-    <a class="button-secondary flex flex-row items-center gap-x-1"
+    <a class={cn(buttonVariants({ variant: 'secondary' }), 'flex flex-row items-center gap-x-1')}
         href="/instances/{data.test_id}/papers/{data.student_no}/process">
       <span class="text-sm">Upload</span>
       <MdiImagePlus class="size-5"/>
@@ -173,7 +175,7 @@
                         />
             <Sheet.Root open={cropDialogOpen.get(studentItem.item_id) ?? false}
                           onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
-              <Sheet.Trigger class="button-outline">
+              <Sheet.Trigger class={buttonVariants({ variant: 'outline' })}>
                 <MdiCrop/>
               </Sheet.Trigger>
               <ManualCrop test_id={data.test_id}
@@ -181,12 +183,11 @@
                           item_id={studentItem.item_id}
                           onCropSubmitted={() => handleCropSubmitted(studentItem.item_id)}/>
             </Sheet.Root>
-            <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
-                            button-outline px-0 py-0`}
+            <Button variant="outline" class="py-0"
                     onclick={() => reevaluateAnswer(studentItem.answer_id)}
                     disabled={isRequestLoading || studentItem.image_directory == ""}>
               <IconReevaluate />
-            </button>
+            </Button>
           </span>
           
           <div>

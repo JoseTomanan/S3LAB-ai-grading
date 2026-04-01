@@ -248,22 +248,18 @@
           
           <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80
                         [&>button]:backdrop-blur-md">
-            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
-                    class="button-outline">
+            <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}>
               <IconRotateCW />
-            </button>
-            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
-                    class="button-outline">
+            </Button>
+            <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}>
               <IconRotateCCW />
-            </button>
-            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
-                    class="button-outline">
+            </Button>
+            <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}>
               <IconFlipHorizontally />
-            </button>
-            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
-                    class="button-outline">
+            </Button>
+            <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}>
               <IconFlipVertically />
-            </button>
+            </Button>
           </span>
         </div>
       {/each}

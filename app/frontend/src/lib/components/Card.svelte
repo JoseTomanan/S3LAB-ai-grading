@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import type { HTMLAnchorAttributes, HTMLAttributes } from 'svelte/elements';
+  import { cn } from '$lib/utils.ts';
 
   type BaseProps = {
     children: Snippet;
@@ -18,9 +19,9 @@
 </script>
 
 
-<svelte:element this={tag} 
+<svelte:element this={tag}
         {...(href ? { href } : {})}
-        class="bg-card text-card-foreground rounded-xs border border-border/50 px-3 py-1.5 {className}" 
+        class={cn("bg-card text-card-foreground rounded-xs border border-border/50 px-3 py-1.5", className)}
         {...rest}>
   {@render children()}
 </svelte:element>

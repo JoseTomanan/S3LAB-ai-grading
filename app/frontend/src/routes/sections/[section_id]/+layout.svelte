@@ -1,5 +1,6 @@
 <script lang="ts">
   const { data, children } = $props();
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
   import IconBack from "~icons/mdi/chevron-left";
   import IconSectionList from '~icons/mdi/format-list-bulleted';
 
@@ -13,15 +14,15 @@
 <nav class="bg-sidebar text-sidebar-foreground
             shadow shadow-sidebar-border
             w-full flex flex-row justify-between p-4 pt-6">
-  <a href="/sections" class="button-floating">
+  <a href="/sections" class={buttonVariants({ variant: 'floating' })}>
     <IconBack/>
   </a>
   <span class="*:leading-5 *:text-center">
     <h1>{sectionName}</h1>
     <h6>Class list</h6>
   </span>
-  <a href="/instances" class="button-floating">
-    <IconSectionList class="size-7 m-0.5"/>
+  <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
+    <IconSectionList/>
   </a>
 </nav>
 

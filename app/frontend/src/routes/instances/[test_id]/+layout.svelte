@@ -17,6 +17,8 @@
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
+  import { Button, buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -39,13 +41,13 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
-      <button class="button-floating"
+      <Button variant="floating"
               onclick={() => goto("..")}>
         <IconBack/>
-      </button>
+      </Button>
       <h1>{ activeTestInstance.name }</h1>
-      <a href="/instances" class="button-floating">
-        <IconInstancesList class="size-7 m-0.5"/>
+      <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
+        <IconInstancesList/>
       </a>
     </span>
     
@@ -75,11 +77,11 @@
     
     <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
-        <a class="button-primary ring-chart-3 {isRouteItems ? "ring-2" : ""}"
+        <a class={cn(buttonVariants(), 'ring-chart-3', isRouteItems ? 'ring-2' : '')}
             href="/instances/{data.test_id}/items">
           Items
         </a>
-        <a class="button-primary ring-chart-3 {isRoutePapers ? "ring-2" : ""}"
+        <a class={cn(buttonVariants(), 'ring-chart-3', isRoutePapers ? 'ring-2' : '')}
             href="/instances/{data.test_id}/papers">
           Papers
         </a>
@@ -87,14 +89,14 @@
       
       <span class="flex flex-row gap-x-1">
         <Dialog.Root>
-          <Dialog.Trigger class="button-primary"
+          <Dialog.Trigger class={buttonVariants()}
                           title={"Export sheets"}>
             <IconTable class="size-5" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
         <Sheet.Root bind:open={isBulkUploadOpen}>
-          <Sheet.Trigger class="button-primary"
+          <Sheet.Trigger class={buttonVariants()}
                           title={"Bulk upload"}>
             <IconUpload class="size-5"/>
           </Sheet.Trigger>

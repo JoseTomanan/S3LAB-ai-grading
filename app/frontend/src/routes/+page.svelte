@@ -1,7 +1,9 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
   import * as Sheet from "$lib/components/ui/sheet/index.ts";
-  
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
+
   import IconPaper from '~icons/mdi/paper';
   import IconSection from '~icons/mdi/person';
   import IconManual from '~icons/mdi/question-mark';
@@ -13,7 +15,7 @@
   <span class="pt-1"></span>
   
   <Sheet.Root>
-    <Sheet.Trigger class="button-floating absolute top-6 left-4">
+    <Sheet.Trigger class={cn(buttonVariants({ variant: 'floating' }), 'absolute top-6 left-4')}>
       <IconManual/>
     </Sheet.Trigger>
     <Manual />
@@ -41,12 +43,12 @@
               [&>a>svg]:size-10 [&>a>svg]:sm:size-12 [&>a>svg]:opacity-80
               [&>a>b]:font-bold [&>a>p]:text-xs [&>a>p]:text-muted-foreground
               ">
-      <a href="/instances" class="button-outline">
+      <a href="/instances" class={buttonVariants({ variant: 'outline' })}>
         <IconPaper />
         <b>Test Instances</b>
         <p>Manage exams & grading</p>
       </a>
-      <a href="/sections" class="button-outline">
+      <a href="/sections" class={buttonVariants({ variant: 'outline' })}>
         <IconSection />
         <b>Sections</b>
         <p>Manage class list</p>

@@ -8,7 +8,8 @@
 	import DebugConsole from "$lib/components/DebugConsole.svelte";
   import Camera from '$lib/components/MobileCamera/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button, buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
 	import { Spinner } from "$lib/components/ui/spinner/index.ts";
 
@@ -100,7 +101,7 @@
           alt="Captured preview"
           class="border-0 ring-2 ring-accent rounded-xl" />
     <div class="flex flex-row w-full gap-1.5">
-      <Dialog.Close class="flex-1 button-primary"
+      <Dialog.Close class={cn(buttonVariants(), 'flex-1')}
                   onclick={returnImage}>
         <MdiImageCheck class="size-6 w-full"/>
       </Dialog.Close>

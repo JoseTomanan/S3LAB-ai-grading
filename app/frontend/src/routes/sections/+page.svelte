@@ -6,6 +6,8 @@
   import IconPapers from '~icons/mdi/text-box-multiple-outline';
 
   import type { Section } from "$lib/index.ts";
+  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { cn } from '$lib/utils.ts';
   import Pagination from "$lib/components/Pagination.svelte";
 	import Card from "$lib/components/Card.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
@@ -18,12 +20,12 @@
 
 <nav class="w-full flex flex-row items-center justify-between mb-4
             px-4 pt-6">
-  <a href="/" class="button-floating">
+  <a href="/" class={buttonVariants({ variant: 'floating' })}>
     <IconHome/>
   </a>
   <h1>Sections</h1>
-  <a href="/instances" class="button-floating">
-    <IconPapers class="size-6 m-1"/>
+  <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
+    <IconPapers/>
   </a>
 </nav>
 <span class="-my-7"></span>
@@ -31,9 +33,8 @@
 <div class="container">
   <div class="flex flex-col gap-3 relative">
     <Dialog.Root>
-      <Dialog.Trigger class="button-outline flex flex-row gap-x-2 justify-center 
-                              *:opacity-90 *:font-semibold">
-        <MdiPeopleAdd class="size-6"/>
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-2 items-center justify-center font-semibold *:opacity-90 *:font-semibold')}>
+        <MdiPeopleAdd class="size-5"/>
         <b>Add new section</b>
       </Dialog.Trigger>
       <AddSection />
@@ -48,7 +49,7 @@
     {:else}
       {#each paginationValues as section}
         <Card href="/sections/{section.section_id}"
-              class="button-outline">
+              class={buttonVariants({ variant: 'outline' })}>
           <h3>{section.section_name}</h3>
           <h5 class="font-normal">
             SectionID: {section.section_id}

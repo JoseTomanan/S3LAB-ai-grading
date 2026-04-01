@@ -156,80 +156,9 @@
     @apply xl:w-4/5;
   }
 
-  .button-primary {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-    text-align: center;
-    font-weight: 500;
-		@apply py-1 px-2;
-		@apply rounded;
-    @apply shadow-xs;
-    cursor: pointer;
-	}
-
-	.button-secondary {
-    background-color: var(--secondary);
-    color: var(--secondary-foreground);
-    text-align: center;
-    font-weight: 500;
-		@apply py-1 px-2;
-		@apply rounded;
-    @apply shadow-xs;
-    cursor: pointer;
-	}
-
-  .button-destructive {
-    background-color: var(--destructive);
-    color: var(--color-white);
-    /* text-align: center; */
-    font-weight: 500;
-    @apply py-1 px-2;
-    @apply rounded;
-    @apply shadow-xs;
-    cursor: pointer;
-  }
-  .button-destructive:hover {
-    opacity: 80%;
-  }
-
-  .button-floating {
-    @apply bg-linear-to-b from-white to-neutral-100;
-            @apply hover:from-neutral-50 hover:to-neutral-200;
-    color: var(--color-primary-700);
-    @apply border border-border;
-    @apply shadow;
-    @apply rounded-full;
-    height: fit-content;
-    @apply *:size-8;
-  }
-
-  .button-floating-secondary {
-    @apply bg-linear-to-b from-white to-neutral-100;
-            @apply hover:from-neutral-50 hover:to-neutral-200;
-    color: var(--secondary-700);
-    @apply border border-border;
-    @apply shadow;
-    @apply rounded-full;
-    height: fit-content;
-    @apply *:size-8;
-  }
 }
 
 
-/* ============UTILITIES============ */
-@layer utilities {
-  .button-outline {
-    background-color: var(--card);
-    color: var(--card-foreground);
-    /* text-align: center; */
-    font-weight: 500;
-    @apply py-1 px-2;
-    @apply rounded;
-    @apply shadow-xs;
-    @apply ring ring-border border-0;
-    cursor: pointer;
-  }
-}
 
 /* ============ANIMATIONS============ */
 @keyframes spin {
