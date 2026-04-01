@@ -24,27 +24,11 @@ IMAGE_MODIFIER = ImageModifier()
 
 # ==============================
 #region Auxiliary Functions
-def evaluate_image_logic(answer_id_input: int, session: Session):
+def compute_ai_evaluation(image_bytes: bytes, test_item: TestItem) -> str:
+    """Run AI evaluation for a single answer. Pure AI call — no DB access."""
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
-
-    print(f"INTERNAL:\tFunction evaluate_image({answer_id_input}) is being executed...")
-
-    answer = session.exec(
-                    select(StudentAnswer)
-                    .where(StudentAnswer.answer_id == answer_id_input)
-                    ).first()
-    assert answer is not None
-
-    actual_image_path = f"static/images/{answer.image_directory.split("/")[3]}"
-    image_bytes: bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
-
-    test_item = session.exec(
-                    select(TestItem)
-                    .where(TestItem.item_id == answer.item_id)
-                    ).first()
-    assert test_item is not None
 
     ai_evaluation = ""
     match test_item.is_problem_solving:
@@ -74,7 +58,7 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                     all_parts.extend(["NO"] * len(batch))
 
             ai_evaluation = ";".join(all_parts) + ";"
-    
+
         case _:
             expected_answer = test_item.expected_answer_rubric_questions
             while True:
@@ -82,12 +66,33 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                 if response and _VALID_E_A_RESPONSE(response):
                     break
                 print("BACKEND:\tRetrying answer eval...")
-            
+
             ai_evaluation = response
 
-    all_scores = calculate_score(test_item.expected_answer_rubric_questions,
-                                 ai_evaluation)
-    
+    return ai_evaluation
+
+
+def evaluate_image_logic(answer_id_input: int, session: Session):
+    print(f"INTERNAL:\tFunction evaluate_image({answer_id_input}) is being executed...")
+
+    answer = session.exec(
+                    select(StudentAnswer)
+                    .where(StudentAnswer.answer_id == answer_id_input)
+                    ).first()
+    assert answer is not None
+
+    actual_image_path = f"static/images/{answer.image_directory.split("/")[3]}"
+    image_bytes: bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
+
+    test_item = session.exec(
+                    select(TestItem)
+                    .where(TestItem.item_id == answer.item_id)
+                    ).first()
+    assert test_item is not None
+
+    ai_evaluation = compute_ai_evaluation(image_bytes, test_item)
+    all_scores = calculate_score(test_item.expected_answer_rubric_questions, ai_evaluation)
+
     answer.ai_evaluation = ai_evaluation
     answer.is_done_rendering = True
 
