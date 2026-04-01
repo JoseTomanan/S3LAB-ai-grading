@@ -29,7 +29,7 @@
   </span>
   <h1>Test instances</h1>
   <a href="/sections" class="button-floating">
-    <IconSections class="size-7.5 m-0.25"/>
+    <IconSections class="size-7.5 m-px"/>
   </a>
 </nav>
 <span class="-my-7"></span>
