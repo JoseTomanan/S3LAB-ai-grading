@@ -18,8 +18,16 @@ class BoxSegmenter(DocumentScanner):
     debug_dir = "./TEMP/output/DEBUG"
 
     def get_answer_sections(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
-        """Use dots to find section corners, then lines to verify rectangle that serves as section."""
+        """
+        [WRAPPER] Use dots to find section corners, then lines to verify rectangle that serves as section.
+        """
         image = self._decode_bytes(image_bytes)
+        list_images_processed = self.get_answer_sections_mat(image, num_boxes, debug)
+        return [self._encode_to_bytes(i) for i in list_images_processed]
+
+    def get_answer_sections_mat(self, image: MatLike, num_boxes: int, debug: bool = False) -> list[MatLike]:
+        """Use dots to find section corners, then lines to verify rectangle.
+        MatLike in, list[MatLike] out."""
         image_original, image_cannied = self._regularize_image(image, canny_thresholds=(30,150),
                                                                 gaussian_blur_kernel_size=None)
         # image_dilated = self._dilate_edges(image_cannied)
@@ -33,8 +41,7 @@ class BoxSegmenter(DocumentScanner):
         if images_answers == []:
             raise ValueError("Could not find any dotted boxes.")
 
-        images_warped = [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
-        return [self._encode_to_bytes(i) for i in images_warped]
+        return [self._warp_from_original(i, image_original) for i in images_answers[:num_boxes]]
 
     def _detect_dots(self, image_original: MatLike, image_cannied: MatLike, debug: bool = False) -> list[list[float]]:
         """From image, use marker dots to find section corners."""
@@ -134,10 +141,17 @@ class BoxSegmenter(DocumentScanner):
 
     #region Secondary functions
     def beautify_scan(self, image_bytes: bytes) -> bytes:
-        """Enhance scan by adjusting contrast and brightening. Sana hindi mo taken for granted yung pinagdaanan ko para sayo"""
-        array = self._decode_bytes(image_bytes)
-        img_contrasted = self._adjust_contrast(array, amount=1.3)
-        return self._encode_to_bytes(img_contrasted)
+        """
+        [WRAPPER] Enhance scan by adjusting contrast and brightening.
+        """
+        image = self._decode_bytes(image_bytes)
+        image_processed = self.beautify_scan_mat(image)
+        return self._encode_to_bytes(image_processed)
+
+    def beautify_scan_mat(self, image: MatLike) -> MatLike:
+        """Enhance scan by adjusting contrast.
+        MatLike in, MatLike out."""
+        return self._adjust_contrast(image, amount=1.3)
 
     def get_boxes(self, image_bytes: bytes, num_boxes: int, debug: bool = False) -> list[bytes]:
         """[DEPRECATED] Get best boxes (non-overlapping) from a scanned image. Currently tuned for white paper only."""

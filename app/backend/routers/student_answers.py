@@ -540,13 +540,21 @@ async def _scan_and_segment_pages(contents_list: list[bytes], num_boxes: Optiona
 
     all_processed: list[bytes] = []
     for page_idx, contents in enumerate(contents_list):
-        ## ======== DOCUMENT SCANNING ========
-        contents = DOCUMENT_SCANNER.normalize_bytes(contents)
-        scanned_page = contents if is_scanned_already else DOCUMENT_SCANNER.scan_page(contents)
+        ## ======== DECODE ONCE ========
+        image_mat = DOCUMENT_SCANNER._decode_bytes(contents)
 
-        ## ======== BOX SEGMENTING ========
-        segmented_list: list[bytes] = BOX_SEGMENTER.get_answer_sections(scanned_page, num_boxes if num_boxes is not None else 3)
-        processed_list: list[bytes] = [BOX_SEGMENTER.beautify_scan(b) for b in segmented_list]
+        ## ======== DOCUMENT SCANNING ========
+        ## normalize_bytes previously added a gratuitous encode+decode cycle here to match load_image behavior.
+        ## Using MatLike path avoids that entirely.
+        ## contents = DOCUMENT_SCANNER.normalize_bytes(contents)
+        scanned_mat = image_mat if is_scanned_already else DOCUMENT_SCANNER.scan_page_mat(image_mat)
+
+        ## ======== BOX SEGMENTING + ENCODE ONCE PER BOX ========
+        segmented_mats = BOX_SEGMENTER.get_answer_sections_mat(scanned_mat, num_boxes if num_boxes is not None else 3)
+        processed_list: list[bytes] = [
+            DOCUMENT_SCANNER._encode_to_bytes(BOX_SEGMENTER.beautify_scan_mat(mat))
+            for mat in segmented_mats
+        ]
 
         print(f"BACKEND:\tPage {page_idx + 1}: segmented {len(processed_list)} boxes.")
         all_processed.extend(processed_list)

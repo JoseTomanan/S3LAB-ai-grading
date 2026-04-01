@@ -17,10 +17,17 @@ class DocumentScanner:
                     image_bytes: bytes,
                     debug: bool = False,
                     ) -> bytes:
-        """Take unscanned image, return scanned image."""
+        """
+        [WRAPPER] Take unscanned image, return scanned image.
+        """
         image = self._decode_bytes(image_bytes)
+        image_processed = self.scan_page_mat(image, debug)
+        return self._encode_to_bytes(image_processed)
+
+    def scan_page_mat(self, image: MatLike, debug: bool = False) -> MatLike:
+        """Take unscanned image (MatLike), return scanned image (MatLike). No encode/decode overhead."""
         image_original, image_cannied = self._regularize_image(image)
-        
+
         if debug:
             self.save_image(
                         self._encode_to_bytes(image_cannied),
@@ -69,9 +76,7 @@ class DocumentScanner:
         if image_good_contour is None:
             raise ValueError("Could not find document outline.")
 
-        image_warped = self._warp_from_original(image_good_contour, image_original)
-
-        return self._encode_to_bytes(image_warped)
+        return self._warp_from_original(image_good_contour, image_original)
 
 
     #region Image modification functions
@@ -85,11 +90,6 @@ class DocumentScanner:
         if not ret:
             raise ValueError("Failed to encode image")
         return buffer.tobytes()
-
-    def normalize_bytes(self, image_bytes: bytes) -> bytes:
-        """Decode and re-encode image bytes to standardize JPEG encoding (strips metadata, normalizes quality).
-        Necessary to normalize image; as if it was loaded using function load_image."""
-        return self._encode_to_bytes(self._decode_bytes(image_bytes))
 
     def brighten(self, image_bytes: bytes, amount: float) -> bytes:
         """Scale pixel values with (1 + amount). Amount > 0 increases brightness; < 0 decreases it."""
