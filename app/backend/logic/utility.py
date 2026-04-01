@@ -24,16 +24,17 @@ IMAGE_MODIFIER = ImageModifier()
 
 # ==============================
 #region Auxiliary Functions
-def compute_ai_evaluation(image_bytes: bytes, test_item: TestItem) -> str:
-    """Run AI evaluation for a single answer. Pure AI call — no DB access."""
+def compute_ai_evaluation(image_bytes: bytes, is_problem_solving: bool, question: str, expected_answer_rubric_questions: str) -> str:
+    """Run AI evaluation for a single answer. Pure AI call — no DB access.
+    Accepts primitives instead of a TestItem ORM object so it is safe to call from worker threads."""
     _STRIP_POINTS = lambda x : re.sub(r'\s*\([^)]*\)\s*$', '', x).strip()
     _VALID_R_Q_RESPONSE = lambda x : x in ["YES", "NO"]
     _VALID_E_A_RESPONSE = lambda x : x in ["YES", "NO", "UNCLEAR"]
 
     ai_evaluation = ""
-    match test_item.is_problem_solving:
+    match is_problem_solving:
         case True:
-            rubric_questions = test_item.expected_answer_rubric_questions.split(";")
+            rubric_questions = expected_answer_rubric_questions.split(";")
             cleaned_rubrics = [_STRIP_POINTS(r) for r in rubric_questions if r.strip() != ""]
 
             BATCH_SIZE = 4
@@ -43,7 +44,7 @@ def compute_ai_evaluation(image_bytes: bytes, test_item: TestItem) -> str:
             for batch in batches:
                 for attempt in range(MAX_RUBRIC_RETRIES):
                     response = AI_ANSWER_EVALUATOR.evaluate_multi_rubric(
-                                    image_bytes, test_item.question, batch
+                                    image_bytes, question, batch
                                     )
                     if response:
                         parts = response.strip().split(";")
@@ -59,10 +60,10 @@ def compute_ai_evaluation(image_bytes: bytes, test_item: TestItem) -> str:
             ai_evaluation = ";".join(all_parts) + ";"
 
         case _:
-            expected_answer = test_item.expected_answer_rubric_questions
+            expected_answer = expected_answer_rubric_questions
             response = None
             for attempt in range(MAX_ANSWER_RETRIES):
-                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, test_item.question, _STRIP_POINTS(expected_answer))
+                response = AI_ANSWER_EVALUATOR.evaluate_expected_answer(image_bytes, question, _STRIP_POINTS(expected_answer))
                 if response and _VALID_E_A_RESPONSE(response):
                     break
                 print(f"BACKEND:\tRetrying answer eval (attempt {attempt + 1}/{MAX_ANSWER_RETRIES})...")
@@ -94,7 +95,7 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                     ).first()
     assert test_item is not None
 
-    ai_evaluation = compute_ai_evaluation(image_bytes, test_item)
+    ai_evaluation = compute_ai_evaluation(image_bytes, test_item.is_problem_solving, test_item.question, test_item.expected_answer_rubric_questions)
     all_scores = calculate_score(test_item.expected_answer_rubric_questions, ai_evaluation)
 
     answer.ai_evaluation = ai_evaluation

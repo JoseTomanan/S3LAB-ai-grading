@@ -735,8 +735,9 @@ def _evaluate_answers_background(answer_ids: list[int]):
 
     session = get_direct_session()
     try:
-        ## Phase A: Sequential DB reads — load image bytes and test items for all answers
-        eval_tasks: list[tuple[int, bytes, TestItem]] = []
+        ## Phase A: Sequential DB reads — extract primitives so threads never touch the session
+        eval_tasks: list[tuple[int, bytes, bool, str, str]] = []
+        ## (answer_id, image_bytes, is_problem_solving, question, expected_answer_rubric_questions)
         for answer_id in answer_ids:
             try:
                 answer = session.get(StudentAnswer, answer_id)
@@ -747,7 +748,13 @@ def _evaluate_answers_background(answer_ids: list[int]):
                 test_item = session.get(TestItem, answer.item_id)
                 if test_item is None:
                     continue
-                eval_tasks.append((answer_id, image_bytes, test_item))
+                eval_tasks.append((
+                    answer_id,
+                    image_bytes,
+                    test_item.is_problem_solving,
+                    test_item.question,
+                    test_item.expected_answer_rubric_questions,
+                ))
             except Exception as e:
                 print(f"BACKEND:\tPhase A failed for answer {answer_id} (image missing or corrupted): {e}")
                 answer = session.get(StudentAnswer, answer_id)
@@ -758,9 +765,9 @@ def _evaluate_answers_background(answer_ids: list[int]):
                     session.commit()
 
         ## Phase B: Parallel AI calls — no DB access inside threads
-        def _run_ai(answer_id: int, image_bytes: bytes, test_item: TestItem) -> tuple[int, str | None, Exception | None]:
+        def _run_ai(answer_id: int, image_bytes: bytes, is_problem_solving: bool, question: str, earq: str) -> tuple[int, str | None, Exception | None]:
             try:
-                ai_evaluation = compute_ai_evaluation(image_bytes, test_item)
+                ai_evaluation = compute_ai_evaluation(image_bytes, is_problem_solving, question, earq)
                 return (answer_id, ai_evaluation, None)
             except Exception as e:
                 print(f"BACKEND:\tAI evaluation failed for answer {answer_id}: {e}")
