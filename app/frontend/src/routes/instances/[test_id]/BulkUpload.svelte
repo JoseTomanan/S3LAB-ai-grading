@@ -23,7 +23,8 @@
 
   import IconAccepted from "~icons/mdi/cloud-check-variant-outline";
   import IconExclamation from "~icons/mdi/exclamation-thick";
-  import IconNotFound from "~icons/mdi/account-question-outline";
+  import IconNoPerson from "~icons/mdi/account-question-outline";
+  import IconNotFound from "~icons/mdi/question-mark";
   import IconUnprocessable from "~icons/mdi/paper-off";
 
   import IconSend from "~icons/mdi/send";
@@ -192,7 +193,7 @@
   {:else if !isOperationStarted}
     <div id="scrollable-area"
           class="flex flex-col items-center max-w-fit overflow-scroll gap-y-1.5
-                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-foreground/40">
+                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-border">
       {#each formFileRecords as p}
         {@const supposedId = GET_STUDENT_NO(p.name)}
         {@const nameOnly = GET_NAME_ONLY(p.name)}
@@ -211,9 +212,9 @@
               <Dialog.Trigger class="max-w-full flex flex-row gap-1.5 items-center bg-white/80 truncate px-1.5 backdrop-blur-md
                                   hover:underline cursor-pointer">
                 {#if IS_IN_STUDENTS(supposedId)}
-                  <IconPerson class="size-4"/>
+                  <IconPerson class="size-4 text-chart-2"/>
                 {:else}
-                  <IconNotFound class="size-4" />
+                  <IconNoPerson class="size-4 text-chart-2" />
                 {/if}
                 <h4 class="text-left w-fit truncate">
                   {nameOnly ? nameOnly : "Add student no..."}
@@ -245,7 +246,8 @@
             {/if}
           </div>
           
-          <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
+          <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80
+                        [&>button]:backdrop-blur-md">
             <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
                     class="button-outline">
               <IconRotateCW />
@@ -276,6 +278,7 @@
       {#each formFileRecords as p}
         <span class="flex flex-row justify-start items-center gap-x-2
                       [&>span]:flex [&>span]:justify-center [&>span]:items-center [&>span]:size-5
+                      [&>span]:text-chart-5
                       [&>h4]:truncate [&>h4]:w-fit
                       [&>i]:flex-1 [&>i]:text-right [&>i]:text-base [&>i]:opacity-60 [&>i]:ml-2 [&>i]:truncate">
           <!-- <span> -->
@@ -296,7 +299,7 @@
               <h4>{ p.name }</h4>
               <i>{p.statusDetail ?? "Unspecified server error"}</i>
             {:else if p.statusCode == 501}
-              <span> <IconExclamation/> </span>
+              <span> <IconExclamation class="text-destructive"/> </span>
               <h4>{ p.name }</h4>
               <i>{p.statusDetail ?? ""}</i>
             
@@ -315,7 +318,7 @@
     </div>
     
     <Separator />
-    <h6>Answers are being evaluated in the background. You may close this screen now.</h6>
+    <h6>Answers will be evaluated in the background. You may close this screen now.</h6>
     {#if isAllDone}
       <Button variant="outline" onclick={resetPage}>Reset page</Button>
     {/if}
