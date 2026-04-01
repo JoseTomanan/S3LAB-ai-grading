@@ -222,6 +222,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
         ## or if the AI evaluation of any answer is not finished (is_done_rendering == False).
         ## 'has_any_answer' tracks if student has >=1 answer for any item -- distinguish between "no answers yet" vs "all answers processed".
         all_items_processed = True
+        is_all_answers_evaluated = True
         has_any_answer = False
         for item in items:
             answer = session.exec(
@@ -244,6 +245,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
             if not answer.is_done_rendering:
                 ## This answer exists but is still being processed by the AI (not fully evaluated yet)
                 all_items_processed = False
+                is_all_answers_evaluated = False
             else:
                 ## This answer is done and has an AI rubric evaluation; aggregate scores.
                 _parsed_scores = get_total_score(item.expected_answer_rubric_questions, answer.ai_evaluation)
@@ -254,6 +256,7 @@ def get_test_paper_statuses(test_id: str, session: Session = Depends(get_session
                 student_no=student.student_no,
                 name=student.name,
                 is_done_rendering=all_items_processed and has_any_answer,
+                is_all_answers_evaluated=is_all_answers_evaluated and has_any_answer,
                 has_any_answer=has_any_answer,
                 total_score=f"{total_score}/{max_score}",
                 ))
