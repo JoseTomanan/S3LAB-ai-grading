@@ -200,9 +200,7 @@
   }
   .button-floating > * {
     @apply size-8;
-    color: var(--sidebar-primary);
-    @apply saturate-200;
-    @apply brightness-60;
+    color: var(--chart-4);
   }
 }
 
@@ -219,11 +217,6 @@
     @apply shadow-xs;
     @apply ring ring-border border-0;
     cursor: pointer;
-  }
-
-  .foregroundize {
-    @apply saturate-200;
-    @apply brightness-60;
   }
 }
 
