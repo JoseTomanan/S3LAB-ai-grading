@@ -107,13 +107,13 @@
     font-family: var(--font-heading);
     letter-spacing: -0.05em;
 		font-weight: bold;
-    text-align: center;
 	}
 
 	h2 {
 		@apply text-xl;
     font-family: var(--font-heading);
-    letter-spacing: -0.05em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
 	}
 
 	h3 {
