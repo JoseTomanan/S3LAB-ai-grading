@@ -36,7 +36,7 @@
 
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
   import * as Sheet from '$lib/components/ui/sheet/index.ts';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import { Separator } from '$lib/components/ui/separator/index.ts';

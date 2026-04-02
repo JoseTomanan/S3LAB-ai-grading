@@ -9,7 +9,7 @@
 
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import * as Select from "$lib/components/ui/select/index.ts";
-  import Button from '$lib/components/ui/button/button.svelte';
+  import Button from '$lib/components/CustomButton/button.svelte';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';

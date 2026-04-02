@@ -1,7 +1,7 @@
 <script>
 	import MdiArrowForward from '~icons/mdi/arrow-forward';
 	import MdiArrowBack from '~icons/mdi/arrow-back';
-	import { Button } from '$lib/components/ui/button/index.ts';
+	import { Button } from '$lib/components/CustomButton/index.ts';
 	
 	let { rows = [], perPage = 10, trimmedRows = $bindable() } = $props();
 

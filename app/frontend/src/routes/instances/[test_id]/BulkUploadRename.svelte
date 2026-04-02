@@ -4,7 +4,7 @@
 
 	import { Input } from '$lib/components/ui/input/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import IconCheck from "~icons/mdi/check";
 	import { Label } from '$lib/components/ui/label/index.ts';
 

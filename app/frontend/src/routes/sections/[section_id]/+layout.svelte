@@ -1,6 +1,6 @@
 <script lang="ts">
   const { data, children } = $props();
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import IconBack from "~icons/mdi/chevron-left";
   import IconSectionList from '~icons/mdi/format-list-bulleted';
 

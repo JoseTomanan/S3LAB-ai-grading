@@ -19,7 +19,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
-  import { Button, buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';

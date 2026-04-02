@@ -6,7 +6,7 @@
   import IconPapers from '~icons/mdi/text-box-multiple-outline';
 
   import type { Section } from "$lib/index.ts";
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
   import Pagination from "$lib/components/Pagination.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";

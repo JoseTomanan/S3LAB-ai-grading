@@ -8,7 +8,7 @@
 	import DebugConsole from "$lib/components/DebugConsole.svelte";
   import Camera from '$lib/components/MobileCamera/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
-  import { Button, buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";
 	import { Spinner } from "$lib/components/ui/spinner/index.ts";

@@ -7,7 +7,7 @@
   import toast from 'svelte-5-french-toast';
   import type { TestItem } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import { Label } from '$lib/components/ui/label/index.js';
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import { Input } from '$lib/components/ui/input/index.ts';

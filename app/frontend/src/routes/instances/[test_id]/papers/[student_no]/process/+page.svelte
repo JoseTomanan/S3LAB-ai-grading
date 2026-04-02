@@ -20,7 +20,7 @@
   import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
-  import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.js';
   import { cn } from '$lib/utils.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';

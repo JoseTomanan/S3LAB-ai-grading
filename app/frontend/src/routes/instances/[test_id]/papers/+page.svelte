@@ -11,7 +11,7 @@
   import type { GetEvaluationsResponse } from '$lib/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
   import { api } from '$lib/utils/api.ts';
   import { createPoller } from '$lib/utils/poller.ts';

@@ -10,7 +10,7 @@
   import * as Select from "$lib/components/ui/select/index.ts";
   import { Label } from '$lib/components/ui/label/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
 
   let dropdownItems: Section[] = $state([]);
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
   import * as Sheet from "$lib/components/ui/sheet/index.ts";
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 
   import IconPaper from '~icons/mdi/paper';

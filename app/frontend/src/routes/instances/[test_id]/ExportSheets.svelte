@@ -3,7 +3,7 @@
 
   const { test_id } = $props();
 
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
   import toast from 'svelte-5-french-toast';
 

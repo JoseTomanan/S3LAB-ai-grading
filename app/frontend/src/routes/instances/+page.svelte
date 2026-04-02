@@ -8,7 +8,7 @@
   import IconNotDone from '~icons/mdi/checkbox-blank-circle';
 
   import type { TestInstance } from '$lib/index.ts';
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 
   import Pagination from '$lib/components/Pagination.svelte';

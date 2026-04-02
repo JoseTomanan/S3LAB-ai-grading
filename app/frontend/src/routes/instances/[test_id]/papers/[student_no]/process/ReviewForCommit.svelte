@@ -7,7 +7,7 @@
   import IconLabel from "~icons/mdi/label";
 	import IconDiscard from "~icons/mdi/close";
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
 	import Card from "$lib/components/Card.svelte";
 
   let testItemsContext: TestItemsContext = getContext("testItemsContext");

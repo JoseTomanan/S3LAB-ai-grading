@@ -1,6 +1,6 @@
 <script lang="ts">
   let { toggle = $bindable(), onDelete, size = 6 } = $props();
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import IconDelete from "~icons/mdi/delete";
 </script>
 

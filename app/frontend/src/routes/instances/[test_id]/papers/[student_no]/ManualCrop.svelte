@@ -8,7 +8,7 @@
   import { apiForm, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
   import { Input } from '$lib/components/ui/input/index.ts';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
 	import Card from '$lib/components/Card.svelte';

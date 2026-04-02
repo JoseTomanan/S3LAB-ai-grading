@@ -8,7 +8,7 @@
   
   import type { TestItem, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import { buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
   import EditTestItem from './EditTestItem.svelte';
   import AddTestItem from './AddTestItem.svelte';
 	import { Skeleton } from "$lib/components/ui/skeleton/index.ts";

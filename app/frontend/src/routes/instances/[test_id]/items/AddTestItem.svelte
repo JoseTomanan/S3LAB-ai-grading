@@ -8,7 +8,7 @@
 
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as RadioGroup from '$lib/components/ui/radio-group/index.ts';
-  import { Button } from '$lib/components/ui/button/index.js';
+  import { Button } from '$lib/components/CustomButton/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Textarea } from '$lib/components/ui/textarea/index.ts';

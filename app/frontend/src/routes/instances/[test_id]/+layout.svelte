@@ -17,7 +17,7 @@
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
-  import { Button, buttonVariants } from '$lib/components/ui/button/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
