@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
 	let { isOpen = $bindable(false) } = $props();
 
 	import { onMount, onDestroy } from 'svelte';
@@ -7,7 +7,7 @@
 
 	import fabric from 'fabric'; 
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-	import { Button } from "$lib/components/ui/button/index.ts";
+	import { Button } from "$lib/components/CustomButton/index.ts";
 
 	let canvasEl: HTMLCanvasElement;
 	let fabricCanvas: fabric.Canvas | null = null;
@@ -181,4 +181,4 @@
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
-</Dialog.Root>
+</Dialog.Root> -->

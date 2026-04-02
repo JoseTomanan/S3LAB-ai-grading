@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import { API_URL } from '$lib/constants.ts';
   const { test_id, student_no } = $props();
 
@@ -159,4 +159,4 @@
   </div>
 </Dialog.Content>
 
-</Dialog.Root>
+</Dialog.Root> -->
