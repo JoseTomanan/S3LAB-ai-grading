@@ -15,14 +15,14 @@
             shadow shadow-sidebar-border
             w-full flex flex-row justify-between p-4 pt-6">
   <a href="/sections" class={buttonVariants({ variant: 'floating' })}>
-    <IconBack/>
+    <IconBack class="size-8"/>
   </a>
   <span class="*:leading-5 *:text-center">
     <h1>{sectionName}</h1>
     <h6>Class list</h6>
   </span>
   <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
-    <IconSectionList/>
+    <IconSectionList class="size-8"/>
   </a>
 </nav>
 

@@ -16,7 +16,7 @@
   
   <Sheet.Root>
     <Sheet.Trigger class={cn(buttonVariants({ variant: 'floating' }), 'absolute top-6 left-4')}>
-      <IconManual/>
+      <IconManual class="size-8"/>
     </Sheet.Trigger>
     <Manual />
   </Sheet.Root>
@@ -44,12 +44,12 @@
               [&>a>b]:font-bold [&>a>p]:text-xs [&>a>p]:text-muted-foreground
               ">
       <a href="/instances" class={buttonVariants({ variant: 'outline' })}>
-        <IconPaper />
+        <IconPaper class="size-10"/>
         <b>Test Instances</b>
         <p>Manage exams & grading</p>
       </a>
       <a href="/sections" class={buttonVariants({ variant: 'outline' })}>
-        <IconSection />
+        <IconSection class="size-10"/>
         <b>Sections</b>
         <p>Manage class list</p>
       </a>

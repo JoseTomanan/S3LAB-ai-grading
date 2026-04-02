@@ -43,11 +43,11 @@
     <span class="flex flex-row items-center justify-between">
       <Button variant="floating"
               onclick={() => goto("..")}>
-        <IconBack/>
+        <IconBack class="size-8"/>
       </Button>
       <h1>{ activeTestInstance.name }</h1>
       <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
-        <IconInstancesList/>
+        <IconInstancesList class="size-8"/>
       </a>
     </span>
     
