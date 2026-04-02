@@ -4,11 +4,11 @@
 	import { type VariantProps, tv } from "tailwind-variants";
 
 	export const buttonVariants = tv({
-		base: "inline-flex shrink-0 items-center justify-center gap-2 rounded text-sm font-medium cursor-pointer transition-all outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+		base: "inline-flex shrink-0 items-center justify-center gap-x-2 rounded text-sm font-medium cursor-pointer transition-all outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 		variants: {
 			size: {
 				default: "px-2 py-1",
-				sm: "px-1.5 py-0.5 gap-1.5",
+				sm: "px-1.5 py-0.5 gap-x-1.5",
 				lg: "px-4 py-2",
 				icon: "size-9",
 				"icon-sm": "size-8",
@@ -22,9 +22,9 @@
 				ghost: "hover:bg-accent hover:text-accent-foreground",
 				link: "text-primary underline-offset-4 hover:underline",
 				floating:
-					"bg-white hover:from-neutral-50 hover:to-neutral-200 text-[var(--color-primary-700)] border border-border shadow rounded-full h-fit p-0 [&_svg:not([class*='size-'])]:size-8",
+					"bg-white hover:from-neutral-50 hover:to-neutral-200 text-[var(--color-primary-700)] border border-border shadow rounded-full h-fit p-0",
 				"floating-secondary":
-					"bg-white hover:from-neutral-50 hover:to-neutral-200 text-[var(--secondary-700)] border border-border shadow rounded-full h-fit p-0 [&_svg:not([class*='size-'])]:size-8",
+					"bg-white hover:from-neutral-50 hover:to-neutral-200 text-[var(--secondary-700)] border border-border shadow rounded-full h-fit p-0",
 			},
 		},
 		defaultVariants: {
