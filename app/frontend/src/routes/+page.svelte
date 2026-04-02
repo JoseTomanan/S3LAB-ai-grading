@@ -1,7 +1,7 @@
 <script lang="ts">
   import logo from "$lib/assets/android-chrome-512x512.png";
   import * as Sheet from "$lib/components/ui/sheet/index.ts";
-  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 
   import IconPaper from '~icons/mdi/paper';
@@ -43,16 +43,18 @@
               [&>a>svg]:size-10 [&>a>svg]:sm:size-12 [&>a>svg]:opacity-80
               [&>a>b]:font-bold [&>a>p]:text-xs [&>a>p]:text-muted-foreground
               ">
-      <a href="/instances" class={buttonVariants({ variant: 'outline' })}>
+      <Button variant="outline"
+              href="/instances">
         <IconPaper class="size-10"/>
         <b>Test Instances</b>
         <p>Manage exams & grading</p>
-      </a>
-      <a href="/sections" class={buttonVariants({ variant: 'outline' })}>
+      </Button>
+      <Button variant="outline"
+              href="/sections">
         <IconSection class="size-10"/>
         <b>Sections</b>
         <p>Manage class list</p>
-      </a>
+      </Button>
     </div>
   </div>
 </div>

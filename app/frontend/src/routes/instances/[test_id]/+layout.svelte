@@ -46,9 +46,10 @@
         <IconBack class="size-8"/>
       </Button>
       <h2>{activeTestInstance.name}</h2>
-      <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
+      <Button variant="floating"
+              href="/instances">
         <IconInstancesList class="size-7 m-0.5"/>
-      </a>
+      </Button>
     </span>
     
     <Separator/>
@@ -77,14 +78,14 @@
     
     <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
-        <a class={cn(buttonVariants(), 'ring-chart-3', isRouteItems ? 'ring-2' : '')}
+        <Button class={cn('ring-chart-3', isRouteItems ? 'ring-2' : '')}
             href="/instances/{data.test_id}/items">
           Items
-        </a>
-        <a class={cn(buttonVariants(), 'ring-chart-3', isRoutePapers ? 'ring-2' : '')}
+        </Button>
+        <Button class={cn('ring-chart-3', isRoutePapers ? 'ring-2' : '')}
             href="/instances/{data.test_id}/papers">
           Papers
-        </a>
+        </Button>
       </span>
       
       <span class="flex flex-row gap-x-1">

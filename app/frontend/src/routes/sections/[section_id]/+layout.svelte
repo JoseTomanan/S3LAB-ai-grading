@@ -1,6 +1,6 @@
 <script lang="ts">
   const { data, children } = $props();
-  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import IconBack from "~icons/mdi/chevron-left";
   import IconSectionList from '~icons/mdi/format-list-bulleted';
 
@@ -11,18 +11,19 @@
 </script>
 
 
+
 <nav class="bg-sidebar text-sidebar-foreground
             shadow shadow-sidebar-border
             w-full flex flex-row items-center justify-between p-4 pt-6">
-  <a href="/sections" class={buttonVariants({ variant: 'floating' })}>
+  <Button variant="floating" href="/sections">
     <IconBack class="size-8"/>
-  </a>
+  </Button>
   <span class="*:leading-5 *:text-center">
     <h2>{sectionName}</h2>
   </span>
-  <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
+  <Button variant="floating" href="/instances">
     <IconSectionList class="size-7 m-0.5"/>
-  </a>
+  </Button>
 </nav>
 
 <span class="-my-4"></span>

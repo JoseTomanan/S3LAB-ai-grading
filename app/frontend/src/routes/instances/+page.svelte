@@ -8,7 +8,7 @@
   import IconNotDone from '~icons/mdi/checkbox-blank-circle';
 
   import type { TestInstance } from '$lib/index.ts';
-  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
 
   import Pagination from '$lib/components/Pagination.svelte';
@@ -25,14 +25,16 @@
 <nav class="w-full flex flex-row items-center justify-between mb-4
             px-4 pt-6">
   <span class="flex flex-row gap-x-2">
-    <a href="/" class={buttonVariants({ variant: 'floating' })}>
+    <Button variant="floating"
+            href="/">
       <IconHome class="size-8"/>
-    </a>
+    </Button>
   </span>
   <h1>Test instances</h1>
-  <a href="/sections" class={buttonVariants({ variant: 'floating' })}>
+  <Button variant="floating"
+          href="/sections">
     <IconSections class="size-8"/>
-  </a>
+  </Button>
 </nav>
 <span class="-my-5"></span>
 

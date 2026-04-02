@@ -6,7 +6,7 @@
   import IconPapers from '~icons/mdi/text-box-multiple-outline';
 
   import type { Section } from "$lib/index.ts";
-  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
   import { cn } from '$lib/utils.ts';
   import Pagination from "$lib/components/Pagination.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
@@ -19,13 +19,13 @@
 
 <nav class="w-full flex flex-row items-center justify-between mb-4
             px-4 pt-6">
-  <a href="/" class={buttonVariants({ variant: 'floating' })}>
+  <Button variant="floating" href="/">
     <IconHome class="size-8"/>
-  </a>
+  </Button>
   <h1 class="italic">Sections</h1>
-  <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
+  <Button variant="floating" href="/instances">
     <IconPapers class="size-6.5 m-0.75"/>
-  </a>
+  </Button>
 </nav>
 <span class="-my-5"></span>
 

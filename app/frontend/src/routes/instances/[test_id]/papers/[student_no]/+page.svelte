@@ -115,11 +115,12 @@
       <h1>Test answers</h1>
       <h5>{data.student_no}</h5>
     </span>
-    <a class={cn(buttonVariants({ variant: 'secondary' }), 'flex flex-row items-center gap-x-1')}
-        href="/instances/{data.test_id}/papers/{data.student_no}/process">
+    <Button variant="secondary"
+            class="flex flex-row items-center gap-x-1"
+            href="/instances/{data.test_id}/papers/{data.student_no}/process">
       <span class="text-sm">Upload</span>
       <MdiImagePlus class="size-5"/>
-    </a>
+    </Button>
   </span>
 
   {#if studentItems.length == 0}
