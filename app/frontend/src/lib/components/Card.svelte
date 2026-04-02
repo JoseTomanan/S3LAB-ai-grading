@@ -21,7 +21,7 @@
 
 <svelte:element this={tag}
         {...(href ? { href } : {})}
-        class={cn("bg-card text-card-foreground rounded-xs border border-border/50 px-3 py-1.5", className)}
+        class={cn("bg-card text-card-foreground rounded-xs border border-border/50 shadow-none px-3 py-1.5", className)}
         {...rest}>
   {@render children()}
 </svelte:element>
