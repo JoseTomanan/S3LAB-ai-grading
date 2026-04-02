@@ -42,13 +42,19 @@ MOCK_DATA = {
             {"section_id": 2, "section": "3-Aguinaldo"}
         ],
         "students": [
-            {"student_no": "201990011", "name": "Amanda Nuñes", "section_id": 1},
-            {"student_no": "201990022", "name": "Anthony Hernandez", "section_id": 1},
-            {"student_no": "201990033", "name": "Michael Morales", "section_id": 1},
+            ## Section 1 students
+            {"student_no": "200033333", "name": "Thomas Yorke", "section_id": 1},
+            {"student_no": "200044444", "name": "Liam Gallagher", "section_id": 1},
+            {"student_no": "200055555", "name": "Pierre Bouvier", "section_id": 1},
+            {"student_no": "200066666", "name": "Chester Bennington", "section_id": 1},
+            {"student_no": "200022222", "name": "John Rzeznik", "section_id": 1},
+            {"student_no": "200011111", "name": "Billy Joe Armstrong", "section_id": 1},
+            ## Section 2 students
             {"student_no": "202090011", "name": "David Amdahl", "section_id": 2},
             {"student_no": "202090022", "name": "Olivia Rodrigo Duterte", "section_id": 2},
-            {"student_no": "202090033", "name": "Jhillian Palis", "section_id": 2},
+            {"student_no": "202090033", "name": "Julius Babao", "section_id": 2},
             {"student_no": "202090044", "name": "Paulo Costa", "section_id": 2},
+            {"student_no": "202090055", "name": "Nikola Kojic Soap", "section_id": 2},
         ],
         "test_instances": [
             {
@@ -124,7 +130,7 @@ MOCK_DATA = {
                 "expected_answer_rubric_questions": "8,056 [1pt]"
             },
         ]
-        }
+    }
 #endregion
 # ==============================
 
