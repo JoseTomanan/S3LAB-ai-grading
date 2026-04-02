@@ -24,7 +24,7 @@
   </a>
   <h1 class="italic">Sections</h1>
   <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
-    <IconPapers class="size-8"/>
+    <IconPapers class="size-6.5 m-0.75"/>
   </a>
 </nav>
 <span class="-my-5"></span>

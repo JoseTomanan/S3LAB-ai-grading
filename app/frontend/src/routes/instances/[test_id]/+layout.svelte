@@ -45,33 +45,33 @@
               onclick={() => goto("..")}>
         <IconBack class="size-8"/>
       </Button>
-      <h1>{ activeTestInstance.name }</h1>
+      <h2>{activeTestInstance.name}</h2>
       <a href="/instances" class={buttonVariants({ variant: 'floating' })}>
-        <IconInstancesList class="size-8"/>
+        <IconInstancesList class="size-7 m-0.5"/>
       </a>
     </span>
     
     <Separator/>
-    <div class="flex flex-col sm:flex-row gap-x-4 gap-y-1
+    <div class="flex flex-col xs:flex-row gap-x-3 gap-y-1
                 *:flex *:justify-between
-                [&>*>h4]:font-normal [&>*>h4]:text-foreground/85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
-      <span class="flex-3/5 tracking-tight">
-        <h4 class="italic">{activeTestInstance.test_id}</h4>
-        <h4>
+                [&>*>h6]:font-normal [&>*>h6]:opacity-70 [&>*>h6]:leading-none [&>*>h6]:whitespace-nowrap">
+      <span class="flex-1 tracking-tight">
+        <h6 class="italic">{activeTestInstance.test_id}</h6>
+        <h6>
           Rendered?
           {activeTestInstance.is_done_rendering 
             ? "☑️" 
             : "✖️" }
-        </h4>
+        </h6>
       </span>
-      <span class="flex-2/5">
-        <h4>
+      <span class="flex-1">
+        <h6>
           Created
           {activeTestInstance.date
             ? new Date(activeTestInstance.date).toLocaleDateString()
             : "" }
-        </h4>
-        <h4>SectionID: { activeTestInstance.section_id }</h4>
+        </h6>
+        <h6>SectionID: { activeTestInstance.section_id }</h6>
       </span>
     </div>
     
@@ -91,14 +91,14 @@
         <Dialog.Root>
           <Dialog.Trigger class={buttonVariants()}
                           title={"Export sheets"}>
-            <IconTable class="size-5" />
+            <IconTable class="size-5.5" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
         <Sheet.Root bind:open={isBulkUploadOpen}>
           <Sheet.Trigger class={buttonVariants()}
                           title={"Bulk upload"}>
-            <IconUpload class="size-5"/>
+            <IconUpload class="size-5.5"/>
           </Sheet.Trigger>
           <BulkUpload test_instance={activeTestInstance}
                       defaultNumBoxes={data.test_items?.length ?? 2}

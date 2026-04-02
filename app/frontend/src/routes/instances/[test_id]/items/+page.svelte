@@ -35,7 +35,7 @@
 
 
 <div class="space-y-3 overflow-visible">
-  <h1 class="text-left font-semibold w-full flex justify-between items-center">
+  <h1 class="text-left w-full flex justify-between items-center">
     Test items
     <Dialog.Root bind:open={isAddDialogOpen}>
       <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>

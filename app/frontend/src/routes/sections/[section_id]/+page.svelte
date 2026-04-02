@@ -18,7 +18,9 @@
 </script>
 
 
-<div class="container">
+<div class="container space-y-3">
+  <h1>Class list</h1>
+  
   <div class="space-y-2">
     <Dialog.Root bind:open={isAddDialogOpen}>
       <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-1 justify-center items-center w-full font-medium')}>

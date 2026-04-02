@@ -167,7 +167,7 @@
 
 <Sheet.Content side="right"
                 class="w-11/12 sm:max-w-135 px-2 py-4">
-  <h1 class="text-left font-semibold">Bulk upload</h1>
+  <h1 class="text-left">Bulk upload</h1>
   <div class="flex flex-row gap-x-1">
     <Input type="file"
             multiple
