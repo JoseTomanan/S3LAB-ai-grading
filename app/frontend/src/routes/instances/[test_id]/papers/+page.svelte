@@ -45,7 +45,7 @@
 
 
 <div class="flex flex-col gap-y-3 overflow-visible items-center">
-  <h1 class="text-left w-full flex justify-between items-center">
+  <h1 class="w-full flex justify-between items-center">
     Test papers
     <Dialog.Root bind:open={isAddStudentDialogOpen}>
       <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>

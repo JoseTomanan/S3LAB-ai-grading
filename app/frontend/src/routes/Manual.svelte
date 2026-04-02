@@ -6,7 +6,7 @@
 
 <Sheet.Content side="bottom"
                 class="flex max-h-[80dvh] flex-col px-4 py-4">
-  <h1 class="text-left">User manual</h1>
+  <h1>User manual</h1>
   <span class="-mt-6"></span>
 
   <div class="overflow-y-auto text-sm border-t border-b border-border
