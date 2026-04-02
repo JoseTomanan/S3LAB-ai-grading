@@ -183,7 +183,7 @@
                           item_id={studentItem.item_id}
                           onCropSubmitted={() => handleCropSubmitted(studentItem.item_id)}/>
             </Sheet.Root>
-            <Button variant="outline" class="py-0"
+            <Button variant="outline"
                     onclick={() => reevaluateAnswer(studentItem.answer_id)}
                     disabled={isRequestLoading || studentItem.image_directory == ""}>
               <IconReevaluate />
@@ -193,17 +193,18 @@
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
-              <span class="flex flex-row justify-between items-baseline-last gap-x-1
-                            [&>h5]:opacity-60">
-                <h5 class="italic flex-1">{e_a_r_q}</h5>
+              <span class="flex flex-row justify-between items-baseline-last gap-x-1">
+                <p class="italic flex-1 text-foreground/60">
+                  {e_a_r_q}
+                </p>
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
-                  <h4 class="font-semibold text-foreground/60">
+                  <p class="font-semibold text-foreground/80">
                     {isEvalNotError
                       ? GET_SCORES(studentItem)[index] || "—"
                       : "⚠️"}
-                  </h4>
+                  </p>
                 {/if}
               </span>
             {/if}
