@@ -1,13 +1,15 @@
 from pathlib import Path
-
-from logic.ai_interface import AIAnswerEvaluator
 from logic.box_segmenter import BoxSegmenter
 
 
 
 GET_INPUT = lambda x : f"./TEMP/input/{x}"
 GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
-FILENAMES = [f.name for f in Path("./TEMP/input").iterdir() if f.name.lower().startswith("proper")]
+FILENAMES = [
+    f.name for f in Path("./TEMP/input").iterdir()
+    if f.name.lower().startswith("proper")
+    and f.name.lower().endswith(('.jpeg', '.jpg', '.png'))
+]
 
 
 

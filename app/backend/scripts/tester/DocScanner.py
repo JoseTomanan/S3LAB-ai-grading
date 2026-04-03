@@ -1,9 +1,14 @@
-import os
+from pathlib import Path
 from logic.document_scanner import DocumentScanner
+
+
 
 GET_INPUT = lambda x : f"./TEMP/input/{x}"
 GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
-FILENAMES = [f for f in os.listdir(GET_INPUT("")) if os.path.isfile(os.path.join(GET_INPUT(""), f))]
+FILENAMES = [
+    f.name for f in Path(GET_INPUT("")).iterdir()
+    if f.name.lower().endswith(('.jpeg', '.jpg', '.png'))
+]
 
 
 
