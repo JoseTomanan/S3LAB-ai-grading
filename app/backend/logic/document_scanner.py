@@ -67,12 +67,23 @@ class DocumentScanner:
                         f"{self.debug_dir}/_00_SCANNEDCONTOUR.jpg"
                         )
 
+        ## Fallback chain — each method targets a progressively harder scene type.
+        ## Ordered by technique family: Canny-based first, then Otsu threshold-based.
+
+        ## Use case: low-contrast scenes where the paper blends into the background
+        ## (e.g. cream paper on gray desk). Applies bilateral filter + boosted CLAHE
+        ## + lower Canny thresholds to recover weak edges the main path misses.
         if image_good_contour is None:
             image_good_contour = self._fallback_low_contrast_detection(image_original)
 
+        ## Use case: clean white paper on a uniformly dark background. Otsu binarization
+        ## separates the bright paper from the dark scene without needing edge detection.
         if image_good_contour is None:
             image_good_contour = self._fallback_otsu_detection(image_original)
 
+        ## Use case: white paper surrounded by other bright elements (e.g. keyboard labels)
+        ## that border-connect to the paper in the Otsu binary. Morphological opening
+        ## breaks thin connections to border blobs, leaving the paper as the dominant region.
         if image_good_contour is None:
             image_good_contour = self._fallback_white_paper_detection(image_original)
 
