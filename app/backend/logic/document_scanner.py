@@ -39,8 +39,13 @@ class DocumentScanner:
 
         candidates = []
         for i, c in enumerate(contours):
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            ## convexHull straightens inward-bowing edges caused by paper curling (one side
+            ## elevated). A curled edge projects as a concave arc; the hull bridges it to a
+            ## straight line, allowing approxPolyDP to collapse it to 4 pts.
+            ## original_area intentionally uses `c` (pre-hull) for the area guard downstream.
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
 
             if debug:
                 debug_img = self._highlight_contours(image_cannied, approximate, c)
@@ -280,7 +285,9 @@ class DocumentScanner:
 
     def _fallback_low_contrast_detection(self, image_original: MatLike):
         """Fallback for low-contrast scenes (e.g. cream paper on gray desk).
-        Uses bilateral filter (edge-preserving) + boosted CLAHE + lower Canny thresholds."""
+        Uses bilateral filter (edge-preserving) + boosted CLAHE + lower Canny thresholds.
+        Like the main path, applies convexHull + 5% epsilon before approxPolyDP to handle
+        paper curling and large dog-ear folds."""
         _, enhanced_edges = self._regularize_image(
             image_original,
             canny_thresholds=(25, 75),
@@ -294,8 +301,9 @@ class DocumentScanner:
 
         candidates = []
         for c in contours:
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
             if len(approximate) == 4:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
@@ -308,7 +316,9 @@ class DocumentScanner:
         return self._pick_best_contour(candidates)
 
     def _fallback_otsu_detection(self, image_original: MatLike):
-        """Fallback: use Otsu threshold to find white paper on dark background."""
+        """Fallback: use Otsu threshold to find white paper on dark background.
+        Like the main path, applies convexHull + 5% epsilon before approxPolyDP to handle
+        paper curling and large dog-ear folds."""
         gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
         _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -324,8 +334,9 @@ class DocumentScanner:
 
         candidates = []
         for c in contours:
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
             if len(approximate) == 4:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
@@ -341,7 +352,9 @@ class DocumentScanner:
         """Fallback for scenes with white paper on a dark background surrounded by other bright elements
         (e.g. keyboard shortcut labels) that border-connect to the paper in a plain Otsu binary.
         Morphological opening breaks thin connections to border-hugging white blobs, leaving the
-        paper as the dominant interior white region."""
+        paper as the dominant interior white region.
+        Like the main path, applies convexHull + 5% epsilon before approxPolyDP to handle
+        paper curling and large dog-ear folds."""
         gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
         _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -360,8 +373,9 @@ class DocumentScanner:
 
         candidates = []
         for c in contours:
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
             if len(approximate) == 4:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
