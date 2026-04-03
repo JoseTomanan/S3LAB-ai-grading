@@ -1,14 +1,6 @@
 **/__pycache__/*
 
-
-## ================================
-/TEMP/input/corner_positions/*
-/TEMP/input/quads/**/*
-/TEMP/input/*
-/TEMP/output/**/*.jpg
-/TEMP/**.py
-## ================================
-
+/TEMP/*
 
 /static/images/*
 !/static/images/.gitkeep
