@@ -55,7 +55,9 @@
       toast.success("Test item added successfully!");
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new test item:\n" + e);
+      toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to add new test item:\n" + e);
     } finally {
       isOperationOngoing = false;
     }

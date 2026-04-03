@@ -42,7 +42,7 @@
       dropdownSections = await api<Section[]>(`${API_URL}/api/sections/`);
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to fetch sections.\n" + String(e));
     } finally {
       isSectionsLoading = false;
@@ -75,7 +75,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to edit student: " + String(e));
     } finally {
       isRequestLoading = false;
@@ -91,7 +91,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to delete student: " + String(e));
     } finally {
       isRequestLoading = false;

@@ -26,7 +26,7 @@
       dropdownItems = await api<Section[]>(`${API_URL}/api/sections/`);
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to fetch sections.\n" + String(e));
     }
   });
@@ -50,7 +50,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `Addition fail: ${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to add new test instance. Check your network connection and try again.");
     }
   }

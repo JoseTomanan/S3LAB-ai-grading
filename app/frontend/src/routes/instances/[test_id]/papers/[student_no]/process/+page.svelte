@@ -98,7 +98,7 @@
       isReviewDialogOpen = true;
     } catch(e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to send raw image for processing:\n" + String(e));
     } finally {
       isOperationOngoing = false;

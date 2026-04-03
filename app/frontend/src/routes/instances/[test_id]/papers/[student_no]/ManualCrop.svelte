@@ -142,7 +142,9 @@
       // Reset file
       canvasFile = undefined;
     } catch(e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to send points:\n" + e);
+      toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to send points:\n" + e);
     } finally {
       isOperationOngoing = false;
     }

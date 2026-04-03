@@ -77,7 +77,9 @@
       toast.success("Test item updated successfully!");
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit test item:\n" + e);
+      toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to edit test item:\n" + e);
     } finally {
       isOperationOngoing = false;
     }
@@ -89,7 +91,9 @@
       toast.success("Test item deleted.");
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete test item:\n" + e);
+      toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to delete test item:\n" + e);
     }
   }
 </script>

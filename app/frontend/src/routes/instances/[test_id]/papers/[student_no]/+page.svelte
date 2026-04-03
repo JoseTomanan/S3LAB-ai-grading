@@ -86,7 +86,7 @@
             );
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to reevaluate answer:\n" + String(e));
     } finally {
       isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
@@ -100,7 +100,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to delete answer:\n" + String(e));
     }
   }

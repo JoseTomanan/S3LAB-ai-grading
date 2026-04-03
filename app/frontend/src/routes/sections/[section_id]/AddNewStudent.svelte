@@ -35,7 +35,9 @@
 			await invalidateAll();
       isAddDialogOpen = false;
 		} catch (e) {
-			toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new student:\n" + e);
+			toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to add new student:\n" + e);
 		} finally {
 			isLoading = false;
 		}
