@@ -5,6 +5,9 @@ FILENAMES = [
     "202090022.jpeg",
     "properTest1.jpeg",
     "properTest2.jpeg",
+    "properTest3.jpeg",
+    "properTest3b.jpeg",
+    "properTest4.jpeg",
     "badScan1.jpg",
     "goodScan1.jpeg",
     "goodScan2.jpeg",
@@ -30,6 +33,5 @@ if __name__ == "__main__":
             DOCUMENT_SCANNER.save_image(image_before, GET_OUTPUT(f"DEBUG/SCANNER/{_onlyfilename}.jpg"))
         except:
             print(f"DEBUGGER:\t--> failed for {file}")
-        if file == FILENAMES[-1]:
-            print("--------------------------------")
+        print("--------------------------------")
     print("================================")

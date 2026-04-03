@@ -74,6 +74,9 @@ class DocumentScanner:
             image_good_contour = self._fallback_low_contrast_detection(image_original)
 
         if image_good_contour is None:
+            image_good_contour = self._fallback_white_paper_detection(image_original)
+
+        if image_good_contour is None:
             raise ValueError("Could not find document outline.")
 
         return self._warp_from_original(image_good_contour, image_original)
@@ -288,6 +291,34 @@ class DocumentScanner:
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
                     is_border = self._is_border_contour(candidate, enhanced_edges.shape)
+                    candidates.append((candidate, is_border, c))
+
+        return self._pick_best_contour(candidates)
+
+    def _fallback_white_paper_detection(self, image_original: MatLike):
+        """Fallback for scenes with white paper on a dark background surrounded by other bright elements
+        (e.g. keyboard shortcut labels) that border-connect to the paper in a plain Otsu binary.
+        Morphological opening breaks thin connections to border-hugging white blobs, leaving the
+        paper as the dominant interior white region."""
+        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+        opened = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
+        contours, _ = cv2.findContours(opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        candidates = []
+        for c in contours:
+            perimeter = cv2.arcLength(c, True)
+            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            if len(approximate) == 4:
+                candidate = approximate.reshape(4, 2)
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    is_border = self._is_border_contour(candidate, opened.shape)
                     candidates.append((candidate, is_border, c))
 
         return self._pick_best_contour(candidates)
