@@ -11,6 +11,13 @@ export class ApiError extends Error {
 	}
 }
 
+/* Health check function to verify API availability. */
+export async function isApiHealthy(): Promise<boolean> {
+  return fetch('/api/health')
+    .then(res => res.ok)
+    .catch(() => false);
+}
+
 /**
  * Typed fetch wrapper for JSON API calls.
  * Throws ApiError on non-OK responses.
