@@ -192,8 +192,8 @@
   
   {:else if !isOperationStarted}
     <div id="scrollable-area"
-          class="flex flex-col items-center max-w-fit overflow-scroll gap-y-1.5
-                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-border">
+          class="scroll-shadows flex flex-col items-center max-w-fit overflow-y-scroll gap-y-1.5
+                  -mx-1.5 px-1.5 -my-2 py-2">
       {#each formFileRecords as p}
         {@const supposedId = GET_STUDENT_NO(p.name)}
         {@const nameOnly = GET_NAME_ONLY(p.name)}

@@ -14,8 +14,8 @@
   <h1>User manual</h1>
   <span class="-mt-6"></span>
 
-  <div class="overflow-y-auto text-sm border-t border-b border-border
-              space-y-4 pt-4 pr-2 -mr-2">
+  <div class="scroll-shadows overflow-y-auto text-sm
+              space-y-4 py-4 pr-2 -mr-2">
     <p class="text-muted-foreground">
       Welcome to <strong>SIPAT.MATH</strong> — an AI-powered grading tool for scanned student
       assessments.

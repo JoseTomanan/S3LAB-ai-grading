@@ -127,7 +127,7 @@
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
   
   {:else}
-    <div class="overflow-y-auto space-y-2 flex flex-col items-center">
+    <div class="scroll-shadows overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
       {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
       {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}

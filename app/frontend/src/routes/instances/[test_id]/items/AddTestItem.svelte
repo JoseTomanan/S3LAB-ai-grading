@@ -82,7 +82,7 @@
 
 
 
-<Dialog.Content class="max-h-[80dvh] overflow-scroll">
+<Dialog.Content class="max-h-[80dvh] scroll-shadows overflow-y-scroll">
   <Dialog.Header>
     <Dialog.Title>Add new test item</Dialog.Title>
   </Dialog.Header>

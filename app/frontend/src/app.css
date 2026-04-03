@@ -160,6 +160,25 @@
 
 
 
+/* ============UTILITIES============ */
+@layer utilities {
+    /* Scroll shadows: fades at top/bottom when content overflows.
+   * Override --scroll-shadow-bg if the container background differs from --background. */
+  .scroll-shadows {
+    background:
+      linear-gradient(var(--scroll-shadow-bg, var(--background)) 30%, transparent)
+        center top / 100% 40px no-repeat local,
+      linear-gradient(transparent, var(--scroll-shadow-bg, var(--background)) 70%)
+        center bottom / 100% 40px no-repeat local,
+      radial-gradient(farthest-side at 50% 0%, oklch(0 0 0 / 30%), transparent)
+        center top / 100% 18px no-repeat scroll,
+      radial-gradient(farthest-side at 50% 100%, oklch(0 0 0 / 30%), transparent)
+        center bottom / 100% 18px no-repeat scroll;
+  }
+}
+
+
+
 /* ============ANIMATIONS============ */
 @keyframes spin {
   from {

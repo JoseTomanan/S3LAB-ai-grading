@@ -53,7 +53,7 @@
     </Button>
   </div>
   
-  <div class="max-h-[80vh] overflow-y-auto">
+  <div class="scroll-shadows max-h-[80vh] overflow-y-auto">
   {#each supposedScans as supposedScan}
     <Card class="relative flex flex-row justify-center items-start gap-x-1
                   {supposedScan.isDiscarded ? "opacity-40" : ""}">
