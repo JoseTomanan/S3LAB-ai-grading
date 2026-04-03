@@ -1,27 +1,16 @@
+import os
 from logic.document_scanner import DocumentScanner
 
-FILENAMES = [
-    "202090011.jpeg",
-    "202090022.jpeg",
-    "properTest1.jpeg",
-    "properTest2.jpeg",
-    "properTest3.jpeg",
-    "properTest3b.jpeg",
-    "properTest4.jpeg",
-    "badScan1.jpg",
-    "goodScan1.jpeg",
-    "goodScan2.jpeg",
-    "goodScan3.jpeg",
-    "goodScan4.jpg",
-]
 GET_INPUT = lambda x : f"./TEMP/input/{x}"
 GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
+FILENAMES = [f for f in os.listdir(GET_INPUT("")) if os.path.isfile(os.path.join(GET_INPUT(""), f))]
 
 
 
 if __name__ == "__main__":
     DOCUMENT_SCANNER = DocumentScanner()
 
+    print("Detected files:", FILENAMES)
     print("================================")
     for file in FILENAMES:
         try:
