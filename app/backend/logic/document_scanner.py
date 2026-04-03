@@ -3,7 +3,7 @@ from typing import Callable
 import numpy as np
 import cv2
 from cv2.typing import MatLike
-from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_PAGE_AREA, MAX_ASPECT_RATIO, BORDER_MARGIN_RATIO
+from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_PAGE_AREA, MAX_ASPECT_RATIO, BORDER_MARGIN_RATIO, BORDER_HARD_MARGIN
 from utils import mapp, get_robust_aspect_ratio, is_valid_quad
 
 
@@ -52,6 +52,8 @@ class DocumentScanner:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, image_cannied.shape):
+                        continue
                     is_border = self._is_border_contour(candidate, image_cannied.shape)
                     candidates.append((candidate, is_border, c))
 
@@ -184,7 +186,16 @@ class DocumentScanner:
                 cv2.drawContours(mask, [c], -1, 255, 2)  # type: ignore[call-overload]
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
         iterated_img = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        
+
+        ## Zero out the image border so morphological closing cannot bridge a page edge
+        ## to the frame boundary, preventing the image frame itself from being detected
+        ## as the document outline.
+        m = BORDER_HARD_MARGIN
+        iterated_img[:m, :] = 0
+        iterated_img[-m:, :] = 0
+        iterated_img[:, :m] = 0
+        iterated_img[:, -m:] = 0
+
         return [original_img, iterated_img]
     
     def _warp_from_original(self, screen_contour: MatLike, original: MatLike) -> MatLike:
@@ -229,6 +240,16 @@ class DocumentScanner:
             return False
 
         return True
+
+    def _is_hard_border_contour(self, quad: MatLike, image_shape: tuple) -> bool:
+        """Return True if any corner of the quad is within BORDER_HARD_MARGIN pixels of the image edge.
+        Such a contour is literally on the camera frame — the image boundary itself is being
+        treated as a page edge, which is never a valid page outline."""
+        h, w = image_shape[:2]
+        for (x, y) in quad:
+            if x < BORDER_HARD_MARGIN or x > w - BORDER_HARD_MARGIN or y < BORDER_HARD_MARGIN or y > h - BORDER_HARD_MARGIN:
+                return True
+        return False
 
     def _is_border_contour(self, quad: MatLike, image_shape: tuple) -> bool:
         """Return True if 3 or more corners of quad are near the image border.
@@ -279,6 +300,8 @@ class DocumentScanner:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, enhanced_edges.shape):
+                        continue
                     is_border = self._is_border_contour(candidate, enhanced_edges.shape)
                     candidates.append((candidate, is_border, c))
 
@@ -289,6 +312,12 @@ class DocumentScanner:
         gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
         _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        m = BORDER_HARD_MARGIN
+        binary[:m, :] = 0
+        binary[-m:, :] = 0
+        binary[:, :m] = 0
+        binary[:, -m:] = 0
 
         contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
@@ -301,6 +330,8 @@ class DocumentScanner:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, binary.shape):
+                        continue
                     is_border = self._is_border_contour(candidate, binary.shape)
                     candidates.append((candidate, is_border, c))
 
@@ -318,6 +349,12 @@ class DocumentScanner:
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
         opened = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
 
+        m = BORDER_HARD_MARGIN
+        opened[:m, :] = 0
+        opened[-m:, :] = 0
+        opened[:, :m] = 0
+        opened[:, -m:] = 0
+
         contours, _ = cv2.findContours(opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
 
@@ -329,6 +366,8 @@ class DocumentScanner:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, opened.shape):
+                        continue
                     is_border = self._is_border_contour(candidate, opened.shape)
                     candidates.append((candidate, is_border, c))
 
