@@ -68,10 +68,10 @@ class DocumentScanner:
                         )
 
         if image_good_contour is None:
-            image_good_contour = self._fallback_otsu_detection(image_original)
+            image_good_contour = self._fallback_low_contrast_detection(image_original)
 
         if image_good_contour is None:
-            image_good_contour = self._fallback_low_contrast_detection(image_original)
+            image_good_contour = self._fallback_otsu_detection(image_original)
 
         if image_good_contour is None:
             image_good_contour = self._fallback_white_paper_detection(image_original)
@@ -246,28 +246,6 @@ class DocumentScanner:
         ## All candidates are border contours — fall back to the largest (first)
         return candidates[0][0]
 
-    def _fallback_otsu_detection(self, image_original: MatLike):
-        """Fallback: use Otsu threshold to find white paper on dark background."""
-        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
-        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
-
-        candidates = []
-        for c in contours:
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
-            if len(approximate) == 4:
-                candidate = approximate.reshape(4, 2)
-                original_area = cv2.contourArea(c)
-                if self._is_good_page_contour(candidate, original_area):
-                    is_border = self._is_border_contour(candidate, binary.shape)
-                    candidates.append((candidate, is_border, c))
-
-        return self._pick_best_contour(candidates)
-
     def _fallback_low_contrast_detection(self, image_original: MatLike):
         """Fallback for low-contrast scenes (e.g. cream paper on gray desk).
         Uses bilateral filter (edge-preserving) + boosted CLAHE + lower Canny thresholds."""
@@ -291,6 +269,28 @@ class DocumentScanner:
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
                     is_border = self._is_border_contour(candidate, enhanced_edges.shape)
+                    candidates.append((candidate, is_border, c))
+
+        return self._pick_best_contour(candidates)
+
+    def _fallback_otsu_detection(self, image_original: MatLike):
+        """Fallback: use Otsu threshold to find white paper on dark background."""
+        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        candidates = []
+        for c in contours:
+            perimeter = cv2.arcLength(c, True)
+            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            if len(approximate) == 4:
+                candidate = approximate.reshape(4, 2)
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    is_border = self._is_border_contour(candidate, binary.shape)
                     candidates.append((candidate, is_border, c))
 
         return self._pick_best_contour(candidates)
