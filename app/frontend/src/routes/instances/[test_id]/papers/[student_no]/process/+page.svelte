@@ -174,7 +174,7 @@
   <!-- <div> -->
     <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-              class={cn(buttonVariants({ variant: 'outline' }), 'flex-1 flex items-center gap-x-2 min-w-0')}>
+              class={cn(buttonVariants({ variant: 'outline' }), 'flex-1 flex justify-start items-center gap-x-1.5 min-w-0')}>
         <IconUpload/>
         <span class="shrink-0 whitespace-nowrap text-sm">
           {formFileRecords.length > 0
@@ -216,6 +216,7 @@
       
       <span class="w-fit flex flex-row gap-x-2 items-center">
         <Switch id="isAlreadyScanned"
+                disabled={isAskingForValidation}
                 bind:checked={paramScannedAlready}
               />
         <Tooltip.Root>
