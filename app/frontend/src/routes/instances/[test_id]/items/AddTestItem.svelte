@@ -82,7 +82,8 @@
 
 
 
-<Dialog.Content class="max-h-[80dvh] scroll-shadows overflow-y-scroll">
+<Dialog.Content class="max-h-[80dvh] overflow-y-scroll">
+  <!-- TODO: bring back scroll-shadows ; something about scroll-shadow-bg is breaking it -->
   <Dialog.Header>
     <Dialog.Title>Add new test item</Dialog.Title>
   </Dialog.Header>
