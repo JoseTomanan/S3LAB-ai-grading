@@ -46,15 +46,15 @@ async def process_student_answer_image(
         print(f"BACKEND:\tUnexpected error during image processing: {e}")
         raise HTTPException(status_code=500, detail="Unexpected server error during segmentation")
 
-    # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    print(f"BACKEND:\tProceeding to labeling the boxes.")
-    boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
-    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
-    background_tasks.add_task(_evaluate_answers_background, answer_ids)
+    # ===== DISPATCH LABELING + RECORD CREATION + EVALUATION TO BACKGROUND =====
+    ## _label_save_boxes makes Gemini API calls — running it on the request thread delays the 202 response.
+    ## All three steps are offloaded so the 202 is returned as soon as CV processing finishes.
+    print(f"BACKEND:\tCV processing done. Dispatching label/save/evaluate to background.")
+    background_tasks.add_task(_label_save_and_evaluate_background, processed_list, test_id, student_no)
 
     return ImagePreprocessResponse(
             num_boxes=len(processed_list),
-            boxes=[BoxesItem(**b) for b in boxes_info],
+            boxes=[],
             )
 
 
@@ -742,6 +742,21 @@ def _create_answer_records(
         answer_ids.append(answer.answer_id)
 
     return answer_ids
+
+
+def _label_save_and_evaluate_background(processed_list: list[bytes], test_id: str, student_no: str):
+    """Label boxes, create answer records, and run AI evaluation — entirely off the request thread."""
+    session = get_direct_session()
+    try:
+        boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
+        answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    except Exception as e:
+        print(f"BACKEND:\tBackground label/save failed: {e}")
+        session.rollback()
+        return
+    finally:
+        session.close()
+    _evaluate_answers_background(answer_ids)
 
 
 def _evaluate_answers_background(answer_ids: list[int]):
