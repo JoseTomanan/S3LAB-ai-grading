@@ -297,7 +297,11 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                 respectiveItem = session.exec(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
-                assert isinstance(respectiveItem, TestItem)
+                if not isinstance(respectiveItem, TestItem):
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"TestItem with ID {answer.item_id} not found"
+                    )
 
                 ai_evaluations.append(AIEvaluationItem(
                             item_id=answer.item_id,
@@ -371,8 +375,12 @@ def get_ai_evaluation_results_per_student(
             respectiveItem = session.exec(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
-            assert isinstance(respectiveItem, TestItem)
-            
+            if not isinstance(respectiveItem, TestItem):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"TestItem with ID {answer.item_id} not found"
+                )
+
             scores = calculate_score(
                                 respectiveItem.expected_answer_rubric_questions,
                                 answer.ai_evaluation

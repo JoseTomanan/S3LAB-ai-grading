@@ -72,8 +72,11 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
     """Re-evaluate image then store to StudentAnswer evaluation result."""
     # TODO: 400 handling
     # TODO: 404 handling
-    return evaluate_image_logic(
-                answer_id_input=answer_id,
-                session=session
-                )
+    try:
+        return evaluate_image_logic(
+                    answer_id_input=answer_id,
+                    session=session
+                    )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 #endregion
