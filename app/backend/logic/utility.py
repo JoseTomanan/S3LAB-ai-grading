@@ -128,6 +128,7 @@ def calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -
     score_parts = []
     for i, e_a_r_q in enumerate(splitted_e_a_r_q):
         if e_a_r_q.strip() != "":
+            # `[` is guaranteed to exist in every rubric part — rubric format enforces `[Npts]` notation
             index_start = e_a_r_q.find("[")
             index_end = index_start + e_a_r_q[index_start:].find("p")
 

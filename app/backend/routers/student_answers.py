@@ -743,6 +743,7 @@ def _evaluate_answers_background(answer_ids: list[int]):
                 answer = session.get(StudentAnswer, answer_id)
                 if answer is None:
                     continue
+                # image_directory is always stored as "/api/static/images/<filename>" (4 parts) — index 3 is the filename
                 actual_image_path = f"static/images/{answer.image_directory.split('/')[3]}"
                 image_bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
                 test_item = session.get(TestItem, answer.item_id)

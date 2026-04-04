@@ -45,6 +45,7 @@ class AIAnswerEvaluator:
                         )
     
     def find_four_points(self, image_bytes: bytes) -> list[tuple[int, int]] | None:
+        """[UNUSED] AI-based fallback for corner detection. CV pipeline handles this instead."""
         response = self._send_image_prompt(image_bytes, DETECT_CORNERS_PROMPT)
         
         try:
