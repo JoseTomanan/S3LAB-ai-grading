@@ -79,7 +79,7 @@ MOCK_DATA = {
                 "label": "1",
                 "question": "Solve for x: 2x + 5 = 15",
                 "is_problem_solving": True,
-                "expected_answer_rubric_questions": "Correct equation setup [2pts]; Accurate solution [2pts];"
+                "expected_answer_rubric_questions": "Correct equation setup [2pts]; Accurate solution [2pts]"
             },
             {
                 "item_id": 2,

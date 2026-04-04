@@ -56,7 +56,7 @@ MOCK_DATA = {
                 "label": "Problem 1",
                 "question": "Solve for x: 2x + 5 = 15",
                 "is_problem_solving": True,
-                "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts);"
+                "expected_answer_rubric_questions": "Correct equation setup (2pts); Accurate solution (2pts)"
             },
             {
                 "item_id": 2,
@@ -72,7 +72,7 @@ MOCK_DATA = {
                 "label": "Problem 1",
                 "question": "Calculate the area of a circle with radius 7 cm",
                 "is_problem_solving": True,
-                "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt);"
+                "expected_answer_rubric_questions": "Correct formula (2pts); Correct substitution (1pt)"
             }
             ]
         }

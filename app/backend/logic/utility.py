@@ -57,7 +57,8 @@ def compute_ai_evaluation(image_bytes: bytes, is_problem_solving: bool, question
                     print(f"BACKEND:\tRubric eval failed after {MAX_RUBRIC_RETRIES} attempts; defaulting to NO for {len(batch)} rubric(s)")
                     all_parts.extend(["NO"] * len(batch))
 
-            ai_evaluation = ";".join(all_parts) + ";"
+            ## ai_evaluation = ";".join(all_parts) + ";"
+            ai_evaluation = ";".join(all_parts)
 
         case _:
             expected_answer = expected_answer_rubric_questions
@@ -117,27 +118,28 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
 
 
 def calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> str:
-    scores = ""
-    if ai_evaluation:
-        splitted_e_a_r_q = expected_answer_rubric_questions.split(";")
-        splitted_evals = ai_evaluation.split(";")
-        print(f"INTERNAL:\tCalculating w/ splitted EARQ: {splitted_e_a_r_q}.")
+    if not ai_evaluation:
+        return ""
 
-        for i, e_a_r_q in enumerate(splitted_e_a_r_q):
-            if e_a_r_q.strip() != "":
-                index_start = e_a_r_q.find("[")
-                index_end = index_start + e_a_r_q[index_start:].find("p")
+    splitted_e_a_r_q = expected_answer_rubric_questions.split(";")
+    splitted_evals = ai_evaluation.split(";")
+    print(f"INTERNAL:\tCalculating w/ splitted EARQ: {splitted_e_a_r_q}.")
 
-                print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
-                print(f"INTERNAL:\t ---> BECOMES {e_a_r_q[index_start+1:index_end]}")
-                
-                points = e_a_r_q[index_start+1 : index_end]
-                if splitted_evals[i] != "":
-                    scores += f"{points}/{points};" if splitted_evals[i] == "YES" \
-                                    else f"0/{points};"
+    score_parts = []
+    for i, e_a_r_q in enumerate(splitted_e_a_r_q):
+        if e_a_r_q.strip() != "":
+            index_start = e_a_r_q.find("[")
+            index_end = index_start + e_a_r_q[index_start:].find("p")
 
-        print(f"INTERNAL:\tScore is {scores}")
+            print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
+            print(f"INTERNAL:\t ---> BECOMES {e_a_r_q[index_start+1:index_end]}")
 
+            points = e_a_r_q[index_start+1 : index_end]
+            if i < len(splitted_evals) and splitted_evals[i] != "":
+                score_parts.append(f"{points}/{points}" if splitted_evals[i] == "YES" else f"0/{points}")
+
+    scores = ";".join(score_parts)
+    print(f"INTERNAL:\tScore is {scores}")
     return scores
 
 
