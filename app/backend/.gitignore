@@ -1,9 +1,11 @@
 **/__pycache__/*
 
-/TEMP/*
+TEMP/input/*
+TEMP/output/*
+TEMP/**.py
 
-/static/images/*
-!/static/images/.gitkeep
+static/images/*
+!static/images/.gitkeep
 
 *.pyc
 
