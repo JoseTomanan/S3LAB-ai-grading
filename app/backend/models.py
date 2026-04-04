@@ -42,7 +42,7 @@ class TestInstance(SQLModel, table=True):
 
 class TestItem(SQLModel, table=True):
     __tablename__ = "test_item"   # type: ignore[assignment]
-    item_id: int = Field(primary_key=True)
+    item_id: Optional[int] = Field(default=None, primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     label: str = Field(max_length=50)
     question: str
