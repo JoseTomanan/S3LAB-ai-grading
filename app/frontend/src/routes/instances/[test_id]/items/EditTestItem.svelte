@@ -99,13 +99,15 @@
 </script>
 
 
+
 <Dialog.Content>
   <Dialog.Header>
     <Dialog.Title>
       Edit test item {testItem.label}
     </Dialog.Title>
     <Dialog.Description>
-      For expected answer/rubric questions, add points in brackets at end. Example: "Correct setup [1pts]"
+      For expected answer/rubric questions, add points in brackets at end. <br>
+      Example: "Correct setup [1pts]"
     </Dialog.Description>
   </Dialog.Header>
   
@@ -139,9 +141,7 @@
               onclick={() => editTestItem(formTestItem)}>
         Save changes
       </Button>
-      <SafeDelete toggle={isWantsToDelete}
-                  onDelete={deleteTestItem}
-                  />
+      <SafeDelete onDelete={deleteTestItem}/>
     </div>
   </Dialog.Footer>
 </Dialog.Content>

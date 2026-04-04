@@ -140,9 +140,7 @@
           <Spinner />
         {/if}
       </Button>
-      <SafeDelete toggle={isWantsToDelete}
-                  onDelete={deleteStudent}
-                  />
+      <SafeDelete onDelete={deleteStudent}/>
     </div>
   </Dialog.Footer>
 </Dialog.Content>

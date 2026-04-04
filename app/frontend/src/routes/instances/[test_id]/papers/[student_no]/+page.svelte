@@ -170,10 +170,7 @@
         
         <div class="flex-1 w-full h-full space-y-2">
           <span class="flex flex-row space-x-1 justify-end">
-            <SafeDelete toggle={isWantsToDelete}
-                        onDelete={() => deleteAnswer(studentItem.item_id)}
-                        size={4}
-                        />
+            <SafeDelete onDelete={() => deleteAnswer(studentItem.item_id)}/>
             <Sheet.Root open={cropDialogOpen.get(studentItem.item_id) ?? false}
                           onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
               <Sheet.Trigger class={buttonVariants({ variant: 'outline' })}>
