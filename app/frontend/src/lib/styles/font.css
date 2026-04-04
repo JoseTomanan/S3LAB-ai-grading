@@ -1,11 +1,38 @@
 @theme {
-  --font-heading: "Montserrat", sans-serif;
-  --font-sans: "SourceSans3", sans-serif;
+  --font-heading: "Manrope", sans-serif;
+  --font-sans: "Inter", sans-serif;
   --font-mono: monospace;
 }
 
 
 /* ============ Imports ============ */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Regular.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Italic.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('/fonts/Manrope-Regular.woff2') format('woff2'); 
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* Old fonts kept just in case */
+/*
 @font-face {
   font-family: 'SourceSans3';
   src: url('/fonts/SourceSans3-Regular.woff2') format('woff2'); 
@@ -37,3 +64,4 @@
   font-style: italic;
   font-display: swap;
 }
+  */
