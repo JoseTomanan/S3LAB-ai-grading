@@ -171,7 +171,11 @@ async def update_answer_segmentation(
                 )
 
     # ===== IMAGE PROCESSING =====
+    if file.size is not None and file.size > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
     contents = await file.read()
+    if len(contents) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
     img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
@@ -535,9 +539,13 @@ async def _validate_files(files: List[UploadFile]) -> list[bytes]:
             raise HTTPException(status_code=400, detail="No file provided")
         if not IMAGE_MODIFIER.validate_file_extension(file.filename):
             raise HTTPException(status_code=415, detail=f"Unsupported file format. Got: {file.filename}")
+        if file.size is not None and file.size > 20 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
         contents = await file.read()
         if len(contents) == 0:
             raise HTTPException(status_code=400, detail="Uploaded file is empty")
+        if len(contents) > 20 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
         contents_list.append(contents)
     return contents_list
 

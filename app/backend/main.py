@@ -61,6 +61,8 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=400, detail="Invalid filename characters")
     
     filepath = TEMP_DIR / filename
+    if not filepath.resolve().is_relative_to(TEMP_DIR.resolve()):
+        raise HTTPException(status_code=400, detail="Invalid filename")
     if not filepath.exists():
         raise HTTPException(status_code=404, detail="Processed image not found")
     
