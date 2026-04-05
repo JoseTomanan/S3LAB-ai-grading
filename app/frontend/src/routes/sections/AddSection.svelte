@@ -52,7 +52,7 @@
 
   <Dialog.Footer>
     <Dialog.Description>
-      Please do not include spaces or underscores in the section name; instead, use hyphens.
+      Please do not include spaces or underscores in the section name; instead, use pascal case (e.g., 3-JoseRizal).
     </Dialog.Description>
     <Button variant="outline" disabled={isOperationOngoing} onclick={addSection}>
       {isOperationOngoing ? "Creating..." : "Create"}

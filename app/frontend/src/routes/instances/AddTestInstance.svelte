@@ -13,7 +13,7 @@
   import { Button } from '$lib/components/CustomButton/index.ts';
 
   let isOperationOngoing = $state(false);
-  
+
   let dropdownItems: Section[] = $state([]);
 
   let newInstanceName: string = $state("");
@@ -94,8 +94,8 @@
   
   <Dialog.Footer>
     <Dialog.Description>
-      Please do not include spaces or underscores in the section name; instead, use hyphens.
-      Note that the name and section cannot be changed after creation.
+      Please do not include spaces or underscores in the section name; instead, use pascal case (e.g., 3-JoseRizal).
+      Note that name and section cannot be changed after creation.
     </Dialog.Description>
     <Button variant="outline"
             disabled={isOperationOngoing}
