@@ -15,6 +15,7 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
 
   let student_items: (StudentAnswer & {label: string})[] | undefined = undefined;
   let student_ai_evaluations: GetSpecificEvaluationResponse[] = [];
+  let evaluation_error: string | undefined = undefined;
   REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
 
   try {
@@ -37,7 +38,9 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
     student_ai_evaluations = result?.evaluations ?? [];
     REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
   } catch (e) {
-    console.log("Failed to fetch AI evaluations:\n"+e)
+    console.error("Failed to fetch AI evaluations:", e);
+    evaluation_error = e instanceof Error ? e.message : "Unknown error occurred while fetching AI evaluations";
+    REPOPULATE_UNANSWERED_ITEMS(student_ai_evaluations, test_items);
   }
 
   if (test_items && student_items) {
@@ -58,5 +61,5 @@ export const load: PageLoad = async ({ fetch, params, parent }) => {
     }
   }
 
-  return { student_items, student_ai_evaluations };
+  return { student_items, student_ai_evaluations, evaluation_error };
 };

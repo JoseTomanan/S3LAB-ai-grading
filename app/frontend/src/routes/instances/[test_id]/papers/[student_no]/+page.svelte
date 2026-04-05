@@ -2,7 +2,7 @@
   import { API_URL } from '$lib/constants.ts';
   const { data } = $props();
 
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
@@ -65,6 +65,11 @@
   }, 5000);
 
   onDestroy(() => cropPoller.stop());
+
+  onMount(() => {
+    if (data.evaluation_error)
+      toast.error(`Failed to load AI evaluations: ${data.evaluation_error}`);
+  });
 
   function handleCropSubmitted(itemId: number) {
     cropDialogOpen = new Map(cropDialogOpen.set(itemId, false));
