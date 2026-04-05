@@ -156,6 +156,15 @@
     @apply xl:w-4/5;
   }
 
+  .name-id-display {
+    @apply truncate space-x-2;
+    & > .name {
+      @apply font-normal;
+    }
+    & > .student-no {
+      @apply tracking-[-0.075em] font-light text-foreground/50;
+    }
+  }
 }
 
 

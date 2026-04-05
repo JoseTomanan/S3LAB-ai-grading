@@ -33,11 +33,9 @@
 
     {#each students as student}
       <Card class="flex flex-row items-center justify-between">
-        <h4 class="truncate space-x-1">
-          <span class="tracking-[-0.08em] font-light text-foreground/70 font-mono">
-            {student.student_no}
-          </span>
-          <span class="font-normal">{student.name}</span>
+        <h4 class="name-id-display">
+          <span class="name">{student.name}</span>
+          <span class="student-no">{student.student_no}</span>
         </h4>
         <!-- TODO: add dialog bindable; close upon operation done. something similar to add new student-->
         <Dialog.Root>
