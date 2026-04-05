@@ -3,7 +3,7 @@
   const { data } = $props();
 
   import { onDestroy } from 'svelte';
-  import { goto, invalidateAll } from '$app/navigation';
+  import { goto, invalidateAll, beforeNavigate } from '$app/navigation';
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
   import { dataUrlToFile, isNotPngOrJpg } from '$lib/utils.ts';
@@ -44,6 +44,24 @@
   let formFileRecords: FileRecord[] = $state([]);
   
   let isAskingForValidation: boolean = $state(false);
+  let isCommitmentOngoing = $state(false);
+
+  beforeNavigate((navigation) => {
+    if (!isCommitmentOngoing && (isOperationOngoing || isAskingForValidation)) {
+      if (!confirm('You have an operation in progress. Leaving will discard your work. Continue?')) {
+        navigation.cancel();
+      }
+    }
+  });
+
+  $effect(() => {
+    if (!isCommitmentOngoing && (isOperationOngoing || isAskingForValidation)) {
+      const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  });
+
   let isReviewDialogOpen: boolean = $state(false);
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean; isDiscarded: boolean })[] = $state([]);
 
@@ -105,8 +123,6 @@
     }
   }
 
-  let isCommitmentOngoing = $state(false);
-
   const commitPoller = createPoller(async () => {
     const result = await api<{ statuses: { student_no: string, is_done_rendering: boolean }[] }>(
       `${API_URL}/api/student_answers/${data.test_id}/statuses`
@@ -116,6 +132,7 @@
     );
     if (thisStudent?.is_done_rendering) {
       isCommitmentOngoing = false;
+      isAskingForValidation = false;
       await invalidateAll();
       goto(`/instances/${data.test_id}/papers/${data.student_no}`);
       return true;
@@ -159,7 +176,8 @@
         ? `${e.status}: ${e.detail ?? e.statusText}`
         : "Failed to commit boxes:\n" + e);
     } finally {
-      if (!commitPoller.active) isCommitmentOngoing = false;
+      if (!commitPoller.active)
+        isCommitmentOngoing = false;
     }
   }
 </script>
@@ -255,7 +273,6 @@
         </h6>
       
       {:else}
-        <!-- TODO: Add function to disregard individual item (i.e. just evaluate the rest) -->
         <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 pt-1 pb-3
                     -mx-6 px-6 md:-mx-18 md:px-18 "
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
