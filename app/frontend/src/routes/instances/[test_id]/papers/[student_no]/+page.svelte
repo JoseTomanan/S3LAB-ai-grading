@@ -166,7 +166,9 @@
     {#each studentItems as studentItem}
       {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
       {@const cropUiState = getCropUiState(studentItem.item_id)}
-      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || cropUiState.cropPending || !studentItem.is_done_rendering}
+      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)
+                || cropUiState.cropPending
+                || (studentItem.image_directory !== "" && !studentItem.is_done_rendering)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
       <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
