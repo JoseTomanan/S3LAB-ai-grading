@@ -43,21 +43,47 @@
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
-  let pollingItemIds: Set<number> = $state(new Set());
-  let cropDialogOpen: Map<number, boolean> = $state(new Map());
+  type CropUiState = {
+    cropDialogOpen: boolean;
+    cropPending: boolean;
+  };
+  let cropUiStateByItemId: Map<number, CropUiState> = $state(new Map());
   let zoomLevel: number = $state(1);
+
+  function getCropUiState(itemId: number): CropUiState {
+    return cropUiStateByItemId.get(itemId) ?? { cropDialogOpen: false, cropPending: false };
+  }
+
+  function updateCropUiState(itemId: number, patch: Partial<CropUiState>) {
+    const next = new Map(cropUiStateByItemId);
+    next.set(itemId, { ...getCropUiState(itemId), ...patch });
+    cropUiStateByItemId = next;
+  }
+
+  function setRequestOngoing(answerId: number, isOngoing: boolean) {
+    const next = new Map(isRequestOngoings);
+    next.set(answerId, isOngoing);
+    isRequestOngoings = next;
+  }
 
   const cropPoller = createPoller(async () => {
     const result = await api<StudentAnswer[]>(
       `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}`
     );
-    for (const itemId of pollingItemIds) {
+
+    const pendingItemIds = Array.from(cropUiStateByItemId.entries())
+      .filter(([, state]) => state.cropPending)
+      .map(([itemId]) => itemId);
+
+    for (const itemId of pendingItemIds) {
       const answer = result.find(a => a.item_id === itemId);
       if (answer?.is_done_rendering) {
-        pollingItemIds = new Set([...pollingItemIds].filter(id => id !== itemId));
+        updateCropUiState(itemId, { cropPending: false, cropDialogOpen: false });
       }
     }
-    if (pollingItemIds.size === 0) {
+
+    const hasPendingCrop = Array.from(cropUiStateByItemId.values()).some(state => state.cropPending);
+    if (!hasPendingCrop) {
       await invalidateAll();
       return true;
     }
@@ -72,13 +98,17 @@
   });
 
   function handleCropSubmitted(itemId: number) {
-    cropDialogOpen = new Map(cropDialogOpen.set(itemId, false));
-    pollingItemIds = new Set(pollingItemIds.add(itemId));
+    updateCropUiState(itemId, { cropDialogOpen: false, cropPending: true });
+    studentItems = studentItems.map(answer =>
+      answer.item_id === itemId
+        ? { ...answer, is_done_rendering: false }
+        : answer
+    );
     cropPoller.start();
   }
 
   async function reevaluateAnswer(answer_id: number) {
-    isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
+    setRequestOngoing(answer_id, true);
     try {
       const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
             `${API_URL}/api/answers/${answer_id}/reevaluate`,
@@ -94,7 +124,7 @@
         ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to reevaluate answer:\n" + String(e));
     } finally {
-      isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
+      setRequestOngoing(answer_id, false);
     }
   }
 
@@ -135,7 +165,8 @@
     <div class="scroll-shadows overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
       {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
-      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
+      {@const cropUiState = getCropUiState(studentItem.item_id)}
+      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || cropUiState.cropPending || !studentItem.is_done_rendering}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
       <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
@@ -176,8 +207,8 @@
         <div class="flex-1 w-full h-full space-y-2">
           <span class="flex flex-row space-x-1 justify-end">
             <SafeDelete onDelete={() => deleteAnswer(studentItem.item_id)}/>
-            <Sheet.Root open={cropDialogOpen.get(studentItem.item_id) ?? false}
-                          onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
+            <Sheet.Root open={cropUiState.cropDialogOpen}
+                          onOpenChange={(v) => { updateCropUiState(studentItem.item_id, { cropDialogOpen: v }); }}>
               <Sheet.Trigger class={buttonVariants({ variant: 'outline' })}>
                 <MdiCrop/>
               </Sheet.Trigger>
