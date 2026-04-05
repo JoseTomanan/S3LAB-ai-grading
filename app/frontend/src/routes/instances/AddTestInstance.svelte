@@ -12,6 +12,8 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { Button } from '$lib/components/CustomButton/index.ts';
 
+  let isOperationOngoing = $state(false);
+  
   let dropdownItems: Section[] = $state([]);
 
   let newInstanceName: string = $state("");
@@ -37,6 +39,7 @@
       return;
     }
 
+    isOperationOngoing = true;
     try {
       await api(`${API_URL}/api/test_instances`, {
         method: "POST",
@@ -52,6 +55,8 @@
       toast.error(e instanceof ApiError
         ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to add new test instance. Check your network connection and try again.");
+    } finally {
+      isOperationOngoing = false;
     }
   }
 </script>
@@ -65,8 +70,10 @@
   <Label for="name">Test name</Label>
   <Input id="name" type="text"
           placeholder="Test name..."
+          pattern="[a-zA-Z0-9\-]*"
           required
-          bind:value={newInstanceName}/>
+          bind:value={newInstanceName}
+        />
   
   <Label for="section">Section</Label>
   <Select.Root type="single"
@@ -86,10 +93,14 @@
   </Select.Root>
   
   <Dialog.Footer>
+    <Dialog.Description>
+      Please do not include spaces or underscores in the section name; instead, use hyphens.
+      Note that the name and section cannot be changed after creation.
+    </Dialog.Description>
     <Button variant="outline"
+            disabled={isOperationOngoing}
             onclick={() => addNewTestInstance(newInstanceName, newInstanceSectionId)}>
-      Create test instance
+      {isOperationOngoing ? "Creating..." : "Create"}
     </Button>
-    <Dialog.Description>Note that the name and section cannot be changed after creation.</Dialog.Description>
   </Dialog.Footer>
 </Dialog.Content>

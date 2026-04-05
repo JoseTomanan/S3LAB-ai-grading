@@ -45,13 +45,17 @@
   <Input id="section_name"
           type="text"
           placeholder="e.g., 3-Einstein"
+          pattern="[a-zA-Z0-9\-]*"
           required
           bind:value={formSectionName}
-          />
+        />
 
   <Dialog.Footer>
+    <Dialog.Description>
+      Please do not include spaces or underscores in the section name; instead, use hyphens.
+    </Dialog.Description>
     <Button variant="outline" disabled={isOperationOngoing} onclick={addSection}>
-      {isOperationOngoing ? "Adding..." : "Add section"}
+      {isOperationOngoing ? "Creating..." : "Create"}
     </Button>
   </Dialog.Footer>
 </Dialog.Content>
