@@ -49,9 +49,11 @@
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   
   let isOperationStarted: boolean = $state(false);
+  let uploadSummary = $state<{ total: number; succeeded: number; failed: number } | null>(null);
 
   function resetPage() {
     isOperationStarted = false;
+    uploadSummary = null;
     formFiles = undefined;
     formFileRecords = [];
   }
@@ -156,6 +158,11 @@
 
     await Promise.allSettled(promises);
     formFileRecords = [...formFileRecords];
+    uploadSummary = {
+      total: formFileRecords.length,
+      succeeded: formFileRecords.filter(r => r.statusCode == 200 || r.statusCode == 202).length,
+      failed: formFileRecords.filter(r => r.statusCode !== 200 && r.statusCode !== 202).length
+    };
 
     if (promises.length > 0) {
       onuploadcomplete?.();
@@ -267,6 +274,14 @@
   
   {:else}
     <div class="flex flex-col space-y-1">
+      {#if uploadSummary}
+        <div class="rounded-md bg-muted/60 px-3 py-2 text-sm">
+          <b>Upload summary</b>
+          <span class="ml-2 opacity-80">
+            {uploadSummary.succeeded} succeeded, {uploadSummary.failed} failed out of {uploadSummary.total} files.
+          </span>
+        </div>
+      {/if}
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
         <b>Evaluation status</b>
