@@ -33,10 +33,12 @@
 
     {#each students as student}
       <Card class="flex flex-row items-center justify-between">
-        <div class="space-x-1">
-          <b class="font-medium tracking-tighter">{student.student_no}</b>
-          <span>{student.name}</span>
-        </div>
+        <h4 class="truncate space-x-1">
+          <span class="tracking-[-0.08em] font-light text-foreground/70 font-mono">
+            {student.student_no}
+          </span>
+          <span class="font-normal">{student.name}</span>
+        </h4>
         <!-- TODO: add dialog bindable; close upon operation done. something similar to add new student-->
         <Dialog.Root>
           <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>

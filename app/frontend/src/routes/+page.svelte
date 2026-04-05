@@ -21,18 +21,18 @@
     <Manual />
   </Sheet.Root>
 
-  <div class="relative w-full py-8 flex flex-col items-center justify-center gap-y-3">
+  <div class="relative w-full py-8 flex flex-col items-center justify-center">
     <span class="absolute inset-0 m-auto size-28 object-contain -z-50 block left-0 right-0 top-0 bottom-0">
-      <span class="slow-spin bg-accent/40 rounded-full ring ring-chart-3/40">
+      <span class="slow-spin bg-accent/40 backdrop-blur-md rounded-full ring ring-primary-600/40">
         <enhanced:img src={logo}
               alt="Llama mascot"
               class="size-28"
           />
       </span>
     </span>
-    <h1 class="text-white text-shadow-xs text-4xl w-fit tracking-[-0.08em] leading-7 font-extrabold">
+    <span class="text-white text-shadow-xs text-shadow-primary-700/40 text-5xl w-fit tracking-[-0.08em] leading-9 font-extrabold text-center">
       SIPAT<br>MATH
-    </h1>
+    </span>
   </div>
   
   <div class="space-y-3 w-full max-w-md px-4 sm:px-0">

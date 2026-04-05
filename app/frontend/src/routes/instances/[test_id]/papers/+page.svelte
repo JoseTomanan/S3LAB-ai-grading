@@ -64,7 +64,9 @@
     <a href={`/instances/${data.test_id}/papers/${testPaper.student_no}`}
         class={cn(buttonVariants({ variant: 'outline' }), 'flex-1 subcontainer flex flex-row justify-between items-center')}>
       <h4 class="truncate space-x-1">
-        <span class="tracking-tighter">{testPaper.student_no}</span>
+        <span class="tracking-[-0.08em] font-light text-foreground/70 font-mono">
+          {testPaper.student_no}
+        </span>
         <span class="font-normal">{testPaper.name}</span>
       </h4>
       <h5 class="flex flex-row gap-x-1.5 items-center tracking-tighter
