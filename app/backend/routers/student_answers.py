@@ -712,7 +712,7 @@ def _create_answer_records(
                             TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
-        if item is None:
+        if item is None or item.item_id is None:
             print(f"BACKEND:\tSkipping box with label '{item_number}' — TestItem not found in DB.")
             continue
         item_id = item.item_id
