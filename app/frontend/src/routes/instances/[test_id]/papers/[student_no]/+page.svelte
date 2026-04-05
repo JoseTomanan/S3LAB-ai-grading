@@ -17,6 +17,7 @@
 	import SafeDelete from '$lib/components/SafeDelete.svelte';
 	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
   import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
@@ -178,7 +179,9 @@
             {studentItem.label}
           </Label>
           <span class="w-5/6 sm:w-full">
-            {#if studentItem.image_directory == ""}
+            {#if isRequestLoading && studentItem.image_directory == ""}
+              <Skeleton class="w-full h-32 rounded-none grayscale" />
+            {:else if studentItem.image_directory == ""}
               <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
               <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
