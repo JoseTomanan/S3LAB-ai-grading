@@ -305,6 +305,10 @@
               <span> <IconUnprocessable class="text-destructive"/> </span>
               <h4>{ p.name }</h4>
               <i>{p.statusDetail ?? "Unprocessable image"}</i>
+            {:else if p.statusCode == 413}
+              <span> <IconUnprocessable /> </span>
+              <h4>{ p.name }</h4>
+              <i>File too large</i>
             {:else if p.statusCode == 500}
               <span> <IconExclamation class="text-destructive"/> </span>
               <h4>{ p.name }</h4>
