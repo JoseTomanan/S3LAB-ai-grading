@@ -1,7 +1,7 @@
 @theme {
   --font-heading: "Manrope", sans-serif;
   --font-sans: "Inter", sans-serif;
-  --font-mono: "JetBrainsMono", monospace;
+  --font-mono: "RobotoMono", monospace;
 }
 
 
@@ -31,8 +31,8 @@
 }
 
 @font-face {
-  font-family: 'JetBrainsMono';
-  src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2'); 
+  font-family: 'RobotoMono';
+  src: url('/fonts/RobotoMono-Regular.woff2') format('woff2'); 
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
