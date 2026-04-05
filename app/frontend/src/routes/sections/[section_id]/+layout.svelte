@@ -21,7 +21,7 @@
   <span class="*:leading-5 *:text-center">
     <h2>{sectionName}</h2>
   </span>
-  <Button variant="floating" href="/instances">
+  <Button variant="floating" href="/sections">
     <IconSectionList class="size-7 m-0.5"/>
   </Button>
 </nav>
