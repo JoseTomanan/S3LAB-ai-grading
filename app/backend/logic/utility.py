@@ -221,10 +221,17 @@ def crop_image(contents: bytes, points_data: dict):
 
 
 def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl.Workbook:
-    test_items = session.exec(
-                            select(TestItem)
-                            .where(TestItem.test_id == test_id_input)
-                            ).all()
+    def _natural_sort_key(item):
+        parts = re.split(r'(\d+)', item.label or "")
+        return [int(p) if p.isdigit() else p.lower() for p in parts]
+
+    test_items = sorted(
+                    session.exec(
+                        select(TestItem)
+                        .where(TestItem.test_id == test_id_input)
+                    ).all(),
+                    key=_natural_sort_key
+                )
     test_items_labels = [item.label for item in test_items]
 
     max_scores = {item.label: get_max_score(item.expected_answer_rubric_questions) for item in test_items}
@@ -240,6 +247,7 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
     students = session.exec(
                         select(Student)
                         .where(Student.section_id == test_instance.section_id)
+                        .order_by(Student.student_no)
                         ).all()
     if not students:
         raise ValueError(f"No students found for section '{test_instance.section_id}'")
