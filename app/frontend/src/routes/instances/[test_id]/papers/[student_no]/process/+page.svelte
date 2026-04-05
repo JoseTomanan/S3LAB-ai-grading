@@ -155,7 +155,9 @@
       commitPoller.start();
       return;
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status}: ${e.detail ?? e.statusText}`
+        : "Failed to commit boxes:\n" + e);
     } finally {
       if (!commitPoller.active) isCommitmentOngoing = false;
     }
@@ -297,6 +299,7 @@
                         />
     </Dialog.Root>
     <h6>
+      <Spinner class={isCommitmentOngoing ? 'inline' : 'hidden'}/>
       {isCommitmentOngoing
         ? "Answers are being evaluated in the background. You may go back to the Papers screen now."
         : "Note that segmentation results are ephemeral, and switching out of this screen will discard them."}
