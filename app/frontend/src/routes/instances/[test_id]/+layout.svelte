@@ -45,7 +45,9 @@
               onclick={() => goto("..")}>
         <IconBack class="size-8"/>
       </Button>
-      <h2>{activeTestInstance.name}</h2>
+      <h2 class="flex-1 text-center">
+        {activeTestInstance.name} &ThinSpace;&middot;&ThinSpace; {activeTestInstance.test_id.split("_").slice()[0]}
+      </h2>
       <Button variant="floating"
               href="/instances">
         <IconInstancesList class="size-7 m-0.5"/>
@@ -53,11 +55,12 @@
     </span>
     
     <Separator/>
-    <div class="flex flex-col xs:flex-row gap-x-3 gap-y-1
+    <div class="flex flex-row-reverse gap-x-3 gap-y-1
                 *:flex *:justify-between
                 [&>*>h6]:font-normal [&>*>h6]:opacity-70 [&>*>h6]:leading-none [&>*>h6]:whitespace-nowrap">
-      <span class="flex-1 tracking-tight">
-        <h6 class="italic">{activeTestInstance.test_id}</h6>
+      <span class="flex-1 tracking-tight
+                   *:w-full *:text-right">
+        <!-- <h6 class="italic">{activeTestInstance.test_id}</h6> -->
         <h6>
           Rendered?
           {activeTestInstance.is_done_rendering 
@@ -72,7 +75,7 @@
             ? new Date(activeTestInstance.date).toLocaleDateString()
             : "" }
         </h6>
-        <h6>SectionID: { activeTestInstance.section_id }</h6>
+        <!-- <h6>SectionID: { activeTestInstance.section_id }</h6> -->
       </span>
     </div>
     

@@ -60,7 +60,7 @@
       <a href="/instances/{instance.test_id}/items"
           class={cn(buttonVariants({ variant: 'outline' }), 'justify-between px-3 py-1.5 *:text-base')}>
         <span>
-          {instance.name} &middot; {instance.test_id.split("_")[0]}
+          {instance.name} &ThinSpace;&middot;&ThinSpace; {instance.test_id.split("_")[0]}
         </span>
         <h5 class="font-normal flex flex-row items-center gap-x-1.5 ml-0.5
                     *:opacity-60">
