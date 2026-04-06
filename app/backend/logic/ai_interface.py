@@ -7,7 +7,7 @@ from google.genai import types
 
 
 # ================================
-#region   Class
+#region Class
 class AIAnswerEvaluator:
     def __init__(self):
         load_dotenv()
@@ -17,24 +17,29 @@ class AIAnswerEvaluator:
         self.flash_version = "gemini-2.5-flash"
 
     def get_item_number(self, image_bytes: bytes):
+        """[UNUSED] Read item number without providing label choices."""
         return self._send_image_prompt(image_bytes, FIND_ITEM_NUMBER_PROMPT)
 
     def get_nearest_item_number(self, image_bytes: bytes, label_choices: list[str]):
+        """Choose closest match from a provided list of valid labels."""
         return self._send_image_prompt(image_bytes, FIND_NEAREST_ITEM_NUMBER_PROMPT(label_choices))
     
     def evaluate_expected_answer(self, image_bytes: bytes, question: str, answer: str):
+        """Evaluate if the student's final answer matches the expected final answer, returning YES/NO/UNCLEAR."""
         return self._send_image_prompt(
                         image_bytes,
                         f"{COMPARE_EXPECTED_FINAL_ANSWER_PROMPT}\nQUESTION: {question}\nANSWER: {answer}"
                         )
         
     def evaluate_rubric(self, image_bytes: bytes, question: str, rubric: str):
+        """Evaluate a single rubric item, returning a simple YES/NO/UNCLEAR response."""
         return self._send_image_prompt(
                         image_bytes,
                         f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nPROMPT: \"{rubric}\": can this be said about the answer?"
                         )
 
     def evaluate_multi_rubric(self, image_bytes: bytes, question: str, rubrics: list[str]):
+        """Evaluate multiple rubric items at once, returning a string of YES/NO responses corresponding to each rubric."""
         rubrics_formatted = json.dumps(rubrics)
         return self._send_image_prompt(
                         image_bytes,
