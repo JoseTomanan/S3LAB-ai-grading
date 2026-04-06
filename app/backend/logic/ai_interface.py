@@ -112,44 +112,24 @@ Where (0,0) is the top-left of the image. Use integers only.
 Example: [[10, 15], [590, 12], [595, 470], [5, 475]]"""
 
 
-FIND_ITEM_NUMBER_PROMPT: str = """You are identifying an encircled item number in the TOP-LEFT corner of a student's answer sheet.
+FIND_ITEM_NUMBER_PROMPT: str = """Identify the encircled label in the TOP-LEFT corner.
 
-IMPORTANT RULES:
-1. Look ONLY at the upper-left corner region
-2. The number is encircled (has a circle around it)
-3. Common numbers are: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-4. Handwriting may be poor - look carefully at the shape
-5. Do NOT confuse similar numbers (1 vs 7, 2 vs 3, 5 vs 6)
-
-EXAMPLES:
-- A single vertical line = 1
-- A curve with horizontal base = 2
-- Two curves stacked = 3
-- Vertical line with horizontal cross = 4
-
-Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
-Do not add any explanation or text."""
+Rules:
+1. Return ONLY the label you see, or `UNKNOWN` if illegible
+2. Handwriting may be poor—interpret generously (b may look like 6, a may look like 9, lowercase/uppercase vary)
+3. Examine shape carefully (vertical line=1, curve+base=2, stacked curves=3, cross=4)
+4. NO explanations, NO other text—output the label only"""
 
 
-FIND_NEAREST_ITEM_NUMBER_PROMPT = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
+FIND_NEAREST_ITEM_NUMBER_PROMPT = lambda l : f"""Identify the encircled label in the TOP-LEFT corner.
 
-IMPORTANT RULES:
-1. Select ONLY from the following choices: {l}
-2. Look ONLY at the upper-left corner region
-3. The label is encircled (has a circle around it)
-4. Common labels are numbers (e.g., 1, 2, 3, 4, 5), or numbers followed by a letter (e.g., 1a, 1b, 1c, 2a, 2b, 2c)
-5. Handwriting may be poor - look carefully at the shape
-6. Do NOT confuse similar numbers (1 vs 7, 2 vs 3, 5 vs 6)
+Valid choices: {l}
 
-EXAMPLES:
-- A single vertical line = 1
-- A curve with horizontal base = 2
-- Two curves stacked = 3
-- Vertical line with horizontal cross = 4
-
-Generate ONLY the label (e.g., `2`); choose the closest label possible depending on the given list.
-Do not add any explanation or text."""
-
-
+Rules:
+1. Return ONLY a value from the list above, or `UNKNOWN` if illegible
+2. ALWAYS match to the closest choice—interpret generously (b may look like 6, a may look like 9, lowercase/uppercase vary)
+3. Prioritize matching over strict reading—if ambiguous, pick the most similar valid choice
+4. Examine shape carefully (vertical line=1, curve+base=2, stacked curves=3, cross=4)
+5. NO explanations, NO other text—output the matched label only"""
 #endregion
 # ================================
