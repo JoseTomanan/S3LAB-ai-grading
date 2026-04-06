@@ -1,15 +1,22 @@
 /**
  * Creates a polling utility that calls `fn` at a fixed interval.
  * Polling stops when `fn` returns `true` (done) or `maxRetries` is reached.
- * Throws an error if polling function fails.
+ * Errors and timeouts are reported via the `onError` callback instead of thrown,
+ * since exceptions inside async setInterval callbacks produce unhandled rejections.
  */
 export function createPoller(
 	fn: () => Promise<boolean>,
 	intervalMs = 5000,
-	maxRetries = 60
+	maxRetries = 60,
+	onError?: (error: Error) => void
 ) {
 	let interval: ReturnType<typeof setInterval> | null = null;
 	let retries = 0;
+
+	function handleError(error: Error) {
+		stop();
+		onError?.(error);
+	}
 
 	function start() {
 		if (interval) return;
@@ -17,28 +24,27 @@ export function createPoller(
 		interval = setInterval(async () => {
 			retries++;
 			if (retries >= maxRetries) {
-				stop();
 				const timeoutError = new Error(
 					`Polling timed out after ${maxRetries} retries (${(maxRetries * intervalMs) / 1000}s)`
 				);
 				timeoutError.name = 'PollingTimeoutError';
-				throw timeoutError;
+				handleError(timeoutError);
+				return;
 			}
 			try {
 				const done = await fn();
 				if (done) stop();
 			} catch (error) {
-				stop();
-				
 				// Enhance error message based on error type
 				if (error instanceof TypeError && error.message.includes('fetch')) {
 					const networkError = new Error(
 						'Network error during polling: Unable to reach server. Please check your connection.'
 					);
 					networkError.name = 'PollingNetworkError';
-					throw networkError;
+					handleError(networkError);
+					return;
 				}
-				
+
 				// Handle HTTP errors
 				if (error instanceof Response || (error as any)?.status) {
 					const status = (error as any).status;
@@ -46,17 +52,17 @@ export function createPoller(
 						`Server error during polling: ${status >= 500 ? 'Server is experiencing issues' : `Request failed with status ${status}`}`
 					);
 					serverError.name = 'PollingServerError';
-					throw serverError;
+					handleError(serverError);
+					return;
 				}
-				
-				// Re-throw with context if it's already an error
+
 				if (error instanceof Error) {
 					error.message = `Polling failed: ${error.message}`;
-					throw error;
+					handleError(error);
+					return;
 				}
-				
-				// Unknown error type
-				throw new Error(`Polling failed with unexpected error: ${String(error)}`);
+
+				handleError(new Error(`Polling failed with unexpected error: ${String(error)}`));
 			}
 		}, intervalMs);
 	}
