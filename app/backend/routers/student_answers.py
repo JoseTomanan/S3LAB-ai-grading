@@ -190,7 +190,14 @@ async def update_answer_segmentation(
 
     # ===== COMMIT RECORDS SYNCHRONOUSLY, EVALUATE IN BACKGROUND =====
     boxes_info = [{"image_directory": image_dir, "item_number": test_item.label}]
-    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    try:
+        answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    except Exception:
+        try:
+            filepath.unlink(missing_ok=True)
+        except Exception:
+            pass
+        raise
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return UpdateSegmentationResponse(image_directory=image_dir)
@@ -700,7 +707,7 @@ def _create_answer_records(
                     is_done_rendering=False
                     )
         session.add(paper)
-        session.commit()
+        session.flush()
         session.refresh(paper)
 
     answer_ids = []
@@ -737,7 +744,7 @@ def _create_answer_records(
             answer.ai_evaluation = ""
             answer.is_done_rendering = False
             answer.detected_item_number = item_number
-        session.commit()
+        session.flush()
         session.refresh(answer)
         answer_ids.append(answer.answer_id)
 
@@ -750,6 +757,7 @@ def _label_save_and_evaluate_background(processed_list: list[bytes], test_id: st
     try:
         boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
         answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+        session.commit()
     except Exception as e:
         print(f"BACKEND:\tBackground label/save failed: {e}")
         session.rollback()
