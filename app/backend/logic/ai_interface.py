@@ -1,11 +1,8 @@
 import os
+import json
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-
-import logging
-import json
-logger = logging.getLogger(__name__)
 
 
 
@@ -54,7 +51,7 @@ class AIAnswerEvaluator:
             return corners
         
         except (json.JSONDecodeError, TypeError):
-            logger.error(f"Failed to parse corner coordinates: {response}")
+            print(f"BACKEND:\tFailed to parse corner coordinates: {response}")
             return None
 
     def _send_image_prompt(self, image_bytes: bytes, prompt: str, is_flash: bool = True) -> str | None:
@@ -66,12 +63,15 @@ class AIAnswerEvaluator:
                             mime_type='image/jpeg'
                             )
 
-        response = self.client.models.generate_content(
-                    model=self.flash_version if is_flash else self.pro_version,
-                    contents=[image_encoded, prompt]
-                    )
-
-        return response.text
+        try:
+            response = self.client.models.generate_content(
+                        model=self.flash_version if is_flash else self.pro_version,
+                        contents=[image_encoded, prompt]
+                        )
+            return response.text
+        except Exception as e:
+            print(f"BACKEND:\tAPI call failed: {e}")
+            return None
 #endregion
 # ================================
     
