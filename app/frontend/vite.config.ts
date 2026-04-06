@@ -32,7 +32,7 @@ export default defineConfig({
       name: 'md-loader',
       transform(src, id) {
         if (id.endsWith('.md')) {
-          const html = marked(src);
+          const html = marked.parse(src);
           return `export default ${JSON.stringify(html)}`;
         }
       }

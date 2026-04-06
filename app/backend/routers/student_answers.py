@@ -130,6 +130,7 @@ async def commit_boxes_endpoint(
     _delete_disregarded_record_imgs(boxes_info_bad)
 
     answer_ids = _create_answer_records(boxes_info_good, test_id, student_no, session)
+    session.commit()
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -192,6 +193,7 @@ async def update_answer_segmentation(
     boxes_info = [{"image_directory": image_dir, "item_number": test_item.label}]
     try:
         answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+        session.commit()
     except Exception:
         try:
             filepath.unlink(missing_ok=True)
