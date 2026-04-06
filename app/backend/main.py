@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -61,6 +61,8 @@ async def get_processed_image(filename: str):
         raise HTTPException(status_code=400, detail="Invalid filename characters")
     
     filepath = TEMP_DIR / filename
+    if not filepath.resolve().is_relative_to(TEMP_DIR.resolve()):
+        raise HTTPException(status_code=400, detail="Invalid filename")
     if not filepath.exists():
         raise HTTPException(status_code=404, detail="Processed image not found")
     
@@ -72,8 +74,11 @@ async def reevaluate_answer(answer_id: int, session: Session = Depends(get_sessi
     """Re-evaluate image then store to StudentAnswer evaluation result."""
     # TODO: 400 handling
     # TODO: 404 handling
-    return evaluate_image_logic(
-                answer_id_input=answer_id,
-                session=session
-                )
+    try:
+        return evaluate_image_logic(
+                    answer_id_input=answer_id,
+                    session=session
+                    )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 #endregion

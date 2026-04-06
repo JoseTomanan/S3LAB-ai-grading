@@ -42,7 +42,7 @@ class TestInstance(SQLModel, table=True):
 
 class TestItem(SQLModel, table=True):
     __tablename__ = "test_item"   # type: ignore[assignment]
-    item_id: int = Field(primary_key=True)
+    item_id: Optional[int] = Field(default=None, primary_key=True)
     test_id: str = Field(foreign_key="test_instance.test_id", index=True)
     label: str = Field(max_length=50)
     question: str
@@ -88,7 +88,7 @@ class StudentAnswer(SQLModel, table=True):
     @property
     def scores_list(self) -> List[float]:
         """Get the list of LLM evaluation scores (e.g., [0.9, 1.0, 0.75])."""
-        return json.loads(self._scores_json)
+        return json.loads(self.scores)
 
     @scores_list.setter
     def scores_list(self, value: List[float]) -> None:
@@ -96,4 +96,4 @@ class StudentAnswer(SQLModel, table=True):
         if not isinstance(value, list):
             raise ValueError("scores must be a list of float numbers")
         # Ensure all elements are float-able
-        self._scores_json = json.dumps([float(x) for x in value])
+        self.scores = json.dumps([float(x) for x in value])

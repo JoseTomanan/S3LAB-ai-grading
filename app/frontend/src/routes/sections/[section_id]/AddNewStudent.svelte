@@ -7,7 +7,7 @@
 	import { api, ApiError } from '$lib/utils/api.ts';
 	import toast from 'svelte-5-french-toast';
 	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-	import Button from '$lib/components/ui/button/button.svelte';
+	import Button from '$lib/components/CustomButton/button.svelte';
 	import { Input } from '$lib/components/ui/input/index.ts';
 	import { Label } from '$lib/components/ui/label/index.ts';
 
@@ -35,7 +35,9 @@
 			await invalidateAll();
       isAddDialogOpen = false;
 		} catch (e) {
-			toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to add new student:\n" + e);
+			toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to add new student:\n" + e);
 		} finally {
 			isLoading = false;
 		}

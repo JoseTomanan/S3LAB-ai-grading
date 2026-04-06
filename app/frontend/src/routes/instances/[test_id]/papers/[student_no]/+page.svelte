@@ -2,7 +2,7 @@
   import { API_URL } from '$lib/constants.ts';
   const { data } = $props();
 
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
@@ -17,8 +17,11 @@
 	import SafeDelete from '$lib/components/SafeDelete.svelte';
 	import { GET_E_A_R_Q, GET_SCORES } from '$lib/utils/ai_evaluations.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import Card from '$lib/components/Card.svelte';
   import ManualCrop from './ManualCrop.svelte';
 
@@ -41,21 +44,47 @@
   })());
 
   let isRequestOngoings: Map<number, boolean> = $state(new Map());
-  let pollingItemIds: Set<number> = $state(new Set());
-  let cropDialogOpen: Map<number, boolean> = $state(new Map());
+  type CropUiState = {
+    cropDialogOpen: boolean;
+    cropPending: boolean;
+  };
+  let cropUiStateByItemId: Map<number, CropUiState> = $state(new Map());
   let zoomLevel: number = $state(1);
+
+  function getCropUiState(itemId: number): CropUiState {
+    return cropUiStateByItemId.get(itemId) ?? { cropDialogOpen: false, cropPending: false };
+  }
+
+  function updateCropUiState(itemId: number, patch: Partial<CropUiState>) {
+    const next = new Map(cropUiStateByItemId);
+    next.set(itemId, { ...getCropUiState(itemId), ...patch });
+    cropUiStateByItemId = next;
+  }
+
+  function setRequestOngoing(answerId: number, isOngoing: boolean) {
+    const next = new Map(isRequestOngoings);
+    next.set(answerId, isOngoing);
+    isRequestOngoings = next;
+  }
 
   const cropPoller = createPoller(async () => {
     const result = await api<StudentAnswer[]>(
       `${API_URL}/api/student_answers/${data.test_id}/${data.student_no}`
     );
-    for (const itemId of pollingItemIds) {
+
+    const pendingItemIds = Array.from(cropUiStateByItemId.entries())
+      .filter(([, state]) => state.cropPending)
+      .map(([itemId]) => itemId);
+
+    for (const itemId of pendingItemIds) {
       const answer = result.find(a => a.item_id === itemId);
       if (answer?.is_done_rendering) {
-        pollingItemIds = new Set([...pollingItemIds].filter(id => id !== itemId));
+        updateCropUiState(itemId, { cropPending: false, cropDialogOpen: false });
       }
     }
-    if (pollingItemIds.size === 0) {
+
+    const hasPendingCrop = Array.from(cropUiStateByItemId.values()).some(state => state.cropPending);
+    if (!hasPendingCrop) {
       await invalidateAll();
       return true;
     }
@@ -64,14 +93,23 @@
 
   onDestroy(() => cropPoller.stop());
 
+  onMount(() => {
+    if (data.evaluation_error)
+      toast.error(`Failed to load AI evaluations: ${data.evaluation_error}`);
+  });
+
   function handleCropSubmitted(itemId: number) {
-    cropDialogOpen = new Map(cropDialogOpen.set(itemId, false));
-    pollingItemIds = new Set(pollingItemIds.add(itemId));
+    updateCropUiState(itemId, { cropDialogOpen: false, cropPending: true });
+    studentItems = studentItems.map(answer =>
+      answer.item_id === itemId
+        ? { ...answer, is_done_rendering: false }
+        : answer
+    );
     cropPoller.start();
   }
 
   async function reevaluateAnswer(answer_id: number) {
-    isRequestOngoings = new Map(isRequestOngoings.set(answer_id, true));
+    setRequestOngoing(answer_id, true);
     try {
       const result = await api<{ answer_id: number, ai_evaluation: string, scores: string }>(
             `${API_URL}/api/answers/${answer_id}/reevaluate`,
@@ -84,10 +122,10 @@
             );
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to reevaluate answer:\n" + String(e));
     } finally {
-      isRequestOngoings = new Map(isRequestOngoings.set(answer_id, false));
+      setRequestOngoing(answer_id, false);
     }
   }
 
@@ -98,7 +136,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to delete answer:\n" + String(e));
     }
   }
@@ -110,24 +148,28 @@
             [&>*>img]:object-fit">
   <span class="flex flex-row justify-between items-center">
     <span class="flex flex-wrap items-baseline gap-x-4 [&>h5]:opacity-60">
-      <h1 class="font-semibold">Test answers</h1>
+      <h1>Test answers</h1>
       <h5>{data.student_no}</h5>
     </span>
-    <a class="button-secondary flex flex-row items-center gap-x-1"
-        href="/instances/{data.test_id}/papers/{data.student_no}/process">
+    <Button variant="secondary"
+            class="flex flex-row items-center gap-x-1"
+            href="/instances/{data.test_id}/papers/{data.student_no}/process">
       <span class="text-sm">Upload</span>
       <MdiImagePlus class="size-5"/>
-    </a>
+    </Button>
   </span>
 
   {#if studentItems.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
   
   {:else}
-    <div class="overflow-y-auto space-y-2 flex flex-col items-center">
+    <div class="scroll-shadows overflow-y-auto space-y-2 flex flex-col items-center">
     {#each studentItems as studentItem}
       {@const isEvalNotError = !studentItem.ai_evaluation.startsWith("_ERROR:")}
-      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id) || pollingItemIds.has(studentItem.item_id)}
+      {@const cropUiState = getCropUiState(studentItem.item_id)}
+      {@const isRequestLoading = isRequestOngoings.get(studentItem.answer_id)
+                || cropUiState.cropPending
+                || (studentItem.image_directory !== "" && !studentItem.is_done_rendering)}
       {@const e_a_r_qs = GET_E_A_R_Q(studentItem)}
       
       <Card class="subcontainer flex flex-col sm:flex-row gap-x-3 gap-y-1.5">
@@ -137,7 +179,9 @@
             {studentItem.label}
           </Label>
           <span class="w-5/6 sm:w-full">
-            {#if studentItem.image_directory == ""}
+            {#if isRequestLoading && studentItem.image_directory == ""}
+              <Skeleton class="w-full h-32 rounded-none grayscale" />
+            {:else if studentItem.image_directory == ""}
               <MdiPaperOff class="mx-auto size-8 opacity-50" />
             {:else}
               <Dialog.Root onOpenChange={(v) => { if (!v) zoomLevel = 1; }}>
@@ -167,13 +211,10 @@
         
         <div class="flex-1 w-full h-full space-y-2">
           <span class="flex flex-row space-x-1 justify-end">
-            <SafeDelete toggle={isWantsToDelete}
-                        onDelete={() => deleteAnswer(studentItem.item_id)}
-                        size={4}
-                        />
-            <Sheet.Root open={cropDialogOpen.get(studentItem.item_id) ?? false}
-                          onOpenChange={(v) => { cropDialogOpen = new Map(cropDialogOpen.set(studentItem.item_id, v)); }}>
-              <Sheet.Trigger class="button-outline">
+            <SafeDelete onDelete={() => deleteAnswer(studentItem.item_id)}/>
+            <Sheet.Root open={cropUiState.cropDialogOpen}
+                          onOpenChange={(v) => { updateCropUiState(studentItem.item_id, { cropDialogOpen: v }); }}>
+              <Sheet.Trigger class={buttonVariants({ variant: 'outline' })}>
                 <MdiCrop/>
               </Sheet.Trigger>
               <ManualCrop test_id={data.test_id}
@@ -181,28 +222,28 @@
                           item_id={studentItem.item_id}
                           onCropSubmitted={() => handleCropSubmitted(studentItem.item_id)}/>
             </Sheet.Root>
-            <button class={`${isRequestLoading || studentItem.image_directory == "" ? "opacity-50" : "opacity-100"}
-                            button-outline px-0 py-0`}
+            <Button variant="outline"
                     onclick={() => reevaluateAnswer(studentItem.answer_id)}
                     disabled={isRequestLoading || studentItem.image_directory == ""}>
               <IconReevaluate />
-            </button>
+            </Button>
           </span>
           
           <div>
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
-              <span class="flex flex-row justify-between items-baseline-last gap-x-1
-                            [&>h5]:opacity-60">
-                <h5 class="italic flex-1">{e_a_r_q}</h5>
+              <span class="flex flex-row justify-between items-baseline-last gap-x-1">
+                <p class="italic flex-1 text-foreground/60">
+                  {e_a_r_q}
+                </p>
                 {#if isRequestLoading}
                   <Spinner class="text-chart-3 size-4" />
                 {:else}
-                  <h4 class="font-semibold text-foreground/60">
+                  <p class="font-semibold text-foreground/80">
                     {isEvalNotError
                       ? GET_SCORES(studentItem)[index] || "—"
                       : "⚠️"}
-                  </h4>
+                  </p>
                 {/if}
               </span>
             {/if}

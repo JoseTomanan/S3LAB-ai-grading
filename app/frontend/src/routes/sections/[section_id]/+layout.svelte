@@ -1,5 +1,10 @@
 <script lang="ts">
+  import { navigating } from '$app/state';
   const { data, children } = $props();
+  
+  import { Button } from '$lib/components/CustomButton/index.ts';
+  import { Separator } from '$lib/components/ui/separator';
+  import { Skeleton } from '$lib/components/ui/skeleton';
   import IconBack from "~icons/mdi/chevron-left";
   import IconSectionList from '~icons/mdi/format-list-bulleted';
 
@@ -10,22 +15,32 @@
 </script>
 
 
+
 <nav class="bg-sidebar text-sidebar-foreground
             shadow shadow-sidebar-border
-            w-full flex flex-row justify-between p-4 pt-6">
-  <a href="/sections" class="button-floating">
-    <IconBack/>
-  </a>
-  <span class="*:leading-5 *:text-center">
-    <h1>{sectionName}</h1>
-    <h6>Class list</h6>
-  </span>
-  <a href="/instances" class="button-floating">
-    <IconSectionList class="size-7 m-0.5"/>
-  </a>
+            w-full flex flex-col gap-y-2.5 p-4 pt-6">
+  <div class="w-full inline-flex items-center justify-between">
+    <Button variant="floating" href="/sections">
+      <IconBack class="size-8"/>
+    </Button>
+    <span class="*:leading-5 *:text-center">
+      <h2>{sectionName}</h2>
+    </span>
+    <Button variant="floating" href="/sections">
+      <IconSectionList class="size-7 m-0.5"/>
+    </Button>
+  </div>
+
+  <Separator/>
 </nav>
 
 <span class="-my-4"></span>
 
-{@render children()}
+{#if navigating.to}
+  <div class="container">
+    <Skeleton class="grayscale-50 w-full h-64 rounded-none"/>
+  </div>
 
+{:else}
+  {@render children()}
+{/if}

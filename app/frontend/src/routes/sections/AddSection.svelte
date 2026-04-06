@@ -4,7 +4,7 @@
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
-  import { Button } from "$lib/components/ui/button/index.ts";
+  import { Button } from "$lib/components/CustomButton/index.ts";
   import { Input } from "$lib/components/ui/input/index.ts";
   import { Label } from "$lib/components/ui/label/index.ts";
 
@@ -27,7 +27,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to add new section:\n" + String(e)
         );
     } finally {
@@ -45,13 +45,17 @@
   <Input id="section_name"
           type="text"
           placeholder="e.g., 3-Einstein"
+          pattern="[a-zA-Z0-9\-]*"
           required
           bind:value={formSectionName}
-          />
+        />
 
   <Dialog.Footer>
+    <Dialog.Description>
+      Please do not include spaces or underscores in the section name; instead, use pascal case (e.g., 3-JoseRizal).
+    </Dialog.Description>
     <Button variant="outline" disabled={isOperationOngoing} onclick={addSection}>
-      {isOperationOngoing ? "Adding..." : "Add section"}
+      {isOperationOngoing ? "Creating..." : "Create"}
     </Button>
   </Dialog.Footer>
 </Dialog.Content>

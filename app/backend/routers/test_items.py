@@ -60,22 +60,13 @@ def add_test_item(
                 detail=f"Test instance '{test_id}' not found"
                 )
     
-    # Determine next item_id (max existing + 1)
-    max_item = session.exec(
-                    select(TestItem)
-                    .order_by(TestItem.item_id.desc())  # type: ignore[union-attr]
-                    ).first()
-
-    next_item_id = (max_item.item_id + 1) if max_item else 1
-
-    # Create new test item
+    # Create new test item (item_id auto-assigned by the database)
     question = item.question if item.question is not None else "Untitled Question"
     is_problem_solving = item.is_problem_solving if item.is_problem_solving is not None else False
 
     new_item = TestItem(
-        item_id=next_item_id,
         test_id=test_id,
-        label=item.label or f"Item {next_item_id}",
+        label=item.label or "Item",
         question=question,
         is_problem_solving=is_problem_solving,
         expected_answer_rubric_questions=item.expected_answer_rubric_questions or ""
@@ -83,6 +74,13 @@ def add_test_item(
     session.add(new_item)
     session.commit()
     session.refresh(new_item)
+
+    # Patch label if it was auto-generated (no label provided)
+    if not item.label:
+        new_item.label = f"Item {new_item.item_id}"
+        session.add(new_item)
+        session.commit()
+        session.refresh(new_item)
     
     # Return full item representation
     return NewTestItemResponse(

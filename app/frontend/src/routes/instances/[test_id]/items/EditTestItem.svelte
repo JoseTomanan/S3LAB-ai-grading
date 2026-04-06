@@ -7,7 +7,7 @@
   import toast from 'svelte-5-french-toast';
   import type { TestItem } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import { Label } from '$lib/components/ui/label/index.js';
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import { Input } from '$lib/components/ui/input/index.ts';
@@ -77,7 +77,9 @@
       toast.success("Test item updated successfully!");
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to edit test item:\n" + e);
+      toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to edit test item:\n" + e);
     } finally {
       isOperationOngoing = false;
     }
@@ -89,10 +91,13 @@
       toast.success("Test item deleted.");
       await invalidateAll();
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status} ${e.statusText}` : "Failed to delete test item:\n" + e);
+      toast.error(e instanceof ApiError
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+        : "Failed to delete test item:\n" + e);
     }
   }
 </script>
+
 
 
 <Dialog.Content>
@@ -101,7 +106,8 @@
       Edit test item {testItem.label}
     </Dialog.Title>
     <Dialog.Description>
-      For expected answer/rubric questions, add points in brackets at end. Example: "Correct setup [1pts]"
+      For expected answer/rubric questions, add points in brackets at end. <br>
+      Example: "Correct setup [1pts]"
     </Dialog.Description>
   </Dialog.Header>
   
@@ -135,9 +141,7 @@
               onclick={() => editTestItem(formTestItem)}>
         Save changes
       </Button>
-      <SafeDelete toggle={isWantsToDelete}
-                  onDelete={deleteTestItem}
-                  />
+      <SafeDelete onDelete={deleteTestItem}/>
     </div>
   </Dialog.Footer>
 </Dialog.Content>

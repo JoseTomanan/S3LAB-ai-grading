@@ -79,7 +79,11 @@ class SheetsExporter:
             scores = self.sheet_items[key_name]
             student_total = sum(v for v in scores.values() if v is not None and v >= 0)
             if self.max_scores is not None:
-                answered_items = [item for item in self.columns if scores.get(item) is not None and scores.get(item) >= 0]
+                answered_items = [
+                    item for item in self.columns
+                    if (score_item := scores.get(item)) is not None
+                    and score_item >= 0
+                    ]
                 answered_max = sum(self.max_scores[item] for item in answered_items if item in self.max_scores)
                 _fmt = lambda v: int(v) if isinstance(v, float) and v % 1 == 0 else v
                 sheet.cell(
@@ -94,10 +98,5 @@ class SheetsExporter:
         total_rows = data_start_row + len(students_list)
         for row in range(1, total_rows):
             sheet.cell(row=row, column=1).font = bold
-
-        # sheets_directory = f"./static/sheets/{file_name}.xlsx"
-
-        # wb.save(sheets_directory)
-        # print(f"--> File '{file_name}.xlsx' saved.")
 
         return wb

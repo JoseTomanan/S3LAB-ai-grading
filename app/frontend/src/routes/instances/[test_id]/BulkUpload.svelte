@@ -36,7 +36,7 @@
 
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
   import * as Sheet from '$lib/components/ui/sheet/index.ts';
-  import { Button } from '$lib/components/ui/button/index.ts';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import { Separator } from '$lib/components/ui/separator/index.ts';
@@ -49,9 +49,11 @@
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   
   let isOperationStarted: boolean = $state(false);
+  let uploadSummary = $state<{ total: number; succeeded: number; failed: number } | null>(null);
 
   function resetPage() {
     isOperationStarted = false;
+    uploadSummary = null;
     formFiles = undefined;
     formFileRecords = [];
   }
@@ -156,6 +158,11 @@
 
     await Promise.allSettled(promises);
     formFileRecords = [...formFileRecords];
+    uploadSummary = {
+      total: formFileRecords.length,
+      succeeded: formFileRecords.filter(r => r.statusCode == 200 || r.statusCode == 202).length,
+      failed: formFileRecords.filter(r => r.statusCode !== 200 && r.statusCode !== 202).length
+    };
 
     if (promises.length > 0) {
       onuploadcomplete?.();
@@ -167,7 +174,7 @@
 
 <Sheet.Content side="right"
                 class="w-11/12 sm:max-w-135 px-2 py-4">
-  <h1 class="text-left font-semibold">Bulk upload</h1>
+  <h1>Bulk upload</h1>
   <div class="flex flex-row gap-x-1">
     <Input type="file"
             multiple
@@ -192,8 +199,8 @@
   
   {:else if !isOperationStarted}
     <div id="scrollable-area"
-          class="flex flex-col items-center max-w-fit overflow-scroll gap-y-1.5
-                  -mx-1.5 px-1.5 -my-2 py-2 border-t-2 border-b-2 border-border">
+          class="scroll-shadows flex flex-col items-center max-w-fit overflow-y-scroll gap-y-1.5
+                  -mx-1.5 px-1.5 -my-2 py-2">
       {#each formFileRecords as p}
         {@const supposedId = GET_STUDENT_NO(p.name)}
         {@const nameOnly = GET_NAME_ONLY(p.name)}
@@ -248,22 +255,18 @@
           
           <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80
                         [&>button]:backdrop-blur-md">
-            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
-                    class="button-outline">
+            <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}>
               <IconRotateCW />
-            </button>
-            <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
-                    class="button-outline">
+            </Button>
+            <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}>
               <IconRotateCCW />
-            </button>
-            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
-                    class="button-outline">
+            </Button>
+            <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}>
               <IconFlipHorizontally />
-            </button>
-            <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
-                    class="button-outline">
+            </Button>
+            <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}>
               <IconFlipVertically />
-            </button>
+            </Button>
           </span>
         </div>
       {/each}
@@ -271,6 +274,14 @@
   
   {:else}
     <div class="flex flex-col space-y-1">
+      {#if uploadSummary}
+        <div class="rounded-md bg-muted/60 px-3 py-2 text-sm">
+          <b>Upload summary</b>
+          <span class="ml-2 opacity-80">
+            {uploadSummary.succeeded} succeeded, {uploadSummary.failed} failed out of {uploadSummary.total} files.
+          </span>
+        </div>
+      {/if}
       <span class="flex flex-row justify-between opacity-80">
         <b>File</b>
         <b>Evaluation status</b>
@@ -294,6 +305,10 @@
               <span> <IconUnprocessable class="text-destructive"/> </span>
               <h4>{ p.name }</h4>
               <i>{p.statusDetail ?? "Unprocessable image"}</i>
+            {:else if p.statusCode == 413}
+              <span> <IconUnprocessable /> </span>
+              <h4>{ p.name }</h4>
+              <i>File too large</i>
             {:else if p.statusCode == 500}
               <span> <IconExclamation class="text-destructive"/> </span>
               <h4>{ p.name }</h4>

@@ -1,12 +1,16 @@
+from pathlib import Path
 from logic.ai_interface import AIAnswerEvaluator
 from logic.box_segmenter import BoxSegmenter
 
 
 
+GET_INPUT = lambda x : f"./TEMP/input/{x}"
+GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
 FILENAMES = [
-    "properTest1.jpeg",
-    "properTest2.jpeg",
-    ]
+    f.name for f in Path("./TEMP/input").iterdir()
+    if f.name.lower().startswith("proper")
+    and f.name.lower().endswith(('.jpeg', '.jpg', '.png'))
+]
 
 EXPECTED_ANSWERS: dict[str,str] = {
     "1a": "Thousands",
@@ -25,9 +29,6 @@ RUBRIC_QUESTIONS: dict[str,list[str]] = {
         "Correct 'books' label in final answer"
     ]
 }
-
-GET_INPUT = lambda x : f"./TEMP/input/{x}"
-GET_OUTPUT = lambda x : f"./TEMP/output/{x}"
 
 
 

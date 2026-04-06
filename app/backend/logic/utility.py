@@ -57,7 +57,8 @@ def compute_ai_evaluation(image_bytes: bytes, is_problem_solving: bool, question
                     print(f"BACKEND:\tRubric eval failed after {MAX_RUBRIC_RETRIES} attempts; defaulting to NO for {len(batch)} rubric(s)")
                     all_parts.extend(["NO"] * len(batch))
 
-            ai_evaluation = ";".join(all_parts) + ";"
+            ## ai_evaluation = ";".join(all_parts) + ";"
+            ai_evaluation = ";".join(all_parts)
 
         case _:
             expected_answer = expected_answer_rubric_questions
@@ -84,7 +85,8 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                     select(StudentAnswer)
                     .where(StudentAnswer.answer_id == answer_id_input)
                     ).first()
-    assert answer is not None
+    if answer is None:
+        raise ValueError(f"StudentAnswer with ID {answer_id_input} not found")
 
     actual_image_path = f"static/images/{answer.image_directory.split("/")[3]}"
     image_bytes: bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
@@ -93,7 +95,8 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
                     select(TestItem)
                     .where(TestItem.item_id == answer.item_id)
                     ).first()
-    assert test_item is not None
+    if test_item is None:
+        raise ValueError(f"TestItem for answer ID {answer_id_input} not found")
 
     ai_evaluation = compute_ai_evaluation(image_bytes, test_item.is_problem_solving, test_item.question, test_item.expected_answer_rubric_questions)
     all_scores = calculate_score(test_item.expected_answer_rubric_questions, ai_evaluation)
@@ -117,27 +120,29 @@ def evaluate_image_logic(answer_id_input: int, session: Session):
 
 
 def calculate_score(expected_answer_rubric_questions: str, ai_evaluation: str) -> str:
-    scores = ""
-    if ai_evaluation:
-        splitted_e_a_r_q = expected_answer_rubric_questions.split(";")
-        splitted_evals = ai_evaluation.split(";")
-        print(f"INTERNAL:\tCalculating w/ splitted EARQ: {splitted_e_a_r_q}.")
+    if not ai_evaluation:
+        return ""
 
-        for i, e_a_r_q in enumerate(splitted_e_a_r_q):
-            if e_a_r_q.strip() != "":
-                index_start = e_a_r_q.find("[")
-                index_end = index_start + e_a_r_q[index_start:].find("p")
+    splitted_e_a_r_q = expected_answer_rubric_questions.split(";")
+    splitted_evals = ai_evaluation.split(";")
+    print(f"INTERNAL:\tCalculating w/ splitted EARQ: {splitted_e_a_r_q}.")
 
-                print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
-                print(f"INTERNAL:\t ---> BECOMES {e_a_r_q[index_start+1:index_end]}")
-                
-                points = e_a_r_q[index_start+1 : index_end]
-                if splitted_evals[i] != "":
-                    scores += f"{points}/{points};" if splitted_evals[i] == "YES" \
-                                    else f"0/{points};"
+    score_parts = []
+    for i, e_a_r_q in enumerate(splitted_e_a_r_q):
+        if e_a_r_q.strip() != "":
+            # `[` is guaranteed to exist in every rubric part — rubric format enforces `[Npts]` notation
+            index_start = e_a_r_q.find("[")
+            index_end = index_start + e_a_r_q[index_start:].find("p")
 
-        print(f"INTERNAL:\tScore is {scores}")
+            print(f"INTERNAL:\t ---> EARQ: {e_a_r_q}")
+            print(f"INTERNAL:\t ---> BECOMES {e_a_r_q[index_start+1:index_end]}")
 
+            points = e_a_r_q[index_start+1 : index_end]
+            if i < len(splitted_evals) and splitted_evals[i] != "":
+                score_parts.append(f"{points}/{points}" if splitted_evals[i] == "YES" else f"0/{points}")
+
+    scores = ";".join(score_parts)
+    print(f"INTERNAL:\tScore is {scores}")
     return scores
 
 
@@ -216,10 +221,17 @@ def crop_image(contents: bytes, points_data: dict):
 
 
 def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl.Workbook:
-    test_items = session.exec(
-                            select(TestItem)
-                            .where(TestItem.test_id == test_id_input)
-                            ).all()
+    def _natural_sort_key(item):
+        parts = re.split(r'(\d+)', item.label or "")
+        return [int(p) if p.isdigit() else p.lower() for p in parts]
+
+    test_items = sorted(
+                    session.exec(
+                        select(TestItem)
+                        .where(TestItem.test_id == test_id_input)
+                    ).all(),
+                    key=_natural_sort_key
+                )
     test_items_labels = [item.label for item in test_items]
 
     max_scores = {item.label: get_max_score(item.expected_answer_rubric_questions) for item in test_items}
@@ -229,13 +241,16 @@ def populate_spreadsheet_logic(test_id_input: str, session: Session) -> openpyxl
                             select(TestInstance)
                             .where(TestInstance.test_id == test_id_input)
                             ).first()
-    assert test_instance is not None # FIXME: Make this a 400 handling
+    if test_instance is None:
+        raise ValueError(f"TestInstance with ID '{test_id_input}' not found")
     
     students = session.exec(
                         select(Student)
                         .where(Student.section_id == test_instance.section_id)
+                        .order_by(Student.student_no)
                         ).all()
-    assert students is not None
+    if not students:
+        raise ValueError(f"No students found for section '{test_instance.section_id}'")
     
     for s in students:
         rowKey = s.student_no

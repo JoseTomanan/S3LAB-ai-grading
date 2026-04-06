@@ -9,7 +9,7 @@
 
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import * as Select from "$lib/components/ui/select/index.ts";
-  import Button from '$lib/components/ui/button/button.svelte';
+  import Button from '$lib/components/CustomButton/button.svelte';
   import { Input } from '$lib/components/ui/input/index.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
@@ -42,7 +42,7 @@
       dropdownSections = await api<Section[]>(`${API_URL}/api/sections/`);
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to fetch sections.\n" + String(e));
     } finally {
       isSectionsLoading = false;
@@ -75,7 +75,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to edit student: " + String(e));
     } finally {
       isRequestLoading = false;
@@ -91,7 +91,7 @@
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to delete student: " + String(e));
     } finally {
       isRequestLoading = false;
@@ -140,9 +140,7 @@
           <Spinner />
         {/if}
       </Button>
-      <SafeDelete toggle={isWantsToDelete}
-                  onDelete={deleteStudent}
-                  />
+      <SafeDelete onDelete={deleteStudent}/>
     </div>
   </Dialog.Footer>
 </Dialog.Content>

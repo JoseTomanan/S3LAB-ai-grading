@@ -17,6 +17,8 @@
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.ts';
 	import * as Sheet from '$lib/components/ui/sheet/index.ts';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import { Separator } from '$lib/components/ui/separator/index.ts';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -39,64 +41,60 @@
 <!-- <div> -->
   <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
     <span class="flex flex-row items-center justify-between">
-      <button class="button-floating"
+      <Button variant="floating"
               onclick={() => goto("..")}>
-        <IconBack/>
-      </button>
-      <h1>{ activeTestInstance.name }</h1>
-      <a href="/instances" class="button-floating">
+        <IconBack class="size-8"/>
+      </Button>
+      <h2 class="flex-1 text-center">
+        {activeTestInstance.name} &ThinSpace;&middot;&ThinSpace; {activeTestInstance.test_id.split("_").slice()[0]}
+      </h2>
+      <Button variant="floating"
+              href="/instances">
         <IconInstancesList class="size-7 m-0.5"/>
-      </a>
+      </Button>
     </span>
     
     <Separator/>
-    <div class="flex flex-col sm:flex-row gap-x-4 gap-y-1
-                *:flex *:justify-between
-                [&>*>h4]:font-normal [&>*>h4]:text-foreground/85 [&>*>h4]:leading-none [&>*>h4]:whitespace-nowrap">
-      <span class="flex-3/5 tracking-tight">
-        <h4 class="italic">{activeTestInstance.test_id}</h4>
-        <h4>
-          Rendered?
-          {activeTestInstance.is_done_rendering 
-            ? "☑️" 
-            : "✖️" }
-        </h4>
-      </span>
-      <span class="flex-2/5">
-        <h4>
-          Created
-          {activeTestInstance.date
-            ? new Date(activeTestInstance.date).toLocaleDateString()
-            : "" }
-        </h4>
-        <h4>SectionID: { activeTestInstance.section_id }</h4>
-      </span>
+    <div class="flex flex-row-reverse justify-between gap-x-3 gap-y-1 
+                [&>*>h6]:font-normal [&>*>h6]:opacity-70 [&>*>h6]:leading-none [&>*>h6]:whitespace-nowrap">
+      <h6>
+        Rendered?
+        {activeTestInstance.is_done_rendering 
+          ? "☑️" 
+          : "✖️" }
+      </h6>
+      <h6>
+        Created
+        {activeTestInstance.date
+          ? new Date(activeTestInstance.date).toLocaleDateString()
+          : "(n/d)" }
+      </h6>
     </div>
     
     <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
       <span>
-        <a class="button-primary ring-chart-3 {isRouteItems ? "ring-2" : ""}"
+        <Button class={cn('ring-chart-3', isRouteItems ? 'ring-2' : '')}
             href="/instances/{data.test_id}/items">
           Items
-        </a>
-        <a class="button-primary ring-chart-3 {isRoutePapers ? "ring-2" : ""}"
+        </Button>
+        <Button class={cn('ring-chart-3', isRoutePapers ? 'ring-2' : '')}
             href="/instances/{data.test_id}/papers">
           Papers
-        </a>
+        </Button>
       </span>
       
       <span class="flex flex-row gap-x-1">
         <Dialog.Root>
-          <Dialog.Trigger class="button-primary"
+          <Dialog.Trigger class={buttonVariants()}
                           title={"Export sheets"}>
-            <IconTable class="size-6" />
+            <IconTable class="size-5.5" />
           </Dialog.Trigger>
           <ExportSheets test_id={data.test_id}/>
         </Dialog.Root>
         <Sheet.Root bind:open={isBulkUploadOpen}>
-          <Sheet.Trigger class="button-primary"
+          <Sheet.Trigger class={buttonVariants()}
                           title={"Bulk upload"}>
-            <IconUpload class="size-6"/>
+            <IconUpload class="size-5.5"/>
           </Sheet.Trigger>
           <BulkUpload test_instance={activeTestInstance}
                       defaultNumBoxes={data.test_items?.length ?? 2}

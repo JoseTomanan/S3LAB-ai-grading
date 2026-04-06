@@ -99,7 +99,7 @@ class BlobDetector:
         self.dyn_min_area = dyn_min_area
         self.dyn_max_area = dyn_max_area
 
-        params = cv2.SimpleBlobDetector_Params()
+        params = cv2.SimpleBlobDetector.Params()
         params.filterByColor = True
         params.blobColor = 255
         params.filterByArea = True
@@ -111,7 +111,7 @@ class BlobDetector:
         params.minConvexity = 0.40
         params.filterByInertia = True
         params.minInertiaRatio = 0.15
-        self._blob_detector = cv2.SimpleBlobDetector_create(params)
+        self._blob_detector = cv2.SimpleBlobDetector.create(params)
 
     def detect_circular_contours_from_canny(self, img: MatLike) -> list[list[float]]:
         """[UNUSED] Detect dots via inner contours of Canny rings.
@@ -335,7 +335,7 @@ class OversimplifiedBlobDetector:
     """Oversimplified blob detector using OpenCV's SimpleBlobDetector. Used as Pass 2 in the dual-pass dot detection pipeline."""
     @staticmethod
     def _base_detect(image_canny: MatLike, is_dark: bool) -> list[list[float]]:
-        params = cv2.SimpleBlobDetector_Params()
+        params = cv2.SimpleBlobDetector.Params()
         
         params.filterByColor = True
         params.blobColor = 0 if is_dark else 255
@@ -361,7 +361,7 @@ class OversimplifiedBlobDetector:
         params.filterByInertia = True
         params.minInertiaRatio = 0.15
 
-        _blob_detector = cv2.SimpleBlobDetector_create(params)
+        _blob_detector = cv2.SimpleBlobDetector.create(params)
         _keypoints =  _blob_detector.detect(image_canny)
         return [[kp.pt[0], kp.pt[1]] for kp in _keypoints]
 

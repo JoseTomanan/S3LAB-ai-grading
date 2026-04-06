@@ -1,17 +1,11 @@
 **/__pycache__/*
 
+TEMP/input/*
+TEMP/output/*
+TEMP/**.py
 
-## ================================
-/TEMP/input/corner_positions/*
-/TEMP/input/quads/**/*
-/TEMP/input/*
-/TEMP/output/**/*.jpg
-/TEMP/**.py
-## ================================
-
-
-/static/images/*
-!/static/images/.gitkeep
+static/images/*
+!static/images/.gitkeep
 
 *.pyc
 

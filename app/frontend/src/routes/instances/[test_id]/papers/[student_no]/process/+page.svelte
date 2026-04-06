@@ -3,7 +3,7 @@
   const { data } = $props();
 
   import { onDestroy } from 'svelte';
-  import { goto, invalidateAll } from '$app/navigation';
+  import { goto, invalidateAll, beforeNavigate } from '$app/navigation';
   import { api, apiForm, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
   import { dataUrlToFile, isNotPngOrJpg } from '$lib/utils.ts';
@@ -20,7 +20,8 @@
   import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
-  import { Button } from '$lib/components/ui/button/index.js';
+  import { Button, buttonVariants } from '$lib/components/CustomButton/index.js';
+  import { cn } from '$lib/utils.ts';
   import { Label } from '$lib/components/ui/label/index.ts';
 	import { Spinner } from '$lib/components/ui/spinner/index.ts';
   import Switch from '$lib/components/LightSwitch.svelte';
@@ -43,6 +44,24 @@
   let formFileRecords: FileRecord[] = $state([]);
   
   let isAskingForValidation: boolean = $state(false);
+  let isCommitmentOngoing = $state(false);
+
+  beforeNavigate((navigation) => {
+    if (!isCommitmentOngoing && (isOperationOngoing || isAskingForValidation)) {
+      if (!confirm('You have an operation in progress. Leaving will discard your work. Continue?')) {
+        navigation.cancel();
+      }
+    }
+  });
+
+  $effect(() => {
+    if (!isCommitmentOngoing && (isOperationOngoing || isAskingForValidation)) {
+      const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  });
+
   let isReviewDialogOpen: boolean = $state(false);
   let supposedScans: (CommitBoxesResponseItem & { editing: boolean; isDiscarded: boolean })[] = $state([]);
 
@@ -97,14 +116,12 @@
       isReviewDialogOpen = true;
     } catch(e) {
       toast.error(e instanceof ApiError
-        ? `${e.status} ${e.statusText}`
+        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
         : "Failed to send raw image for processing:\n" + String(e));
     } finally {
       isOperationOngoing = false;
     }
   }
-
-  let isCommitmentOngoing = $state(false);
 
   const commitPoller = createPoller(async () => {
     const result = await api<{ statuses: { student_no: string, is_done_rendering: boolean }[] }>(
@@ -115,6 +132,7 @@
     );
     if (thisStudent?.is_done_rendering) {
       isCommitmentOngoing = false;
+      isAskingForValidation = false;
       await invalidateAll();
       goto(`/instances/${data.test_id}/papers/${data.student_no}`);
       return true;
@@ -154,9 +172,12 @@
       commitPoller.start();
       return;
     } catch (e) {
-      toast.error(e instanceof ApiError ? `${e.status}: ${e.detail ?? e.statusText}` : "Failed to commit boxes:\n" + e);
+      toast.error(e instanceof ApiError
+        ? `${e.status}: ${e.detail ?? e.statusText}`
+        : "Failed to commit boxes:\n" + e);
     } finally {
-      if (!commitPoller.active) isCommitmentOngoing = false;
+      if (!commitPoller.active)
+        isCommitmentOngoing = false;
     }
   }
 </script>
@@ -173,7 +194,7 @@
   <!-- <div> -->
     <div class="subcontainer flex flex-row gap-2 min-w-0">
       <Label for="sendImage"
-              class="button-outline flex-1 flex items-center gap-x-2 min-w-0">
+              class={cn(buttonVariants({ variant: 'outline' }), 'flex-1 flex justify-start items-center gap-x-1.5 min-w-0')}>
         <IconUpload/>
         <span class="shrink-0 whitespace-nowrap text-sm">
           {formFileRecords.length > 0
@@ -197,7 +218,7 @@
           />
       
       <Dialog.Root bind:open={isCameraDialogOpen}>
-        <Dialog.Trigger class="button-secondary w-1/5 h-auto flex justify-center items-center">
+        <Dialog.Trigger class={cn(buttonVariants({ variant: 'secondary' }), 'w-1/5 flex justify-center items-center')}>
           <IconCamera class="size-6 opacity-80"/>
         </Dialog.Trigger>
         <OpenCamera {isCameraDialogOpen}
@@ -215,6 +236,7 @@
       
       <span class="w-fit flex flex-row gap-x-2 items-center">
         <Switch id="isAlreadyScanned"
+                disabled={isAskingForValidation}
                 bind:checked={paramScannedAlready}
               />
         <Tooltip.Root>
@@ -251,7 +273,6 @@
         </h6>
       
       {:else}
-        <!-- TODO: Add function to disregard individual item (i.e. just evaluate the rest) -->
         <div class="flex flex-row items-center overflow-x-auto gap-x-1.5 pt-1 pb-3
                     -mx-6 px-6 md:-mx-18 md:px-18 "
               style="scrollbar-gutter: stable; scrollbar-color: var(--chart-3) transparent;">
@@ -263,22 +284,18 @@
                     class="aspect-auto block"
                     />
               <span class="absolute top-2 right-2 flex flex-row gap-x-1 opacity-80">
-                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}
-                        class="button-outline">
+                <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, true)}>
                   <IconRotateCW />
-                </button>
-                <button onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}
-                        class="button-outline">
+                </Button>
+                <Button variant="outline" onclick={async () => formFileRecords = await handleRotateCommand(p, formFileRecords, false)}>
                   <IconRotateCCW />
-                </button>
-                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}
-                        class="button-outline">
+                </Button>
+                <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, true)}>
                   <IconFlipHorizontally />
-                </button>
-                <button onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}
-                        class="button-outline">
+                </Button>
+                <Button variant="outline" onclick={async () => formFileRecords = await handleFlipCommand(p, formFileRecords, false)}>
                   <IconFlipVertically />
-                </button>
+                </Button>
               </span>
             </div>
           {/each}
@@ -288,7 +305,7 @@
 
   {:else}
     <Dialog.Root bind:open={isReviewDialogOpen}>
-      <Dialog.Trigger class="button-secondary text-sm {isCommitmentOngoing ? "opacity-50" : ""}"
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'secondary' }), 'text-sm')}
                       disabled={isCommitmentOngoing}>
         Open segmentation results
       </Dialog.Trigger>
@@ -299,6 +316,7 @@
                         />
     </Dialog.Root>
     <h6>
+      <Spinner class={isCommitmentOngoing ? 'inline' : 'hidden'}/>
       {isCommitmentOngoing
         ? "Answers are being evaluated in the background. You may go back to the Papers screen now."
         : "Note that segmentation results are ephemeral, and switching out of this screen will discard them."}

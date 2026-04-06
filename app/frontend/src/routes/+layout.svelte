@@ -17,7 +17,7 @@
 </svelte:head>
 
 
-<Tooltip.Provider delayDuration={100}>
+<Tooltip.Provider>
   <div class="flex justify-center bg-fixed">
     <div class="app">
       {@render children()}

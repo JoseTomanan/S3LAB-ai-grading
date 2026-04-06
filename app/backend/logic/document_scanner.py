@@ -3,7 +3,7 @@ from typing import Callable
 import numpy as np
 import cv2
 from cv2.typing import MatLike
-from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_PAGE_AREA, MAX_ASPECT_RATIO, BORDER_MARGIN_RATIO
+from core.constants import NORMAL_SIZE, MIN_PAGE_AREA, MAX_PAGE_AREA, MAX_ASPECT_RATIO, BORDER_MARGIN_RATIO, BORDER_HARD_MARGIN
 from utils import mapp, get_robust_aspect_ratio, is_valid_quad
 
 
@@ -39,8 +39,13 @@ class DocumentScanner:
 
         candidates = []
         for i, c in enumerate(contours):
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            ## convexHull straightens inward-bowing edges caused by paper curling (one side
+            ## elevated). A curled edge projects as a concave arc; the hull bridges it to a
+            ## straight line, allowing approxPolyDP to collapse it to 4 pts.
+            ## original_area intentionally uses `c` (pre-hull) for the area guard downstream.
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
 
             if debug:
                 debug_img = self._highlight_contours(image_cannied, approximate, c)
@@ -52,6 +57,8 @@ class DocumentScanner:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, image_cannied.shape):
+                        continue
                     is_border = self._is_border_contour(candidate, image_cannied.shape)
                     candidates.append((candidate, is_border, c))
 
@@ -67,11 +74,25 @@ class DocumentScanner:
                         f"{self.debug_dir}/_00_SCANNEDCONTOUR.jpg"
                         )
 
+        ## Fallback chain — each method targets a progressively harder scene type.
+        ## Ordered by technique family: Canny-based first, then Otsu threshold-based.
+
+        ## Use case: low-contrast scenes where the paper blends into the background
+        ## (e.g. cream paper on gray desk). Applies bilateral filter + boosted CLAHE
+        ## + lower Canny thresholds to recover weak edges the main path misses.
+        if image_good_contour is None:
+            image_good_contour = self._fallback_low_contrast_detection(image_original)
+
+        ## Use case: clean white paper on a uniformly dark background. Otsu binarization
+        ## separates the bright paper from the dark scene without needing edge detection.
         if image_good_contour is None:
             image_good_contour = self._fallback_otsu_detection(image_original)
 
+        ## Use case: white paper surrounded by other bright elements (e.g. keyboard labels)
+        ## that border-connect to the paper in the Otsu binary. Morphological opening
+        ## breaks thin connections to border blobs, leaving the paper as the dominant region.
         if image_good_contour is None:
-            image_good_contour = self._fallback_low_contrast_detection(image_original)
+            image_good_contour = self._fallback_white_paper_detection(image_original)
 
         if image_good_contour is None:
             raise ValueError("Could not find document outline.")
@@ -170,7 +191,16 @@ class DocumentScanner:
                 cv2.drawContours(mask, [c], -1, 255, 2)  # type: ignore[call-overload]
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
         iterated_img = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        
+
+        ## Zero out the image border so morphological closing cannot bridge a page edge
+        ## to the frame boundary, preventing the image frame itself from being detected
+        ## as the document outline.
+        m = BORDER_HARD_MARGIN
+        iterated_img[:m, :] = 0
+        iterated_img[-m:, :] = 0
+        iterated_img[:, :m] = 0
+        iterated_img[:, -m:] = 0
+
         return [original_img, iterated_img]
     
     def _warp_from_original(self, screen_contour: MatLike, original: MatLike) -> MatLike:
@@ -216,6 +246,16 @@ class DocumentScanner:
 
         return True
 
+    def _is_hard_border_contour(self, quad: MatLike, image_shape: tuple) -> bool:
+        """Return True if any corner of the quad is within BORDER_HARD_MARGIN pixels of the image edge.
+        Such a contour is literally on the camera frame — the image boundary itself is being
+        treated as a page edge, which is never a valid page outline."""
+        h, w = image_shape[:2]
+        for (x, y) in quad:
+            if x < BORDER_HARD_MARGIN or x > w - BORDER_HARD_MARGIN or y < BORDER_HARD_MARGIN or y > h - BORDER_HARD_MARGIN:
+                return True
+        return False
+
     def _is_border_contour(self, quad: MatLike, image_shape: tuple) -> bool:
         """Return True if 3 or more corners of quad are near the image border.
         Contours hugging the border are likely the scene boundary (e.g. binder edge), not the paper."""
@@ -243,31 +283,11 @@ class DocumentScanner:
         ## All candidates are border contours — fall back to the largest (first)
         return candidates[0][0]
 
-    def _fallback_otsu_detection(self, image_original: MatLike):
-        """Fallback: use Otsu threshold to find white paper on dark background."""
-        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
-        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
-
-        candidates = []
-        for c in contours:
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
-            if len(approximate) == 4:
-                candidate = approximate.reshape(4, 2)
-                original_area = cv2.contourArea(c)
-                if self._is_good_page_contour(candidate, original_area):
-                    is_border = self._is_border_contour(candidate, binary.shape)
-                    candidates.append((candidate, is_border, c))
-
-        return self._pick_best_contour(candidates)
-
     def _fallback_low_contrast_detection(self, image_original: MatLike):
         """Fallback for low-contrast scenes (e.g. cream paper on gray desk).
-        Uses bilateral filter (edge-preserving) + boosted CLAHE + lower Canny thresholds."""
+        Uses bilateral filter (edge-preserving) + boosted CLAHE + lower Canny thresholds.
+        Like the main path, applies convexHull + 5% epsilon before approxPolyDP to handle
+        paper curling and large dog-ear folds."""
         _, enhanced_edges = self._regularize_image(
             image_original,
             canny_thresholds=(25, 75),
@@ -281,13 +301,88 @@ class DocumentScanner:
 
         candidates = []
         for c in contours:
-            perimeter = cv2.arcLength(c, True)
-            approximate = cv2.approxPolyDP(c, 0.04 * perimeter, closed=True)
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
             if len(approximate) == 4:
                 candidate = approximate.reshape(4, 2)
                 original_area = cv2.contourArea(c)
                 if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, enhanced_edges.shape):
+                        continue
                     is_border = self._is_border_contour(candidate, enhanced_edges.shape)
+                    candidates.append((candidate, is_border, c))
+
+        return self._pick_best_contour(candidates)
+
+    def _fallback_otsu_detection(self, image_original: MatLike):
+        """Fallback: use Otsu threshold to find white paper on dark background.
+        Like the main path, applies convexHull + 5% epsilon before approxPolyDP to handle
+        paper curling and large dog-ear folds."""
+        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        m = BORDER_HARD_MARGIN
+        binary[:m, :] = 0
+        binary[-m:, :] = 0
+        binary[:, :m] = 0
+        binary[:, -m:] = 0
+
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        candidates = []
+        for c in contours:
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
+            if len(approximate) == 4:
+                candidate = approximate.reshape(4, 2)
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, binary.shape):
+                        continue
+                    is_border = self._is_border_contour(candidate, binary.shape)
+                    candidates.append((candidate, is_border, c))
+
+        return self._pick_best_contour(candidates)
+
+    def _fallback_white_paper_detection(self, image_original: MatLike):
+        """Fallback for scenes with white paper on a dark background surrounded by other bright elements
+        (e.g. keyboard shortcut labels) that border-connect to the paper in a plain Otsu binary.
+        Morphological opening breaks thin connections to border-hugging white blobs, leaving the
+        paper as the dominant interior white region.
+        Like the main path, applies convexHull + 5% epsilon before approxPolyDP to handle
+        paper curling and large dog-ear folds."""
+        gray = cv2.cvtColor(image_original, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+        opened = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
+        m = BORDER_HARD_MARGIN
+        opened[:m, :] = 0
+        opened[-m:, :] = 0
+        opened[:, :m] = 0
+        opened[:, -m:] = 0
+
+        contours, _ = cv2.findContours(opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+
+        candidates = []
+        for c in contours:
+            hull = cv2.convexHull(c)
+            hull_perimeter = cv2.arcLength(hull, True)
+            approximate = cv2.approxPolyDP(hull, 0.05 * hull_perimeter, closed=True)
+            if len(approximate) == 4:
+                candidate = approximate.reshape(4, 2)
+                original_area = cv2.contourArea(c)
+                if self._is_good_page_contour(candidate, original_area):
+                    if self._is_hard_border_contour(candidate, opened.shape):
+                        continue
+                    is_border = self._is_border_contour(candidate, opened.shape)
                     candidates.append((candidate, is_border, c))
 
         return self._pick_best_contour(candidates)

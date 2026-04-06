@@ -253,7 +253,10 @@ def export_test_results(test_id: str, session: Session = Depends(get_session)):
                 detail=f"Test instance with ID '{test_id}' not found"
                 )
 
-    workbook = populate_spreadsheet_logic(test_id, session)
+    try:
+        workbook = populate_spreadsheet_logic(test_id, session)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     
     # Create DataFrame and Excel file
     output = io.BytesIO()

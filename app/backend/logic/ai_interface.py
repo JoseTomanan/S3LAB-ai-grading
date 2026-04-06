@@ -1,16 +1,13 @@
 import os
+import json
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-import logging
-import json
-logger = logging.getLogger(__name__)
-
 
 
 # ================================
-#region   Class
+#region Class
 class AIAnswerEvaluator:
     def __init__(self):
         load_dotenv()
@@ -20,24 +17,29 @@ class AIAnswerEvaluator:
         self.flash_version = "gemini-2.5-flash"
 
     def get_item_number(self, image_bytes: bytes):
+        """[UNUSED] Read item number without providing label choices."""
         return self._send_image_prompt(image_bytes, FIND_ITEM_NUMBER_PROMPT)
 
     def get_nearest_item_number(self, image_bytes: bytes, label_choices: list[str]):
+        """Choose closest match from a provided list of valid labels."""
         return self._send_image_prompt(image_bytes, FIND_NEAREST_ITEM_NUMBER_PROMPT(label_choices))
     
     def evaluate_expected_answer(self, image_bytes: bytes, question: str, answer: str):
+        """Evaluate if the student's final answer matches the expected final answer, returning YES/NO/UNCLEAR."""
         return self._send_image_prompt(
                         image_bytes,
                         f"{COMPARE_EXPECTED_FINAL_ANSWER_PROMPT}\nQUESTION: {question}\nANSWER: {answer}"
                         )
         
     def evaluate_rubric(self, image_bytes: bytes, question: str, rubric: str):
+        """Evaluate a single rubric item, returning a simple YES/NO/UNCLEAR response."""
         return self._send_image_prompt(
                         image_bytes,
                         f"{ANSWER_RUBRIC_PROMPT}\nQUESTION: {question}\nPROMPT: \"{rubric}\": can this be said about the answer?"
                         )
 
     def evaluate_multi_rubric(self, image_bytes: bytes, question: str, rubrics: list[str]):
+        """Evaluate multiple rubric items at once, returning a string of YES/NO responses corresponding to each rubric."""
         rubrics_formatted = json.dumps(rubrics)
         return self._send_image_prompt(
                         image_bytes,
@@ -45,6 +47,7 @@ class AIAnswerEvaluator:
                         )
     
     def find_four_points(self, image_bytes: bytes) -> list[tuple[int, int]] | None:
+        """[UNUSED] AI-based fallback for corner detection. CV pipeline handles this instead."""
         response = self._send_image_prompt(image_bytes, DETECT_CORNERS_PROMPT)
         
         try:
@@ -53,7 +56,7 @@ class AIAnswerEvaluator:
             return corners
         
         except (json.JSONDecodeError, TypeError):
-            logger.error(f"Failed to parse corner coordinates: {response}")
+            print(f"BACKEND:\tFailed to parse corner coordinates: {response}")
             return None
 
     def _send_image_prompt(self, image_bytes: bytes, prompt: str, is_flash: bool = True) -> str | None:
@@ -65,12 +68,15 @@ class AIAnswerEvaluator:
                             mime_type='image/jpeg'
                             )
 
-        response = self.client.models.generate_content(
-                    model=self.flash_version if is_flash else self.pro_version,
-                    contents=[image_encoded, prompt]
-                    )
-
-        return response.text
+        try:
+            response = self.client.models.generate_content(
+                        model=self.flash_version if is_flash else self.pro_version,
+                        contents=[image_encoded, prompt]
+                        )
+            return response.text
+        except Exception as e:
+            print(f"BACKEND:\tAPI call failed: {e}")
+            return None
 #endregion
 # ================================
     
@@ -111,44 +117,24 @@ Where (0,0) is the top-left of the image. Use integers only.
 Example: [[10, 15], [590, 12], [595, 470], [5, 475]]"""
 
 
-FIND_ITEM_NUMBER_PROMPT: str = """You are identifying an encircled item number in the TOP-LEFT corner of a student's answer sheet.
+FIND_ITEM_NUMBER_PROMPT: str = """Identify the encircled label in the TOP-LEFT corner.
 
-IMPORTANT RULES:
-1. Look ONLY at the upper-left corner region
-2. The number is encircled (has a circle around it)
-3. Common numbers are: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-4. Handwriting may be poor - look carefully at the shape
-5. Do NOT confuse similar numbers (1 vs 7, 2 vs 3, 5 vs 6)
-
-EXAMPLES:
-- A single vertical line = 1
-- A curve with horizontal base = 2
-- Two curves stacked = 3
-- Vertical line with horizontal cross = 4
-
-Generate ONLY the number (e.g., `2`) or `NONE` if no number exists.
-Do not add any explanation or text."""
+Rules:
+1. Return ONLY the label you see, or `UNKNOWN` if illegible
+2. Handwriting may be poor—interpret generously (b may look like 6, a may look like 9, lowercase/uppercase vary)
+3. Examine shape carefully (vertical line=1, curve+base=2, stacked curves=3, cross=4)
+4. NO explanations, NO other text—output the label only"""
 
 
-FIND_NEAREST_ITEM_NUMBER_PROMPT = lambda l : f"""You are identifying an encircled item label in the TOP-LEFT corner of a student's answer sheet.
+FIND_NEAREST_ITEM_NUMBER_PROMPT = lambda l : f"""Identify the encircled label in the TOP-LEFT corner.
 
-IMPORTANT RULES:
-1. Select ONLY from the following choices: {l}
-2. Look ONLY at the upper-left corner region
-3. The label is encircled (has a circle around it)
-4. Common labels are numbers (e.g., 1, 2, 3, 4, 5), or numbers followed by a letter (e.g., 1a, 1b, 1c, 2a, 2b, 2c)
-5. Handwriting may be poor - look carefully at the shape
-6. Do NOT confuse similar numbers (1 vs 7, 2 vs 3, 5 vs 6)
+Valid choices: {l}
 
-EXAMPLES:
-- A single vertical line = 1
-- A curve with horizontal base = 2
-- Two curves stacked = 3
-- Vertical line with horizontal cross = 4
-
-Generate ONLY the label (e.g., `2`); choose the closest label possible depending on the given list.
-Do not add any explanation or text."""
-
-
+Rules:
+1. Return ONLY a value from the list above, or `UNKNOWN` if illegible
+2. ALWAYS match to the closest choice—interpret generously (b may look like 6, a may look like 9, lowercase/uppercase vary)
+3. Prioritize matching over strict reading—if ambiguous, pick the most similar valid choice
+4. Examine shape carefully (vertical line=1, curve+base=2, stacked curves=3, cross=4)
+5. NO explanations, NO other text—output the matched label only"""
 #endregion
 # ================================

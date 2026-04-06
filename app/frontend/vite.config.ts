@@ -4,6 +4,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { enhancedImages } from '@sveltejs/enhanced-img';
 import { defineConfig } from 'vite';
+import { marked } from 'marked';
 
 export default defineConfig({
   server: {
@@ -27,5 +28,14 @@ export default defineConfig({
 		Icons({
 			compiler: 'svelte',
 		}),
+    {
+      name: 'md-loader',
+      transform(src, id) {
+        if (id.endsWith('.md')) {
+          const html = marked.parse(src);
+          return `export default ${JSON.stringify(html)}`;
+        }
+      }
+    },
 	]
 });

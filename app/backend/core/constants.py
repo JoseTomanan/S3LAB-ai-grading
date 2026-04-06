@@ -21,6 +21,7 @@ MAX_AREA = AREA * 0.90
 MIN_PAGE_AREA = AREA * 0.30
 MAX_PAGE_AREA = AREA * 0.95
 BORDER_MARGIN_RATIO = 0.02
+BORDER_HARD_MARGIN = 3  # px — any contour corner within this distance from the image edge is excluded
 
 ## For box_segmenter utility functions (as found in utils)
 ## Values are overridden by document_scanner path

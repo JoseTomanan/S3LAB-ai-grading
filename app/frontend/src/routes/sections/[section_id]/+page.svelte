@@ -6,6 +6,8 @@
 
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
+  import { buttonVariants } from '$lib/components/CustomButton/index.ts';
+  import { cn } from '$lib/utils.ts';
 	import Card from "$lib/components/Card.svelte";
 	import AddNewStudent from './AddNewStudent.svelte';
 	import EditStudent from './EditStudent.svelte';
@@ -16,10 +18,12 @@
 </script>
 
 
-<div class="container">
+<div class="container space-y-3">
+  <h1>Class list</h1>
+  
   <div class="space-y-2">
     <Dialog.Root bind:open={isAddDialogOpen}>
-      <Dialog.Trigger class="button-outline flex flex-row gap-x-1 justify-center items-center w-full font-medium">
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-1 justify-center items-center w-full font-medium')}>
         <IconPlus />
         Add new student
       </Dialog.Trigger>
@@ -29,13 +33,13 @@
 
     {#each students as student}
       <Card class="flex flex-row items-center justify-between">
-        <div class="space-x-1">
-          <b class="font-medium tracking-tighter">{student.student_no}</b>
-          <span>{student.name}</span>
-        </div>
+        <h4 class="name-id-display">
+          <span class="name">{student.name}</span>
+          <span class="student-no">{student.student_no}</span>
+        </h4>
         <!-- TODO: add dialog bindable; close upon operation done. something similar to add new student-->
         <Dialog.Root>
-          <Dialog.Trigger class="button-secondary">
+          <Dialog.Trigger class={buttonVariants({ variant: 'secondary' })}>
             <MdiEdit class="size-4"/>
           </Dialog.Trigger>
           <EditStudent bind:section_id={data.section_id}

@@ -46,15 +46,15 @@ async def process_student_answer_image(
         print(f"BACKEND:\tUnexpected error during image processing: {e}")
         raise HTTPException(status_code=500, detail="Unexpected server error during segmentation")
 
-    # ===== SAVE ALL CANDIDATE BOXES FOR PREVIEW =====
-    print(f"BACKEND:\tProceeding to labeling the boxes.")
-    boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
-    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
-    background_tasks.add_task(_evaluate_answers_background, answer_ids)
+    # ===== DISPATCH LABELING + RECORD CREATION + EVALUATION TO BACKGROUND =====
+    ## _label_save_boxes makes Gemini API calls — running it on the request thread delays the 202 response.
+    ## All three steps are offloaded so the 202 is returned as soon as CV processing finishes.
+    print(f"BACKEND:\tCV processing done. Dispatching label/save/evaluate to background.")
+    background_tasks.add_task(_label_save_and_evaluate_background, processed_list, test_id, student_no)
 
     return ImagePreprocessResponse(
             num_boxes=len(processed_list),
-            boxes=[BoxesItem(**b) for b in boxes_info],
+            boxes=[],
             )
 
 
@@ -130,6 +130,7 @@ async def commit_boxes_endpoint(
     _delete_disregarded_record_imgs(boxes_info_bad)
 
     answer_ids = _create_answer_records(boxes_info_good, test_id, student_no, session)
+    session.commit()
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return Response(status_code=status.HTTP_202_ACCEPTED)
@@ -171,7 +172,11 @@ async def update_answer_segmentation(
                 )
 
     # ===== IMAGE PROCESSING =====
+    if file.size is not None and file.size > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
     contents = await file.read()
+    if len(contents) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
     BOX_SEGMENTER = BoxSegmenter()
     img_bytes_crop = crop_image(contents, points_data)
     img_bytes = BOX_SEGMENTER.beautify_scan(img_bytes_crop)
@@ -186,7 +191,15 @@ async def update_answer_segmentation(
 
     # ===== COMMIT RECORDS SYNCHRONOUSLY, EVALUATE IN BACKGROUND =====
     boxes_info = [{"image_directory": image_dir, "item_number": test_item.label}]
-    answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+    try:
+        answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+        session.commit()
+    except Exception:
+        try:
+            filepath.unlink(missing_ok=True)
+        except Exception:
+            pass
+        raise
     background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return UpdateSegmentationResponse(image_directory=image_dir)
@@ -297,7 +310,11 @@ def get_ai_evaluation_results(test_id: str, session: Session = Depends(get_sessi
                 respectiveItem = session.exec(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
-                assert isinstance(respectiveItem, TestItem)
+                if not isinstance(respectiveItem, TestItem):
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"TestItem with ID {answer.item_id} not found"
+                    )
 
                 ai_evaluations.append(AIEvaluationItem(
                             item_id=answer.item_id,
@@ -371,8 +388,12 @@ def get_ai_evaluation_results_per_student(
             respectiveItem = session.exec(
                                     select(TestItem).where(TestItem.item_id == answer.item_id)
                                     ).first()
-            assert isinstance(respectiveItem, TestItem)
-            
+            if not isinstance(respectiveItem, TestItem):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"TestItem with ID {answer.item_id} not found"
+                )
+
             scores = calculate_score(
                                 respectiveItem.expected_answer_rubric_questions,
                                 answer.ai_evaluation
@@ -527,9 +548,13 @@ async def _validate_files(files: List[UploadFile]) -> list[bytes]:
             raise HTTPException(status_code=400, detail="No file provided")
         if not IMAGE_MODIFIER.validate_file_extension(file.filename):
             raise HTTPException(status_code=415, detail=f"Unsupported file format. Got: {file.filename}")
+        if file.size is not None and file.size > 20 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
         contents = await file.read()
         if len(contents) == 0:
             raise HTTPException(status_code=400, detail="Uploaded file is empty")
+        if len(contents) > 20 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="File too large (max 20 MB)")
         contents_list.append(contents)
     return contents_list
 
@@ -684,7 +709,7 @@ def _create_answer_records(
                     is_done_rendering=False
                     )
         session.add(paper)
-        session.commit()
+        session.flush()
         session.refresh(paper)
 
     answer_ids = []
@@ -696,7 +721,7 @@ def _create_answer_records(
                             TestItem.test_id == test_id,
                             TestItem.label == item_number,
                         )).first()
-        if item is None:
+        if item is None or item.item_id is None:
             print(f"BACKEND:\tSkipping box with label '{item_number}' — TestItem not found in DB.")
             continue
         item_id = item.item_id
@@ -721,11 +746,27 @@ def _create_answer_records(
             answer.ai_evaluation = ""
             answer.is_done_rendering = False
             answer.detected_item_number = item_number
-        session.commit()
+        session.flush()
         session.refresh(answer)
         answer_ids.append(answer.answer_id)
 
     return answer_ids
+
+
+def _label_save_and_evaluate_background(processed_list: list[bytes], test_id: str, student_no: str):
+    """Label boxes, create answer records, and run AI evaluation — entirely off the request thread."""
+    session = get_direct_session()
+    try:
+        boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
+        answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+        session.commit()
+    except Exception as e:
+        print(f"BACKEND:\tBackground label/save failed: {e}")
+        session.rollback()
+        return
+    finally:
+        session.close()
+    _evaluate_answers_background(answer_ids)
 
 
 def _evaluate_answers_background(answer_ids: list[int]):
@@ -743,6 +784,7 @@ def _evaluate_answers_background(answer_ids: list[int]):
                 answer = session.get(StudentAnswer, answer_id)
                 if answer is None:
                     continue
+                # image_directory is always stored as "/api/static/images/<filename>" (4 parts) — index 3 is the filename
                 actual_image_path = f"static/images/{answer.image_directory.split('/')[3]}"
                 image_bytes = DOCUMENT_SCANNER.load_image(actual_image_path)
                 test_item = session.get(TestItem, answer.item_id)
