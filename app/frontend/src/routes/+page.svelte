@@ -12,7 +12,7 @@
 
 
 <div class="container w-full h-[93dvh] flex flex-col items-center justify-center gap-y-10">
-  <span class="pt-1"></span>
+  <span></span>
   
   <Sheet.Root>
     <Sheet.Trigger class={cn(buttonVariants({ variant: 'floating' }), 'absolute top-6 left-4')}>
@@ -58,5 +58,3 @@
     </div>
   </div>
 </div>
-
-<h6 class="font-light opacity-50">Made for CS199 by Tomanan and Tuan, with love.</h6>
