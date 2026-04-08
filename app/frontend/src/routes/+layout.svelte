@@ -5,26 +5,28 @@
 	import { navigating, page } from '$app/state';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
+	import { isApiHealthy } from '$lib/utils/api.ts';
 	import { Toaster } from 'svelte-5-french-toast';
 
   let { children } = $props();
 
   const isRouteHome = $derived(page.route.id! === "/");
-  
-  // Placeholders; TODO: Replace with actual health check logic
+
   let isOnline = $state(false);
   let isHealthCheckOngoing = $state(true);
-  
-  // Connection status simulation
-  // Simulate connection with 300ms delay
-  // TODO: Replace with actual health check logic
-  $effect(() => {
-    const timer = setTimeout(() => {
-      isHealthCheckOngoing = false;
-      isOnline = true;
-    }, 2000);
+
+  $effect.pre(() => {
+    let cancelled = false;
     
-    return () => clearTimeout(timer);
+    (async () => {
+      const isHealthy = await isApiHealthy();
+      if (!cancelled) {
+        isOnline = isHealthy;
+        isHealthCheckOngoing = false;
+      }
+    })();
+    
+    return () => { cancelled = true };
   });
 </script>
 
@@ -42,19 +44,19 @@
       {@render children()}
     </div>
     
-    <div class="fixed bottom-1.75 right-2 z-50">
+    <div class="fixed bottom-1.75 right-2 z-1">
       {#if navigating.to}
         <Spinner class="size-12 text-accent"/>
       {/if}
     </div>
 
-    <div class="fixed bottom-1.75 right-2 z-51 inline-flex gap-x-0.5 items-center">
+    <div class="fixed bottom-1.75 right-2 z-2 inline-flex gap-x-0.5 items-center">
       {#if isRouteHome || !isOnline}
         <span class="text-xs opacity-40">
           {isOnline
             ? 'Online'
             : (isHealthCheckOngoing
-              ? 'Connecting to backend...'
+              ? 'Connecting...'
               : 'Offline')}
         </span>
       {/if}
