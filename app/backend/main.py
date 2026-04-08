@@ -43,7 +43,7 @@ app.include_router(sections.router, prefix="/api/sections", tags=["Sections"])
 
 
 #region Endpoints
-@app.get("/health")
+@app.get("/api/health")
 def health_check():
     """Health check."""
     return {"status": "ok"}
