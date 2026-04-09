@@ -5,27 +5,23 @@
 	import { navigating, page } from '$app/state';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.ts';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
-	import { isApiHealthy } from '$lib/utils/api.ts';
+	import { getApiStatus, type ApiStatus } from '$lib/utils/api.ts';
 	import { Toaster } from 'svelte-5-french-toast';
 
   let { children } = $props();
 
   const isRouteHome = $derived(page.route.id! === "/");
 
-  let isOnline = $state(false);
-  let isHealthCheckOngoing = $state(true);
+  let apiStatus = $state<ApiStatus | 'checking'>('checking');
 
   $effect.pre(() => {
     let cancelled = false;
-    
+
     (async () => {
-      const isHealthy = await isApiHealthy();
-      if (!cancelled) {
-        isOnline = isHealthy;
-        isHealthCheckOngoing = false;
-      }
+      const status = await getApiStatus();
+      if (!cancelled) apiStatus = status;
     })();
-    
+
     return () => { cancelled = true };
   });
 </script>
@@ -51,18 +47,26 @@
     </div>
 
     <div class="fixed bottom-1.75 right-2 z-2 inline-flex gap-x-0.5 items-center">
-      {#if isRouteHome || !isOnline}
+      {#if isRouteHome || apiStatus !== 'online'}
         <span class="text-xs opacity-40">
-          {isOnline
-            ? 'Online'
-            : (isHealthCheckOngoing
-              ? 'Connecting...'
-              : 'Offline')}
+          {#if apiStatus === 'checking'}
+            Connecting...
+          {:else if apiStatus === 'online'}
+            Online
+          {:else if apiStatus === 'no-ai-key'}
+            No AI key
+          {:else}
+            Offline
+          {/if}
         </span>
       {/if}
-      <!-- TODO: Add non-hardcoded values -->
       <IconAPIStatus class="opacity-80
-                {isOnline ? '*:text-green-600' : '*:text-gray-600'}"/>
+                {apiStatus === 'online'
+                  ? '*:text-green-600'
+                  : apiStatus === 'checking'
+                    ? '*:text-gray-600'
+                    : '*:text-destructive'}
+              "/>
     </div>
   </div>
 </Tooltip.Provider>
