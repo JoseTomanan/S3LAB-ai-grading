@@ -45,7 +45,9 @@ app.include_router(sections.router, prefix="/api/sections", tags=["Sections"])
 #region Endpoints
 @app.get("/api/health")
 def health_check():
-    """Health check."""
+    """Health check. Returns 200 only when the Gemini API key is valid."""
+    if not AI_ANSWER_EVALUATOR.validate_key():
+        raise HTTPException(status_code=503, detail="Gemini API key invalid or unreachable")
     return {"status": "ok"}
 
 

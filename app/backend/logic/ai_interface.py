@@ -59,6 +59,14 @@ class AIAnswerEvaluator:
             print(f"BACKEND:\tFailed to parse corner coordinates: {response}")
             return None
 
+    def validate_key(self) -> bool:
+        """Check that the API key is valid by fetching model metadata (no tokens consumed)."""
+        try:
+            self.client.models.get(model=self.flash_version)
+            return True
+        except Exception:
+            return False
+
     def _send_image_prompt(self, image_bytes: bytes, prompt: str, is_flash: bool = True) -> str | None:
         """
         Send a chat completion request with the image input
