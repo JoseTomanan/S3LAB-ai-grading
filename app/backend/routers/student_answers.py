@@ -46,11 +46,23 @@ async def process_student_answer_image(
         print(f"BACKEND:\tUnexpected error during image processing: {e}")
         raise HTTPException(status_code=500, detail="Unexpected server error during segmentation")
 
-    # ===== DISPATCH LABELING + RECORD CREATION + EVALUATION TO BACKGROUND =====
-    ## _label_save_boxes makes Gemini API calls — running it on the request thread delays the 202 response.
-    ## All three steps are offloaded so the 202 is returned as soon as CV processing finishes.
-    print(f"BACKEND:\tCV processing done. Dispatching label/save/evaluate to background.")
-    background_tasks.add_task(_label_save_and_evaluate_background, processed_list, test_id, student_no)
+    # ===== LABEL + SAVE ON REQUEST THREAD, EVALUATE IN BACKGROUND =====
+    ## _label_save_boxes makes Gemini API calls (box labeling) — this delays the 202 response, but
+    ## ensures StudentAnswer records exist in the DB before the response reaches the frontend.
+    ## Without this, invalidateAll() on the frontend fires before has_any_answer is true, causing
+    ## the papers list poller to never start (spinner never shows).
+    print(f"BACKEND:\tCV processing done. Labeling and saving boxes now.")
+    try:
+        boxes_info = _label_save_boxes(test_id, student_no, processed_list, session)
+        answer_ids = _create_answer_records(boxes_info, test_id, student_no, session)
+        session.commit()
+    except Exception as e:
+        print(f"BACKEND:\tLabel/save failed: {e}")
+        session.rollback()
+        raise HTTPException(status_code=500, detail="Unexpected server error during labeling")
+
+    print(f"BACKEND:\tLabel/save done. Dispatching AI evaluation to background.")
+    background_tasks.add_task(_evaluate_answers_background, answer_ids)
 
     return ImagePreprocessResponse(
             num_boxes=len(processed_list),
