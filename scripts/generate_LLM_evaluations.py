@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 from dotenv import load_dotenv
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT   = Path(__file__).resolve().parent.parent
 BACKEND_DIR = REPO_ROOT / "app" / "backend"
 sys.path.insert(0, str(BACKEND_DIR))
 
@@ -26,7 +26,7 @@ from logic.ai_interface import AIAnswerEvaluator, ANSWER_RUBRIC_PROMPT  # pyrigh
 from logic.box_segmenter import BoxSegmenter  # pyright: ignore[reportMissingImports] E402
 
 
-CSV_PATH    = REPO_ROOT / "dataset" / "DrawEduMath_QA.csv"
+CSV_PATH    = REPO_ROOT / "dataset" / "DrawEduMath_SimplifiedQA.csv"
 IMAGES_DIR  = REPO_ROOT / "dataset" / "DrawEduMath" / "Claude_Postprocessing"
 DEFAULT_OUT = REPO_ROOT / "dataset" / "DrawEduMath" / "LLM_evaluations_QA_Teacher.jsonl"
 
@@ -44,8 +44,13 @@ def load_done(output_path: Path) -> set[int]:
 
 
 def build_prompt(questions: list[str]) -> str:
-    joined = "; ".join(q.strip() for q in questions)
-    return f"{ANSWER_RUBRIC_PROMPT}\nQUESTION:\nPROMPT: {joined}"
+    numbered = "\n".join(f"{i+1}. {q.strip()}" for i, q in enumerate(questions))
+    return (
+        f"{ANSWER_RUBRIC_PROMPT}\n"
+        "Return your answers as a JSON array of strings, one element per question, "
+        "in the same order as the questions below.\n"
+        f"QUESTION:\nPROMPT:\n{numbered}"
+    )
 
 
 def main() -> None:
@@ -100,8 +105,18 @@ def main() -> None:
                 completed += 1
                 continue
 
-            questions    = [item["question"].strip() for item in qa_items]
-            ground_truth = [item["answer"].strip()   for item in qa_items]
+            yn_items = [
+                (item["question"].strip(), item["answer"].strip())
+                for item in qa_items
+                if item["answer"].strip() in ("YES", "NO")
+            ]
+            if not yn_items:
+                print(f"[{completed+1}/{total}] row={row_num}: SKIP — no YES/NO questions")
+                completed += 1
+                continue
+
+            questions    = [q for q, _ in yn_items]
+            ground_truth = [a for _, a in yn_items]
 
             prompt = build_prompt(questions)
 
@@ -112,29 +127,42 @@ def main() -> None:
                 print("\n--- Ground truth ---")
                 for q, a in zip(questions, ground_truth):
                     print(f"  Q: {q}")
-                    print(f"  A: {a[:120]}")
+                    print(f"  A: {a}")
                 return
 
             image_bytes = box_segmenter.beautify_scan(image_path.read_bytes()) # pyright: ignore[reportOptionalMemberAccess] E0602
-            raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt) # pyright: ignore[reportOptionalMemberAccess] E0602
+            raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt, response_schema=list[str]) # pyright: ignore[reportOptionalMemberAccess] E0602
 
             if raw_response is None:
                 model_answers: list[str] = []
                 parse_ok = False
             else:
-                model_answers = [a.strip() for a in raw_response.split(";")]
-                parse_ok      = len(model_answers) == len(questions)
+                try:
+                    parsed = json.loads(raw_response)
+                    if isinstance(parsed, list) and all(isinstance(x, str) for x in parsed):
+                        model_answers = [a.strip().upper() for a in parsed]
+                    else:
+                        model_answers = [str(x).strip().upper() for x in parsed] if isinstance(parsed, list) else []
+                except json.JSONDecodeError:
+                    model_answers = []
+                parse_ok = len(model_answers) == len(questions)
+
+            comparisons = (
+                [m == g for m, g in zip(model_answers, ground_truth)]
+                if parse_ok else []
+            )
 
             record = {
-                "row_num":           row_num,
-                "problem_id":        int(row["Problem ID"]),
-                "image_name":        row["Image Name"],
-                "local_image":       local_image,
-                "questions":         questions,
+                "row_num":              row_num,
+                "problem_id":           int(row["Problem ID"]),
+                "image_name":           row["Image Name"],
+                "local_image":          local_image,
+                "questions":            questions,
                 "ground_truth_answers": ground_truth,
-                "model_answers":     model_answers,
-                "raw_response":      raw_response,
-                "parse_ok":          parse_ok,
+                "model_answers":        model_answers,
+                "comparisons":          comparisons,
+                "raw_response":         raw_response,
+                "parse_ok":             parse_ok,
             }
 
             assert out_file is not None
