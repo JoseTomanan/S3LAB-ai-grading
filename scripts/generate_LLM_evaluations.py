@@ -22,7 +22,8 @@ sys.path.insert(0, str(BACKEND_DIR))
 
 load_dotenv(BACKEND_DIR / ".env")
 
-from logic.ai_interface import AIAnswerEvaluator, ANSWER_RUBRIC_PROMPT  # noqa: E402
+from logic.ai_interface import AIAnswerEvaluator, ANSWER_RUBRIC_PROMPT  # pyright: ignore[reportMissingImports] E402
+from logic.box_segmenter import BoxSegmenter  # pyright: ignore[reportMissingImports] E402
 
 
 CSV_PATH    = REPO_ROOT / "dataset" / "DrawEduMath_QA.csv"
@@ -64,7 +65,8 @@ def main() -> None:
     if done_rows:
         print(f"Resuming — {len(done_rows)} rows already done.")
 
-    evaluator = None if args.dry_run else AIAnswerEvaluator()
+    evaluator     = None if args.dry_run else AIAnswerEvaluator() # pyright: ignore[reportUnboundVariable] E0602
+    box_segmenter = None if args.dry_run else BoxSegmenter()
     out_file  = None if args.dry_run else open(args.output, "a", encoding="utf-8")
 
     try:
@@ -105,7 +107,7 @@ def main() -> None:
 
             if args.dry_run:
                 print(f"=== Dry run: row {row_num} — {local_image} ===")
-                print(f"Image: {image_path}")
+                print(f"Image: {image_path} (would apply beautify_scan enhancement)")
                 print(f"\n--- Prompt ({len(questions)} questions) ---\n{prompt}")
                 print("\n--- Ground truth ---")
                 for q, a in zip(questions, ground_truth):
@@ -113,8 +115,8 @@ def main() -> None:
                     print(f"  A: {a[:120]}")
                 return
 
-            image_bytes = image_path.read_bytes()
-            raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt)
+            image_bytes = box_segmenter.beautify_scan(image_path.read_bytes()) # pyright: ignore[reportOptionalMemberAccess] E0602
+            raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt) # pyright: ignore[reportOptionalMemberAccess] E0602
 
             if raw_response is None:
                 model_answers: list[str] = []
@@ -135,6 +137,7 @@ def main() -> None:
                 "parse_ok":          parse_ok,
             }
 
+            assert out_file is not None
             out_file.write(json.dumps(record, ensure_ascii=False) + "\n")
             out_file.flush()
 
