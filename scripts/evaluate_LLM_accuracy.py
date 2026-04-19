@@ -58,7 +58,8 @@ def load_ground_truth(gt_csv: Path) -> dict[int, list[dict]]:
     for idx, row in df.iterrows():
         row_num = int(idx) + 1 # type: ignore
         try:
-            out[row_num] = json.loads(row["QA Teacher"])
+            items = json.loads(row["QA Teacher"])
+            out[row_num] = [item for item in items if item["answer"].strip() in ("YES", "NO")]
         except (json.JSONDecodeError, KeyError):
             out[row_num] = []
     return out
