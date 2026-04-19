@@ -67,7 +67,13 @@ class AIAnswerEvaluator:
         except Exception:
             return False
 
-    def _send_image_prompt(self, image_bytes: bytes, prompt: str, is_flash: bool = True) -> str | None:
+    def _send_image_prompt(
+        self,
+        image_bytes: bytes,
+        prompt: str,
+        is_flash: bool = True,
+        response_schema: object | None = None,
+    ) -> str | None:
         """
         Send a chat completion request with the image input
         """
@@ -76,10 +82,18 @@ class AIAnswerEvaluator:
                             mime_type='image/jpeg'
                             )
 
+        config = None
+        if response_schema is not None:
+            config = types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=response_schema,
+            )
+
         try:
             response = self.client.models.generate_content(
                         model=self.flash_version if is_flash else self.pro_version,
-                        contents=[image_encoded, prompt]
+                        contents=[image_encoded, prompt],
+                        config=config,
                         )
             return response.text
         except Exception as e:
