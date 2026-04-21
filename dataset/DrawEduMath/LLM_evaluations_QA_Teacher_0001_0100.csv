@@ -1,16 +1,16 @@
 Metric,Value
 Number of tests,194
-Number correct,130
-Accuracy rate,67.01%
+Number correct,138
+Accuracy rate,71.13%
 
 row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,correct
-1,1065658,04255753-0b36-495d-87eb-1e3cd0c97634.jpeg,0,Did students label the number line correctly?,NO,YES,False
+1,1065658,04255753-0b36-495d-87eb-1e3cd0c97634.jpeg,0,Did students label the number line correctly?,YES,YES,True
 1,1065658,04255753-0b36-495d-87eb-1e3cd0c97634.jpeg,1,Did students use arrows to indicate the direction of movement on the number line?,YES,YES,True
-1,1065658,04255753-0b36-495d-87eb-1e3cd0c97634.jpeg,2,Is the final answer clearly marked on the number line?,NO,YES,False
+1,1065658,04255753-0b36-495d-87eb-1e3cd0c97634.jpeg,2,Is the final answer clearly marked on the number line?,YES,YES,True
 1,1065658,04255753-0b36-495d-87eb-1e3cd0c97634.jpeg,3,Does the student label the magnitude of each arrow?,NO,NO,True
 2,1065658,0a70eabf-c272-4d6b-a271-f44470be10dc.jpeg,0,Did students label the number line correctly?,YES,YES,True
 2,1065658,0a70eabf-c272-4d6b-a271-f44470be10dc.jpeg,1,Did students use arrows to indicate the direction of movement on the number line?,YES,YES,True
-2,1065658,0a70eabf-c272-4d6b-a271-f44470be10dc.jpeg,2,Is the final answer clearly marked on the number line?,NO,YES,False
+2,1065658,0a70eabf-c272-4d6b-a271-f44470be10dc.jpeg,2,Is the final answer clearly marked on the number line?,YES,YES,True
 2,1065658,0a70eabf-c272-4d6b-a271-f44470be10dc.jpeg,3,Did the student label the magnitude of each arrow on the number line diagram?,NO,NO,True
 2,1065658,0a70eabf-c272-4d6b-a271-f44470be10dc.jpeg,4,Did the student use straight arrows or curved arrows to represent the sum of the integers on the number line diagram?,STRAIGHT ARROWS,NO,False
 3,1065658,2292f546-86ba-4150-9888-eb4ea29067bf.jpeg,0,Did students label the number line correctly?,YES,YES,True
@@ -46,11 +46,11 @@ row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,co
 11,1065658,d3e07e18-11c1-4f8e-8cfa-32ef8a9a560e.jpeg,0,Did students label the number line correctly?,YES,YES,True
 11,1065658,d3e07e18-11c1-4f8e-8cfa-32ef8a9a560e.jpeg,1,Did students use arrows to indicate the direction of movement on the number line?,NO,YES,False
 11,1065658,d3e07e18-11c1-4f8e-8cfa-32ef8a9a560e.jpeg,2,Is the final answer clearly marked on the number line?,NO,YES,False
-12,1065658,e33295ea-2b5c-4952-a53f-1fc2f288f4a7.jpeg,0,Did students label the number line correctly?,YES,YES,True
+12,1065658,e33295ea-2b5c-4952-a53f-1fc2f288f4a7.jpeg,0,Did students label the number line correctly?,NO,YES,False
 12,1065658,e33295ea-2b5c-4952-a53f-1fc2f288f4a7.jpeg,1,Did students use arrows to indicate the direction of movement on the number line?,NO,NO,True
 12,1065658,e33295ea-2b5c-4952-a53f-1fc2f288f4a7.jpeg,2,Is the final answer clearly marked on the number line?,YES,YES,True
-13,1065658,f0738571-7208-4c44-9083-11f5535cf3b4.jpeg,0,Did students label the number line correctly?,NO,YES,False
-13,1065658,f0738571-7208-4c44-9083-11f5535cf3b4.jpeg,1,Did students use arrows to indicate the direction of movement on the number line?,YES,NO,False
+13,1065658,f0738571-7208-4c44-9083-11f5535cf3b4.jpeg,0,Did students label the number line correctly?,YES,YES,True
+13,1065658,f0738571-7208-4c44-9083-11f5535cf3b4.jpeg,1,Did students use arrows to indicate the direction of movement on the number line?,NO,NO,True
 13,1065658,f0738571-7208-4c44-9083-11f5535cf3b4.jpeg,2,Is the final answer clearly marked on the number line?,NO,YES,False
 14,1066525,0cbf496f-4429-4a5b-ad41-8737be8dc29c.jpeg,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
 15,1066525,26de330a-1430-4592-bd6f-4511ba1c49f1.png,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
@@ -61,7 +61,7 @@ row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,co
 20,1066525,7cced3ee-6560-4c04-8af6-c2885c15fb93.jpeg,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
 21,1066525,7d69e46a-a244-41bc-9d4b-7c26620d74d5.png,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
 22,1066525,8ba1e3c4-07dc-421c-bb33-e7cd7c6bc6b1.png,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
-23,1066525,98aa4971-50a1-41ee-9df8-7b1884eeff7d.png,0,Did the student correctly differentiate between the legs and the hypoteneuse?,NOT DISCERNIBLE,YES,False
+23,1066525,98aa4971-50a1-41ee-9df8-7b1884eeff7d.png,0,Did the student correctly differentiate between the legs and the hypoteneuse?,NO,YES,False
 24,1066525,b94bc548-da8c-420c-a259-da442e1c417f.jpeg,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
 25,1066525,ccef0c51-10f3-4af9-b2cf-b6b10769479d.jpeg,0,Did the student correctly differentiate between the legs and the hypoteneuse?,YES,YES,True
 26,1066525,dd8d3e19-7538-483d-a977-5324ebdcf1b2.jpeg,0,Did the student correctly differentiate between the legs and the hypoteneuse?,NO,YES,False
@@ -72,81 +72,81 @@ row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,co
 31,1066769,1d71180e-3fce-4c8e-842c-a141421b72fa.jpeg,0,Does the formula the student used match the number line model?,YES,YES,True
 32,1066769,25d5fdf4-5007-4d7c-b503-bd8ac829e607.jpeg,0,Does the formula the student used match the number line model?,NO,YES,False
 33,1066769,3535abe9-ba97-4d29-af84-6a612ca25539.jpeg,0,Does the formula the student used match the number line model?,YES,YES,True
-34,1066769,55937e96-da9b-443c-8f1e-4b6e1035b29b.jpeg,0,Does the formula the student used match the number line model?,YES,YES,True
-35,1066769,801d70da-3db7-47ca-a6c9-6571d8be4e73.png,0,Does the formula the student used match the number line model?,NO FORMULA IS VISIBLE IN THE IMAGE.,YES,False
+34,1066769,55937e96-da9b-443c-8f1e-4b6e1035b29b.jpeg,0,Does the formula the student used match the number line model?,NO,YES,False
+35,1066769,801d70da-3db7-47ca-a6c9-6571d8be4e73.png,0,Does the formula the student used match the number line model?,NO,YES,False
 36,1066769,9b548fbb-5bf8-45f9-a24c-a114e01b1eb7.jpeg,0,Does the formula the student used match the number line model?,YES,YES,True
-37,1066769,b73fb06f-c997-4594-9f88-91a165ee69ca.png,0,Does the formula the student used match the number line model?,NO,NO,True
+37,1066769,b73fb06f-c997-4594-9f88-91a165ee69ca.png,0,Does the formula the student used match the number line model?,,NO,False
 38,1066769,d45e81b2-2271-49aa-a314-7b2d0d7a072d.jpeg,0,Does the formula the student used match the number line model?,NO,NO,True
-39,1066769,e91ba2f8-f9df-49a3-9f72-2c5fa2f2d9e0.jpeg,0,Does the formula the student used match the number line model?,NO,NO,True
+39,1066769,e91ba2f8-f9df-49a3-9f72-2c5fa2f2d9e0.jpeg,0,Does the formula the student used match the number line model?,YES,NO,False
 40,1066769,edd4f9f0-1e97-46c2-958d-f9c19e3eb0d4.jpeg,0,Does the formula the student used match the number line model?,YES,NO,False
 41,1066769,ee507113-578f-40c2-a721-f3b7fe6358d0.jpeg,0,Does the formula the student used match the number line model?,YES,NO,False
 42,1066816,00a97a80-2884-438b-a34d-adacbbf2058f.png,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
-42,1066816,00a97a80-2884-438b-a34d-adacbbf2058f.png,1,Did the student draw a horizontal or vertical number line diagram?,NO,HORIZONTAL,False
+42,1066816,00a97a80-2884-438b-a34d-adacbbf2058f.png,1,Did the student draw a horizontal number line diagram?,NO,YES,False
 42,1066816,00a97a80-2884-438b-a34d-adacbbf2058f.png,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
 43,1066816,0826de7b-5f90-471d-8951-e5044117341c.png,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
-43,1066816,0826de7b-5f90-471d-8951-e5044117341c.png,1,Did the student draw a horizontal or vertical number line diagram?,NONE,HORIZONTAL,False
+43,1066816,0826de7b-5f90-471d-8951-e5044117341c.png,1,Did the student draw a horizontal number line diagram?,NO,YES,False
 43,1066816,0826de7b-5f90-471d-8951-e5044117341c.png,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
 44,1066816,20d2b8f9-cd36-442a-8e70-045138787f90.jpeg,0,Did the student correctly represent the water level using negative numbers?,YES,NO,False
-44,1066816,20d2b8f9-cd36-442a-8e70-045138787f90.jpeg,1,Did the student draw a horizontal or vertical number line diagram?,HORIZONTAL,HORIZONTAL,True
+44,1066816,20d2b8f9-cd36-442a-8e70-045138787f90.jpeg,1,Did the student draw a horizontal number line diagram?,YES,YES,True
 44,1066816,20d2b8f9-cd36-442a-8e70-045138787f90.jpeg,2,Did the student label 0 as the normal water level on the diagram?,YES,NO,False
 45,1066816,67a02367-5fb8-461b-bb60-3fc053cc9ab9.jpeg,0,Did the student correctly represent the water level using negative numbers?,YES,YES,True
-45,1066816,67a02367-5fb8-461b-bb60-3fc053cc9ab9.jpeg,1,Did the student draw a horizontal or vertical number line diagram?,HORIZONTAL,HORIZONTAL,True
-45,1066816,67a02367-5fb8-461b-bb60-3fc053cc9ab9.jpeg,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
+45,1066816,67a02367-5fb8-461b-bb60-3fc053cc9ab9.jpeg,1,Did the student draw a horizontal number line diagram?,YES,YES,True
+45,1066816,67a02367-5fb8-461b-bb60-3fc053cc9ab9.jpeg,2,Did the student label 0 as the normal water level on the diagram?,YES,NO,False
 46,1066816,80207e6c-ce8f-4779-ae8a-4f0f7cfc936a.jpeg,0,Did the student correctly represent the water level using negative numbers?,YES,NO,False
-46,1066816,80207e6c-ce8f-4779-ae8a-4f0f7cfc936a.jpeg,1,Did the student draw a horizontal or vertical number line diagram?,HORIZONTAL,HORIZONTAL,True
+46,1066816,80207e6c-ce8f-4779-ae8a-4f0f7cfc936a.jpeg,1,Did the student draw a horizontal number line diagram?,YES,YES,True
 46,1066816,80207e6c-ce8f-4779-ae8a-4f0f7cfc936a.jpeg,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
 47,1066816,8b74a953-5262-4e18-8a31-b4039aafa266.jpeg,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
-47,1066816,8b74a953-5262-4e18-8a31-b4039aafa266.jpeg,1,Did the student draw a horizontal or vertical number line diagram?,HORIZONTAL,HORIZONTAL,True
+47,1066816,8b74a953-5262-4e18-8a31-b4039aafa266.jpeg,1,Did the student draw a horizontal number line diagram?,YES,YES,True
 47,1066816,8b74a953-5262-4e18-8a31-b4039aafa266.jpeg,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
-48,1066816,a12e8fec-22b0-4622-8fa5-2b0a6c595383.jpeg,0,Did the student correctly represent the water level using negative numbers?,YES,NO,False
-48,1066816,a12e8fec-22b0-4622-8fa5-2b0a6c595383.jpeg,1,Did the student draw a horizontal or vertical number line diagram?,HORIZONTAL,HORIZONTAL,True
-48,1066816,a12e8fec-22b0-4622-8fa5-2b0a6c595383.jpeg,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
-49,1066816,b91af8c8-4ab3-4807-b3e9-80189d0e3f9a.png,0,Did the student correctly represent the water level using negative numbers?,NOT DISCERNIBLE FROM IMAGE,NO,False
-49,1066816,b91af8c8-4ab3-4807-b3e9-80189d0e3f9a.png,1,Did the student draw a horizontal or vertical number line diagram?,NOT DISCERNIBLE FROM IMAGE,HORIZONTAL,False
-49,1066816,b91af8c8-4ab3-4807-b3e9-80189d0e3f9a.png,2,Did the student label 0 as the normal water level on the diagram?,NOT DISCERNIBLE FROM IMAGE,YES,False
+48,1066816,a12e8fec-22b0-4622-8fa5-2b0a6c595383.jpeg,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
+48,1066816,a12e8fec-22b0-4622-8fa5-2b0a6c595383.jpeg,1,Did the student draw a horizontal number line diagram?,YES,YES,True
+48,1066816,a12e8fec-22b0-4622-8fa5-2b0a6c595383.jpeg,2,Did the student label 0 as the normal water level on the diagram?,YES,NO,False
+49,1066816,b91af8c8-4ab3-4807-b3e9-80189d0e3f9a.png,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
+49,1066816,b91af8c8-4ab3-4807-b3e9-80189d0e3f9a.png,1,Did the student draw a horizontal number line diagram?,NO,YES,False
+49,1066816,b91af8c8-4ab3-4807-b3e9-80189d0e3f9a.png,2,Did the student label 0 as the normal water level on the diagram?,NO,YES,False
 50,1066816,c1e61987-501a-4bcb-9eda-02bcf269c704.png,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
-50,1066816,c1e61987-501a-4bcb-9eda-02bcf269c704.png,1,Did the student draw a horizontal or vertical number line diagram?,NO DIAGRAM,VERTICAL,False
+50,1066816,c1e61987-501a-4bcb-9eda-02bcf269c704.png,1,Did the student draw a vertical number line diagram?,NO,YES,False
 50,1066816,c1e61987-501a-4bcb-9eda-02bcf269c704.png,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
 51,1066816,e45adf34-47d1-4e6d-a8c9-ac58ac0faccb.png,0,Did the student correctly represent the water level using negative numbers?,NO,NO,True
-51,1066816,e45adf34-47d1-4e6d-a8c9-ac58ac0faccb.png,1,Did the student draw a horizontal or vertical number line diagram?,NO DIAGRAM,HORIZONTAL,False
+51,1066816,e45adf34-47d1-4e6d-a8c9-ac58ac0faccb.png,1,Did the student draw a horizontal number line diagram?,NO,YES,False
 51,1066816,e45adf34-47d1-4e6d-a8c9-ac58ac0faccb.png,2,Did the student label 0 as the normal water level on the diagram?,NO,NO,True
-52,1066819,161be5c1-1cb7-4811-9ded-b142b54df59a.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-52,1066819,161be5c1-1cb7-4811-9ded-b142b54df59a.jpeg,1,Does the student's answer match the number line diagram?,NO EXPLICIT ANSWER VISIBLE,NO,False
-53,1066819,2bd3b27b-c990-45b1-b3e0-7855da385a6b.png,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
+52,1066819,161be5c1-1cb7-4811-9ded-b142b54df59a.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+52,1066819,161be5c1-1cb7-4811-9ded-b142b54df59a.jpeg,1,Does the student's answer match the number line diagram?,YES,NO,False
+53,1066819,2bd3b27b-c990-45b1-b3e0-7855da385a6b.png,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
 53,1066819,2bd3b27b-c990-45b1-b3e0-7855da385a6b.png,1,Does the student's answer match the number line diagram?,NO,NO,True
-54,1066819,2f42939e-6f26-4954-9ba0-40dda0aeeab6.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,VERTICAL,VERTICAL,True
+54,1066819,2f42939e-6f26-4954-9ba0-40dda0aeeab6.jpeg,0,Did the student use a vertical number line to model this problem?,YES,YES,True
 54,1066819,2f42939e-6f26-4954-9ba0-40dda0aeeab6.jpeg,1,Does the student's answer match the number line diagram?,YES,YES,True
-55,1066819,377c0fd4-a0e0-4091-8a14-42f407ac05fb.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
+55,1066819,377c0fd4-a0e0-4091-8a14-42f407ac05fb.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
 55,1066819,377c0fd4-a0e0-4091-8a14-42f407ac05fb.jpeg,1,Does the student's answer match the number line diagram?,YES,NO,False
-56,1066819,3f7125d1-a084-48a6-b606-3edb36837c71.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
+56,1066819,3f7125d1-a084-48a6-b606-3edb36837c71.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
 56,1066819,3f7125d1-a084-48a6-b606-3edb36837c71.jpeg,1,Does the student's answer match the number line diagram?,YES,YES,True
-57,1066819,483bde13-b412-4858-9b9d-ef244c13ca98.png,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-57,1066819,483bde13-b412-4858-9b9d-ef244c13ca98.png,1,Does the student's answer match the number line diagram?,YES,YES,True
-58,1066819,5bf4a6b3-601a-4578-9171-34c3b21c9fcf.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-58,1066819,5bf4a6b3-601a-4578-9171-34c3b21c9fcf.jpeg,1,Does the student's answer match the number line diagram?,NO,YES,False
-59,1066819,5f37bea7-209b-49d9-b7cc-06d2abd39124.png,0,Did the student use a horizontal or vertical number line to model this problem?,NOT VISIBLE,HORIZONTAL,False
-59,1066819,5f37bea7-209b-49d9-b7cc-06d2abd39124.png,1,Does the student's answer match the number line diagram?,NOT VISIBLE,NO,False
-60,1066819,61bccabc-1500-40e2-ab76-c69ded4bcc16.png,0,Did the student use a horizontal or vertical number line to model this problem?,,VERTICAL,False
-60,1066819,61bccabc-1500-40e2-ab76-c69ded4bcc16.png,1,Does the student's answer match the number line diagram?,,YES,False
-61,1066819,7438b611-d296-47e6-8507-e898337dce11.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,VERTICAL,VERTICAL,True
-61,1066819,7438b611-d296-47e6-8507-e898337dce11.jpeg,1,Does the student's answer match the number line diagram?,NO DISTINCT ANSWER PROVIDED,YES,False
-62,1066819,93a06158-065e-43bc-a572-d889e24417ca.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-62,1066819,93a06158-065e-43bc-a572-d889e24417ca.jpeg,1,Does the student's answer match the number line diagram?,YES,NO,False
-63,1066819,b4539436-38b4-4dda-87e5-aacc28e40130.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,NO,False
-63,1066819,b4539436-38b4-4dda-87e5-aacc28e40130.jpeg,1,Does the student's answer match the number line diagram?,YES,NO,False
-64,1066819,deae1247-d706-4178-89f3-1f4e71060359.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,VERTICAL,VERTICAL,True
+57,1066819,483bde13-b412-4858-9b9d-ef244c13ca98.png,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+57,1066819,483bde13-b412-4858-9b9d-ef244c13ca98.png,1,Does the student's answer match the number line diagram?,NO,YES,False
+58,1066819,5bf4a6b3-601a-4578-9171-34c3b21c9fcf.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+58,1066819,5bf4a6b3-601a-4578-9171-34c3b21c9fcf.jpeg,1,Does the student's answer match the number line diagram?,YES,YES,True
+59,1066819,5f37bea7-209b-49d9-b7cc-06d2abd39124.png,0,Did the student use a horizontal number line to model this problem?,NO,YES,False
+59,1066819,5f37bea7-209b-49d9-b7cc-06d2abd39124.png,1,Does the student's answer match the number line diagram?,NO,NO,True
+60,1066819,61bccabc-1500-40e2-ab76-c69ded4bcc16.png,0,Did the student use a vertical number line to model this problem?,NO,YES,False
+60,1066819,61bccabc-1500-40e2-ab76-c69ded4bcc16.png,1,Does the student's answer match the number line diagram?,NO,YES,False
+61,1066819,7438b611-d296-47e6-8507-e898337dce11.jpeg,0,Did the student use a vertical number line to model this problem?,YES,YES,True
+61,1066819,7438b611-d296-47e6-8507-e898337dce11.jpeg,1,Does the student's answer match the number line diagram?,NO,YES,False
+62,1066819,93a06158-065e-43bc-a572-d889e24417ca.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+62,1066819,93a06158-065e-43bc-a572-d889e24417ca.jpeg,1,Does the student's answer match the number line diagram?,NO,NO,True
+63,1066819,b4539436-38b4-4dda-87e5-aacc28e40130.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,NO,NO,True
+63,1066819,b4539436-38b4-4dda-87e5-aacc28e40130.jpeg,1,Does the student's answer match the number line diagram?,NO,NO,True
+64,1066819,deae1247-d706-4178-89f3-1f4e71060359.jpeg,0,Did the student use a vertical number line to model this problem?,YES,YES,True
 64,1066819,deae1247-d706-4178-89f3-1f4e71060359.jpeg,1,Does the student's answer match the number line diagram?,YES,YES,True
-65,1066820,27f288e8-6b14-4d9f-b4cd-9db39543b882.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-66,1066820,2ff9f5b0-db48-46c2-afff-3041e517cfd6.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
+65,1066820,27f288e8-6b14-4d9f-b4cd-9db39543b882.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+66,1066820,2ff9f5b0-db48-46c2-afff-3041e517cfd6.jpeg,0,Did the student use a horizontal number line to model this problem?,NO,YES,False
 67,1066820,5568fa07-b294-40d7-9662-2906c21b28cb.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,VERTICAL,NO,False
-68,1066820,6dc3dd0c-0460-4539-ad08-528a028afd93.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-69,1066820,88402054-bb18-4e68-8f95-ad9f9de33b74.png,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
+68,1066820,6dc3dd0c-0460-4539-ad08-528a028afd93.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+69,1066820,88402054-bb18-4e68-8f95-ad9f9de33b74.png,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
 70,1066820,9dbd56d5-c0ac-4119-82d3-5432ca4d73cd.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,NO,NO,True
-71,1066820,a0bec6da-7c2d-47b6-98e1-09d6f9ceaae3.png,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-72,1066820,a8f69f2b-95df-4720-b0d0-11990b06d2d7.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-73,1066820,a9352065-a427-46e3-a043-78c7c8e652fc.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-74,1066820,c34286af-81b2-49ea-ae00-52c0d71312b5.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
-75,1066820,d93ef0ca-ed8a-4438-96cb-ba3fbf57a78a.jpeg,0,Did the student use a horizontal or vertical number line to model this problem?,HORIZONTAL,HORIZONTAL,True
+71,1066820,a0bec6da-7c2d-47b6-98e1-09d6f9ceaae3.png,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+72,1066820,a8f69f2b-95df-4720-b0d0-11990b06d2d7.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+73,1066820,a9352065-a427-46e3-a043-78c7c8e652fc.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+74,1066820,c34286af-81b2-49ea-ae00-52c0d71312b5.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
+75,1066820,d93ef0ca-ed8a-4438-96cb-ba3fbf57a78a.jpeg,0,Did the student use a horizontal number line to model this problem?,YES,YES,True
 76,1130632,10baecbd-c964-428c-9227-d9ac862f6aed.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,NO,False
 76,1130632,10baecbd-c964-428c-9227-d9ac862f6aed.jpeg,1,Did the student correctly draw two rows in their array?,YES,YES,True
 76,1130632,10baecbd-c964-428c-9227-d9ac862f6aed.jpeg,2,Did the student draw a rectangular array?,YES,YES,True
@@ -165,10 +165,10 @@ row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,co
 81,1130632,3d491565-f8c8-48bf-91cd-10c0c737f514.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,YES,True
 81,1130632,3d491565-f8c8-48bf-91cd-10c0c737f514.jpeg,1,Did the student correctly draw two rows in their array?,YES,YES,True
 81,1130632,3d491565-f8c8-48bf-91cd-10c0c737f514.jpeg,2,Did the student draw a rectangular array?,YES,YES,True
-82,1130632,3e7c051f-ae26-4de3-9f1a-78c02bd9f503.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,NO,False
+82,1130632,3e7c051f-ae26-4de3-9f1a-78c02bd9f503.jpeg,0,Did the student correctly draw five dots in each row in their array?,NO,NO,True
 82,1130632,3e7c051f-ae26-4de3-9f1a-78c02bd9f503.jpeg,1,Did the student correctly draw two rows in their array?,YES,YES,True
 82,1130632,3e7c051f-ae26-4de3-9f1a-78c02bd9f503.jpeg,2,Did the student draw a rectangular array?,NO,YES,False
-83,1130632,99c36717-4145-4c85-a496-609e3a106bfb.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,NO,False
+83,1130632,99c36717-4145-4c85-a496-609e3a106bfb.jpeg,0,Did the student correctly draw five dots in each row in their array?,NO,NO,True
 83,1130632,99c36717-4145-4c85-a496-609e3a106bfb.jpeg,1,Did the student correctly draw two rows in their array?,YES,YES,True
 83,1130632,99c36717-4145-4c85-a496-609e3a106bfb.jpeg,2,Did the student draw a rectangular array?,YES,YES,True
 84,1130632,a25d30d1-e9ac-4f95-8df8-44fc223797eb.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,NO,False
@@ -177,8 +177,8 @@ row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,co
 85,1130632,cd32ba0e-92b0-4206-8886-2fef8f956ed3.jpeg,0,Did the student correctly draw five dots in each row in their array?,NO,NO,True
 85,1130632,cd32ba0e-92b0-4206-8886-2fef8f956ed3.jpeg,1,Did the student correctly draw two rows in their array?,YES,NO,False
 85,1130632,cd32ba0e-92b0-4206-8886-2fef8f956ed3.jpeg,2,Did the student draw a rectangular array?,NO,NO,True
-86,1130632,d1fc81ea-fb41-4a15-b82b-9e28f731c0f0.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,NO,False
-86,1130632,d1fc81ea-fb41-4a15-b82b-9e28f731c0f0.jpeg,1,Did the student correctly draw two rows in their array?,YES,NO,False
+86,1130632,d1fc81ea-fb41-4a15-b82b-9e28f731c0f0.jpeg,0,Did the student correctly draw five dots in each row in their array?,NO,NO,True
+86,1130632,d1fc81ea-fb41-4a15-b82b-9e28f731c0f0.jpeg,1,Did the student correctly draw two rows in their array?,NO,NO,True
 86,1130632,d1fc81ea-fb41-4a15-b82b-9e28f731c0f0.jpeg,2,Did the student draw a rectangular array?,YES,YES,True
 87,1130632,dff7d4b6-02ef-40bf-8c91-290da61e8e42.jpeg,0,Did the student correctly draw five dots in each row in their array?,YES,YES,True
 87,1130632,dff7d4b6-02ef-40bf-8c91-290da61e8e42.jpeg,1,Did the student correctly draw two rows in their array?,YES,YES,True
