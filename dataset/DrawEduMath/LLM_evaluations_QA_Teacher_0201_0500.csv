@@ -1,0 +1,608 @@
+Metric,Value
+Number of tests,602
+Number correct,428
+Accuracy rate,71.10%
+
+row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,correct
+201,1212658,44e01132-c056-4daf-9515-8fb135484085.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",YES,YES,True
+202,1212658,72c3e47f-92be-4b7a-a16a-bc31243de3a9.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",NO,NO,True
+203,1212658,8ca3eeff-7958-4a9d-8483-29968081aa7b.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",NO,NO,True
+204,1212658,cb3a8cce-6b5e-4a70-844f-aa61aecbdaca.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",YES,YES,True
+204,1212658,cb3a8cce-6b5e-4a70-844f-aa61aecbdaca.jpeg,1,Does this diagram demonstrate 3/6 is equivilent to 1/2?,YES,NO,False
+205,1212658,d1f1427d-90da-443d-b1a9-9b73a7a9e20b.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",NO,YES,False
+206,1212658,d99cd3f6-15ae-40a3-85d6-cc9f72780fea.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",YES,NO,False
+207,1212658,dc20426f-702c-46d6-bda8-e6a71491d2bb.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",YES,YES,True
+208,1212658,e527addd-1027-4f80-a09b-706a234b05b0.jpeg,0,"Did the student correctly show that 1, 2/2, and 6/6 are all at the same place on the number line?",NO,NO,True
+209,1213327,0de3e3e7-bcd3-437f-a82b-e3b2f1fbdec9.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,YES,True
+210,1213327,402ce961-881c-4203-847a-6401af023bf5.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,NO,NO,True
+211,1213327,4914f7f0-4105-460f-9d7b-93ecb22adc72.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,NO,False
+212,1213327,4aee2a7e-8159-406c-8e7b-2efc0727911a.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,NO,NO,True
+213,1213327,532be0e6-7f5d-49f6-93a6-2cf12ac05372.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,YES,True
+214,1213327,75e2dbde-a983-4bf1-939f-5492a39d136c.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,YES,True
+215,1213327,799228a7-d598-4934-86bf-cc3bc863d78e.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,NO,NO,True
+216,1213327,99a4f942-95ec-46c6-a79c-99a11cb1d576.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,NO,NO,True
+217,1213327,d07bd749-3ca1-441a-8655-000b06450ce7.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,YES,True
+218,1213327,db348988-a377-4f38-a81b-14a8725a94fc.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,YES,True
+219,1213327,df7cb580-d3cb-4e1a-bb90-18ef02a3b86c.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,YES,NO,False
+220,1213327,ebaef314-df98-4186-9ac4-ead6de54b86b.jpeg,0,Did the student correctly represent that 2 hundreds are equivalent to 20 tens?,NO,NO,True
+221,1213640,04a96d9a-07f4-432a-b06b-8d8289dd4a3c.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+221,1213640,04a96d9a-07f4-432a-b06b-8d8289dd4a3c.jpeg,1,Did the student correctly label the value 4/6 on the number line?,NO,NO,True
+221,1213640,04a96d9a-07f4-432a-b06b-8d8289dd4a3c.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,NO,NO,True
+222,1213640,548e414e-0054-4386-b4b3-3fde5933b36c.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,NO,False
+222,1213640,548e414e-0054-4386-b4b3-3fde5933b36c.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,YES,True
+222,1213640,548e414e-0054-4386-b4b3-3fde5933b36c.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,YES,True
+223,1213640,992c6bcf-166f-4503-be0a-c3c4a837346e.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,NO,NO,True
+223,1213640,992c6bcf-166f-4503-be0a-c3c4a837346e.jpeg,1,Did the student correctly label the value 4/6 on the number line?,NO,NO,True
+223,1213640,992c6bcf-166f-4503-be0a-c3c4a837346e.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,NO,NO,True
+224,1213640,9c48b8a6-ded3-47d7-ab3c-524e80b101f0.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+224,1213640,9c48b8a6-ded3-47d7-ab3c-524e80b101f0.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,NO,False
+224,1213640,9c48b8a6-ded3-47d7-ab3c-524e80b101f0.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,NO,False
+225,1213640,af3c3547-3d5e-4f9d-8525-f1280b809abb.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+225,1213640,af3c3547-3d5e-4f9d-8525-f1280b809abb.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,YES,True
+225,1213640,af3c3547-3d5e-4f9d-8525-f1280b809abb.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,YES,True
+226,1213640,bac47510-7de1-4f9d-b9dc-995f9d5c5589.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+226,1213640,bac47510-7de1-4f9d-b9dc-995f9d5c5589.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,YES,True
+226,1213640,bac47510-7de1-4f9d-b9dc-995f9d5c5589.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,YES,True
+227,1213640,cbea8053-e587-4cfd-988d-e2652cef7ebd.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,NO,False
+227,1213640,cbea8053-e587-4cfd-988d-e2652cef7ebd.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,NO,False
+227,1213640,cbea8053-e587-4cfd-988d-e2652cef7ebd.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,NO,False
+228,1213640,e0bd2e3b-85c6-4b98-ae70-660d6a529592.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,NO,False
+228,1213640,e0bd2e3b-85c6-4b98-ae70-660d6a529592.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,NO,False
+228,1213640,e0bd2e3b-85c6-4b98-ae70-660d6a529592.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,NO,False
+229,1213640,e85507a3-5eaa-472e-b53c-42b8f45b8f68.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+229,1213640,e85507a3-5eaa-472e-b53c-42b8f45b8f68.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,YES,True
+229,1213640,e85507a3-5eaa-472e-b53c-42b8f45b8f68.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,YES,True
+230,1213640,e8727fac-bff7-405d-99a8-5fc3a5f2552d.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+230,1213640,e8727fac-bff7-405d-99a8-5fc3a5f2552d.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,YES,True
+230,1213640,e8727fac-bff7-405d-99a8-5fc3a5f2552d.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,YES,True
+231,1213640,f8717f8a-7358-43f8-a65a-98f634b78a7b.jpeg,0,Did the student correctly identify that 2/3 is equivalent to 4/6 in their explanation?,YES,YES,True
+231,1213640,f8717f8a-7358-43f8-a65a-98f634b78a7b.jpeg,1,Did the student correctly label the value 4/6 on the number line?,YES,YES,True
+231,1213640,f8717f8a-7358-43f8-a65a-98f634b78a7b.jpeg,2,Did the student place 2/3 and 4/6 at the same place on the number line?,YES,YES,True
+232,1213643,09148984-0814-4f08-bc6a-aeecfcc90403.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+233,1213643,11e40909-0483-45d7-b084-f922e164d925.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+234,1213643,340ce907-eec8-4f60-a3c4-c1717feaf895.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,NO,False
+235,1213643,432805bc-761b-4b5b-9954-8e3e6fc9d002.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,NO,False
+236,1213643,5bb0f529-4ce7-4ba9-b726-5e8650051e2b.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+237,1213643,735946ad-34e8-4f06-a897-11e4d7d2fc97.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+238,1213643,74c2e022-6240-4715-ac67-f3f6e20251ca.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+239,1213643,76dc3154-e3ef-40ad-94b1-7a1faae1cc51.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+240,1213643,7e2198cd-5540-4a4c-96be-73a01d4aca87.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+241,1213643,9142071f-567e-4484-8f34-2a2bf6a73e5d.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+242,1213643,9fb2e22b-d8cc-4705-b047-0d812bf16dc7.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+243,1213643,b2bee459-0880-46c5-948a-4df2a7ef8dc8.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+244,1213643,dbacd54f-553f-4349-a55c-14285a4587b4.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+245,1213643,e8744139-d393-47fd-9763-69dbe485a055.jpeg,0,Did the student correctly state that there are four copies of 1/4 in one whole?,YES,YES,True
+246,1220849,17d95adb-d1df-4da2-8320-3e4f451bef63.jpeg,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,YES,YES,True
+246,1220849,17d95adb-d1df-4da2-8320-3e4f451bef63.jpeg,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+247,1220849,7e7a5a00-0ee7-4c8c-992b-1644d4dcbbc3.jpeg,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,YES,YES,True
+247,1220849,7e7a5a00-0ee7-4c8c-992b-1644d4dcbbc3.jpeg,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+248,1220849,9907b993-3f7a-4fd0-bbb9-e92e28bce19a.jpeg,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,YES,YES,True
+248,1220849,9907b993-3f7a-4fd0-bbb9-e92e28bce19a.jpeg,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,YES,False
+249,1220849,bd431df1-5f54-4297-8ac6-9c2595844101.png,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,NO,YES,False
+249,1220849,bd431df1-5f54-4297-8ac6-9c2595844101.png,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+250,1220849,d40b4063-9837-4d19-bebb-7a854edb99d4.jpeg,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,YES,YES,True
+250,1220849,d40b4063-9837-4d19-bebb-7a854edb99d4.jpeg,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+251,1220849,df6dab81-d0fd-40d9-823d-4728b86defde.png,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,NO,YES,False
+251,1220849,df6dab81-d0fd-40d9-823d-4728b86defde.png,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+252,1220849,e85104bc-f1d3-4c90-8b2b-d2c4f621d502.jpeg,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,YES,YES,True
+252,1220849,e85104bc-f1d3-4c90-8b2b-d2c4f621d502.jpeg,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+253,1220849,f8c187c0-9840-4838-9f3c-e76a46c82a06.jpeg,0,Did the student correctly place -2 1/2 to the right of -3 on the number line?,YES,YES,True
+253,1220849,f8c187c0-9840-4838-9f3c-e76a46c82a06.jpeg,1,"Did the student state that because -2 1/2 is to the right of -3 on the number line, -2 1/2 is the greater value?",NO,NO,True
+254,1221395,21602f72-9a79-4aaa-896c-f34f9d846131.jpeg,0,Are the numbers plotted correctly given the scale?,NO,NO,True
+255,1221395,2b564f4b-7a18-422a-a4f8-7a9acc5a2414.jpeg,0,Are the numbers plotted correctly given the scale?,NO,YES,False
+256,1221395,31f093f0-70e7-420c-bcfd-d3cdeace48af.png,0,Are the numbers plotted correctly given the scale?,NO,YES,False
+257,1221395,34461f7f-6e36-46d3-9292-7b9ed27e30d6.jpeg,0,Are the numbers plotted correctly given the scale?,YES,NO,False
+258,1221395,5125456f-eb82-43f0-9077-63e74727bf8b.jpeg,0,Are the numbers plotted correctly given the scale?,YES,NO,False
+259,1221395,7f81b63c-1879-4a0b-96a7-73f51df533f4.jpeg,0,Are the numbers plotted correctly given the scale?,YES,NO,False
+260,1221395,8cf498bb-0ccf-46d9-b2b6-dc96e8648ae9.jpeg,0,Are the numbers plotted correctly given the scale?,NO,YES,False
+261,1221395,95058d9e-8062-4eeb-86ac-9524dbfc34d1.jpeg,0,Are the numbers plotted correctly given the scale?,NO,YES,False
+262,1221395,ed3397a3-c8a3-4422-bef0-6647ded6ef8f.jpeg,0,Are the numbers plotted correctly given the scale?,YES,YES,True
+263,1222298,0c9cc50f-fb86-4cc9-8649-9ae80c078b10.jpeg,0,Did the student correctly represent the picnic area as 0?,NO,YES,False
+264,1222298,61c27dd6-e665-4b2b-a8f2-f5cb13659743.jpeg,0,Did the student correctly represent the picnic area as 0?,NO,YES,False
+265,1222298,74d63c25-f46b-4155-bb08-d6f3f332fadf.jpeg,0,Did the student correctly represent the picnic area as 0?,NO,YES,False
+266,1222298,8c39b75f-c6fa-4b80-a53c-cb8c995c4c2e.jpeg,0,Did the student correctly represent the picnic area as 0?,YES,YES,True
+267,1222298,bbcb69c8-96db-49bc-911b-29011e3992e8.jpeg,0,Did the student correctly represent the picnic area as 0?,NO,YES,False
+268,1222298,d5fff899-4efa-4eb9-88ae-22f3cf557bd6.jpeg,0,Did the student correctly represent the picnic area as 0?,YES,YES,True
+269,1222298,d74df408-b767-4742-a893-16e81aa90852.jpeg,0,Did the student correctly represent the picnic area as 0?,YES,YES,True
+270,1222298,e151bd4b-51b1-4b10-b820-9f89d5885f79.jpeg,0,Did the student correctly represent the picnic area as 0?,YES,YES,True
+271,1222298,e92b2601-6d07-4df3-bd44-60c96323480b.jpeg,0,Did the student correctly represent the picnic area as 0?,YES,YES,True
+272,1222537,380b0a62-cd36-423f-b6b4-f2c54d27e8a0.jpeg,0,Did the student correctly round 283 to 300 and 416 to 400?,NO,NO,True
+272,1222537,380b0a62-cd36-423f-b6b4-f2c54d27e8a0.jpeg,1,Is the student's estimate of the product reasonable?,YES,NO,False
+273,1222537,3dce09a8-c171-4cec-be41-549a505e41dd.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,NO,True
+273,1222537,3dce09a8-c171-4cec-be41-549a505e41dd.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+273,1222537,3dce09a8-c171-4cec-be41-549a505e41dd.jpeg,2,Is the student's estimate of the product reasonable?,NO,NO,True
+274,1222537,3ecd77aa-cd03-4ca2-bf87-f555b7c3bc78.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+274,1222537,3ecd77aa-cd03-4ca2-bf87-f555b7c3bc78.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+274,1222537,3ecd77aa-cd03-4ca2-bf87-f555b7c3bc78.jpeg,2,Is the student's estimate of the product reasonable?,YES,NO,False
+275,1222537,57e28287-bc17-4798-937d-a12fdd358efa.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+275,1222537,57e28287-bc17-4798-937d-a12fdd358efa.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+275,1222537,57e28287-bc17-4798-937d-a12fdd358efa.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+276,1222537,5cdf44ab-4fc1-4889-8f05-536a403ea59a.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+276,1222537,5cdf44ab-4fc1-4889-8f05-536a403ea59a.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,NO,YES,False
+276,1222537,5cdf44ab-4fc1-4889-8f05-536a403ea59a.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+277,1222537,7d9ea07e-42eb-4e2e-9eb9-9b3bc4a6189d.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+277,1222537,7d9ea07e-42eb-4e2e-9eb9-9b3bc4a6189d.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+277,1222537,7d9ea07e-42eb-4e2e-9eb9-9b3bc4a6189d.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+278,1222537,8a0f02a5-dd55-49b6-96c1-eaeed45682c0.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+278,1222537,8a0f02a5-dd55-49b6-96c1-eaeed45682c0.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+278,1222537,8a0f02a5-dd55-49b6-96c1-eaeed45682c0.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+279,1222537,93ee2d1e-c233-4ef9-8c96-7efb92f34c13.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,NO,True
+279,1222537,93ee2d1e-c233-4ef9-8c96-7efb92f34c13.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+279,1222537,93ee2d1e-c233-4ef9-8c96-7efb92f34c13.jpeg,2,Is the student's estimate of the product reasonable?,NO,NO,True
+280,1222537,98c58ee6-215d-44b9-aaa8-e763451b5624.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,NO,True
+280,1222537,98c58ee6-215d-44b9-aaa8-e763451b5624.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,N/A,YES,False
+280,1222537,98c58ee6-215d-44b9-aaa8-e763451b5624.jpeg,2,Is the student's estimate of the product reasonable?,NO,NO,True
+281,1222537,ab62544b-82c1-45af-a3dc-bf6a4ae37104.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+281,1222537,ab62544b-82c1-45af-a3dc-bf6a4ae37104.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+281,1222537,ab62544b-82c1-45af-a3dc-bf6a4ae37104.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+282,1222537,c8e4c6fc-3d9d-472b-a3f0-5bfffac73683.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+282,1222537,c8e4c6fc-3d9d-472b-a3f0-5bfffac73683.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+282,1222537,c8e4c6fc-3d9d-472b-a3f0-5bfffac73683.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+283,1222537,f678392b-38ef-4b40-9818-3d37691d1c5a.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,NO,True
+283,1222537,f678392b-38ef-4b40-9818-3d37691d1c5a.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+283,1222537,f678392b-38ef-4b40-9818-3d37691d1c5a.jpeg,2,Is the student's estimate of the product reasonable?,NO,YES,False
+284,1222537,f80406ad-2229-4cec-b015-9efeadfeda27.jpeg,0,"Did the student correctly estiamte the product as 1,200?",NO,YES,False
+284,1222537,f80406ad-2229-4cec-b015-9efeadfeda27.jpeg,1,Did the student correctly round 283 to 300 and 416 to 400?,YES,YES,True
+284,1222537,f80406ad-2229-4cec-b015-9efeadfeda27.jpeg,2,Is the student's estimate of the product reasonable?,YES,YES,True
+285,1222625,035d602d-5f4e-47cc-9d29-0807d9d5f6aa.jpeg,0,Did the student estimate the product within reason?,YES,NO,False
+285,1222625,035d602d-5f4e-47cc-9d29-0807d9d5f6aa.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,YES,True
+285,1222625,035d602d-5f4e-47cc-9d29-0807d9d5f6aa.jpeg,2,Did the student solve using an area model?,YES,YES,True
+285,1222625,035d602d-5f4e-47cc-9d29-0807d9d5f6aa.jpeg,3,Did the student solve using the standard algorithm?,NO,NO,True
+285,1222625,035d602d-5f4e-47cc-9d29-0807d9d5f6aa.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+285,1222625,035d602d-5f4e-47cc-9d29-0807d9d5f6aa.jpeg,5,Is the student's answer reasoanble?,YES,NO,False
+286,1222625,1eabc7a8-0f42-4ade-b057-00eb926ae3a8.jpeg,0,Did the student estimate the product within reason?,YES,NO,False
+286,1222625,1eabc7a8-0f42-4ade-b057-00eb926ae3a8.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,YES,True
+286,1222625,1eabc7a8-0f42-4ade-b057-00eb926ae3a8.jpeg,2,Did the student solve using an area model?,YES,NO,False
+286,1222625,1eabc7a8-0f42-4ade-b057-00eb926ae3a8.jpeg,3,Did the student solve using the standard algorithm?,YES,NO,False
+286,1222625,1eabc7a8-0f42-4ade-b057-00eb926ae3a8.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+286,1222625,1eabc7a8-0f42-4ade-b057-00eb926ae3a8.jpeg,5,Is the student's answer reasoanble?,YES,YES,True
+287,1222625,31f5bea0-ad01-432f-a0e7-dcc9fcaddfe9.jpeg,0,Did the student estimate the product within reason?,NO,NO,True
+287,1222625,31f5bea0-ad01-432f-a0e7-dcc9fcaddfe9.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,YES,True
+287,1222625,31f5bea0-ad01-432f-a0e7-dcc9fcaddfe9.jpeg,2,Did the student solve using an area model?,NO,NO,True
+287,1222625,31f5bea0-ad01-432f-a0e7-dcc9fcaddfe9.jpeg,3,Did the student solve using the standard algorithm?,YES,YES,True
+287,1222625,31f5bea0-ad01-432f-a0e7-dcc9fcaddfe9.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+287,1222625,31f5bea0-ad01-432f-a0e7-dcc9fcaddfe9.jpeg,5,Is the student's answer reasoanble?,YES,NO,False
+288,1222625,4cf5dbf1-1ffc-4a70-bbd8-6f240b15acfb.jpeg,0,Did the student estimate the product within reason?,YES,NO,False
+288,1222625,4cf5dbf1-1ffc-4a70-bbd8-6f240b15acfb.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,YES,True
+288,1222625,4cf5dbf1-1ffc-4a70-bbd8-6f240b15acfb.jpeg,2,Did the student solve using an area model?,NO,NO,True
+288,1222625,4cf5dbf1-1ffc-4a70-bbd8-6f240b15acfb.jpeg,3,Did the student solve using the standard algorithm?,YES,YES,True
+288,1222625,4cf5dbf1-1ffc-4a70-bbd8-6f240b15acfb.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+288,1222625,4cf5dbf1-1ffc-4a70-bbd8-6f240b15acfb.jpeg,5,Is the student's answer reasoanble?,YES,YES,True
+289,1222625,50a06820-4a2d-4ede-8159-8e8046dbbf6f.jpeg,0,Did the student estimate the product within reason?,YES,NO,False
+289,1222625,50a06820-4a2d-4ede-8159-8e8046dbbf6f.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,NO,False
+289,1222625,50a06820-4a2d-4ede-8159-8e8046dbbf6f.jpeg,2,Did the student solve using an area model?,NO,NO,True
+289,1222625,50a06820-4a2d-4ede-8159-8e8046dbbf6f.jpeg,3,Did the student solve using the standard algorithm?,YES,YES,True
+289,1222625,50a06820-4a2d-4ede-8159-8e8046dbbf6f.jpeg,4,Is the product expressed in standard form?,YES,NO,False
+289,1222625,50a06820-4a2d-4ede-8159-8e8046dbbf6f.jpeg,5,Is the student's answer reasoanble?,YES,NO,False
+290,1222625,766717e5-6ecf-4c77-9775-84a81d302400.jpeg,0,Did the student estimate the product within reason?,NO,NO,True
+290,1222625,766717e5-6ecf-4c77-9775-84a81d302400.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,NO,NO,True
+290,1222625,766717e5-6ecf-4c77-9775-84a81d302400.jpeg,2,Did the student solve using an area model?,NO,NO,True
+290,1222625,766717e5-6ecf-4c77-9775-84a81d302400.jpeg,3,Did the student solve using the standard algorithm?,YES,YES,True
+290,1222625,766717e5-6ecf-4c77-9775-84a81d302400.jpeg,4,Is the product expressed in standard form?,YES,NO,False
+290,1222625,766717e5-6ecf-4c77-9775-84a81d302400.jpeg,5,Is the student's answer reasoanble?,NO,NO,True
+291,1222625,94acabec-4e37-49c5-b7d8-163da67820c1.jpeg,0,Did the student estimate the product within reason?,NO,NO,True
+291,1222625,94acabec-4e37-49c5-b7d8-163da67820c1.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,NO,NO,True
+291,1222625,94acabec-4e37-49c5-b7d8-163da67820c1.jpeg,2,Did the student solve using an area model?,NO,NO,True
+291,1222625,94acabec-4e37-49c5-b7d8-163da67820c1.jpeg,3,Did the student solve using the standard algorithm?,NO,NO,True
+291,1222625,94acabec-4e37-49c5-b7d8-163da67820c1.jpeg,4,Is the product expressed in standard form?,NO,NO,True
+291,1222625,94acabec-4e37-49c5-b7d8-163da67820c1.jpeg,5,Is the student's answer reasoanble?,NO,NO,True
+292,1222625,bd51703b-8745-425d-aade-77bf407f58a0.jpeg,0,Did the student estimate the product within reason?,YES,YES,True
+292,1222625,bd51703b-8745-425d-aade-77bf407f58a0.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,YES,True
+292,1222625,bd51703b-8745-425d-aade-77bf407f58a0.jpeg,2,Did the student solve using an area model?,YES,YES,True
+292,1222625,bd51703b-8745-425d-aade-77bf407f58a0.jpeg,3,Did the student solve using the standard algorithm?,YES,YES,True
+292,1222625,bd51703b-8745-425d-aade-77bf407f58a0.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+292,1222625,bd51703b-8745-425d-aade-77bf407f58a0.jpeg,5,Is the student's answer reasoanble?,YES,YES,True
+293,1222625,c1532f85-f18c-4410-a7b4-707a73b2c9e8.jpeg,0,Did the student estimate the product within reason?,YES,YES,True
+293,1222625,c1532f85-f18c-4410-a7b4-707a73b2c9e8.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,NO,False
+293,1222625,c1532f85-f18c-4410-a7b4-707a73b2c9e8.jpeg,2,Did the student solve using an area model?,NO,NO,True
+293,1222625,c1532f85-f18c-4410-a7b4-707a73b2c9e8.jpeg,3,Did the student solve using the standard algorithm?,NO,YES,False
+293,1222625,c1532f85-f18c-4410-a7b4-707a73b2c9e8.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+293,1222625,c1532f85-f18c-4410-a7b4-707a73b2c9e8.jpeg,5,Is the student's answer reasoanble?,YES,YES,True
+294,1222625,d15322f0-ab59-4ba0-b0cb-67f3fef287d4.jpeg,0,Did the student estimate the product within reason?,NO,YES,False
+294,1222625,d15322f0-ab59-4ba0-b0cb-67f3fef287d4.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,NO,False
+294,1222625,d15322f0-ab59-4ba0-b0cb-67f3fef287d4.jpeg,2,Did the student solve using an area model?,NO,NO,True
+294,1222625,d15322f0-ab59-4ba0-b0cb-67f3fef287d4.jpeg,3,Did the student solve using the standard algorithm?,NO,NO,True
+294,1222625,d15322f0-ab59-4ba0-b0cb-67f3fef287d4.jpeg,4,Is the product expressed in standard form?,YES,NO,False
+294,1222625,d15322f0-ab59-4ba0-b0cb-67f3fef287d4.jpeg,5,Is the student's answer reasoanble?,NO,YES,False
+295,1222625,d8ddf62d-c6a5-40c5-bcc2-64e7e2f17178.jpeg,0,Did the student estimate the product within reason?,YES,NO,False
+295,1222625,d8ddf62d-c6a5-40c5-bcc2-64e7e2f17178.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,NO,NO,True
+295,1222625,d8ddf62d-c6a5-40c5-bcc2-64e7e2f17178.jpeg,2,Did the student solve using an area model?,YES,YES,True
+295,1222625,d8ddf62d-c6a5-40c5-bcc2-64e7e2f17178.jpeg,3,Did the student solve using the standard algorithm?,NO,NO,True
+295,1222625,d8ddf62d-c6a5-40c5-bcc2-64e7e2f17178.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+295,1222625,d8ddf62d-c6a5-40c5-bcc2-64e7e2f17178.jpeg,5,Is the student's answer reasoanble?,YES,NO,False
+296,1222625,d9505dc7-dd60-49ca-9c57-0827d463e4f3.jpeg,0,Did the student estimate the product within reason?,YES,YES,True
+296,1222625,d9505dc7-dd60-49ca-9c57-0827d463e4f3.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,NO,NO,True
+296,1222625,d9505dc7-dd60-49ca-9c57-0827d463e4f3.jpeg,2,Did the student solve using an area model?,YES,YES,True
+296,1222625,d9505dc7-dd60-49ca-9c57-0827d463e4f3.jpeg,3,Did the student solve using the standard algorithm?,YES,YES,True
+296,1222625,d9505dc7-dd60-49ca-9c57-0827d463e4f3.jpeg,4,Is the product expressed in standard form?,YES,YES,True
+296,1222625,d9505dc7-dd60-49ca-9c57-0827d463e4f3.jpeg,5,Is the student's answer reasoanble?,YES,YES,True
+297,1222625,eb7ae36c-debe-4c28-a386-210bc697a123.jpeg,0,Did the student estimate the product within reason?,NO,YES,False
+297,1222625,eb7ae36c-debe-4c28-a386-210bc697a123.jpeg,1,Did the student remember to include the decimal in the correct location in their final answer?,YES,NO,False
+297,1222625,eb7ae36c-debe-4c28-a386-210bc697a123.jpeg,2,Did the student solve using an area model?,NO,YES,False
+297,1222625,eb7ae36c-debe-4c28-a386-210bc697a123.jpeg,3,Did the student solve using the standard algorithm?,YES,NO,False
+297,1222625,eb7ae36c-debe-4c28-a386-210bc697a123.jpeg,4,Is the product expressed in standard form?,YES,NO,False
+297,1222625,eb7ae36c-debe-4c28-a386-210bc697a123.jpeg,5,Is the student's answer reasoanble?,YES,NO,False
+298,1222676,0a53c170-eed6-460c-be13-e191a8954503.jpeg,0,Did the student correctly estimate 3.03 as 3?,NO,NO,True
+298,1222676,0a53c170-eed6-460c-be13-e191a8954503.jpeg,1,Did the student correctly estimate 402 as 400?,YES,NO,False
+298,1222676,0a53c170-eed6-460c-be13-e191a8954503.jpeg,2,"Did the student correctly estimate the product as 1,200?",NO,NO,True
+299,1222676,1ed99274-09f7-4fd5-81a4-09ed232e2649.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+299,1222676,1ed99274-09f7-4fd5-81a4-09ed232e2649.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+299,1222676,1ed99274-09f7-4fd5-81a4-09ed232e2649.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+300,1222676,1fb55ef5-b915-4aae-89d1-071f97110514.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+300,1222676,1fb55ef5-b915-4aae-89d1-071f97110514.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+300,1222676,1fb55ef5-b915-4aae-89d1-071f97110514.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+301,1222676,38372f52-fafb-4e1c-a379-7cf6be85e528.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+301,1222676,38372f52-fafb-4e1c-a379-7cf6be85e528.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+301,1222676,38372f52-fafb-4e1c-a379-7cf6be85e528.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+302,1222676,3c71d776-716e-485f-ab6b-45e8111c2f04.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+302,1222676,3c71d776-716e-485f-ab6b-45e8111c2f04.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+302,1222676,3c71d776-716e-485f-ab6b-45e8111c2f04.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+303,1222676,597b9e1a-4870-4012-b564-639abc3aa4b3.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+303,1222676,597b9e1a-4870-4012-b564-639abc3aa4b3.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+303,1222676,597b9e1a-4870-4012-b564-639abc3aa4b3.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+304,1222676,7f0bc3c8-226d-405a-bf6b-dc858cdb708a.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+304,1222676,7f0bc3c8-226d-405a-bf6b-dc858cdb708a.jpeg,1,Did the student correctly estimate 402 as 400?,NO,YES,False
+304,1222676,7f0bc3c8-226d-405a-bf6b-dc858cdb708a.jpeg,2,"Did the student correctly estimate the product as 1,200?",NO,YES,False
+305,1222676,82342606-de60-4ff1-b2aa-6ef5826ebcc2.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+305,1222676,82342606-de60-4ff1-b2aa-6ef5826ebcc2.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+305,1222676,82342606-de60-4ff1-b2aa-6ef5826ebcc2.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+306,1222676,9ada022d-9406-4e05-af69-1c0bd1426021.png,0,Did the student correctly estimate 3.03 as 3?,I CANNOT ANSWER THIS QUESTION AS THE STUDENT'S WORK IS NOT VISIBLE IN THE PROVIDED IMAGE.,YES,False
+306,1222676,9ada022d-9406-4e05-af69-1c0bd1426021.png,1,Did the student correctly estimate 402 as 400?,I CANNOT ANSWER THIS QUESTION AS THE STUDENT'S WORK IS NOT VISIBLE IN THE PROVIDED IMAGE.,NO,False
+306,1222676,9ada022d-9406-4e05-af69-1c0bd1426021.png,2,"Did the student correctly estimate the product as 1,200?",I CANNOT ANSWER THIS QUESTION AS THE STUDENT'S WORK IS NOT VISIBLE IN THE PROVIDED IMAGE.,NO,False
+307,1222676,bfc02239-526c-45ea-b0e2-5f4a18bd41d9.jpeg,0,Did the student correctly estimate 3.03 as 3?,NO,NO,True
+307,1222676,bfc02239-526c-45ea-b0e2-5f4a18bd41d9.jpeg,1,Did the student correctly estimate 402 as 400?,NO,NO,True
+307,1222676,bfc02239-526c-45ea-b0e2-5f4a18bd41d9.jpeg,2,"Did the student correctly estimate the product as 1,200?",NO,NO,True
+308,1222676,d3909705-8320-4702-9ad8-50b09cf77f1f.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+308,1222676,d3909705-8320-4702-9ad8-50b09cf77f1f.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+308,1222676,d3909705-8320-4702-9ad8-50b09cf77f1f.jpeg,2,"Did the student correctly estimate the product as 1,200?",YES,YES,True
+309,1222676,e5abfcdc-d9cf-4689-a0b1-4f4cfcffa966.jpeg,0,Did the student correctly estimate 3.03 as 3?,YES,YES,True
+309,1222676,e5abfcdc-d9cf-4689-a0b1-4f4cfcffa966.jpeg,1,Did the student correctly estimate 402 as 400?,YES,YES,True
+309,1222676,e5abfcdc-d9cf-4689-a0b1-4f4cfcffa966.jpeg,2,"Did the student correctly estimate the product as 1,200?",NO,NO,True
+310,1228874,0c81a2e9-e74c-4dc2-8b01-365f8931054d.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+310,1228874,0c81a2e9-e74c-4dc2-8b01-365f8931054d.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+311,1228874,0f2f70ea-61e9-4029-8916-e8b9918787df.jpeg,0,Did the student correctly state that the product is 1/9?,NO,NO,True
+311,1228874,0f2f70ea-61e9-4029-8916-e8b9918787df.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,NO,NO,True
+312,1228874,25d5bfa0-e7df-49b1-a596-20f0e035a9aa.jpeg,0,Did the student correctly state that the product is 1/9?,YES,NO,False
+312,1228874,25d5bfa0-e7df-49b1-a596-20f0e035a9aa.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+313,1228874,28e320c7-f656-4351-9af0-bd677c6939a9.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+313,1228874,28e320c7-f656-4351-9af0-bd677c6939a9.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,NO,False
+314,1228874,3efad145-1903-48c2-99c8-1a2e9c3a1f7b.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+314,1228874,3efad145-1903-48c2-99c8-1a2e9c3a1f7b.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,NO,NO,True
+315,1228874,4d1a2faf-4557-494c-96a3-e398f29fce28.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+315,1228874,4d1a2faf-4557-494c-96a3-e398f29fce28.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+316,1228874,50d89880-3468-46b2-839e-5c605c6efbc0.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+316,1228874,50d89880-3468-46b2-839e-5c605c6efbc0.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+317,1228874,5899c36d-562f-48ba-aa58-7d82a0d6e6be.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+317,1228874,5899c36d-562f-48ba-aa58-7d82a0d6e6be.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+318,1228874,82257c75-bcef-4696-bb2e-fb49b43e7657.jpeg,0,Did the student correctly state that the product is 1/9?,NO,NO,True
+318,1228874,82257c75-bcef-4696-bb2e-fb49b43e7657.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,NO,False
+319,1228874,8fc24d49-55ce-4873-993e-cfca0abcc8af.jpeg,0,Did the student correctly state that the product is 1/9?,NO,NO,True
+319,1228874,8fc24d49-55ce-4873-993e-cfca0abcc8af.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,NO,YES,False
+320,1228874,a347adb2-3338-422a-ae13-3f5b43e9a7ce.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+320,1228874,a347adb2-3338-422a-ae13-3f5b43e9a7ce.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,NO,NO,True
+321,1228874,ab5ed89e-5b09-4856-87bf-a7863b0a5023.jpeg,0,Did the student correctly state that the product is 1/9?,NO,YES,False
+321,1228874,ab5ed89e-5b09-4856-87bf-a7863b0a5023.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,NO,YES,False
+322,1228874,b65ab935-22c0-413a-89ff-85040b4a8bd9.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+322,1228874,b65ab935-22c0-413a-89ff-85040b4a8bd9.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+323,1228874,e0d2c606-8d11-454c-a59f-fbf0fe8b2e98.jpeg,0,Did the student correctly state that the product is 1/9?,YES,YES,True
+323,1228874,e0d2c606-8d11-454c-a59f-fbf0fe8b2e98.jpeg,1,Did the student split up their rectanguar model into three rows and three columns?,YES,YES,True
+324,1228891,1b20734e-ec36-477e-87a9-23566d92e253.jpeg,0,Did the student correctly state the answer of 3/21?,NO,YES,False
+324,1228891,1b20734e-ec36-477e-87a9-23566d92e253.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,NO,YES,False
+325,1228891,85282674-5fbd-4e9c-a7a1-684df07ab0fa.jpeg,0,Did the student correctly state the answer of 3/21?,YES,YES,True
+325,1228891,85282674-5fbd-4e9c-a7a1-684df07ab0fa.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,YES,True
+326,1228891,a02c4e08-33d5-4b0b-9916-66ffb86c34d5.png,0,Did the student correctly state the answer of 3/21?,NO,NO,True
+326,1228891,a02c4e08-33d5-4b0b-9916-66ffb86c34d5.png,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,NO,NO,True
+327,1228891,ac53cf79-5a66-4d18-845d-f2466feaf7c6.jpeg,0,Did the student correctly state the answer of 3/21?,NO,YES,False
+327,1228891,ac53cf79-5a66-4d18-845d-f2466feaf7c6.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,NO,False
+328,1228891,b42279a6-e8e1-4280-882c-2ae53b6c167b.jpeg,0,Did the student correctly state the answer of 3/21?,YES,NO,False
+328,1228891,b42279a6-e8e1-4280-882c-2ae53b6c167b.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,NO,NO,True
+329,1228891,b561ba05-44ec-47db-8cb4-fbbfff16432c.jpeg,0,Did the student correctly state the answer of 3/21?,NO,YES,False
+329,1228891,b561ba05-44ec-47db-8cb4-fbbfff16432c.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,NO,False
+330,1228891,dae6ebbe-48d4-47b1-a40d-b8146a1b588a.png,0,Did the student correctly state the answer of 3/21?,NO WORK VISIBLE,NO,False
+330,1228891,dae6ebbe-48d4-47b1-a40d-b8146a1b588a.png,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,NO WORK VISIBLE,NO,False
+331,1228891,e0d53b46-f047-4d2a-984e-4db4d458d78f.jpeg,0,Did the student correctly state the answer of 3/21?,NO,YES,False
+331,1228891,e0d53b46-f047-4d2a-984e-4db4d458d78f.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,NO,YES,False
+332,1228891,e0dedc98-144f-4966-9ba7-ed694dae15a5.jpeg,0,Did the student correctly state the answer of 3/21?,NO,NO,True
+332,1228891,e0dedc98-144f-4966-9ba7-ed694dae15a5.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,NO,False
+333,1228891,e2f2737b-3528-412a-89c8-a5996cfd58da.jpeg,0,Did the student correctly state the answer of 3/21?,NO,NO,True
+333,1228891,e2f2737b-3528-412a-89c8-a5996cfd58da.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,YES,True
+334,1228891,f3e8f285-8dd5-4081-bedc-29b9758aa743.jpeg,0,Did the student correctly state the answer of 3/21?,YES,YES,True
+334,1228891,f3e8f285-8dd5-4081-bedc-29b9758aa743.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,NO,NO,True
+335,1228891,f7174a02-a115-4328-a86a-819657f71cfe.jpeg,0,Did the student correctly state the answer of 3/21?,NO,NO,True
+335,1228891,f7174a02-a115-4328-a86a-819657f71cfe.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,YES,True
+336,1228891,fb8c3c47-10e9-4f53-9240-af628856b71c.jpeg,0,Did the student correctly state the answer of 3/21?,NO,NO,True
+336,1228891,fb8c3c47-10e9-4f53-9240-af628856b71c.jpeg,1,Does the student's model match the number sentence 1/3 times 3/7 = 3/21?,YES,NO,False
+337,1228910,11417b6a-468b-4c8c-bec1-a388b81364bc.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",NO,NO,True
+337,1228910,11417b6a-468b-4c8c-bec1-a388b81364bc.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+337,1228910,11417b6a-468b-4c8c-bec1-a388b81364bc.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,NO,NO,True
+337,1228910,11417b6a-468b-4c8c-bec1-a388b81364bc.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+337,1228910,11417b6a-468b-4c8c-bec1-a388b81364bc.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+337,1228910,11417b6a-468b-4c8c-bec1-a388b81364bc.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+338,1228910,1ee1bbce-cb7e-4eeb-97d2-c5ce73b493eb.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",NO,NO,True
+338,1228910,1ee1bbce-cb7e-4eeb-97d2-c5ce73b493eb.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+338,1228910,1ee1bbce-cb7e-4eeb-97d2-c5ce73b493eb.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+338,1228910,1ee1bbce-cb7e-4eeb-97d2-c5ce73b493eb.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+338,1228910,1ee1bbce-cb7e-4eeb-97d2-c5ce73b493eb.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+338,1228910,1ee1bbce-cb7e-4eeb-97d2-c5ce73b493eb.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+339,1228910,3ed97c74-f661-47e2-b184-416025e7836a.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",NO,NO,True
+339,1228910,3ed97c74-f661-47e2-b184-416025e7836a.jpeg,1,Did they draw a rectangular fraction model?,YES,NO,False
+339,1228910,3ed97c74-f661-47e2-b184-416025e7836a.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,NO,NO,True
+339,1228910,3ed97c74-f661-47e2-b184-416025e7836a.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+339,1228910,3ed97c74-f661-47e2-b184-416025e7836a.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+339,1228910,3ed97c74-f661-47e2-b184-416025e7836a.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+340,1228910,42564d9f-a4cb-49a1-9aa2-88d7f968495b.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",NO,NO,True
+340,1228910,42564d9f-a4cb-49a1-9aa2-88d7f968495b.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+340,1228910,42564d9f-a4cb-49a1-9aa2-88d7f968495b.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+340,1228910,42564d9f-a4cb-49a1-9aa2-88d7f968495b.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+340,1228910,42564d9f-a4cb-49a1-9aa2-88d7f968495b.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+340,1228910,42564d9f-a4cb-49a1-9aa2-88d7f968495b.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+341,1228910,5cf1edad-1788-456e-a635-d15fbcdcadc5.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",NO,NO,True
+341,1228910,5cf1edad-1788-456e-a635-d15fbcdcadc5.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+341,1228910,5cf1edad-1788-456e-a635-d15fbcdcadc5.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+341,1228910,5cf1edad-1788-456e-a635-d15fbcdcadc5.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,YES,False
+341,1228910,5cf1edad-1788-456e-a635-d15fbcdcadc5.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+341,1228910,5cf1edad-1788-456e-a635-d15fbcdcadc5.jpeg,5,Did they write a multiplication sentence?,YES,NO,False
+342,1228910,b67679de-6431-46c5-9380-5f5fc79df859.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+342,1228910,b67679de-6431-46c5-9380-5f5fc79df859.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+342,1228910,b67679de-6431-46c5-9380-5f5fc79df859.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+342,1228910,b67679de-6431-46c5-9380-5f5fc79df859.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+342,1228910,b67679de-6431-46c5-9380-5f5fc79df859.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,YES,False
+342,1228910,b67679de-6431-46c5-9380-5f5fc79df859.jpeg,5,Did they write a multiplication sentence?,YES,YES,True
+343,1228910,be60d7cf-342f-4c3c-a6b4-b0c968c09c5f.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,NO,False
+343,1228910,be60d7cf-342f-4c3c-a6b4-b0c968c09c5f.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+343,1228910,be60d7cf-342f-4c3c-a6b4-b0c968c09c5f.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+343,1228910,be60d7cf-342f-4c3c-a6b4-b0c968c09c5f.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,YES,False
+343,1228910,be60d7cf-342f-4c3c-a6b4-b0c968c09c5f.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,YES,False
+343,1228910,be60d7cf-342f-4c3c-a6b4-b0c968c09c5f.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+344,1228910,daec0d73-946b-48ad-b4c8-ff29015ffe70.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+344,1228910,daec0d73-946b-48ad-b4c8-ff29015ffe70.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+344,1228910,daec0d73-946b-48ad-b4c8-ff29015ffe70.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+344,1228910,daec0d73-946b-48ad-b4c8-ff29015ffe70.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+344,1228910,daec0d73-946b-48ad-b4c8-ff29015ffe70.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+344,1228910,daec0d73-946b-48ad-b4c8-ff29015ffe70.jpeg,5,Did they write a multiplication sentence?,YES,YES,True
+345,1228910,dd3836f0-cecb-4a31-90b5-62a44cd054dc.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+345,1228910,dd3836f0-cecb-4a31-90b5-62a44cd054dc.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+345,1228910,dd3836f0-cecb-4a31-90b5-62a44cd054dc.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+345,1228910,dd3836f0-cecb-4a31-90b5-62a44cd054dc.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+345,1228910,dd3836f0-cecb-4a31-90b5-62a44cd054dc.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+345,1228910,dd3836f0-cecb-4a31-90b5-62a44cd054dc.jpeg,5,Did they write a multiplication sentence?,YES,NO,False
+346,1228910,df9baea9-8710-4db3-bdb7-0ca8cec268f5.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+346,1228910,df9baea9-8710-4db3-bdb7-0ca8cec268f5.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+346,1228910,df9baea9-8710-4db3-bdb7-0ca8cec268f5.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,NO,NO,True
+346,1228910,df9baea9-8710-4db3-bdb7-0ca8cec268f5.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+346,1228910,df9baea9-8710-4db3-bdb7-0ca8cec268f5.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+346,1228910,df9baea9-8710-4db3-bdb7-0ca8cec268f5.jpeg,5,Did they write a multiplication sentence?,YES,YES,True
+347,1228910,e34c8b99-04fa-464a-8d5c-365d94dfab8a.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+347,1228910,e34c8b99-04fa-464a-8d5c-365d94dfab8a.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+347,1228910,e34c8b99-04fa-464a-8d5c-365d94dfab8a.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+347,1228910,e34c8b99-04fa-464a-8d5c-365d94dfab8a.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+347,1228910,e34c8b99-04fa-464a-8d5c-365d94dfab8a.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+347,1228910,e34c8b99-04fa-464a-8d5c-365d94dfab8a.jpeg,5,Did they write a multiplication sentence?,YES,YES,True
+348,1228910,edaf68a3-a81c-4a82-b3a5-04f889735a1d.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+348,1228910,edaf68a3-a81c-4a82-b3a5-04f889735a1d.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+348,1228910,edaf68a3-a81c-4a82-b3a5-04f889735a1d.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,NO,YES,False
+348,1228910,edaf68a3-a81c-4a82-b3a5-04f889735a1d.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,YES,False
+348,1228910,edaf68a3-a81c-4a82-b3a5-04f889735a1d.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+348,1228910,edaf68a3-a81c-4a82-b3a5-04f889735a1d.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+349,1228910,ffa27498-336f-43d1-b598-be01d8371310.jpeg,0,"Did the student correctly find a product of 6/15, or equivalent?",YES,YES,True
+349,1228910,ffa27498-336f-43d1-b598-be01d8371310.jpeg,1,Did they draw a rectangular fraction model?,YES,YES,True
+349,1228910,ffa27498-336f-43d1-b598-be01d8371310.jpeg,2,Did they group 3 out of the 5 sections to show 3/5?,YES,YES,True
+349,1228910,ffa27498-336f-43d1-b598-be01d8371310.jpeg,3,Did they label 2 out of the 3 shaded sections as 2/5?,NO,NO,True
+349,1228910,ffa27498-336f-43d1-b598-be01d8371310.jpeg,4,Did they label each section of the fraction model with 1/5?,NO,NO,True
+349,1228910,ffa27498-336f-43d1-b598-be01d8371310.jpeg,5,Did they write a multiplication sentence?,NO,NO,True
+363,1287671,061b5696-1fb4-493a-8bbf-20265ee2e6c1.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,YES,True
+363,1287671,061b5696-1fb4-493a-8bbf-20265ee2e6c1.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+364,1287671,13a25894-8c1d-4e7e-9f5f-2a937dbfebce.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,YES,True
+364,1287671,13a25894-8c1d-4e7e-9f5f-2a937dbfebce.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+365,1287671,275f3f7a-c03b-445c-99f4-c072e4700574.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,NO,NO,True
+365,1287671,275f3f7a-c03b-445c-99f4-c072e4700574.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+366,1287671,33a04e50-e993-4807-ac2e-1198343b7783.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,NO,False
+366,1287671,33a04e50-e993-4807-ac2e-1198343b7783.jpeg,1,Did the student correctly state that the product was 345.2?,YES,NO,False
+367,1287671,35a5a317-578c-4779-8fee-df3a12c5c5d3.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,NO,False
+367,1287671,35a5a317-578c-4779-8fee-df3a12c5c5d3.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+368,1287671,459d01da-0ddd-466d-be20-abeda5acd101.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,NO,NO,True
+368,1287671,459d01da-0ddd-466d-be20-abeda5acd101.jpeg,1,Did the student correctly state that the product was 345.2?,NO,NO,True
+369,1287671,78ddb27b-d0a8-4e3d-b793-789646beaf4a.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,NO,YES,False
+369,1287671,78ddb27b-d0a8-4e3d-b793-789646beaf4a.jpeg,1,Did the student correctly state that the product was 345.2?,NO,YES,False
+370,1287671,97860ae0-6cf7-4d98-a9ad-e84c03db3ec5.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,YES,True
+370,1287671,97860ae0-6cf7-4d98-a9ad-e84c03db3ec5.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+371,1287671,a969e495-c958-4cb8-893b-e21cb1904898.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,YES,True
+371,1287671,a969e495-c958-4cb8-893b-e21cb1904898.jpeg,1,Did the student correctly state that the product was 345.2?,NO,YES,False
+372,1287671,be5ae751-c26f-4cd3-8bbb-dbb3840cd5f7.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,YES,True
+372,1287671,be5ae751-c26f-4cd3-8bbb-dbb3840cd5f7.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+373,1287671,c9cdabc1-7feb-41b6-8214-0fb8f035e39c.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,NO,YES,False
+373,1287671,c9cdabc1-7feb-41b6-8214-0fb8f035e39c.jpeg,1,Did the student correctly state that the product was 345.2?,NO,NO,True
+374,1287671,f62c8669-1156-4702-8917-66729979836e.jpeg,0,Did the student correctly represent that the value of each digit increases by two place values?,YES,YES,True
+374,1287671,f62c8669-1156-4702-8917-66729979836e.jpeg,1,Did the student correctly state that the product was 345.2?,YES,YES,True
+375,1287672,3dcea030-04e0-48e7-a065-28491c9719a4.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,NO,False
+375,1287672,3dcea030-04e0-48e7-a065-28491c9719a4.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,NO,False
+376,1287672,5fc02617-3987-47f4-99b5-1557cf2ff1ea.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,NO,NO,True
+376,1287672,5fc02617-3987-47f4-99b5-1557cf2ff1ea.jpeg,1,Did the student identify the correct quotient of 3.45?,NO,NO,True
+377,1287672,63f5077f-d829-42f0-be19-50bedd91845c.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+377,1287672,63f5077f-d829-42f0-be19-50bedd91845c.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+378,1287672,75753237-57f7-4a42-8211-0405c64e77b7.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,NO,False
+378,1287672,75753237-57f7-4a42-8211-0405c64e77b7.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,NO,False
+379,1287672,759e66c9-d21b-4ceb-8739-61e1cd51de64.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+379,1287672,759e66c9-d21b-4ceb-8739-61e1cd51de64.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+380,1287672,9036e1e1-ec3b-4fae-af56-9a5caf4451c9.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+380,1287672,9036e1e1-ec3b-4fae-af56-9a5caf4451c9.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+381,1287672,a2afdc87-1df5-437b-aa61-0a9eaa0ed5c9.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,NO,NO,True
+381,1287672,a2afdc87-1df5-437b-aa61-0a9eaa0ed5c9.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+382,1287672,aa409bf8-c779-4083-a899-e58aebbce2ca.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,NO,NO,True
+382,1287672,aa409bf8-c779-4083-a899-e58aebbce2ca.jpeg,1,Did the student identify the correct quotient of 3.45?,NO,NO,True
+383,1287672,b2c2c39d-b36c-4afb-a259-87737863883f.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+383,1287672,b2c2c39d-b36c-4afb-a259-87737863883f.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+384,1287672,cc6af163-b437-4d84-8e1e-d937b7acb38d.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+384,1287672,cc6af163-b437-4d84-8e1e-d937b7acb38d.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+385,1287672,ddef0be2-a077-49d7-8882-cafbf103adf5.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+385,1287672,ddef0be2-a077-49d7-8882-cafbf103adf5.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+386,1287672,ef9d8e36-2162-4798-b396-7f8ce789c222.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,NO,False
+386,1287672,ef9d8e36-2162-4798-b396-7f8ce789c222.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,NO,False
+387,1287672,efb3633b-d107-4d1a-a330-1e3cb97ad0e5.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+387,1287672,efb3633b-d107-4d1a-a330-1e3cb97ad0e5.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+388,1287672,f8069aed-b3ca-4289-8dfe-1dc16d486809.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,NO,NO,True
+388,1287672,f8069aed-b3ca-4289-8dfe-1dc16d486809.jpeg,1,Did the student identify the correct quotient of 3.45?,NO,NO,True
+389,1287672,fac41e96-d966-4709-868d-52d53ac4ce2b.jpeg,0,Did the student correctly identify that dividing by 100 shifts the digits two place values to the right?,YES,YES,True
+389,1287672,fac41e96-d966-4709-868d-52d53ac4ce2b.jpeg,1,Did the student identify the correct quotient of 3.45?,YES,YES,True
+390,1295292,086f5c88-d5f3-4b51-b0d4-0f5cdb499290.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,YES,True
+390,1295292,086f5c88-d5f3-4b51-b0d4-0f5cdb499290.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+391,1295292,16f58012-5f65-44e2-82a4-fb92814e5155.jpeg,0,Did the student use hundredths number disks to represent 7/100?,NO,NO,True
+391,1295292,16f58012-5f65-44e2-82a4-fb92814e5155.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,YES,False
+392,1295292,3450cc5e-58a5-4183-a973-8feba436237c.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,YES,True
+392,1295292,3450cc5e-58a5-4183-a973-8feba436237c.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+393,1295292,3a94f87c-6243-4b3a-a703-ddf691f2aa96.jpeg,0,Did the student use hundredths number disks to represent 7/100?,NO,NO,True
+393,1295292,3a94f87c-6243-4b3a-a703-ddf691f2aa96.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,YES,False
+394,1295292,3cf68ce6-cd4d-47b9-9f99-440981c3c27a.jpeg,0,Did the student use hundredths number disks to represent 7/100?,NO,YES,False
+394,1295292,3cf68ce6-cd4d-47b9-9f99-440981c3c27a.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+395,1295292,516536e6-d0df-4567-9dac-5178814ee1fc.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,YES,True
+395,1295292,516536e6-d0df-4567-9dac-5178814ee1fc.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+396,1295292,520e108b-885a-47e5-b34a-802ab7bb5b87.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,NO,False
+396,1295292,520e108b-885a-47e5-b34a-802ab7bb5b87.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,YES,False
+397,1295292,53108b43-7e5c-45b9-b0de-612ca3f3fe15.jpeg,0,Did the student use hundredths number disks to represent 7/100?,NO,YES,False
+397,1295292,53108b43-7e5c-45b9-b0de-612ca3f3fe15.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+398,1295292,873c97b9-85a8-4082-a39f-596da394b39c.jpeg,0,Did the student use hundredths number disks to represent 7/100?,NO,NO,True
+398,1295292,873c97b9-85a8-4082-a39f-596da394b39c.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,YES,False
+399,1295292,9c3d164d-851b-416e-a576-d0ce9d3a9b3f.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,YES,True
+399,1295292,9c3d164d-851b-416e-a576-d0ce9d3a9b3f.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,YES,False
+400,1295292,b8146b21-a4ae-44a5-a85e-19ed2111a002.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,YES,True
+400,1295292,b8146b21-a4ae-44a5-a85e-19ed2111a002.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+401,1295292,efee0301-97f6-4201-9727-b1dcb367e528.jpeg,0,Did the student use hundredths number disks to represent 7/100?,YES,NO,False
+401,1295292,efee0301-97f6-4201-9727-b1dcb367e528.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,NO,True
+402,1295292,f4124fe4-eca2-44a4-b32f-7ae157222e97.jpeg,0,Did the student use hundredths number disks to represent 7/100?,NO,YES,False
+402,1295292,f4124fe4-eca2-44a4-b32f-7ae157222e97.jpeg,1,Did the student use tenths number disks to represent 7/100?,NO,YES,False
+404,1295301,493de345-6e12-43c5-b565-fcd1fd9b17e2.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+405,1295301,988cf7fa-cba8-4ea5-843c-ed96c0b94b41.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+406,1295301,9b6dab34-9654-4e13-8595-02cfcd586aec.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+407,1295301,aa59c3ca-5cf7-4e55-956c-30a85ed38745.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+408,1295301,ac6984d7-624b-4b6d-b24f-c33134cd1e84.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+410,1295301,b80fe3e0-0af0-403f-8911-0dc5f70a36c2.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,"I CANNOT DETERMINE FROM THE IMAGE ALONE IF THE STUDENT CORRECTLY IDENTIFIED THAT EACH TICK MARK REPRESENTS ONE TENTH OR TEN HUNDREDTHS, AS THERE ARE NO LABELS OR CONTEXT PROVIDED.",NO,False
+411,1295301,bceec425-e158-4286-b5c9-6523009a5a09.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+412,1295301,bf53cc1e-85df-4b54-8004-0717c579afca.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,NO,NO,True
+416,1295301,fac6c241-9056-42f6-b91d-e39f324fff93.jpeg,0,Did the student correctly identify that each tick marks represents one tenth or ten hundredths?,YES,NO,False
+417,1295366,1d3de175-7315-45d0-b380-2d00b40d6694.jpeg,0,Did the student find the correct value of 30?,NO,NO,True
+418,1295366,27ea8971-deea-4cb3-9a04-faeb4a619130.jpeg,0,Did the student find the correct value of 30?,YES,NO,False
+419,1295366,5002a32f-e248-4fa8-8934-14fdefe9080b.jpeg,0,Did the student find the correct value of 30?,YES,NO,False
+420,1295366,7a492cf4-88a0-4a02-845e-720f87ba055a.jpeg,0,Did the student find the correct value of 30?,YES,YES,True
+421,1295366,7e2b4d1c-9aa0-4d41-b88a-508dfedd01e7.jpeg,0,Did the student find the correct value of 30?,YES,YES,True
+422,1295366,825256f5-eee0-4a87-835c-141f0312f390.jpeg,0,Did the student find the correct value of 30?,NO,NO,True
+423,1295366,9cafdf63-999c-465b-aeb0-54afbd7e6465.jpeg,0,Did the student find the correct value of 30?,NO,NO,True
+424,1295366,ab523c00-adfc-4e97-94c1-24a7f24c5e91.jpeg,0,Did the student find the correct value of 30?,YES,YES,True
+425,1295366,bb9c0d5b-727d-4b8d-83a4-6284caf2dca7.jpeg,0,Did the student find the correct value of 30?,NO,NO,True
+426,1295366,f803dbb5-23c5-4e62-8c6d-858a4313fa0a.jpeg,0,Did the student find the correct value of 30?,YES,YES,True
+427,1295366,fcc2033c-0ca8-48c9-bbc5-5e97642f99d1.jpeg,0,Did the student find the correct value of 30?,NO,NO,True
+450,1394545,0deaface-1975-472d-bb47-f944df2a43a9.png,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,YES,False
+450,1394545,0deaface-1975-472d-bb47-f944df2a43a9.png,1,Did the student correctly state the percent form of 11/20 is 55%?,NO,YES,False
+450,1394545,0deaface-1975-472d-bb47-f944df2a43a9.png,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,YES,False
+451,1394545,17631426-c25b-4444-beb9-f38bda2d3063.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,YES,YES,True
+451,1394545,17631426-c25b-4444-beb9-f38bda2d3063.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,YES,True
+451,1394545,17631426-c25b-4444-beb9-f38bda2d3063.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,YES,YES,True
+452,1394545,22399312-c44b-4ccb-a62f-48ad9f1f3e15.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+452,1394545,22399312-c44b-4ccb-a62f-48ad9f1f3e15.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,NO,False
+452,1394545,22399312-c44b-4ccb-a62f-48ad9f1f3e15.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+453,1394545,26783f2c-717e-4211-9ff5-05ef5977da09.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,YES,NO,False
+453,1394545,26783f2c-717e-4211-9ff5-05ef5977da09.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,NO,False
+453,1394545,26783f2c-717e-4211-9ff5-05ef5977da09.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+454,1394545,2c9ae801-076d-40c3-99d3-be296a874e4b.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+454,1394545,2c9ae801-076d-40c3-99d3-be296a874e4b.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,NO,NO,True
+454,1394545,2c9ae801-076d-40c3-99d3-be296a874e4b.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+455,1394545,3b4b7ea5-92d0-44f2-b70c-5c82c9e0667c.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,YES,NO,False
+455,1394545,3b4b7ea5-92d0-44f2-b70c-5c82c9e0667c.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,NO,False
+455,1394545,3b4b7ea5-92d0-44f2-b70c-5c82c9e0667c.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+456,1394545,48b4b519-a8b5-407f-840c-1dd76bb788f9.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,YES,YES,True
+456,1394545,48b4b519-a8b5-407f-840c-1dd76bb788f9.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,YES,True
+456,1394545,48b4b519-a8b5-407f-840c-1dd76bb788f9.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,YES,YES,True
+457,1394545,6c47dfce-91a8-4533-a03f-5e588c1966db.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+457,1394545,6c47dfce-91a8-4533-a03f-5e588c1966db.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,NO,NO,True
+457,1394545,6c47dfce-91a8-4533-a03f-5e588c1966db.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+458,1394545,7977424a-07e1-4e8a-af3d-67c5589d384b.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+458,1394545,7977424a-07e1-4e8a-af3d-67c5589d384b.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,NO,False
+458,1394545,7977424a-07e1-4e8a-af3d-67c5589d384b.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+459,1394545,8d183092-d7d4-4c11-905f-bcc746bda25a.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,YES,False
+459,1394545,8d183092-d7d4-4c11-905f-bcc746bda25a.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,NO,YES,False
+459,1394545,8d183092-d7d4-4c11-905f-bcc746bda25a.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,YES,False
+460,1394545,b7c19ddc-69d1-4d63-b33d-4e51b105bde7.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,YES,YES,True
+460,1394545,b7c19ddc-69d1-4d63-b33d-4e51b105bde7.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,YES,True
+460,1394545,b7c19ddc-69d1-4d63-b33d-4e51b105bde7.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,YES,YES,True
+461,1394545,b7d66391-fdf2-42f3-afa2-123830c829b1.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+461,1394545,b7d66391-fdf2-42f3-afa2-123830c829b1.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,YES,True
+461,1394545,b7d66391-fdf2-42f3-afa2-123830c829b1.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+462,1394545,baf9b0ab-410f-4ba1-b8d3-ca1b51c3bdd9.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,YES,NO,False
+462,1394545,baf9b0ab-410f-4ba1-b8d3-ca1b51c3bdd9.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,NO,False
+462,1394545,baf9b0ab-410f-4ba1-b8d3-ca1b51c3bdd9.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,YES,NO,False
+463,1394545,dc4f8b22-ab5e-4f30-bbcc-561a84c0e09f.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+463,1394545,dc4f8b22-ab5e-4f30-bbcc-561a84c0e09f.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,YES,YES,True
+463,1394545,dc4f8b22-ab5e-4f30-bbcc-561a84c0e09f.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+464,1394545,e5d59a95-4097-4d1a-b235-e9b001dba8dc.jpeg,0,Did the student correctly place 11/20 and 55/100 as equivalent on the tape diagram?,NO,NO,True
+464,1394545,e5d59a95-4097-4d1a-b235-e9b001dba8dc.jpeg,1,Did the student correctly state the percent form of 11/20 is 55%?,NO,NO,True
+464,1394545,e5d59a95-4097-4d1a-b235-e9b001dba8dc.jpeg,2,Is the tape diagram split into 20ths on one side and hundredths on the other?,NO,NO,True
+465,1425492,16cc496f-878d-42ba-a0f2-74c3c7631ce9.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+465,1425492,16cc496f-878d-42ba-a0f2-74c3c7631ce9.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,YES,True
+466,1425492,1b6dc27b-7a8f-49c4-a80a-7f5a43a55bad.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+466,1425492,1b6dc27b-7a8f-49c4-a80a-7f5a43a55bad.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,NO,False
+467,1425492,2fa89458-8057-4403-956d-5f70284c7f9d.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,NO,False
+467,1425492,2fa89458-8057-4403-956d-5f70284c7f9d.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,NO,False
+468,1425492,3593dac2-c5c5-4d9d-98d0-ced3192494f2.jpeg,0,Did the student correctly idenitfy the quotient as 4?,NO,YES,False
+468,1425492,3593dac2-c5c5-4d9d-98d0-ced3192494f2.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,NO,NO,True
+469,1425492,6446ad15-f74d-4b01-88c2-8cbf6d5eb784.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,NO,False
+469,1425492,6446ad15-f74d-4b01-88c2-8cbf6d5eb784.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,NO,False
+470,1425492,9700a08b-c429-4204-9d30-58c938a0b0db.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+470,1425492,9700a08b-c429-4204-9d30-58c938a0b0db.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,NO,False
+471,1425492,a6b2bf44-c2d3-4237-958b-c1ff4bc800a6.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+471,1425492,a6b2bf44-c2d3-4237-958b-c1ff4bc800a6.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,YES,True
+472,1425492,b359b18a-91ff-4be8-a75c-18669cfaa043.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+472,1425492,b359b18a-91ff-4be8-a75c-18669cfaa043.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,NO,False
+473,1425492,b66a1a91-f0b2-41f4-a991-a39338d5dd35.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+473,1425492,b66a1a91-f0b2-41f4-a991-a39338d5dd35.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,YES,True
+474,1425492,cc3525ab-c264-4b3a-b919-d36f0743c0fd.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+475,1425492,ce155339-1437-4881-ac36-8dcfeb1f3449.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+475,1425492,ce155339-1437-4881-ac36-8dcfeb1f3449.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,NO,False
+476,1425492,dc06a66c-fca5-4ee3-a3e2-97c153db5f5a.jpeg,0,Did the student correctly idenitfy the quotient as 4?,YES,YES,True
+476,1425492,dc06a66c-fca5-4ee3-a3e2-97c153db5f5a.jpeg,1,Did the student correctly show that there are four copies of 1/5 in 4/5?,YES,YES,True
+477,1425504,0a3dbc72-f09e-4436-b28b-dd59d8a73668.png,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+477,1425504,0a3dbc72-f09e-4436-b28b-dd59d8a73668.png,1,Did the student correctly state that the quotient is 2?,NO,NO,True
+478,1425504,28e956fe-c7b5-43c8-b3d3-f95c5cf51add.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+478,1425504,28e956fe-c7b5-43c8-b3d3-f95c5cf51add.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+479,1425504,3149a5bb-5dcf-472a-9ad6-a3f2b7abb3f2.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+479,1425504,3149a5bb-5dcf-472a-9ad6-a3f2b7abb3f2.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+480,1425504,3417db4d-d68a-4fca-90ca-1ab5eee89f64.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,NO,NO,True
+480,1425504,3417db4d-d68a-4fca-90ca-1ab5eee89f64.jpeg,1,Did the student correctly state that the quotient is 2?,YES,NO,False
+481,1425504,346ff603-a000-422a-be0d-92d912bdf598.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,NO,YES,False
+481,1425504,346ff603-a000-422a-be0d-92d912bdf598.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+482,1425504,40a15545-ccdb-42cd-b385-a03d5e9a81ae.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+482,1425504,40a15545-ccdb-42cd-b385-a03d5e9a81ae.jpeg,1,Did the student correctly state that the quotient is 2?,NO,NO,True
+483,1425504,47c36ef9-695b-4b1a-9ae5-b9c88a682ca1.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+483,1425504,47c36ef9-695b-4b1a-9ae5-b9c88a682ca1.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+484,1425504,5998646a-388e-4577-9499-c59a22b5756e.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+484,1425504,5998646a-388e-4577-9499-c59a22b5756e.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+485,1425504,6d093706-6c4f-4ac1-840f-569d10b5d6f6.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,NO,False
+485,1425504,6d093706-6c4f-4ac1-840f-569d10b5d6f6.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+486,1425504,74c6ca7c-ba43-44a5-9376-35494dce3765.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+486,1425504,74c6ca7c-ba43-44a5-9376-35494dce3765.jpeg,1,Did the student correctly state that the quotient is 2?,YES,NO,False
+487,1425504,925d3d15-a7a6-456d-93bf-a008a14574dd.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+487,1425504,925d3d15-a7a6-456d-93bf-a008a14574dd.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+488,1425504,a0b14cf0-45a4-4362-98c7-41bd763dcbc8.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,NO,NO,True
+488,1425504,a0b14cf0-45a4-4362-98c7-41bd763dcbc8.jpeg,1,Did the student correctly state that the quotient is 2?,YES,YES,True
+489,1425504,a1d75a83-638c-4216-abbc-dd56e000ada6.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+489,1425504,a1d75a83-638c-4216-abbc-dd56e000ada6.jpeg,1,Did the student correctly state that the quotient is 2?,NO,YES,False
+490,1425504,f4618f09-5e26-444f-92cd-e8743fbfdd34.jpeg,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,YES,YES,True
+490,1425504,f4618f09-5e26-444f-92cd-e8743fbfdd34.jpeg,1,Did the student correctly state that the quotient is 2?,NO,NO,True
+491,1425504,f82a333b-312c-4b2f-8738-a59af93068b0.png,0,Did the student correctly show that there are 2 copies of 4/9 in 8/9?,NO,YES,False
+491,1425504,f82a333b-312c-4b2f-8738-a59af93068b0.png,1,Did the student correctly state that the quotient is 2?,NO,NO,True
+492,1425516,1ac7d70e-d7e4-4d69-b041-b1156f83357d.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,YES,True
+492,1425516,1ac7d70e-d7e4-4d69-b041-b1156f83357d.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
+493,1425516,1e8ae4fa-7d24-4460-9962-41f85ba440c8.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,YES,True
+493,1425516,1e8ae4fa-7d24-4460-9962-41f85ba440c8.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
+494,1425516,3b53eff2-4e04-42b8-96f3-85c104efc05e.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,NO,False
+494,1425516,3b53eff2-4e04-42b8-96f3-85c104efc05e.jpeg,1,Did the student correctly state the quotient is 5?,YES,NO,False
+495,1425516,5a1c795e-ee9b-4acd-8c94-96891f03b325.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,NO,False
+495,1425516,5a1c795e-ee9b-4acd-8c94-96891f03b325.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
+496,1425516,994e542d-432a-4daa-abd3-e72beffc3b9d.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,NO,YES,False
+496,1425516,994e542d-432a-4daa-abd3-e72beffc3b9d.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
+497,1425516,b1d26452-e43b-4642-a222-e450f33c64dc.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,YES,True
+497,1425516,b1d26452-e43b-4642-a222-e450f33c64dc.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
+498,1425516,c180ca48-b359-42d6-ac10-dd575ddcbace.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,YES,True
+498,1425516,c180ca48-b359-42d6-ac10-dd575ddcbace.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
+499,1425516,c499523d-91e8-4bfa-954f-3a6631b3b0a2.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,NO,YES,False
+499,1425516,c499523d-91e8-4bfa-954f-3a6631b3b0a2.jpeg,1,Did the student correctly state the quotient is 5?,NO,YES,False
+500,1425516,c8d194e9-a2e7-46c0-92e5-7b11464a2abc.jpeg,0,Did the student correctly show that there are 5 copies of 3/4 in 15/4?,YES,YES,True
+500,1425516,c8d194e9-a2e7-46c0-92e5-7b11464a2abc.jpeg,1,Did the student correctly state the quotient is 5?,YES,YES,True
