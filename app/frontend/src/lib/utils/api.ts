@@ -13,12 +13,16 @@ export class ApiError extends Error {
 
 export type ApiStatus = 'online' | 'offline' | 'no-ai-key';
 
+import { API_URL } from '$lib/constants';
+
 /** Health check. Distinguishes a valid backend from one with a missing/invalid Gemini key. */
 export async function getApiStatus(): Promise<ApiStatus> {
   try {
-    const res = await fetch('/api/health');
-    if (res.ok) return 'online';
-    if (res.status === 503) return 'no-ai-key';
+    const res = await fetch(`${API_URL}/api/health`);
+    if (res.ok)
+      return 'online';
+    if (res.status === 503)
+      return 'no-ai-key';
     return 'offline';
   } catch {
     return 'offline';
