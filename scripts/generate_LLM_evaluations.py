@@ -6,12 +6,15 @@ Usage:
     python scripts/generate_LLM_evaluations.py               # all 2030 rows
     python scripts/generate_LLM_evaluations.py --start 8 --end 8
     python scripts/generate_LLM_evaluations.py --dry-run --start 8 --end 8
+    python scripts/generate_LLM_evaluations.py --workers 8   # more parallelism
 """
 
 import argparse
 import json
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import pandas as pd
@@ -30,6 +33,8 @@ from logic.box_segmenter import BoxSegmenter  # pyright: ignore[reportMissingImp
 CSV_PATH    = REPO_ROOT / "dataset" / "DrawEduMath_SimplifiedQA.csv"
 IMAGES_DIR  = REPO_ROOT / "dataset" / "DrawEduMath" / "Claude_Postprocessing"
 DEFAULT_OUT = REPO_ROOT / "dataset" / "DrawEduMath" / "LLM_evaluations_QA_Teacher.jsonl"
+
+_thread_local = threading.local()
 
 
 def load_done(output_path: Path) -> set[int]:
@@ -54,14 +59,100 @@ def build_prompt(questions: list[str]) -> str:
     )
 
 
+def _local_instances() -> tuple[AIAnswerEvaluator, BoxSegmenter]:
+    """Return (evaluator, box_segmenter) local to the calling thread."""
+    if not hasattr(_thread_local, "evaluator"):
+        _thread_local.evaluator    = AIAnswerEvaluator()
+        _thread_local.box_segmenter = BoxSegmenter()
+    return _thread_local.evaluator, _thread_local.box_segmenter
+
+
+def process_row(
+    row_num: int,
+    df: pd.DataFrame,
+    qa_column: str,
+) -> tuple[int, dict | None, str | None]:
+    """
+    Returns (row_num, record, skip_reason).
+    record is None for skipped rows; skip_reason is None for processed rows.
+    """
+    row = df.iloc[row_num - 1]
+
+    ext         = row["Image Name"].split(".")[-1].lower()
+    local_image = f"{row_num}.{ext}"
+    image_path  = IMAGES_DIR / local_image
+
+    if not image_path.exists():
+        return row_num, None, f"SKIP — {local_image} not found"
+
+    try:
+        qa_items = json.loads(row[qa_column])
+    except (json.JSONDecodeError, KeyError) as e:
+        return row_num, None, f"SKIP — QA parse error: {e}"
+
+    yn_items = [
+        (item["question"].strip(), item["answer"].strip())
+        for item in qa_items
+        if item["answer"].strip() in ("YES", "NO")
+    ]
+    if not yn_items:
+        return row_num, None, "SKIP — no YES/NO questions"
+
+    questions    = [q for q, _ in yn_items]
+    ground_truth = [a for _, a in yn_items]
+    prompt       = build_prompt(questions)
+
+    evaluator, box_segmenter = _local_instances()
+    image_bytes = box_segmenter.beautify_scan(image_path.read_bytes())
+    t0 = time.perf_counter()
+    raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt, response_schema=list[str])  # pyright: ignore[reportPrivateUsage]
+    elapsed_s = round(time.perf_counter() - t0, 3)
+
+    if raw_response is None:
+        model_answers: list[str] = []
+        parse_ok = False
+    else:
+        try:
+            parsed = json.loads(raw_response)
+            if isinstance(parsed, list) and all(isinstance(x, str) for x in parsed):
+                model_answers = [a.strip().upper() for a in parsed]
+            else:
+                model_answers = [str(x).strip().upper() for x in parsed] if isinstance(parsed, list) else []
+        except json.JSONDecodeError:
+            model_answers = []
+        parse_ok = len(model_answers) == len(questions)
+
+    comparisons = (
+        [m == g for m, g in zip(model_answers, ground_truth)]
+        if parse_ok else []
+    )
+
+    record = {
+        "row_num":              row_num,
+        "problem_id":           int(row["Problem ID"]),
+        "image_name":           row["Image Name"],
+        "local_image":          local_image,
+        "questions":            questions,
+        "ground_truth_answers": ground_truth,
+        "model_answers":        model_answers,
+        "comparisons":          comparisons,
+        "raw_response":         raw_response,
+        "parse_ok":             parse_ok,
+        "elapsed_s":            elapsed_s,
+    }
+
+    return row_num, record, None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate LLM evaluations for DrawEduMath")
     parser.add_argument("--qa-column", default="QA Teacher", help="CSV column to read QA from")
-    parser.add_argument("--start", type=int, default=1,    help="First row (1-indexed, inclusive)")
-    parser.add_argument("--end",   type=int, default=2030, help="Last row  (1-indexed, inclusive)")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--start",   type=int,  default=1,    help="First row (1-indexed, inclusive)")
+    parser.add_argument("--end",     type=int,  default=2030, help="Last row  (1-indexed, inclusive)")
+    parser.add_argument("--workers", type=int,  default=4,    help="Number of parallel API threads")
+    parser.add_argument("--output",  type=Path, default=DEFAULT_OUT)
     parser.add_argument("--dry-run", action="store_true",
-                        help="Print the prompt for the first row and exit without calling Gemini")
+                        help="Print the prompt for the first row and exit without calling the API")
     args = parser.parse_args()
 
     df    = pd.read_csv(CSV_PATH)
@@ -71,39 +162,27 @@ def main() -> None:
     if done_rows:
         print(f"Resuming — {len(done_rows)} rows already done.")
 
-    evaluator     = None if args.dry_run else AIAnswerEvaluator() # pyright: ignore[reportUnboundVariable] E0602
-    box_segmenter = None if args.dry_run else BoxSegmenter()
-    out_file  = None if args.dry_run else open(args.output, "a", encoding="utf-8")
+    # Build pending list, stopping at the first row that exceeds CSV bounds.
+    pending: list[int] = []
+    for rn in range(args.start, args.end + 1):
+        if rn - 1 >= len(df):
+            print(f"Row {rn}: beyond CSV length, stopping.")
+            break
+        if rn not in done_rows:
+            pending.append(rn)
 
-    try:
-        completed = 0
-        for row_num in range(args.start, args.end + 1):
-            if row_num in done_rows:
-                completed += 1
-                continue
-
-            idx = row_num - 1
-            if idx >= len(df):
-                print(f"Row {row_num}: beyond CSV length, stopping.")
-                break
-
-            row = df.iloc[idx]
-
-            # Resolve local image — extension comes from the CSV Image Name
+    # ── dry-run: print first processable row and exit ────────────────────────
+    if args.dry_run:
+        for row_num in pending:
+            row         = df.iloc[row_num - 1]
             ext         = row["Image Name"].split(".")[-1].lower()
             local_image = f"{row_num}.{ext}"
             image_path  = IMAGES_DIR / local_image
 
-            if not image_path.exists():
-                print(f"[{completed+1}/{total}] row={row_num}: SKIP — {local_image} not found")
-                completed += 1
-                continue
-
             try:
                 qa_items = json.loads(row[args.qa_column])
             except (json.JSONDecodeError, KeyError) as e:
-                print(f"[{completed+1}/{total}] row={row_num}: SKIP — QA parse error: {e}")
-                completed += 1
+                print(f"row={row_num}: SKIP — QA parse error: {e}")
                 continue
 
             yn_items = [
@@ -112,72 +191,44 @@ def main() -> None:
                 if item["answer"].strip() in ("YES", "NO")
             ]
             if not yn_items:
-                print(f"[{completed+1}/{total}] row={row_num}: SKIP — no YES/NO questions")
-                completed += 1
+                print(f"row={row_num}: SKIP — no YES/NO questions")
                 continue
 
             questions    = [q for q, _ in yn_items]
             ground_truth = [a for _, a in yn_items]
+            prompt       = build_prompt(questions)
 
-            prompt = build_prompt(questions)
+            print(f"=== Dry run: row {row_num} — {local_image} ===")
+            print(f"Image: {image_path} (would apply beautify_scan enhancement)")
+            print(f"\n--- Prompt ({len(questions)} questions) ---\n{prompt}")
+            print("\n--- Ground truth ---")
+            for q, a in zip(questions, ground_truth):
+                print(f"  Q: {q}")
+                print(f"  A: {a}")
+            return
+        return
 
-            if args.dry_run:
-                print(f"=== Dry run: row {row_num} — {local_image} ===")
-                print(f"Image: {image_path} (would apply beautify_scan enhancement)")
-                print(f"\n--- Prompt ({len(questions)} questions) ---\n{prompt}")
-                print("\n--- Ground truth ---")
-                for q, a in zip(questions, ground_truth):
-                    print(f"  Q: {q}")
-                    print(f"  A: {a}")
-                return
+    # ── threaded processing ───────────────────────────────────────────────────
+    completed  = total - len(pending)  # already-done + out-of-range rows
+    write_lock = threading.Lock()
 
-            image_bytes = box_segmenter.beautify_scan(image_path.read_bytes()) # pyright: ignore[reportOptionalMemberAccess] E0602
-            t0 = time.perf_counter()
-            raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt, response_schema=list[str]) # pyright: ignore[reportOptionalMemberAccess] E0602
-            elapsed_s = round(time.perf_counter() - t0, 3)
-
-            if raw_response is None:
-                model_answers: list[str] = []
-                parse_ok = False
-            else:
-                try:
-                    parsed = json.loads(raw_response)
-                    if isinstance(parsed, list) and all(isinstance(x, str) for x in parsed):
-                        model_answers = [a.strip().upper() for a in parsed]
-                    else:
-                        model_answers = [str(x).strip().upper() for x in parsed] if isinstance(parsed, list) else []
-                except json.JSONDecodeError:
-                    model_answers = []
-                parse_ok = len(model_answers) == len(questions)
-
-            comparisons = (
-                [m == g for m, g in zip(model_answers, ground_truth)]
-                if parse_ok else []
-            )
-
-            record = {
-                "row_num":              row_num,
-                "problem_id":           int(row["Problem ID"]),
-                "image_name":           row["Image Name"],
-                "local_image":          local_image,
-                "questions":            questions,
-                "ground_truth_answers": ground_truth,
-                "model_answers":        model_answers,
-                "comparisons":          comparisons,
-                "raw_response":         raw_response,
-                "parse_ok":             parse_ok,
-                "elapsed_s":            elapsed_s,
+    with open(args.output, "a", encoding="utf-8") as out_file:
+        with ThreadPoolExecutor(max_workers=args.workers) as executor:
+            futures = {
+                executor.submit(process_row, rn, df, args.qa_column): rn
+                for rn in pending
             }
-
-            assert out_file is not None
-            out_file.write(json.dumps(record, ensure_ascii=False) + "\n")
-            out_file.flush()
-
-            completed += 1
-            print(f"[{completed}/{total}] row={row_num} parse_ok={parse_ok} elapsed={elapsed_s}s")
-    finally:
-        if out_file:
-            out_file.close()
+            for future in as_completed(futures):
+                row_num, record, skip_reason = future.result()
+                with write_lock:
+                    completed += 1
+                    if skip_reason:
+                        print(f"[{completed}/{total}] row={row_num}: {skip_reason}")
+                    else:
+                        assert record is not None
+                        out_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+                        out_file.flush()
+                        print(f"[{completed}/{total}] row={row_num} parse_ok={record['parse_ok']} elapsed={record['elapsed_s']}s")
 
 
 if __name__ == "__main__":
