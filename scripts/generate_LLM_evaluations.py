@@ -11,6 +11,7 @@ Usage:
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -131,7 +132,9 @@ def main() -> None:
                 return
 
             image_bytes = box_segmenter.beautify_scan(image_path.read_bytes()) # pyright: ignore[reportOptionalMemberAccess] E0602
+            t0 = time.perf_counter()
             raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt, response_schema=list[str]) # pyright: ignore[reportOptionalMemberAccess] E0602
+            elapsed_s = round(time.perf_counter() - t0, 3)
 
             if raw_response is None:
                 model_answers: list[str] = []
@@ -163,6 +166,7 @@ def main() -> None:
                 "comparisons":          comparisons,
                 "raw_response":         raw_response,
                 "parse_ok":             parse_ok,
+                "elapsed_s":            elapsed_s,
             }
 
             assert out_file is not None
@@ -170,7 +174,7 @@ def main() -> None:
             out_file.flush()
 
             completed += 1
-            print(f"[{completed}/{total}] row={row_num} parse_ok={parse_ok}")
+            print(f"[{completed}/{total}] row={row_num} parse_ok={parse_ok} elapsed={elapsed_s}s")
     finally:
         if out_file:
             out_file.close()
