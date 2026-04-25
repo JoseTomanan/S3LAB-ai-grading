@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { API_URL } from '$lib/constants.ts';
 
-	let { section_id, isBulkDialogOpen = $bindable() } = $props();
+	interface Props { section_id: number; close: () => void }
+	let { section_id, close }: Props = $props();
 
 	import { invalidateAll } from '$app/navigation';
 	import { api, ApiError } from '$lib/utils/api.ts';
@@ -83,7 +84,7 @@
 		if (failed === 0) {
 			toast.success(`Added ${succeeded} student${succeeded === 1 ? '' : 's'}`);
 			await invalidateAll();
-			isBulkDialogOpen = false;
+			close();
 			formText = '';
 			results = null;
 		} else {

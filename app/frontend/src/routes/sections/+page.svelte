@@ -1,64 +1,64 @@
 <script lang="ts">
-  const { data } = $props();
+  import type { PageData } from './$types.ts';
+  import type { Section } from '$lib/index.ts';
+  import TopBar from '$lib/components/TopBar.svelte';
+  import BottomSheet from '$lib/components/BottomSheet.svelte';
+  import { Button } from '$lib/components/CustomButton/index.ts';
+  import Pagination from '$lib/components/Pagination.svelte';
+  import AddSection from './AddSection.svelte';
+  import IconPlus from '~icons/mdi/plus';
+  import IconClassroom from '~icons/mdi/google-classroom';
+  import IconChevronRight from '~icons/mdi/chevron-right';
 
-  import MdiPeopleAdd from "~icons/mdi/people-add";
-  import IconHome from '~icons/mdi/home';
-  import IconPapers from '~icons/mdi/text-box-multiple-outline';
-
-  import type { Section } from "$lib/index.ts";
-  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
-  import { cn } from '$lib/utils.ts';
-  import Pagination from "$lib/components/Pagination.svelte";
-  import * as Dialog from "$lib/components/ui/dialog/index.ts";
-  import AddSection from "./AddSection.svelte";
+  let { data }: { data: PageData } = $props();
 
   let sections: Section[] = $derived(data.sections);
   let paginationValues: Section[] = $state([]);
+  let showAdd = $state(false);
 </script>
 
+<div class="flex flex-col min-h-full">
+  {#snippet rightSlot()}
+    <button
+      onclick={() => { showAdd = true; }}
+      class="size-9 rounded-full bg-primary flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+    >
+      <IconPlus class="size-[22px]" />
+    </button>
+  {/snippet}
+  <TopBar title="Sections" right={rightSlot} />
 
-<nav class="w-full flex flex-row items-center justify-between mb-4
-            px-4 pt-6">
-  <Button variant="floating" href="/">
-    <IconHome class="size-8"/>
-  </Button>
-  <h1 class="italic">Sections</h1>
-  <Button variant="floating" href="/instances">
-    <IconPapers class="size-6.5 m-0.75"/>
-  </Button>
-</nav>
-<span class="-my-5"></span>
-
-<div class="container">
-  <div class="flex flex-col gap-3 relative">
-    <Dialog.Root>
-      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-2 items-center justify-center text-base *:font-semibold *:opacity-90')}>
-        <MdiPeopleAdd class="size-5"/>
-        <b>Add new section</b>
-      </Dialog.Trigger>
-      <AddSection />
-    </Dialog.Root>
-    
-    {#if sections.length == 0}
-      <div class="absolute top-0 right-0
-                  flex flex-col items-center text-center mt-2 opacity-60">
-        <p>No test instances yet. Tap above to add one!</p>
-      </div>
-
-    {:else}
-      {#each paginationValues as section}
-      <a href="/sections/{section.section_id}"
-          class={cn(buttonVariants({ variant: 'outline' }), 'justify-between px-3 py-1.5 *:text-base')}>
-        <span>{section.section_name}</span>
-        <span class="font-normal font-mono opacity-60">
-          {section.section_id}
-        </span>
+  <div class="flex flex-col gap-2.5 p-4">
+    {#each paginationValues as section}
+      <a
+        href="/sections/{section.section_id}"
+        class="bg-card rounded-xl shadow-sm px-4 py-3 flex items-center gap-3 no-underline hover:shadow-md transition-shadow"
+      >
+        <div class="size-[38px] rounded-[10px] bg-accent flex items-center justify-center shrink-0">
+          <IconClassroom class="size-5 text-foreground" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[14px] font-medium text-foreground truncate opacity-100">{section.section_name}</p>
+        </div>
+        <IconChevronRight class="size-5 text-foreground/55 shrink-0" />
       </a>
-      {/each}
+    {/each}
+
+    {#if sections.length === 0}
+      <p class="text-center text-muted-foreground text-sm py-8">No sections yet.</p>
     {/if}
+
+    <Button variant="add" onclick={() => { showAdd = true; }}>
+      <IconPlus class="size-[18px]" />
+      Add new section
+    </Button>
+
+    <Pagination rows={sections} perPage={6} bind:trimmedRows={paginationValues} />
   </div>
-  
-  <Pagination rows={sections}
-              perPage={6}
-              bind:trimmedRows={paginationValues} />
 </div>
+
+<BottomSheet bind:open={showAdd} title="New Section">
+  {#snippet children()}
+    <AddSection close={() => { showAdd = false; }} />
+  {/snippet}
+</BottomSheet>

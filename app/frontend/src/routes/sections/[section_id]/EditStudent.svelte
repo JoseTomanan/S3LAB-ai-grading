@@ -5,8 +5,10 @@
   import { api, ApiError } from '$lib/utils/api.ts';
   import toast from 'svelte-5-french-toast';
 
-  let { section_id = $bindable(), student_no, name = $bindable() } = $props();
+  interface Props { section_id: number; student_no: string; name: string }
+  let { section_id, student_no, name }: Props = $props();
 
+  import { untrack } from 'svelte';
   import * as Dialog from "$lib/components/ui/dialog/index.ts";
   import * as Select from "$lib/components/ui/select/index.ts";
   import Button from '$lib/components/CustomButton/button.svelte';
@@ -22,8 +24,8 @@
 
   let isRequestLoading = $state(false);
 
-  let formName: string = $state(name.slice());
-  let formSectionId: string = $state(section_id.toString())
+  let formName: string = $state(untrack(() => name.slice()));
+  let formSectionId: string = $state(untrack(() => section_id.toString()));
 
   let isWantsToDelete: boolean = $state(false);
   $effect(() => {
@@ -70,8 +72,6 @@
         })
       });
       toast.success("Student updated successfully!");
-      name = formName;
-      section_id = Number(formSectionId);
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
@@ -87,7 +87,6 @@
     try {
       await api(`${API_URL}/api/students/${student_no}`, { method: "DELETE" });
       toast.success("Student deleted successfully!");
-      section_id = -1;
       await invalidateAll();
     } catch (e) {
       toast.error(e instanceof ApiError
