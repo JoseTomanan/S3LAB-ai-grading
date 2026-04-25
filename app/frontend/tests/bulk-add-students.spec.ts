@@ -10,7 +10,7 @@ const CLEANUP_NOS = ['299900001', '299900002', '299900003'];
 const EXISTING_STUDENT_NO = '200011111';
 
 // Reliable selectors confirmed via debug inspection
-const BULK_TRIGGER = 'button:has-text("Add students in bulk")';
+const BULK_TRIGGER = 'button:has-text("Bulk add students")';
 const DIALOG = '[data-slot="dialog-content"]';
 
 test.afterAll(async ({ request }) => {

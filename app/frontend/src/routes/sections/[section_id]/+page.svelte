@@ -25,23 +25,25 @@
   <h1>Class list</h1>
   
   <div class="space-y-2">
-    <Dialog.Root bind:open={isAddDialogOpen}>
-      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-1 justify-center items-center w-full font-medium')}>
-        <IconPlus />
-        Add new student
-      </Dialog.Trigger>
-      <AddNewStudent bind:isAddDialogOpen
-                      section_id={data.section_id}/>
-    </Dialog.Root>
+    <div class="flex gap-2">
+      <Dialog.Root bind:open={isAddDialogOpen}>
+        <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-1 flex-row gap-x-1 justify-center items-center font-medium')}>
+          <IconPlus />
+          Add new student
+        </Dialog.Trigger>
+        <AddNewStudent bind:isAddDialogOpen
+                        section_id={data.section_id}/>
+      </Dialog.Root>
 
-    <Dialog.Root bind:open={isBulkDialogOpen}>
-      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-1 justify-center items-center w-full font-medium')}>
-        <IconTableMultiple />
-        Add students in bulk
-      </Dialog.Trigger>
-      <BulkAddStudents bind:isBulkDialogOpen
-                       section_id={data.section_id}/>
-    </Dialog.Root>
+      <Dialog.Root bind:open={isBulkDialogOpen}>
+        <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-1 flex-row gap-x-1 justify-center items-center font-medium')}>
+          <IconTableMultiple />
+          Bulk add students
+        </Dialog.Trigger>
+        <BulkAddStudents bind:isBulkDialogOpen
+                         section_id={data.section_id}/>
+      </Dialog.Root>
+    </div>
 
     {#each students as student}
       <Card class="flex flex-row items-center justify-between">
