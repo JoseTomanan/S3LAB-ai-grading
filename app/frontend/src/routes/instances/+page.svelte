@@ -1,81 +1,84 @@
 <script lang="ts">
-  const { data } = $props();
-
-  import MdiPaperAddOutline from '~icons/mdi/paper-add';
-  import IconHome from '~icons/mdi/home';
-  import IconSections from '~icons/mdi/people-outline';
-  import IconDone from '~icons/mdi/checkbox-marked-circle';
-  import IconNotDone from '~icons/mdi/checkbox-blank-circle';
-
+  import type { PageData } from './$types.ts';
   import type { TestInstance } from '$lib/index.ts';
-  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
-  import { cn } from '$lib/utils.ts';
 
+  import TopBar from '$lib/components/TopBar.svelte';
+  import BottomSheet from '$lib/components/BottomSheet.svelte';
+  import { Button } from '$lib/components/CustomButton/index.ts';
   import Pagination from '$lib/components/Pagination.svelte';
-  import * as Dialog from "$lib/components/ui/dialog/index.js";
   import AddTestInstance from './AddTestInstance.svelte';
-	import { Separator } from '$lib/components/ui/separator/index.ts';
+
+  import IconPlus from '~icons/mdi/plus';
+  import IconDone from '~icons/mdi/file-check-outline';
+  import IconPending from '~icons/mdi/file-clock-outline';
+
+  let { data }: { data: PageData } = $props();
 
   let instances: TestInstance[] = $derived(data.instances);
   let paginationValues: TestInstance[] = $state([]);
+  let showAdd = $state(false);
 </script>
 
+<div class="flex flex-col min-h-full">
+  {#snippet rightSlot()}
+    <button
+      onclick={() => showAdd = true}
+      class="size-9 rounded-full bg-primary flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+    >
+      <IconPlus class="size-[22px]" />
+    </button>
+  {/snippet}
+  <TopBar title="Test Instances" right={rightSlot} />
 
-
-<nav class="w-full flex flex-row items-center justify-between mb-4
-            px-4 pt-6">
-  <span class="flex flex-row gap-x-2">
-    <Button variant="floating"
-            href="/">
-      <IconHome class="size-8"/>
-    </Button>
-  </span>
-  <h1>Test instances</h1>
-  <Button variant="floating"
-          href="/sections">
-    <IconSections class="size-8"/>
-  </Button>
-</nav>
-<span class="-my-5"></span>
-
-<div class="container">
-
-  <div class="flex flex-col gap-3 relative">
-    <Dialog.Root>
-      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-2 items-center justify-center text-base *:font-semibold *:opacity-90')}>
-        <MdiPaperAddOutline class="size-5"/>
-        <b>Add new test instance</b>
-      </Dialog.Trigger>
-      <AddTestInstance />
-    </Dialog.Root>
-    
-    {#if instances.length == 0}
-      <div class="absolute top-0 right-0
-                  flex flex-col items-center text-center mt-2 opacity-60">
-        <p>No test instances yet. Tap above to add one!</p>
-      </div>
-    
-    {:else}
-      {#each paginationValues as instance}
-      <a href="/instances/{instance.test_id}/items"
-          class={cn(buttonVariants({ variant: 'outline' }), 'justify-between px-3 py-1.5 *:text-base')}>
-        <span>
-          {instance.name} &ThinSpace;&middot;&ThinSpace; {instance.test_id.split("_")[0]}
-        </span>
-        <h5 class="font-normal flex flex-row items-center gap-x-1.5 ml-0.5
-                    *:opacity-60">
-          {new Date(instance.date).toLocaleDateString()}
-          {#if instance.is_done_rendering}
-            <IconDone class="size-3"/>
+  <div class="flex flex-col gap-2.5 p-4">
+    {#each paginationValues as inst}
+      <a
+        href="/instances/{inst.test_id}/papers"
+        class="bg-card rounded-xl shadow-sm px-4 py-3 flex items-center gap-3 no-underline hover:shadow-md transition-shadow"
+      >
+        <div class="size-[38px] rounded-[10px] flex items-center justify-center shrink-0
+          {inst.is_done_rendering ? 'bg-secondary-300' : 'bg-accent'}">
+          {#if inst.is_done_rendering}
+            <IconDone class="size-5 text-secondary-700" />
           {:else}
-            <IconNotDone class="size-3"/>
+            <IconPending class="size-5 text-primary-700" />
           {/if}
-        </h5>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <p class="text-[14px] font-medium text-foreground truncate opacity-100">{inst.name}</p>
+          <p class="text-[11px] text-foreground/55 mt-0.5 font-mono opacity-100">{inst.test_id}</p>
+        </div>
+
+        <div class="flex flex-col items-end gap-1 shrink-0">
+          <span class="text-[11px] text-foreground/55">
+            {new Date(inst.date).toLocaleDateString()}
+          </span>
+          <span class="text-[12px] font-heading font-bold px-2 py-0.5 rounded-full
+            {inst.is_done_rendering
+              ? 'bg-secondary-300 text-secondary-700'
+              : 'bg-muted text-muted-foreground'}">
+            {inst.is_done_rendering ? 'Ready' : 'Pending'}
+          </span>
+        </div>
       </a>
-      {/each}
+    {/each}
+
+    {#if instances.length === 0}
+      <p class="text-center text-muted-foreground text-sm py-8">No test instances yet.</p>
     {/if}
+
+    <Button variant="add" onclick={() => { showAdd = true; }}>
+      <IconPlus class="size-[18px]" />
+      Add test instance
+    </Button>
+
+    <Pagination rows={instances} perPage={6} bind:trimmedRows={paginationValues} />
   </div>
-  <Pagination rows={instances}
-              perPage={6}
-              bind:trimmedRows={paginationValues} />
 </div>
+
+<BottomSheet bind:open={showAdd} title="New Test Instance">
+  {#snippet children()}
+    <AddTestInstance close={() => showAdd = false} />
+  {/snippet}
+</BottomSheet>
