@@ -115,6 +115,7 @@
   {#if perStudentStatuses.length === 0}
     <p class="text-center text-muted-foreground text-sm py-8">No papers yet.</p>
   {:else}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
     {#each perStudentStatuses as paper}
       <a
         href="/instances/{data.test_id}/papers/{paper.student_no}"
@@ -162,6 +163,7 @@
         </div>
       </a>
     {/each}
+    </div>
   {/if}
 </div>
 

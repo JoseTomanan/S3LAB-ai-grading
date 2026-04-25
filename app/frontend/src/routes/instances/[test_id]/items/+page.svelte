@@ -38,6 +38,7 @@
     </button>
   </div>
 
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
   {#each [{ label: 'Short Form', items: shortFormItems }, { label: 'Problem-Solving', items: probSolItems }] as group}
     <div class="bg-card rounded-xl shadow-sm px-3.5 py-3">
       <p class="text-[12px] font-bold uppercase tracking-[0.05em] text-foreground/55 mb-2.5">
@@ -72,6 +73,7 @@
       {/if}
     </div>
   {/each}
+  </div>
 </div>
 
 <BottomSheet bind:open={showAdd} title="New Test Item">

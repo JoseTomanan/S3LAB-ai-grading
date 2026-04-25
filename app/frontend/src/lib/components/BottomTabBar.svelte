@@ -16,11 +16,15 @@
   }
 </script>
 
-<nav class="bg-card border-t border-border h-[60px] flex shrink-0">
+<nav class="bg-card shrink-0
+  border-t border-border h-[60px] flex flex-row
+  md:border-t-0 md:border-r md:h-full md:w-16 md:flex-col md:py-4
+">
   {#each tabs as tab}
     <a
       href={tab.href}
-      class="flex-1 flex flex-col items-center justify-center gap-[3px] no-underline"
+      class="flex-1 flex flex-col items-center justify-center gap-[3px] no-underline
+             md:flex-none md:w-full md:h-[60px] md:gap-1"
     >
       <tab.icon
         class="size-[22px] transition-colors {isActive(tab.href) ? 'text-primary-700' : 'text-foreground/55'}"

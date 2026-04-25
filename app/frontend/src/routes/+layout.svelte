@@ -30,22 +30,30 @@
 </svelte:head>
 
 <Tooltip.Provider>
-  <div class="min-h-dvh flex justify-center bg-background">
-    <div class="w-full max-w-[480px] flex flex-col min-h-dvh">
-      <div class="flex-1 flex flex-col min-h-0 overflow-y-auto pb-[60px]">
+  <!-- Tablet+ sidebar: fixed left column -->
+  <aside class="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:bottom-0 md:z-10">
+    <BottomTabBar />
+  </aside>
+
+  <!-- Main content: phone-width centered on mobile, full-width on tablet+ -->
+  <div class="min-h-dvh bg-background md:pl-16">
+    <div class="w-full max-w-[480px] mx-auto md:max-w-none flex flex-col min-h-dvh">
+      <div class="flex-1 flex flex-col min-h-0 overflow-y-auto pb-[60px] md:pb-0">
         {@render children()}
       </div>
-      <div class="fixed bottom-0 left-0 right-0 flex justify-center z-10 pointer-events-none">
-        <div class="w-full max-w-[480px] pointer-events-auto">
-          <BottomTabBar />
-        </div>
-      </div>
+    </div>
+  </div>
+
+  <!-- Mobile bottom tab bar -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 flex justify-center z-10 pointer-events-none">
+    <div class="w-full max-w-[480px] pointer-events-auto">
+      <BottomTabBar />
     </div>
   </div>
 
   <!-- navigating indicator -->
   {#if navigating.to}
-    <div class="fixed bottom-[68px] right-3 z-20">
+    <div class="fixed bottom-[68px] right-3 z-20 md:bottom-3">
       <Spinner class="size-8 text-primary" />
     </div>
   {/if}

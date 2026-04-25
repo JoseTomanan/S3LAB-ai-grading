@@ -28,32 +28,35 @@
   {/snippet}
   <TopBar title="Sections" right={rightSlot} />
 
-  <div class="flex flex-col gap-2.5 p-4">
-    {#each paginationValues as section}
-      <a
-        href="/sections/{section.section_id}"
-        class="bg-card rounded-xl shadow-sm px-4 py-3 flex items-center gap-3 no-underline hover:shadow-md transition-shadow"
-      >
-        <div class="size-[38px] rounded-[10px] bg-accent flex items-center justify-center shrink-0">
-          <IconClassroom class="size-5 text-foreground" />
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-[14px] font-medium text-foreground truncate opacity-100">{section.section_name}</p>
-        </div>
-        <IconChevronRight class="size-5 text-foreground/55 shrink-0" />
-      </a>
-    {/each}
+  <div class="p-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+      {#each paginationValues as section}
+        <a
+          href="/sections/{section.section_id}"
+          class="bg-card rounded-xl shadow-sm px-4 py-3 flex items-center gap-3 no-underline hover:shadow-md transition-shadow"
+        >
+          <div class="size-[38px] rounded-[10px] bg-accent flex items-center justify-center shrink-0">
+            <IconClassroom class="size-5 text-foreground" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[14px] font-medium text-foreground truncate opacity-100">{section.section_name}</p>
+          </div>
+          <IconChevronRight class="size-5 text-foreground/55 shrink-0" />
+        </a>
+      {/each}
+    </div>
 
     {#if sections.length === 0}
       <p class="text-center text-muted-foreground text-sm py-8">No sections yet.</p>
     {/if}
 
-    <Button variant="add" onclick={() => { showAdd = true; }}>
-      <IconPlus class="size-[18px]" />
-      Add new section
-    </Button>
-
-    <Pagination rows={sections} perPage={6} bind:trimmedRows={paginationValues} />
+    <div class="mt-2.5 flex flex-col gap-2">
+      <Button variant="add" onclick={() => { showAdd = true; }}>
+        <IconPlus class="size-[18px]" />
+        Add new section
+      </Button>
+      <Pagination rows={sections} perPage={6} bind:trimmedRows={paginationValues} />
+    </div>
   </div>
 </div>
 

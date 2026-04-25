@@ -46,35 +46,37 @@
   </div>
 
   <!-- student cards -->
-  {#each students as student}
-    <div class="bg-card rounded-xl shadow-sm px-4 py-3 flex items-center gap-3">
-      <!-- avatar -->
-      <div class="size-[34px] rounded-full bg-accent flex items-center justify-center shrink-0">
-        <span class="font-heading text-[13px] font-extrabold text-primary-700 tracking-[-0.02em]">
-          {student.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
-        </span>
-      </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+    {#each students as student}
+      <div class="bg-card rounded-xl shadow-sm px-4 py-3 flex items-center gap-3">
+        <!-- avatar -->
+        <div class="size-[34px] rounded-full bg-accent flex items-center justify-center shrink-0">
+          <span class="font-heading text-[13px] font-extrabold text-primary-700 tracking-[-0.02em]">
+            {student.name.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}
+          </span>
+        </div>
 
-      <div class="flex-1 min-w-0">
-        <p class="text-[14px] font-medium text-foreground truncate opacity-100">{student.name}</p>
-        <p class="text-[11px] font-mono text-foreground/55 mt-0.5 opacity-100">{student.student_no}</p>
-      </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[14px] font-medium text-foreground truncate opacity-100">{student.name}</p>
+          <p class="text-[11px] font-mono text-foreground/55 mt-0.5 opacity-100">{student.student_no}</p>
+        </div>
 
-      <!-- edit (Dialog kept for destructive UX) -->
-      <Dialog.Root>
-        <Dialog.Trigger
-          class="size-8 rounded-full flex items-center justify-center text-foreground/55 hover:text-foreground hover:bg-muted transition-colors"
-        >
-          <IconDots class="size-5" />
-        </Dialog.Trigger>
-        <EditStudent
-          section_id={sectionId}
-          student_no={student.student_no}
-          name={student.name}
-        />
-      </Dialog.Root>
-    </div>
-  {/each}
+        <!-- edit (Dialog kept for destructive UX) -->
+        <Dialog.Root>
+          <Dialog.Trigger
+            class="size-8 rounded-full flex items-center justify-center text-foreground/55 hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <IconDots class="size-5" />
+          </Dialog.Trigger>
+          <EditStudent
+            section_id={sectionId}
+            student_no={student.student_no}
+            name={student.name}
+          />
+        </Dialog.Root>
+      </div>
+    {/each}
+  </div>
 
   {#if students.length === 0}
     <p class="text-center text-muted-foreground text-sm py-8">No students yet.</p>
