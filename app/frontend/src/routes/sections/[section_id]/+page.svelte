@@ -25,9 +25,12 @@
   <h1>Class list</h1>
   
   <div class="space-y-2">
-    <div class="flex gap-2">
+    <div class="flex flex-row gap-x-0.5">
       <Dialog.Root bind:open={isAddDialogOpen}>
-        <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-1 flex-row gap-x-1 justify-center items-center font-medium')}>
+        <Dialog.Trigger class={
+                  cn(buttonVariants({ variant: 'outline' }),
+                  'flex flex-5 flex-row gap-x-1 justify-center items-center font-medium rounded-r-none')
+                }>
           <IconPlus />
           Add new student
         </Dialog.Trigger>
@@ -36,9 +39,11 @@
       </Dialog.Root>
 
       <Dialog.Root bind:open={isBulkDialogOpen}>
-        <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-1 flex-row gap-x-1 justify-center items-center font-medium')}>
+        <Dialog.Trigger class={
+                  cn(buttonVariants({ variant: 'outline' }),
+                  'flex flex-1 flex-row gap-x-1 justify-center items-center font-medium rounded-l-none'
+                )}>
           <IconTableMultiple />
-          Bulk add students
         </Dialog.Trigger>
         <BulkAddStudents bind:isBulkDialogOpen
                          section_id={data.section_id}/>
