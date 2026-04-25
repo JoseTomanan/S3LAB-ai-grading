@@ -7,6 +7,7 @@
   import BulkUpload from './BulkUpload.svelte';
   import ExportSheets from './ExportSheets.svelte';
   import TopBar from '$lib/components/TopBar.svelte';
+  import * as Sheet from '$lib/components/ui/sheet/index.ts';
 
   import IconUpload from '~icons/mdi/tray-upload';
 
@@ -87,9 +88,11 @@
   </div>
 </div>
 
-<BulkUpload
-  test_instance={activeTestInstance}
-  defaultNumBoxes={data.test_items?.length ?? 2}
-  onuploadcomplete={invalidateAll}
-  open={isBulkUploadOpen}
-/>
+<Sheet.Root bind:open={isBulkUploadOpen}>
+  <BulkUpload
+    test_instance={activeTestInstance}
+    defaultNumBoxes={data.test_items?.length ?? 2}
+    onuploadcomplete={invalidateAll}
+    open={isBulkUploadOpen}
+  />
+</Sheet.Root>

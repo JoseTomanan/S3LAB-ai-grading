@@ -184,12 +184,13 @@
 
 
 
-<div class="flex flex-col gap-y-2 items-center">
-  <span class="flex flex-row justify-between items-baseline w-full
-                [&>h1]:font-semibold [&>h5]:opacity-60">
-    <h1>Process image</h1>
-    <h5>For {data.student_no}</h5>
-  </span>
+<div class="p-4 flex flex-col gap-y-2 items-center">
+  <div class="flex items-center justify-between w-full mb-1">
+    <span class="font-heading text-[20px] font-extrabold text-foreground tracking-[-0.04em]">Process Image</span>
+    <span class="text-[12px] font-mono px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+      {data.student_no}
+    </span>
+  </div>
 
   <!-- <div> -->
     <div class="subcontainer flex flex-row gap-2 min-w-0">
