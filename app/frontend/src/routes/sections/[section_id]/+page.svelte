@@ -3,6 +3,7 @@
 
 	import MdiEdit from "~icons/mdi/edit";
   import IconPlus from "~icons/mdi/plus";
+  import IconTableMultiple from "~icons/mdi/table-multiple";
 
 	import type { Student } from '$lib/index.ts';
 	import * as Dialog from '$lib/components/ui/dialog/index.ts';
@@ -11,10 +12,12 @@
 	import Card from "$lib/components/Card.svelte";
 	import AddNewStudent from './AddNewStudent.svelte';
 	import EditStudent from './EditStudent.svelte';
+	import BulkAddStudents from './BulkAddStudents.svelte';
 
 	let students: Student[] = $derived(data.students);
 
   let isAddDialogOpen: boolean = $state(false);
+  let isBulkDialogOpen: boolean = $state(false);
 </script>
 
 
@@ -29,6 +32,15 @@
       </Dialog.Trigger>
       <AddNewStudent bind:isAddDialogOpen
                       section_id={data.section_id}/>
+    </Dialog.Root>
+
+    <Dialog.Root bind:open={isBulkDialogOpen}>
+      <Dialog.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'flex flex-row gap-x-1 justify-center items-center w-full font-medium')}>
+        <IconTableMultiple />
+        Add students in bulk
+      </Dialog.Trigger>
+      <BulkAddStudents bind:isBulkDialogOpen
+                       section_id={data.section_id}/>
     </Dialog.Root>
 
     {#each students as student}
