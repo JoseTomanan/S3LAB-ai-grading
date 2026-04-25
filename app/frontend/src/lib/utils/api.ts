@@ -18,7 +18,7 @@ import { API_URL } from '$lib/constants';
 /** Health check. Distinguishes a valid backend from one with a missing/invalid Gemini key. */
 export async function getApiStatus(): Promise<ApiStatus> {
   try {
-    const res = await fetch(`${API_URL}/health`);
+    const res = await fetch(`${API_URL}/api/health`);
     if (res.ok)
       return 'online';
     if (res.status === 503)
