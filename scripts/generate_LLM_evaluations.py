@@ -34,6 +34,8 @@ CSV_PATH    = REPO_ROOT / "dataset" / "DrawEduMath_SimplifiedQA.csv"
 IMAGES_DIR  = REPO_ROOT / "dataset" / "DrawEduMath" / "Claude_Postprocessing"
 DEFAULT_OUT = REPO_ROOT / "dataset" / "DrawEduMath" / "LLM_evaluations_QA_Teacher.jsonl"
 
+MODEL = "gemini-2.5-pro"  # "gemini-2.5-pro" or "gemini-2.5-flash"
+
 _thread_local = threading.local()
 
 
@@ -105,7 +107,7 @@ def process_row(
     evaluator, box_segmenter = _local_instances()
     image_bytes = box_segmenter.beautify_scan(image_path.read_bytes())
     t0 = time.perf_counter()
-    raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt, response_schema=list[str])  # pyright: ignore[reportPrivateUsage]
+    raw_response: str | None = evaluator._send_image_prompt(image_bytes, prompt, is_flash="flash" in MODEL, response_schema=list[str])  # pyright: ignore[reportPrivateUsage]
     elapsed_s = round(time.perf_counter() - t0, 3)
 
     if raw_response is None:
