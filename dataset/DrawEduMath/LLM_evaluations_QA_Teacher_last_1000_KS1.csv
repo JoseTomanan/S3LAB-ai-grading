@@ -1,0 +1,745 @@
+Metric,Value
+Number of tests,739
+Number correct,436
+Accuracy rate,59.00%
+
+row_num,problem_id,image_name,question_idx,question,model_answer,ground_truth,correct
+1107,1524632,35eb70c1-66a0-4176-81ea-f1e71db08e1f.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1105,1524632,235717ba-bd54-4d71-b21b-c4e6561fa413.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,YES,True
+1106,1524632,2b0dd8c2-6e49-4540-8b24-25707b673df9.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1104,1524632,084bdfdd-df2e-465c-b9e5-e9badbe73d27.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1110,1524632,6fb55f24-03b3-4dd8-a2ae-52db7c457aac.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,NO,YES,False
+1109,1524632,64f4fb10-f825-480b-96ce-ac9760aa6379.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1108,1524632,421c37d4-773f-4a52-aa19-28c934c83bd0.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1111,1524632,93d1e3de-958b-4157-a82c-d2fcf0fc6263.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1112,1524632,9836b153-08ab-44dc-81c1-f1d6e1614ff6.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1113,1524632,ab6bae7b-f095-443f-aca1-1d5f916bf609.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,NO,YES,False
+1115,1524632,f0aeca24-ae47-4caa-856d-07757cc3308f.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,YES,NO,False
+1114,1524632,af2f6246-98b7-4358-8a74-8c7c70ac81bd.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,NO,NO,True
+1116,1524632,fabb2622-375f-45ba-9cc1-07e02787a19d.jpeg,0,Did the student draw a parallelogram that is not a rectangle?,NO,NO,True
+1117,1524632,ffbbf36c-1fb1-485b-bbb1-19ff8b84cdc7.png,0,Did the student draw a parallelogram that is not a rectangle?,NO,NO,True
+1118,1524656,34aaa819-3495-42d9-bd5a-9c020f98239b.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1118,1524656,34aaa819-3495-42d9-bd5a-9c020f98239b.jpeg,1,Does the triangle the student drew have an area of 24 square units?,NO,YES,False
+1119,1524656,3b2449e2-bde2-430c-811a-7db94e5be765.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1119,1524656,3b2449e2-bde2-430c-811a-7db94e5be765.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,NO,False
+1120,1524656,4709d40c-5606-4f8b-a4bf-2746ae1ecb2b.png,0,Did the student draw a triangle?,NO,NO,True
+1120,1524656,4709d40c-5606-4f8b-a4bf-2746ae1ecb2b.png,1,Does the triangle the student drew have an area of 24 square units?,NO,NO,True
+1121,1524656,4acd13d6-973b-410c-80ab-1858df664a4c.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1121,1524656,4acd13d6-973b-410c-80ab-1858df664a4c.jpeg,1,Does the triangle the student drew have an area of 24 square units?,NO,NO,True
+1122,1524656,6f0abf7b-974a-4a0b-8f5b-443794e553e9.png,0,Did the student draw a triangle?,NO,YES,False
+1122,1524656,6f0abf7b-974a-4a0b-8f5b-443794e553e9.png,1,Does the triangle the student drew have an area of 24 square units?,NO,YES,False
+1123,1524656,70b57b7d-4a34-4452-9747-98812942a5d1.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1123,1524656,70b57b7d-4a34-4452-9747-98812942a5d1.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,NO,False
+1125,1524656,798e9755-d2d5-494e-9ff0-9367656ad9fb.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1125,1524656,798e9755-d2d5-494e-9ff0-9367656ad9fb.jpeg,1,Does the triangle the student drew have an area of 24 square units?,NO,YES,False
+1124,1524656,76baec53-9e46-4d86-95be-28fd4853a48c.png,0,Did the student draw a triangle?,YES,YES,True
+1124,1524656,76baec53-9e46-4d86-95be-28fd4853a48c.png,1,Does the triangle the student drew have an area of 24 square units?,CANNOT BE DETERMINED,YES,False
+1126,1524656,85665e4b-d520-41e9-8216-066d2d52d54c.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1126,1524656,85665e4b-d520-41e9-8216-066d2d52d54c.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,NO,False
+1127,1524656,894e8e22-7eac-4879-85e2-dbcdf0d1df11.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1127,1524656,894e8e22-7eac-4879-85e2-dbcdf0d1df11.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,NO,False
+1128,1524656,8a15114b-488c-4f6f-8220-f734c3b0b284.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1128,1524656,8a15114b-488c-4f6f-8220-f734c3b0b284.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,NO,False
+1129,1524656,ad30356b-8c61-4fd7-b69d-9d3a34174c5b.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1129,1524656,ad30356b-8c61-4fd7-b69d-9d3a34174c5b.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,YES,True
+1130,1524656,f2a2c293-2cb6-4751-a47c-26d345fc1829.jpeg,0,Did the student draw a triangle?,YES,YES,True
+1130,1524656,f2a2c293-2cb6-4751-a47c-26d345fc1829.jpeg,1,Does the triangle the student drew have an area of 24 square units?,YES,YES,True
+1297,1532571,0da7e0ac-815f-4651-89a5-743c8e47f818.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1131,1524656,f32c0c27-7cf8-4e16-85ec-78c58429cdf2.png,0,Did the student draw a triangle?,NO,YES,False
+1131,1524656,f32c0c27-7cf8-4e16-85ec-78c58429cdf2.png,1,Does the triangle the student drew have an area of 24 square units?,NO,YES,False
+1299,1532571,1d317f04-e6bb-45a5-a837-a86e610d99aa.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1298,1532571,170bfd52-79ea-4865-887f-3baa440071a8.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1300,1532571,2914e1ce-8f9e-4183-a47f-e9f91e2789b2.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1302,1532571,37287da6-689e-4611-a8c6-5455007353d8.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1301,1532571,350261d9-e84d-4d52-9599-0e16763efbb4.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1304,1532571,3cd2d2a5-287b-460c-a454-d084fa304bc0.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1303,1532571,3be65bc8-7bf5-4c93-a2cf-b49f24e9b70a.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1305,1532571,5756803a-2ac9-4005-a6b7-47fa9016553b.png,0,Did the student use the standard division algorithm?,YES,YES,True
+1308,1532571,93dfa228-e20d-464d-88c0-1a0eb612a7c7.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1306,1532571,5d478751-5449-4651-9ccc-6ea3dd05fded.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1307,1532571,6868ca2d-e6ac-4f3d-8b75-b03ab3dada8a.jpeg,0,Did the student use the standard division algorithm?,NO,NO,True
+1310,1532571,f1aae905-e2d9-46a6-a0ca-7ccd66a0ed5e.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1309,1532571,9cbd98a8-62bc-4ec9-aa76-abc3f2d48702.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1309,1532571,9cbd98a8-62bc-4ec9-aa76-abc3f2d48702.jpeg,1,Are there any other strategies you could use?,YES,YES,True
+1311,1532572,0070c15f-a89f-44e2-8aed-f26022237c5a.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1311,1532572,0070c15f-a89f-44e2-8aed-f26022237c5a.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1311,1532572,0070c15f-a89f-44e2-8aed-f26022237c5a.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1312,1532572,027c8d27-f341-4d6b-afe3-0dbe84cd029a.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,NO,False
+1312,1532572,027c8d27-f341-4d6b-afe3-0dbe84cd029a.jpeg,1,Did the student get a quotient of 0.06?,YES,NO,False
+1312,1532572,027c8d27-f341-4d6b-afe3-0dbe84cd029a.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1315,1532572,48809dd9-2583-4d6d-9010-ebbfb2d231f0.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1315,1532572,48809dd9-2583-4d6d-9010-ebbfb2d231f0.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1315,1532572,48809dd9-2583-4d6d-9010-ebbfb2d231f0.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1314,1532572,1898d74e-af31-4c57-ac90-a0d84440fe16.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1314,1532572,1898d74e-af31-4c57-ac90-a0d84440fe16.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1314,1532572,1898d74e-af31-4c57-ac90-a0d84440fe16.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1316,1532572,748b6478-daa6-4eac-9797-2d97bdebfe8a.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1316,1532572,748b6478-daa6-4eac-9797-2d97bdebfe8a.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1316,1532572,748b6478-daa6-4eac-9797-2d97bdebfe8a.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1318,1532572,8d9b4aea-3b69-4ad5-aef9-d309364419eb.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1318,1532572,8d9b4aea-3b69-4ad5-aef9-d309364419eb.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1318,1532572,8d9b4aea-3b69-4ad5-aef9-d309364419eb.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1317,1532572,7d60bb86-62ad-4a93-9dc5-679f5ad1f983.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1317,1532572,7d60bb86-62ad-4a93-9dc5-679f5ad1f983.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1317,1532572,7d60bb86-62ad-4a93-9dc5-679f5ad1f983.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1313,1532572,04478b38-5064-4ce5-8267-be093d9d3211.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,NO,YES,False
+1313,1532572,04478b38-5064-4ce5-8267-be093d9d3211.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1313,1532572,04478b38-5064-4ce5-8267-be093d9d3211.jpeg,2,Did the student use the standard division algorithm?,NO,NO,True
+1319,1532572,a3160413-175f-422e-9384-8caeb72f18d8.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1319,1532572,a3160413-175f-422e-9384-8caeb72f18d8.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1319,1532572,a3160413-175f-422e-9384-8caeb72f18d8.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1320,1532572,ac571e03-5b75-43fd-925e-66b1607c862a.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1320,1532572,ac571e03-5b75-43fd-925e-66b1607c862a.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1320,1532572,ac571e03-5b75-43fd-925e-66b1607c862a.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1321,1532572,b1e05193-f018-4c8a-8fcc-bca979c724c0.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,NO,YES,False
+1321,1532572,b1e05193-f018-4c8a-8fcc-bca979c724c0.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1321,1532572,b1e05193-f018-4c8a-8fcc-bca979c724c0.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1322,1532572,be02555c-8037-4ef3-a8a7-d7287fe3844a.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1322,1532572,be02555c-8037-4ef3-a8a7-d7287fe3844a.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1322,1532572,be02555c-8037-4ef3-a8a7-d7287fe3844a.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1323,1532572,d2495466-61aa-42fa-aa60-1f21007a73a3.jpeg,0,Did the student use the standard division algorithm?,YES,YES,True
+1325,1532572,e10876de-38ad-4406-a1b0-eefacbcbd560.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1325,1532572,e10876de-38ad-4406-a1b0-eefacbcbd560.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1325,1532572,e10876de-38ad-4406-a1b0-eefacbcbd560.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1327,1532573,05cc38b3-550e-4e34-add3-c36829298b42.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1327,1532573,05cc38b3-550e-4e34-add3-c36829298b42.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1324,1532572,d94b22e1-071d-45cf-9c82-ad7ec5c51789.jpeg,0,Did the student correctly put 3 inside the division house and 50 outside?,YES,YES,True
+1324,1532572,d94b22e1-071d-45cf-9c82-ad7ec5c51789.jpeg,1,Did the student get a quotient of 0.06?,YES,YES,True
+1324,1532572,d94b22e1-071d-45cf-9c82-ad7ec5c51789.jpeg,2,Did the student use the standard division algorithm?,YES,YES,True
+1330,1532573,3cb98a0c-7aee-44a8-9a04-124b5147e0db.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1330,1532573,3cb98a0c-7aee-44a8-9a04-124b5147e0db.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1328,1532573,0d3c47ca-e3c0-42b3-8cc6-013a3318203d.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,NO,YES,False
+1328,1532573,0d3c47ca-e3c0-42b3-8cc6-013a3318203d.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1326,1532573,01a2a622-9d37-434d-8242-a167e5e62c92.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1326,1532573,01a2a622-9d37-434d-8242-a167e5e62c92.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1329,1532573,10fc0143-680a-43b1-b7f0-87d5df6e6331.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1329,1532573,10fc0143-680a-43b1-b7f0-87d5df6e6331.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1331,1532573,66f93f92-dd25-4a1d-9df5-38a3d4d6da44.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1331,1532573,66f93f92-dd25-4a1d-9df5-38a3d4d6da44.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1333,1532573,76892a16-b99d-4729-b70d-cb9482dee60b.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1333,1532573,76892a16-b99d-4729-b70d-cb9482dee60b.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1332,1532573,6a518d8e-11fd-4db9-8df5-de0da78789fa.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1332,1532573,6a518d8e-11fd-4db9-8df5-de0da78789fa.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1334,1532573,92557428-3874-494e-b202-0ad7761fe1ba.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1334,1532573,92557428-3874-494e-b202-0ad7761fe1ba.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1336,1532573,da0fda2b-6882-49c2-8129-6822f915aec8.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1336,1532573,da0fda2b-6882-49c2-8129-6822f915aec8.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1337,1532573,e10593da-83d5-4ae7-a76a-7babee9bb34d.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1337,1532573,e10593da-83d5-4ae7-a76a-7babee9bb34d.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1335,1532573,d5fcc0bf-d54d-4bcb-9d32-ce2c8c2d6858.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,NO,YES,False
+1335,1532573,d5fcc0bf-d54d-4bcb-9d32-ce2c8c2d6858.jpeg,1,Is the quotient 0.28?,NO,YES,False
+1338,1532573,f6d158e8-d059-4d54-8f08-3944381fe1ce.jpeg,0,Did the student correctly put 7 on the inside of the division house and 25 on the outside of the division house?,YES,YES,True
+1338,1532573,f6d158e8-d059-4d54-8f08-3944381fe1ce.jpeg,1,Is the quotient 0.28?,YES,YES,True
+1385,1557600,00a20d83-50ed-4398-a5b1-3544cef2cd29.png,0,Did the student correctly estimate the product as 120?,NO,YES,False
+1385,1557600,00a20d83-50ed-4398-a5b1-3544cef2cd29.png,1,Did the student correctly round 1.7 to 2?,NO,YES,False
+1385,1557600,00a20d83-50ed-4398-a5b1-3544cef2cd29.png,2,Did the student correctly round 55 to 60?,NO,YES,False
+1385,1557600,00a20d83-50ed-4398-a5b1-3544cef2cd29.png,3,Is the student's estimate of the product reasonable?,NO,YES,False
+1386,1557600,15105a48-55b4-4dc8-aab2-e60c83b0521f.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1386,1557600,15105a48-55b4-4dc8-aab2-e60c83b0521f.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1386,1557600,15105a48-55b4-4dc8-aab2-e60c83b0521f.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1386,1557600,15105a48-55b4-4dc8-aab2-e60c83b0521f.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1387,1557600,42c0ebd1-9660-4689-b025-81c51bb36196.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1387,1557600,42c0ebd1-9660-4689-b025-81c51bb36196.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1387,1557600,42c0ebd1-9660-4689-b025-81c51bb36196.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1387,1557600,42c0ebd1-9660-4689-b025-81c51bb36196.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1391,1557600,a972c7bf-c220-43b9-b0af-6f4e2db2ff2a.png,0,Did the student correctly estimate the product as 120?,NO,YES,False
+1391,1557600,a972c7bf-c220-43b9-b0af-6f4e2db2ff2a.png,1,Did the student correctly round 1.7 to 2?,NO,YES,False
+1391,1557600,a972c7bf-c220-43b9-b0af-6f4e2db2ff2a.png,2,Did the student correctly round 55 to 60?,NO,YES,False
+1391,1557600,a972c7bf-c220-43b9-b0af-6f4e2db2ff2a.png,3,Is the student's estimate of the product reasonable?,NO,YES,False
+1388,1557600,4751c5c0-a645-42d2-9572-17b9153497be.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1388,1557600,4751c5c0-a645-42d2-9572-17b9153497be.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1388,1557600,4751c5c0-a645-42d2-9572-17b9153497be.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1388,1557600,4751c5c0-a645-42d2-9572-17b9153497be.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1392,1557600,abc695a8-515c-40b3-b633-d3e702de69e0.png,0,Did the student correctly estimate the product as 120?,,YES,False
+1392,1557600,abc695a8-515c-40b3-b633-d3e702de69e0.png,1,Did the student correctly round 1.7 to 2?,,YES,False
+1392,1557600,abc695a8-515c-40b3-b633-d3e702de69e0.png,2,Did the student correctly round 55 to 60?,,YES,False
+1392,1557600,abc695a8-515c-40b3-b633-d3e702de69e0.png,3,Is the student's estimate of the product reasonable?,,YES,False
+1390,1557600,a154a813-b388-43cf-b388-d4f6ab2dd0c6.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1390,1557600,a154a813-b388-43cf-b388-d4f6ab2dd0c6.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1390,1557600,a154a813-b388-43cf-b388-d4f6ab2dd0c6.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1390,1557600,a154a813-b388-43cf-b388-d4f6ab2dd0c6.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1389,1557600,6c013e9f-0d13-49f4-aa71-aefdc2108509.jpeg,0,Did the student correctly estimate the product as 120?,NO,YES,False
+1389,1557600,6c013e9f-0d13-49f4-aa71-aefdc2108509.jpeg,1,Did the student correctly round 1.7 to 2?,NO,YES,False
+1389,1557600,6c013e9f-0d13-49f4-aa71-aefdc2108509.jpeg,2,Did the student correctly round 55 to 60?,NO,YES,False
+1389,1557600,6c013e9f-0d13-49f4-aa71-aefdc2108509.jpeg,3,Is the student's estimate of the product reasonable?,NO,YES,False
+1393,1557600,b14a5d67-29e3-41c1-81df-e6001675bbc9.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1393,1557600,b14a5d67-29e3-41c1-81df-e6001675bbc9.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1393,1557600,b14a5d67-29e3-41c1-81df-e6001675bbc9.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1393,1557600,b14a5d67-29e3-41c1-81df-e6001675bbc9.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1394,1557600,bd290679-8f6a-4cb3-980e-bddec40bd1bf.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1394,1557600,bd290679-8f6a-4cb3-980e-bddec40bd1bf.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1394,1557600,bd290679-8f6a-4cb3-980e-bddec40bd1bf.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1394,1557600,bd290679-8f6a-4cb3-980e-bddec40bd1bf.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1395,1557600,e87b82c1-d4ac-4250-adfa-883e0caf980d.jpeg,0,Did the student correctly estimate the product as 120?,YES,YES,True
+1395,1557600,e87b82c1-d4ac-4250-adfa-883e0caf980d.jpeg,1,Did the student correctly round 1.7 to 2?,YES,YES,True
+1395,1557600,e87b82c1-d4ac-4250-adfa-883e0caf980d.jpeg,2,Did the student correctly round 55 to 60?,YES,YES,True
+1395,1557600,e87b82c1-d4ac-4250-adfa-883e0caf980d.jpeg,3,Is the student's estimate of the product reasonable?,YES,YES,True
+1396,1557730,09ddfa34-7db3-4a25-b77e-a8b872c052a3.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,YES,YES,True
+1396,1557730,09ddfa34-7db3-4a25-b77e-a8b872c052a3.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,YES,YES,True
+1396,1557730,09ddfa34-7db3-4a25-b77e-a8b872c052a3.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,YES,YES,True
+1398,1557730,40b6ad83-6fb3-4ef7-baca-77911efc7385.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,YES,YES,True
+1398,1557730,40b6ad83-6fb3-4ef7-baca-77911efc7385.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,YES,YES,True
+1398,1557730,40b6ad83-6fb3-4ef7-baca-77911efc7385.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,YES,YES,True
+1399,1557730,8dfd7205-e004-49d7-a86c-c3f942c9ef9e.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,YES,YES,True
+1399,1557730,8dfd7205-e004-49d7-a86c-c3f942c9ef9e.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,YES,YES,True
+1399,1557730,8dfd7205-e004-49d7-a86c-c3f942c9ef9e.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,YES,YES,True
+1400,1557730,9e24c43e-3347-4a15-b92a-b5ffcc8413cb.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,NO,YES,False
+1400,1557730,9e24c43e-3347-4a15-b92a-b5ffcc8413cb.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,NO,YES,False
+1400,1557730,9e24c43e-3347-4a15-b92a-b5ffcc8413cb.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,NO,YES,False
+1401,1557730,bb85851a-7e49-4801-a1e0-e766b2fcedb6.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,NO,YES,False
+1401,1557730,bb85851a-7e49-4801-a1e0-e766b2fcedb6.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,NO,YES,False
+1401,1557730,bb85851a-7e49-4801-a1e0-e766b2fcedb6.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,NO,YES,False
+1404,1557730,f65aaf03-5fc5-4c40-b68a-2004892ac623.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,YES,YES,True
+1404,1557730,f65aaf03-5fc5-4c40-b68a-2004892ac623.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,YES,YES,True
+1404,1557730,f65aaf03-5fc5-4c40-b68a-2004892ac623.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,YES,YES,True
+1405,1557742,06076f0a-69f4-45fd-9a06-37dd2e8511b7.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1397,1557730,0da0c581-27d1-4a09-96a2-3ebb41e24042.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,NO,YES,False
+1397,1557730,0da0c581-27d1-4a09-96a2-3ebb41e24042.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,NO,YES,False
+1397,1557730,0da0c581-27d1-4a09-96a2-3ebb41e24042.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,NO,YES,False
+1402,1557730,e60bdd3e-df53-4970-a7e4-1ff66125f9c9.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,NO,YES,False
+1402,1557730,e60bdd3e-df53-4970-a7e4-1ff66125f9c9.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,YES,YES,True
+1402,1557730,e60bdd3e-df53-4970-a7e4-1ff66125f9c9.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,YES,YES,True
+1403,1557730,f500b3c8-a037-4236-9be4-8cf34fdc720f.jpeg,0,Did the student correctly round the amount of chemical A to the nearest tenth of a gram?,YES,YES,True
+1403,1557730,f500b3c8-a037-4236-9be4-8cf34fdc720f.jpeg,1,Did the student correctly round the amount of chemical B to the nearest tenth of a gram?,YES,YES,True
+1403,1557730,f500b3c8-a037-4236-9be4-8cf34fdc720f.jpeg,2,Did the student correctly round the amount of chemical C to the nearest tenth of a gram?,YES,YES,True
+1408,1557742,54b5fca7-9619-4227-8978-92862fe95a37.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1409,1557742,599429a5-d554-48f4-8f09-a03a9a837874.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1407,1557742,263a6ed0-3f8b-4452-8c12-900e981caa20.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,NO,False
+1406,1557742,120dc850-ac5f-42d7-899c-51c4c9ffa21b.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,NO,False
+1410,1557742,759c77a7-e274-4b78-88ad-46b92ef79d09.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1412,1557742,b00d1b98-2148-4cf2-8487-1db4e4901fc4.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1413,1557742,b9f4cba4-1949-4f42-99dc-b1432aaa984c.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1411,1557742,954b2bc5-9089-44b5-bc76-808230c54b93.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1416,1557742,f47ea68b-f272-4a6c-909b-203780f8822c.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,YES,YES,True
+1417,1557743,02c3a692-8d4e-4432-aa43-45b84033f1c1.png,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,NO,True
+1415,1557742,da3e56c1-b8cb-4d52-ba2b-a07fe23ee329.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,NO,NO,True
+1419,1557743,19a71fd6-cdf2-4f3b-98ac-4bb1f036104a.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,YES,False
+1418,1557743,19812d83-2b2e-452f-9ae9-75fa1d960931.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,YES,False
+1420,1557743,231d6042-793b-40d2-9280-5f574621ac38.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,NO,True
+1420,1557743,231d6042-793b-40d2-9280-5f574621ac38.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,NO,NO,True
+1414,1557742,c51dcc9b-7802-4637-86e2-3e67c6246f9b.jpeg,0,Did the student correctly include one placeholder zero when multiplying by the tens place in 33?,NO,NO,True
+1422,1557743,2d7fe92a-c9d6-486e-adfa-414413eaa931.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,YES,YES,True
+1422,1557743,2d7fe92a-c9d6-486e-adfa-414413eaa931.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,YES,YES,True
+1423,1557743,40ae4e81-8d3c-4d8d-834d-66346519c499.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,NO,True
+1423,1557743,40ae4e81-8d3c-4d8d-834d-66346519c499.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,NO,NO,True
+1421,1557743,23ee7d66-6430-4db6-a655-f94bbc25c015.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,YES,False
+1421,1557743,23ee7d66-6430-4db6-a655-f94bbc25c015.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,YES,YES,True
+1425,1557743,cdf99eb4-1634-40a9-aee7-0a1e621f2c13.png,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,NO,True
+1425,1557743,cdf99eb4-1634-40a9-aee7-0a1e621f2c13.png,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,NO,NO,True
+1424,1557743,b5996bb7-520c-4caf-8292-5f67db55b91f.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,YES,False
+1424,1557743,b5996bb7-520c-4caf-8292-5f67db55b91f.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,YES,YES,True
+1427,1557743,de910fd2-6bb0-4726-8fb0-4e723e04f1fc.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,YES,False
+1427,1557743,de910fd2-6bb0-4726-8fb0-4e723e04f1fc.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,YES,YES,True
+1426,1557743,d68d262d-626a-4b9b-8a8d-82d90e7b6508.jpeg,0,Did the student correctly include one placeholder zero when multipying by the tens place in 405?,NO,YES,False
+1426,1557743,d68d262d-626a-4b9b-8a8d-82d90e7b6508.jpeg,1,Did the student correctly include two placeholde zeroes when multiplying by the hundreds place in 405?,NO,NO,True
+1426,1557743,d68d262d-626a-4b9b-8a8d-82d90e7b6508.jpeg,2,Can you double check your multiplication of 546x400?,218400,YES,False
+1428,1557744,28b1bb68-3fed-45ad-9139-8543ca5e2d0a.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,YES,False
+1428,1557744,28b1bb68-3fed-45ad-9139-8543ca5e2d0a.jpeg,1,Did the student correctly convert from yards to feet?,NO,NO,True
+1431,1557744,6926ea3a-6aab-45c7-b97e-3a3a52c4fccb.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,YES,YES,True
+1431,1557744,6926ea3a-6aab-45c7-b97e-3a3a52c4fccb.jpeg,1,Did the student correctly convert from yards to feet?,NO,NO,True
+1429,1557744,4b32b1f8-ae7c-457b-8798-a0ad3a5bb537.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,NO,True
+1429,1557744,4b32b1f8-ae7c-457b-8798-a0ad3a5bb537.jpeg,1,Did the student correctly convert from yards to feet?,YES,YES,True
+1430,1557744,54ba8caf-cb4f-4699-8825-e2510db9267f.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,YES,NO,False
+1430,1557744,54ba8caf-cb4f-4699-8825-e2510db9267f.jpeg,1,Did the student correctly convert from yards to feet?,NO,YES,False
+1435,1557744,aaf33279-8427-4751-92db-cb0b4eb04b53.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,NO,True
+1435,1557744,aaf33279-8427-4751-92db-cb0b4eb04b53.jpeg,1,Did the student correctly convert from yards to feet?,NO,NO,True
+1432,1557744,7c1502a4-f3f3-42e2-acbb-adb013457869.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,YES,False
+1432,1557744,7c1502a4-f3f3-42e2-acbb-adb013457869.jpeg,1,Did the student correctly convert from yards to feet?,YES,YES,True
+1434,1557744,9e9b6cca-8216-4c84-b8c4-201cf2d1c3db.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,YES,False
+1434,1557744,9e9b6cca-8216-4c84-b8c4-201cf2d1c3db.jpeg,1,Did the student correctly convert from yards to feet?,NO,NO,True
+1433,1557744,7e456dc0-e70d-48eb-b0aa-dc3ddb2a027c.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,YES,False
+1433,1557744,7e456dc0-e70d-48eb-b0aa-dc3ddb2a027c.jpeg,1,Did the student correctly convert from yards to feet?,YES,YES,True
+1437,1557744,ec9d313b-e97a-436a-995c-38c15c981920.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,YES,YES,True
+1437,1557744,ec9d313b-e97a-436a-995c-38c15c981920.jpeg,1,Did the student correctly convert from yards to feet?,NO,NO,True
+1439,1557745,0aeb4d26-9994-41f1-8c35-d552aa38f3cb.jpeg,0,Is the student's final product reasonable?,YES,YES,True
+1440,1557745,1e8acc92-0aa2-427f-a00d-d7220c8357d1.png,0,Is the student's final product reasonable?,NO,YES,False
+1442,1557745,65895386-5537-4185-8d68-c7f781665b21.jpeg,0,Is the student's final product reasonable?,YES,YES,True
+1436,1557744,cbec96dd-5e52-45a5-832e-972898651c8d.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,YES,YES,True
+1436,1557744,cbec96dd-5e52-45a5-832e-972898651c8d.jpeg,1,Did the student correctly convert from yards to feet?,NO,NO,True
+1441,1557745,5d3285fc-cb3b-42df-9c10-2b609c875452.jpeg,0,Is the student's final product reasonable?,NO,YES,False
+1444,1557745,8a6edd5b-08ba-433c-b8c7-8063b41ea7f8.jpeg,0,Is the student's final product reasonable?,YES,NO,False
+1443,1557745,81afcc37-a8f9-487e-b756-6d699ff1556a.jpeg,0,Is the student's final product reasonable?,NO,YES,False
+1445,1557745,9e6c7484-0f06-44c6-813b-f5ff8a65e257.jpeg,0,Is the student's final product reasonable?,NO,YES,False
+1438,1557744,f8655792-4932-42db-b665-a1b8d9f1df9d.jpeg,0,Did the student correctly calculate the number of yards of ribbon needed for all the bows?,NO,NO,True
+1438,1557744,f8655792-4932-42db-b665-a1b8d9f1df9d.jpeg,1,Did the student correctly convert from yards to feet?,NO,YES,False
+1447,1557745,bfe33cd5-afb2-4d99-ae51-7f9d53545554.jpeg,0,Is the student's final product reasonable?,NO,YES,False
+1449,1557745,d3d18d8a-35f5-4466-963c-032c763a229c.jpeg,0,Is the student's final product reasonable?,YES,YES,True
+1448,1557745,d35d5f0a-7c29-43b5-8c2a-e2794ff93d39.jpeg,0,Is the student's final product reasonable?,YES,NO,False
+1446,1557745,bdc100f1-e675-4317-b9d3-3809920620e0.jpeg,0,Is the student's final product reasonable?,NO,YES,False
+1450,1557745,dbdc416d-7ec5-419e-8ee5-643e60fc38a1.jpeg,0,Is the student's final product reasonable?,NO,YES,False
+1451,1557984,0e214658-a84e-406b-b9cb-278b7813859d.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1451,1557984,0e214658-a84e-406b-b9cb-278b7813859d.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1451,1557984,0e214658-a84e-406b-b9cb-278b7813859d.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1452,1557984,19d5e51a-6f6e-46fb-8650-05c501145d7f.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1452,1557984,19d5e51a-6f6e-46fb-8650-05c501145d7f.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1452,1557984,19d5e51a-6f6e-46fb-8650-05c501145d7f.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1453,1557984,3825c8ff-ebe4-4ceb-8f01-9cb4e8f2efb4.jpeg,0,Did the student correctly find the quotient is 59?,NO,YES,False
+1453,1557984,3825c8ff-ebe4-4ceb-8f01-9cb4e8f2efb4.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1453,1557984,3825c8ff-ebe4-4ceb-8f01-9cb4e8f2efb4.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1456,1557984,6ec73a06-7c13-4f93-9468-a47b9bd19abd.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1456,1557984,6ec73a06-7c13-4f93-9468-a47b9bd19abd.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1456,1557984,6ec73a06-7c13-4f93-9468-a47b9bd19abd.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1457,1557984,95c2f640-76e4-4bef-9c8a-6da3d6298241.jpeg,0,Did the student correctly find the quotient is 59?,NO,YES,False
+1457,1557984,95c2f640-76e4-4bef-9c8a-6da3d6298241.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1457,1557984,95c2f640-76e4-4bef-9c8a-6da3d6298241.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1455,1557984,55101cf8-4e6f-4dcd-b85b-caf425cdf98f.jpeg,0,Did the student correctly find the quotient is 59?,NO,NO,True
+1455,1557984,55101cf8-4e6f-4dcd-b85b-caf425cdf98f.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1455,1557984,55101cf8-4e6f-4dcd-b85b-caf425cdf98f.jpeg,2,Did the student use the standard division algorithm to solve?,NO,YES,False
+1458,1557984,96b8d224-bfe1-4597-84e3-cc44978bbeec.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1458,1557984,96b8d224-bfe1-4597-84e3-cc44978bbeec.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1458,1557984,96b8d224-bfe1-4597-84e3-cc44978bbeec.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1454,1557984,3e5a9c77-ea4e-4907-a33c-5240d1a01a14.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1454,1557984,3e5a9c77-ea4e-4907-a33c-5240d1a01a14.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1454,1557984,3e5a9c77-ea4e-4907-a33c-5240d1a01a14.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1459,1557984,a5ada780-ef0c-49e4-90d6-057f8464f8e6.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1459,1557984,a5ada780-ef0c-49e4-90d6-057f8464f8e6.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1459,1557984,a5ada780-ef0c-49e4-90d6-057f8464f8e6.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1462,1557984,c3ef431d-6907-41f0-b859-53a92c4efb2c.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1462,1557984,c3ef431d-6907-41f0-b859-53a92c4efb2c.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1462,1557984,c3ef431d-6907-41f0-b859-53a92c4efb2c.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1461,1557984,c025f955-6587-4eb9-937a-6bdbe4108035.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1461,1557984,c025f955-6587-4eb9-937a-6bdbe4108035.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1461,1557984,c025f955-6587-4eb9-937a-6bdbe4108035.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1460,1557984,a5c1543d-ac77-4589-8cd8-e1dd44779ed1.jpeg,0,Did the student correctly find the quotient is 59?,YES,NO,False
+1460,1557984,a5c1543d-ac77-4589-8cd8-e1dd44779ed1.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1460,1557984,a5c1543d-ac77-4589-8cd8-e1dd44779ed1.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1464,1557984,f94d4cac-2b0f-4720-9213-8f1444216e1d.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1464,1557984,f94d4cac-2b0f-4720-9213-8f1444216e1d.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1464,1557984,f94d4cac-2b0f-4720-9213-8f1444216e1d.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1463,1557984,cb2737a1-e4fc-46ac-a1d2-15db1865a6ae.jpeg,0,Did the student correctly find the quotient is 59?,YES,YES,True
+1463,1557984,cb2737a1-e4fc-46ac-a1d2-15db1865a6ae.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1463,1557984,cb2737a1-e4fc-46ac-a1d2-15db1865a6ae.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1466,1557985,103e29d9-acd7-42a5-8cee-9432c7c70faf.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1466,1557985,103e29d9-acd7-42a5-8cee-9432c7c70faf.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1466,1557985,103e29d9-acd7-42a5-8cee-9432c7c70faf.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1467,1557985,36011931-d8aa-47bb-be74-f563b83296b1.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1467,1557985,36011931-d8aa-47bb-be74-f563b83296b1.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1467,1557985,36011931-d8aa-47bb-be74-f563b83296b1.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1468,1557985,3e162e8d-6b5e-4dba-874a-f73ef9946641.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1468,1557985,3e162e8d-6b5e-4dba-874a-f73ef9946641.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1468,1557985,3e162e8d-6b5e-4dba-874a-f73ef9946641.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1465,1557984,fa247f00-851f-4f00-8ca9-dc4f253339d6.jpeg,0,Did the student correctly find the quotient is 59?,NO,YES,False
+1465,1557984,fa247f00-851f-4f00-8ca9-dc4f253339d6.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1465,1557984,fa247f00-851f-4f00-8ca9-dc4f253339d6.jpeg,2,Did the student use the standard division algorithm to solve?,NO,NO,True
+1469,1557985,4c3ebbe9-bd56-4d33-a45b-39160b560dbd.jpeg,0,Did the student get the correct quotient of 300?,NO,NO,True
+1469,1557985,4c3ebbe9-bd56-4d33-a45b-39160b560dbd.jpeg,1,Did the student use place value strategies to solve?,YES,NO,False
+1469,1557985,4c3ebbe9-bd56-4d33-a45b-39160b560dbd.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1470,1557985,5432fc7b-bbff-4d0e-98f3-57ce047e1f9d.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1470,1557985,5432fc7b-bbff-4d0e-98f3-57ce047e1f9d.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1470,1557985,5432fc7b-bbff-4d0e-98f3-57ce047e1f9d.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1471,1557985,60db6874-6a47-402a-a17b-0a2e163db5f2.jpeg,0,Did the student get the correct quotient of 300?,NO,NO,True
+1471,1557985,60db6874-6a47-402a-a17b-0a2e163db5f2.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1471,1557985,60db6874-6a47-402a-a17b-0a2e163db5f2.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1474,1557985,685624ef-f3c9-4c27-ba81-b71d97e3c80e.png,0,Did the student get the correct quotient of 300?,NO,YES,False
+1474,1557985,685624ef-f3c9-4c27-ba81-b71d97e3c80e.png,1,Did the student use place value strategies to solve?,NO,YES,False
+1474,1557985,685624ef-f3c9-4c27-ba81-b71d97e3c80e.png,2,Did the student use the standard algorithm to solve?,NO,YES,False
+1472,1557985,61661ff2-69d4-45d3-bb08-a0ceceffef81.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1472,1557985,61661ff2-69d4-45d3-bb08-a0ceceffef81.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1472,1557985,61661ff2-69d4-45d3-bb08-a0ceceffef81.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1475,1557985,9d788daa-d0ec-4efc-89cd-146e9e498074.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1475,1557985,9d788daa-d0ec-4efc-89cd-146e9e498074.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1475,1557985,9d788daa-d0ec-4efc-89cd-146e9e498074.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1477,1557985,c84c25d0-9946-45a2-b94d-c02c8513171e.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1477,1557985,c84c25d0-9946-45a2-b94d-c02c8513171e.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1477,1557985,c84c25d0-9946-45a2-b94d-c02c8513171e.jpeg,2,Did the student use the standard algorithm to solve?,NO,YES,False
+1476,1557985,b0024c78-fd73-44ef-b130-6dd73bb2722a.jpeg,0,Did the student get the correct quotient of 300?,NO,YES,False
+1476,1557985,b0024c78-fd73-44ef-b130-6dd73bb2722a.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1476,1557985,b0024c78-fd73-44ef-b130-6dd73bb2722a.jpeg,2,Did the student use the standard algorithm to solve?,NO,YES,False
+1479,1557986,26ce0352-ecd2-401a-981f-2d5a42f38724.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1479,1557986,26ce0352-ecd2-401a-981f-2d5a42f38724.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1473,1557985,682d8e30-967b-411e-af86-20faded4327f.jpeg,0,Did the student get the correct quotient of 300?,YES,YES,True
+1473,1557985,682d8e30-967b-411e-af86-20faded4327f.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1473,1557985,682d8e30-967b-411e-af86-20faded4327f.jpeg,2,Did the student use the standard algorithm to solve?,NO,NO,True
+1480,1557986,2aacb8b5-bc25-4c1f-80ca-9985a6e737c3.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1480,1557986,2aacb8b5-bc25-4c1f-80ca-9985a6e737c3.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1481,1557986,3afdb25f-dd60-4fac-8988-6498ab877374.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1481,1557986,3afdb25f-dd60-4fac-8988-6498ab877374.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1482,1557986,3d14e521-93a2-46f6-8f5d-8c5df75b8ab0.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1482,1557986,3d14e521-93a2-46f6-8f5d-8c5df75b8ab0.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1483,1557986,703a302c-07ce-40a1-ac37-7721ae59566a.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1483,1557986,703a302c-07ce-40a1-ac37-7721ae59566a.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1478,1557985,dccc3fdf-b757-4d0c-b3ee-abe9902664e0.jpeg,0,Did the student get the correct quotient of 300?,NO,YES,False
+1478,1557985,dccc3fdf-b757-4d0c-b3ee-abe9902664e0.jpeg,1,Did the student use place value strategies to solve?,YES,YES,True
+1478,1557985,dccc3fdf-b757-4d0c-b3ee-abe9902664e0.jpeg,2,Did the student use the standard algorithm to solve?,NO,YES,False
+1486,1557986,a2ba81f6-3d95-4e87-9a60-02f300060a0c.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1486,1557986,a2ba81f6-3d95-4e87-9a60-02f300060a0c.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1484,1557986,7d341db8-6d16-4ba0-9938-6feacf8e1997.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1484,1557986,7d341db8-6d16-4ba0-9938-6feacf8e1997.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1485,1557986,9d5ff8e9-90be-46a2-ada6-5ef18d31df9b.jpeg,0,Did the student use place value strategies to solve?,NO,YES,False
+1485,1557986,9d5ff8e9-90be-46a2-ada6-5ef18d31df9b.jpeg,1,Did the student use the standard division algorithm?,YES,YES,True
+1487,1557986,b000c2e0-84de-4d0a-97cd-4027980c2f79.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1487,1557986,b000c2e0-84de-4d0a-97cd-4027980c2f79.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1488,1557986,d02c944e-4468-4e89-9840-e51383e15191.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1488,1557986,d02c944e-4468-4e89-9840-e51383e15191.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1489,1557986,dc1851dc-196f-402c-b170-08242254d662.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1489,1557986,dc1851dc-196f-402c-b170-08242254d662.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1490,1557986,e528c74b-d900-496a-bb90-03d064d24e9b.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1490,1557986,e528c74b-d900-496a-bb90-03d064d24e9b.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1493,1558469,1b45ddf4-f19a-4d0a-be07-b9f05462dbd3.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1491,1557986,f46dc1eb-cf9e-43bb-9d1b-e63667e17e80.jpeg,0,Did the student use place value strategies to solve?,NO,YES,False
+1491,1557986,f46dc1eb-cf9e-43bb-9d1b-e63667e17e80.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1492,1557986,f583eaa0-a18f-483c-8cf4-0b0aff4f54db.jpeg,0,Did the student use place value strategies to solve?,YES,YES,True
+1492,1557986,f583eaa0-a18f-483c-8cf4-0b0aff4f54db.jpeg,1,Did the student use the standard division algorithm?,NO,YES,False
+1494,1558469,1c1f721b-6053-437a-81db-d4132b499cc2.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1497,1558469,54cbc500-fcff-4e77-85d9-1fa8fc252e16.jpeg,0,Is the student's final answer reasonable?,NO,YES,False
+1496,1558469,47fee961-2f9a-43be-804e-a715b9de914c.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1498,1558469,5a9c02c8-2962-4713-ad06-cf5c42ca8665.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1499,1558469,7f46ca6f-9074-46b6-9874-4d8e110920e0.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1500,1558469,7fb7d6df-8812-4796-8bb8-7ad1100f0b57.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1495,1558469,3e09d688-8058-48aa-9d62-5a31e22d3497.jpeg,0,Is the student's final answer reasonable?,NO,YES,False
+1504,1558469,b94888b7-c045-461e-a875-216b16dbb4f9.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1503,1558469,ad3f5e46-2146-4b35-b3d6-69c2ee8aed7c.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1502,1558469,a033554d-5d42-45f7-b5e1-ef2eaed97bf0.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1501,1558469,8ad4f90d-31d7-472e-ad70-b7cc94667396.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1507,1558470,240b32a9-19b6-43b3-b5d0-a107eafadbff.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1505,1558469,f4ec99b0-ef04-44bb-a47a-8a7cf8260f03.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1509,1558470,4d669b51-c3bf-4af7-93ee-977a05b0c426.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1506,1558469,f504cdf5-fbb9-4942-9f22-4d7279017c1f.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1513,1558470,8f65ce5c-f752-4421-8fd1-466c9a4ea63e.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1512,1558470,86993e7a-81f1-4a9e-91f5-f6a0d15c1ab1.jpeg,0,Is the student's final answer reasonable?,NO,YES,False
+1510,1558470,709a3af2-a9bc-4ea1-84a1-062461d12237.jpeg,0,Is the student's final answer reasonable?,NO,YES,False
+1511,1558470,7cb338c1-079d-4418-a81a-80fc742ecfa3.jpeg,0,Is the student's final answer reasonable?,NO,YES,False
+1516,1558470,e0c7230f-4bf8-4cca-8cc8-aef90f88b37a.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1517,1558470,e2b67729-a932-4884-a2a0-3cf6d48fab09.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1514,1558470,982ae0a8-bec8-4f16-a35b-a351d00ef023.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1518,1558470,e98aff03-8a8c-4a05-aa04-dfd9b3634986.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1515,1558470,a94b256e-c2da-4ec3-90d9-c33013699573.jpeg,0,Is the student's final answer reasonable?,NO,YES,False
+1520,1558471,066e71f4-dad9-4e5c-a8dc-343e8aca406d.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1521,1558471,130e3402-0df2-446a-9e0d-e9d539959ff2.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1519,1558470,f885608c-2d55-4959-b7b6-a9f79effadcf.jpeg,0,Is the student's final answer reasonable?,YES,YES,True
+1522,1558471,13137b94-70cc-4eb0-80ad-92a404269f49.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1523,1558471,2918accd-d8f1-4899-a3de-069e54ba436a.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1525,1558471,383b6efa-4a95-4e8f-906a-ddede3880a8e.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1527,1558471,61480c16-65f2-43cd-afb1-17789c399cb4.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1524,1558471,31b4974f-0cb6-4e3f-8ddf-06889f4a3ead.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1526,1558471,4bdeb62d-a9d2-4ae7-998b-0dcf32fdc1c6.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1528,1558471,7c630742-6fb7-491a-8358-b60edbc5f142.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1529,1558471,83a375b2-16c9-4936-b949-dd4da27b6914.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1530,1558471,870ba096-83ac-46ef-9011-4829393674e5.jpeg,0,Is the student's final answer reasonable?,NO,NO,True
+1531,1558471,91f75caa-c0af-4eb1-b2aa-046cfa870c5c.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1532,1558471,c3e1616e-2673-488a-a556-7abfdd6ab57c.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1533,1558471,d0c9f09d-f2cd-48f4-b7ee-6b7a5d52753f.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1534,1558471,f9e4e8a5-c909-4a7c-9870-1aed14f94d21.jpeg,0,Is the student's final answer reasonable?,YES,NO,False
+1535,1558505,08a89c23-97ad-4ffe-9e99-81ece3aa8c85.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1537,1558505,54706179-8f9a-451e-ad12-1bc5920ad5ba.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1536,1558505,4783dd55-0ec0-4bc4-b444-9687fe526917.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1538,1558505,636118db-3ee4-42bf-9bbd-c00f57dcc798.png,0,Is the student's estimate reasonable?,NO,NO,True
+1541,1558505,b2573af5-5b4f-42c0-a1f0-9b6b1a912f42.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1539,1558505,796dc23b-8ec3-467e-9b3b-27f1f78ee963.jpeg,0,Is the student's estimate reasonable?,YES,NO,False
+1540,1558505,7d37a6f4-9e80-406c-8641-e73ff7ae4720.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1543,1558505,b48b24bc-4a00-4cba-84db-7189527806cd.jpeg,0,Is the student's estimate reasonable?,YES,NO,False
+1544,1558505,bba2970d-1a76-4e98-a57f-b9eac63af553.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1542,1558505,b3cd0cae-e7ee-4e0f-994c-0c45d7df68ad.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1545,1558505,cab711d5-308c-4a08-82db-a0a418ab9fc1.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1547,1558505,cd08e287-cf4c-4531-9866-8c3fdd8e3610.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1549,1572866,4169710a-1be8-4d3e-829b-a90f432abd17.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1546,1558505,cc31a805-c18f-4651-8844-898c647356ef.jpeg,0,Is the student's estimate reasonable?,YES,YES,True
+1550,1572866,55e75b34-5fcc-4695-b0db-20fe0b4c9976.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1552,1572866,748cadc8-2dd8-4efa-accd-4d9d9a0449ca.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1553,1572866,77c39d4c-ea8a-449a-b5e5-15c643656124.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1548,1572866,3306c86d-77e9-430f-9aa5-b13d569d0ce1.png,0,Is the student's estimation reasonable?,NO,YES,False
+1551,1572866,62bd7af2-5435-477a-b535-2c0cbd7ee761.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1555,1572866,9540d248-2014-41c2-8bee-650f95554b44.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1554,1572866,7db3fea4-efc0-4553-a680-4c35fa3420b9.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1556,1572866,9c4f9cd8-95a5-46c7-a6c3-938b2cd34261.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1558,1572866,d293d977-c1a0-4b25-9dac-44a657bdccbb.jpeg,0,Is the student's estimation reasonable?,NO,YES,False
+1557,1572866,9f75874b-a237-4759-93b8-7ce06a1917ae.jpeg,0,Is the student's estimation reasonable?,NO,YES,False
+1559,1572866,daa14fd3-fd34-4bd8-a296-73659dfa5c1a.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1560,1572866,e68f9086-a485-41d3-a98c-45d0f378a083.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1561,1572866,e9461f30-30e1-45bd-a13f-784154edb7d6.jpeg,0,Is the student's estimation reasonable?,YES,YES,True
+1563,1572997,2cce160e-5e25-46f1-818d-cc9f41fa47dd.jpeg,0,Did the student draw an array with 3 rows and four columns?,NO,YES,False
+1562,1572997,1d6491bb-6fc8-4799-9e29-c4b33bd6cf72.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1564,1572997,46f9be0f-c2d3-488f-a022-0ca10b2ed7fc.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1566,1572997,6d48ce4c-2d1c-48c8-9653-cda607f2998d.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1565,1572997,5d685769-ce63-4a94-9db3-eac3b4b20b25.jpeg,0,Did the student draw an array with 3 rows and four columns?,NO,YES,False
+1568,1572997,a0114caf-bcb8-4552-a1ba-9031290e280c.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1567,1572997,78e844c9-ac04-449d-9f07-6336b2724908.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1569,1572997,a289a8d5-ac0d-481b-9ace-4de976c77f33.png,0,Did the student draw an array with 3 rows and four columns?,NO,YES,False
+1571,1572997,a954770f-5e53-405c-8dbf-4fc6139166c9.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1572,1572997,b719b7cc-eb12-41d6-b27f-d10ba5eda90c.jpeg,0,Did the student draw an array with 3 rows and four columns?,NO,YES,False
+1570,1572997,a4858f35-2cd1-432c-89c5-2623f3f5cdab.jpeg,0,Did the student draw an array with 3 rows and four columns?,NO,YES,False
+1574,1572997,e4bf57e0-1aae-4aef-9f1d-5d8b3b8e106b.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1573,1572997,d95798d0-5501-4e3f-b16e-d8a19b3194e7.jpeg,0,Did the student draw an array with 3 rows and four columns?,YES,YES,True
+1671,1597679,00a99664-338e-4b39-b6b5-a92f9452c16b.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1671,1597679,00a99664-338e-4b39-b6b5-a92f9452c16b.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1671,1597679,00a99664-338e-4b39-b6b5-a92f9452c16b.jpeg,2,Did the student shade one of the four parts?,YES,YES,True
+1672,1597679,0ae9aaee-df73-443c-bca5-0f0fb79ea5c7.jpeg,0,Are the parts of the whole of equal size?,YES,YES,True
+1672,1597679,0ae9aaee-df73-443c-bca5-0f0fb79ea5c7.jpeg,1,Did the student correctly partition the shape equally into four parts?,YES,YES,True
+1672,1597679,0ae9aaee-df73-443c-bca5-0f0fb79ea5c7.jpeg,2,Did the student shade one of the four parts?,NO,YES,False
+1673,1597679,0de98605-22b5-4101-8128-1aabfdddc3c6.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1673,1597679,0de98605-22b5-4101-8128-1aabfdddc3c6.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1673,1597679,0de98605-22b5-4101-8128-1aabfdddc3c6.jpeg,2,Did the student shade one of the four parts?,YES,YES,True
+1674,1597679,180e9c84-0aa6-4ab0-ac7e-f7d0acee0ba6.jpeg,0,Are the parts of the whole of equal size?,YES,YES,True
+1674,1597679,180e9c84-0aa6-4ab0-ac7e-f7d0acee0ba6.jpeg,1,Did the student correctly partition the shape equally into four parts?,YES,YES,True
+1674,1597679,180e9c84-0aa6-4ab0-ac7e-f7d0acee0ba6.jpeg,2,Did the student shade one of the four parts?,NO,NO,True
+1675,1597679,4a6bd080-6e28-4997-ba59-7783dd0870f1.jpeg,0,Are the parts of the whole of equal size?,NO,NO,True
+1675,1597679,4a6bd080-6e28-4997-ba59-7783dd0870f1.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1675,1597679,4a6bd080-6e28-4997-ba59-7783dd0870f1.jpeg,2,Did the student shade one of the four parts?,YES,YES,True
+1575,1572997,eee766d6-82f8-435a-b0c2-29cb72c5f006.jpeg,0,Did the student draw an array with 3 rows and four columns?,NO,YES,False
+1676,1597679,4ad00fa5-7431-40d4-a865-7d382a02f6f4.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1676,1597679,4ad00fa5-7431-40d4-a865-7d382a02f6f4.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1676,1597679,4ad00fa5-7431-40d4-a865-7d382a02f6f4.jpeg,2,Did the student shade one of the four parts?,YES,YES,True
+1677,1597679,61af649e-04dc-4764-806e-1be344485465.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1677,1597679,61af649e-04dc-4764-806e-1be344485465.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1677,1597679,61af649e-04dc-4764-806e-1be344485465.jpeg,2,Did the student shade one of the four parts?,YES,YES,True
+1678,1597679,65f1b055-5b67-4a5e-8be4-db75535d0061.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1678,1597679,65f1b055-5b67-4a5e-8be4-db75535d0061.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1678,1597679,65f1b055-5b67-4a5e-8be4-db75535d0061.jpeg,2,Did the student shade one of the four parts?,NO,NO,True
+1679,1597679,6a56a619-5a16-41d3-8231-007a47d2c0be.jpeg,0,Are the parts of the whole of equal size?,YES,NO,False
+1679,1597679,6a56a619-5a16-41d3-8231-007a47d2c0be.jpeg,1,Did the student correctly partition the shape equally into four parts?,YES,YES,True
+1679,1597679,6a56a619-5a16-41d3-8231-007a47d2c0be.jpeg,2,Did the student shade one of the four parts?,NO,YES,False
+1680,1597679,81e1227e-2943-49b2-a09e-e09fa8c60700.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1680,1597679,81e1227e-2943-49b2-a09e-e09fa8c60700.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1680,1597679,81e1227e-2943-49b2-a09e-e09fa8c60700.jpeg,2,Did the student shade one of the four parts?,NO,YES,False
+1681,1597679,94ed9179-f9d5-431f-9288-22eb3ff9cddf.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1681,1597679,94ed9179-f9d5-431f-9288-22eb3ff9cddf.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1681,1597679,94ed9179-f9d5-431f-9288-22eb3ff9cddf.jpeg,2,Did the student shade one of the four parts?,YES,YES,True
+1683,1597679,d1e236c0-cb39-4b35-a320-f267ebf07ee2.png,0,Are the parts of the whole of equal size?,YES,YES,True
+1683,1597679,d1e236c0-cb39-4b35-a320-f267ebf07ee2.png,1,Did the student correctly partition the shape equally into four parts?,YES,YES,True
+1683,1597679,d1e236c0-cb39-4b35-a320-f267ebf07ee2.png,2,Did the student shade one of the four parts?,YES,YES,True
+1682,1597679,99d21684-4957-4fbb-b290-f05fc9c10e01.jpeg,0,Are the parts of the whole of equal size?,YES,YES,True
+1682,1597679,99d21684-4957-4fbb-b290-f05fc9c10e01.jpeg,1,Did the student correctly partition the shape equally into four parts?,YES,YES,True
+1682,1597679,99d21684-4957-4fbb-b290-f05fc9c10e01.jpeg,2,Did the student shade one of the four parts?,NO,YES,False
+1684,1597679,d357d0f8-1e85-4116-961f-7ca5861a4f63.jpeg,0,Are the parts of the whole of equal size?,NO,YES,False
+1684,1597679,d357d0f8-1e85-4116-961f-7ca5861a4f63.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1684,1597679,d357d0f8-1e85-4116-961f-7ca5861a4f63.jpeg,2,Did the student shade one of the four parts?,NO,YES,False
+1685,1597679,f7a58ee9-788f-4e25-901e-83bb1defb116.jpeg,0,Are the parts of the whole of equal size?,NO,NO,True
+1685,1597679,f7a58ee9-788f-4e25-901e-83bb1defb116.jpeg,1,Did the student correctly partition the shape equally into four parts?,NO,YES,False
+1685,1597679,f7a58ee9-788f-4e25-901e-83bb1defb116.jpeg,2,Did the student shade one of the four parts?,NO,YES,False
+1686,1597690,30117bac-ecd4-46f8-8c43-ead392b64ec6.png,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,YES,False
+1686,1597690,30117bac-ecd4-46f8-8c43-ead392b64ec6.png,1,Did the student draw two identical rectangles?,NO,YES,False
+1686,1597690,30117bac-ecd4-46f8-8c43-ead392b64ec6.png,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1686,1597690,30117bac-ecd4-46f8-8c43-ead392b64ec6.png,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1686,1597690,30117bac-ecd4-46f8-8c43-ead392b64ec6.png,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",NO,YES,False
+1688,1597690,758a2320-3ef3-4d6d-875e-d5c1b15ae29f.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,YES,False
+1688,1597690,758a2320-3ef3-4d6d-875e-d5c1b15ae29f.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1688,1597690,758a2320-3ef3-4d6d-875e-d5c1b15ae29f.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,YES,YES,True
+1688,1597690,758a2320-3ef3-4d6d-875e-d5c1b15ae29f.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,YES,YES,True
+1688,1597690,758a2320-3ef3-4d6d-875e-d5c1b15ae29f.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,NO,False
+1689,1597690,7ccf9d27-5543-4047-a1ca-a65dd728eece.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,YES,False
+1689,1597690,7ccf9d27-5543-4047-a1ca-a65dd728eece.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1689,1597690,7ccf9d27-5543-4047-a1ca-a65dd728eece.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1689,1597690,7ccf9d27-5543-4047-a1ca-a65dd728eece.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1689,1597690,7ccf9d27-5543-4047-a1ca-a65dd728eece.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,YES,True
+1687,1597690,42219515-6443-4771-b1cc-29873d945391.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,YES,YES,True
+1687,1597690,42219515-6443-4771-b1cc-29873d945391.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1687,1597690,42219515-6443-4771-b1cc-29873d945391.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1687,1597690,42219515-6443-4771-b1cc-29873d945391.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1687,1597690,42219515-6443-4771-b1cc-29873d945391.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,YES,True
+1690,1597690,a7f56e74-981a-4e80-ac6d-cfda33e3a783.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,YES,False
+1690,1597690,a7f56e74-981a-4e80-ac6d-cfda33e3a783.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1690,1597690,a7f56e74-981a-4e80-ac6d-cfda33e3a783.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1690,1597690,a7f56e74-981a-4e80-ac6d-cfda33e3a783.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1690,1597690,a7f56e74-981a-4e80-ac6d-cfda33e3a783.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,YES,True
+1692,1597690,c45a9002-901d-4e6f-b1a2-5fc4ea8c6479.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,NO,True
+1692,1597690,c45a9002-901d-4e6f-b1a2-5fc4ea8c6479.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1692,1597690,c45a9002-901d-4e6f-b1a2-5fc4ea8c6479.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1692,1597690,c45a9002-901d-4e6f-b1a2-5fc4ea8c6479.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1692,1597690,c45a9002-901d-4e6f-b1a2-5fc4ea8c6479.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,YES,True
+1691,1597690,bafb48bd-7d9e-40bc-9eeb-12cf45a1582b.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,YES,False
+1691,1597690,bafb48bd-7d9e-40bc-9eeb-12cf45a1582b.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1691,1597690,bafb48bd-7d9e-40bc-9eeb-12cf45a1582b.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1691,1597690,bafb48bd-7d9e-40bc-9eeb-12cf45a1582b.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1691,1597690,bafb48bd-7d9e-40bc-9eeb-12cf45a1582b.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",NO,YES,False
+1693,1597690,c86638d1-19de-44dc-8f95-66f87b6f5434.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,YES,YES,True
+1693,1597690,c86638d1-19de-44dc-8f95-66f87b6f5434.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1693,1597690,c86638d1-19de-44dc-8f95-66f87b6f5434.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,YES,YES,True
+1693,1597690,c86638d1-19de-44dc-8f95-66f87b6f5434.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1693,1597690,c86638d1-19de-44dc-8f95-66f87b6f5434.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,YES,True
+1694,1597690,efbcbaf3-3fe2-440c-a67e-9f71643e84cf.jpeg,0,Did the student correctly explain why 1/5 is bigger than 1/8?,NO,YES,False
+1694,1597690,efbcbaf3-3fe2-440c-a67e-9f71643e84cf.jpeg,1,Did the student draw two identical rectangles?,NO,YES,False
+1694,1597690,efbcbaf3-3fe2-440c-a67e-9f71643e84cf.jpeg,2,Did the student label one equal part of the rectangle partitioned into 5 equal parts as 1/5?,NO,YES,False
+1694,1597690,efbcbaf3-3fe2-440c-a67e-9f71643e84cf.jpeg,3,Did the student label one equal part of the rectangle partitioned into 8 equal parts as 1/8?,NO,YES,False
+1694,1597690,efbcbaf3-3fe2-440c-a67e-9f71643e84cf.jpeg,4,"Did the student partition one of the rectangles into 5 equal parts, while partitioning the other rectangle into 8 equal parts?",YES,YES,True
+1697,1597698,23cd490f-d964-4a21-8dbc-507c7487ded8.jpeg,0,Did the student correctly shade two of the units to show the answer?,NO,YES,False
+1697,1597698,23cd490f-d964-4a21-8dbc-507c7487ded8.jpeg,1,Did the student divide the strip into five equal parts?,YES,YES,True
+1697,1597698,23cd490f-d964-4a21-8dbc-507c7487ded8.jpeg,2,Did the student write the unit fraction inside each unit?,YES,YES,True
+1698,1597698,44fecd7c-17ad-4eed-8c39-5476dcfdb7eb.jpeg,0,Did the student correctly shade two of the units to show the answer?,NO,YES,False
+1698,1597698,44fecd7c-17ad-4eed-8c39-5476dcfdb7eb.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1698,1597698,44fecd7c-17ad-4eed-8c39-5476dcfdb7eb.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1695,1597698,060db233-03f4-43ca-a503-37c7feade5c1.jpeg,0,Did the student correctly shade two of the units to show the answer?,YES,YES,True
+1695,1597698,060db233-03f4-43ca-a503-37c7feade5c1.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1695,1597698,060db233-03f4-43ca-a503-37c7feade5c1.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1696,1597698,08195123-eadf-4a2b-8043-1b989298f004.jpeg,0,Did the student correctly shade two of the units to show the answer?,NO,YES,False
+1696,1597698,08195123-eadf-4a2b-8043-1b989298f004.jpeg,1,Did the student divide the strip into five equal parts?,YES,YES,True
+1696,1597698,08195123-eadf-4a2b-8043-1b989298f004.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1699,1597698,4660b546-2d9b-4d1a-8160-5bb066e9a500.jpeg,0,Did the student correctly shade two of the units to show the answer?,NO,YES,False
+1699,1597698,4660b546-2d9b-4d1a-8160-5bb066e9a500.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1699,1597698,4660b546-2d9b-4d1a-8160-5bb066e9a500.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1701,1597698,693d7179-aff5-4425-b023-9e8b21c122b3.jpeg,0,Did the student correctly shade two of the units to show the answer?,NO,YES,False
+1701,1597698,693d7179-aff5-4425-b023-9e8b21c122b3.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1701,1597698,693d7179-aff5-4425-b023-9e8b21c122b3.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1700,1597698,62d212fd-2641-4ab1-9bee-0f879a4535d0.jpeg,0,Did the student correctly shade two of the units to show the answer?,YES,YES,True
+1700,1597698,62d212fd-2641-4ab1-9bee-0f879a4535d0.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1700,1597698,62d212fd-2641-4ab1-9bee-0f879a4535d0.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1702,1597698,8ae135c4-0fe1-4904-bb44-7d6aa6e5ddae.jpeg,0,Did the student correctly shade two of the units to show the answer?,YES,YES,True
+1702,1597698,8ae135c4-0fe1-4904-bb44-7d6aa6e5ddae.jpeg,1,Did the student divide the strip into five equal parts?,YES,YES,True
+1702,1597698,8ae135c4-0fe1-4904-bb44-7d6aa6e5ddae.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1703,1597698,95a75698-bd69-4d94-be14-d2e01b086af2.jpeg,0,Did the student correctly shade two of the units to show the answer?,YES,YES,True
+1703,1597698,95a75698-bd69-4d94-be14-d2e01b086af2.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1703,1597698,95a75698-bd69-4d94-be14-d2e01b086af2.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1704,1597698,c44fcd4a-5cf6-4134-9302-ba3272367049.jpeg,0,Did the student correctly shade two of the units to show the answer?,NO,YES,False
+1704,1597698,c44fcd4a-5cf6-4134-9302-ba3272367049.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1704,1597698,c44fcd4a-5cf6-4134-9302-ba3272367049.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1705,1597698,e9aa0658-53f6-42d4-af72-1bfe5707b0d7.jpeg,0,Did the student correctly shade two of the units to show the answer?,YES,YES,True
+1705,1597698,e9aa0658-53f6-42d4-af72-1bfe5707b0d7.jpeg,1,Did the student divide the strip into five equal parts?,NO,YES,False
+1705,1597698,e9aa0658-53f6-42d4-af72-1bfe5707b0d7.jpeg,2,Did the student write the unit fraction inside each unit?,NO,YES,False
+1707,1598215,2725b2e4-789c-4fd3-b96b-2a4023324525.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1707,1598215,2725b2e4-789c-4fd3-b96b-2a4023324525.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1707,1598215,2725b2e4-789c-4fd3-b96b-2a4023324525.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1708,1598215,5765fb93-1384-4c59-bce7-b2137afc8b9e.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1708,1598215,5765fb93-1384-4c59-bce7-b2137afc8b9e.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1708,1598215,5765fb93-1384-4c59-bce7-b2137afc8b9e.jpeg,2,Did the student correctly shade in four of the units?,YES,YES,True
+1709,1598215,6128beae-c0a7-49d2-963e-6c17d22ca2ef.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,NO,True
+1709,1598215,6128beae-c0a7-49d2-963e-6c17d22ca2ef.jpeg,1,Did the student correctly partition each rectangle into thirds?,YES,YES,True
+1709,1598215,6128beae-c0a7-49d2-963e-6c17d22ca2ef.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1706,1598215,074ffd9e-e439-4864-8db6-3c7e51eb1181.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1706,1598215,074ffd9e-e439-4864-8db6-3c7e51eb1181.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1706,1598215,074ffd9e-e439-4864-8db6-3c7e51eb1181.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1710,1598215,7d2c8f0e-ba91-44a5-be12-93cd4c14a4ae.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1710,1598215,7d2c8f0e-ba91-44a5-be12-93cd4c14a4ae.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1710,1598215,7d2c8f0e-ba91-44a5-be12-93cd4c14a4ae.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1712,1598215,905af511-6136-43d5-8610-0cb4e3a376ba.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1712,1598215,905af511-6136-43d5-8610-0cb4e3a376ba.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1712,1598215,905af511-6136-43d5-8610-0cb4e3a376ba.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1711,1598215,8be9ebcf-679b-4097-b4f7-73654b77350a.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1711,1598215,8be9ebcf-679b-4097-b4f7-73654b77350a.jpeg,1,Did the student correctly partition each rectangle into thirds?,YES,YES,True
+1711,1598215,8be9ebcf-679b-4097-b4f7-73654b77350a.jpeg,2,Did the student correctly shade in four of the units?,YES,YES,True
+1714,1598215,dd88c671-f114-4e77-bb82-706c4768adcb.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1714,1598215,dd88c671-f114-4e77-bb82-706c4768adcb.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1714,1598215,dd88c671-f114-4e77-bb82-706c4768adcb.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1713,1598215,adf8bbb6-a978-4531-81c9-2213a56ffe69.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1713,1598215,adf8bbb6-a978-4531-81c9-2213a56ffe69.jpeg,1,Did the student correctly partition each rectangle into thirds?,YES,YES,True
+1713,1598215,adf8bbb6-a978-4531-81c9-2213a56ffe69.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1715,1598215,e6007b25-bca2-4f5c-9da7-f21c9305ac41.jpeg,0,Did the student correctly label each unit fraction of 1/3?,YES,YES,True
+1715,1598215,e6007b25-bca2-4f5c-9da7-f21c9305ac41.jpeg,1,Did the student correctly partition each rectangle into thirds?,YES,YES,True
+1715,1598215,e6007b25-bca2-4f5c-9da7-f21c9305ac41.jpeg,2,Did the student correctly shade in four of the units?,YES,YES,True
+1717,1598215,faaeb3ba-886f-4875-8010-60b31faf8323.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1717,1598215,faaeb3ba-886f-4875-8010-60b31faf8323.jpeg,1,Did the student correctly partition each rectangle into thirds?,NO,YES,False
+1717,1598215,faaeb3ba-886f-4875-8010-60b31faf8323.jpeg,2,Did the student correctly shade in four of the units?,NO,YES,False
+1718,1598216,18d43818-1100-4080-bc7a-76304db0835d.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,NO,YES,False
+1716,1598215,f3034ac2-70b0-4a71-b77f-5ed130d26869.jpeg,0,Did the student correctly label each unit fraction of 1/3?,NO,YES,False
+1716,1598215,f3034ac2-70b0-4a71-b77f-5ed130d26869.jpeg,1,Did the student correctly partition each rectangle into thirds?,YES,YES,True
+1716,1598215,f3034ac2-70b0-4a71-b77f-5ed130d26869.jpeg,2,Did the student correctly shade in four of the units?,YES,YES,True
+1722,1598216,6be32250-0060-4d3c-a411-56138c6cf66d.png,0,Did the student shade the correct amount of units on the fraction strips?,NO,YES,False
+1721,1598216,6438c3c7-05ad-442d-90ee-bc1ea0d45555.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,NO,YES,False
+1720,1598216,3c3bc418-9fa5-4215-89e3-4c96e66bd1b2.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,NO,YES,False
+1724,1598216,f4ebb038-aa92-4c4b-9bfe-d7a6b5218021.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,NO,YES,False
+1719,1598216,3973acc3-a5c3-422f-8596-cd593d4028ec.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,YES,YES,True
+1726,1598217,1b028672-a089-4eee-850d-45dd13a8d86b.jpeg,0,Did the student circle 1/2?,YES,YES,True
+1726,1598217,1b028672-a089-4eee-850d-45dd13a8d86b.jpeg,1,Did the student start 1/4?,YES,YES,True
+1723,1598216,77580e16-2030-43fd-8281-0d551e3b8f67.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,YES,YES,True
+1725,1598216,f62c475d-e5d3-4486-ad45-040f8f92a8ba.jpeg,0,Did the student shade the correct amount of units on the fraction strips?,THE PROBLEM IS NOT SHOWN,YES,False
+1727,1598217,1f9ff9d7-fe70-4646-ae49-8a9352b033e1.jpeg,0,Did the student circle 1/2?,YES,YES,True
+1727,1598217,1f9ff9d7-fe70-4646-ae49-8a9352b033e1.jpeg,1,Did the student start 1/4?,YES,YES,True
+1728,1598217,77e001d8-7478-4a43-9dda-36b7ef7723e8.jpeg,0,Did the student circle 1/2?,YES,YES,True
+1728,1598217,77e001d8-7478-4a43-9dda-36b7ef7723e8.jpeg,1,Did the student start 1/4?,NO,YES,False
+1731,1598217,b73887be-6484-435c-b418-395165cedb3d.jpeg,0,Did the student circle 1/2?,NO,NO,True
+1731,1598217,b73887be-6484-435c-b418-395165cedb3d.jpeg,1,Did the student start 1/4?,NO,NO,True
+1729,1598217,82f45548-3a49-4fa2-9580-cb623f601f44.jpeg,0,Did the student circle 1/2?,NO,YES,False
+1729,1598217,82f45548-3a49-4fa2-9580-cb623f601f44.jpeg,1,Did the student start 1/4?,NO,YES,False
+1730,1598217,8792e34f-02e5-4ffd-bd56-09070ddbc11b.jpeg,0,Did the student circle 1/2?,NO,YES,False
+1730,1598217,8792e34f-02e5-4ffd-bd56-09070ddbc11b.jpeg,1,Did the student start 1/4?,NO,YES,False
+1732,1598217,c9af9dd9-2cf3-44e0-ab86-2ecbc8f8edc0.jpeg,0,Did the student circle 1/2?,YES,YES,True
+1732,1598217,c9af9dd9-2cf3-44e0-ab86-2ecbc8f8edc0.jpeg,1,Did the student start 1/4?,YES,YES,True
+1733,1598217,ca67625f-2330-4cd1-bc3a-af7f9374401e.jpeg,0,Did the student circle 1/2?,YES,YES,True
+1733,1598217,ca67625f-2330-4cd1-bc3a-af7f9374401e.jpeg,1,Did the student start 1/4?,YES,YES,True
+1735,1598217,ea212860-cb78-47a9-8bc4-8ac6fb4e771f.png,0,Did the student circle 1/2?,YES,YES,True
+1735,1598217,ea212860-cb78-47a9-8bc4-8ac6fb4e771f.png,1,Did the student start 1/4?,YES,YES,True
+1736,1598221,218f27f9-bc5e-435d-a611-2d01f511eacd.jpeg,0,Does the model represent the fraction the student wrote in Part A?,YES,YES,True
+1739,1598221,a369221d-f886-4c5b-904d-3fd4d74dded4.jpeg,0,Does the model represent the fraction the student wrote in Part A?,YES,YES,True
+1734,1598217,e2ff43c9-8405-4897-90ff-88550c3eb6d1.jpeg,0,Did the student circle 1/2?,NO,NO,True
+1734,1598217,e2ff43c9-8405-4897-90ff-88550c3eb6d1.jpeg,1,Did the student start 1/4?,NO,NO,True
+1740,1598221,b3960d0a-28fe-40cc-b9fa-f7e4676bd7e0.jpeg,0,Does the model represent the fraction the student wrote in Part A?,NO,NO,True
+1738,1598221,9400d478-23ad-4366-a53c-23e58e7adbe9.jpeg,0,Does the model represent the fraction the student wrote in Part A?,NO,YES,False
+1742,1598221,c4d3846d-4ad8-4799-b69d-a3713fd10ce1.jpeg,0,Does the model represent the fraction the student wrote in Part A?,NO,NO,True
+1737,1598221,7b837c2c-545c-41c8-93dc-5d2ff632142d.jpeg,0,Does the model represent the fraction the student wrote in Part A?,NO,YES,False
+1744,1598221,cb1730bd-8972-4a1f-8eb6-18aa8354e2b8.jpeg,0,Does the model represent the fraction the student wrote in Part A?,YES,YES,True
+1743,1598221,c6df4933-7342-483d-8cde-af5a7c867514.jpeg,0,Does the model represent the fraction the student wrote in Part A?,NO,YES,False
+1745,1598224,0f81189d-da38-4699-bc50-18f713160dcb.jpeg,0,Do the number line and the number bond match?,YES,YES,True
+1745,1598224,0f81189d-da38-4699-bc50-18f713160dcb.jpeg,1,Does the number bond show that each student gets 20 cents?,YES,YES,True
+1745,1598224,0f81189d-da38-4699-bc50-18f713160dcb.jpeg,2,Does the number line show that each student gets 20 cents?,YES,YES,True
+1741,1598221,b5fe2287-722c-4b6a-9b72-34537807c2d3.jpeg,0,Does the model represent the fraction the student wrote in Part A?,YES,YES,True
+1747,1598224,5e7448a6-5159-4730-b77f-d5fca5a397e0.jpeg,0,Do the number line and the number bond match?,YES,YES,True
+1747,1598224,5e7448a6-5159-4730-b77f-d5fca5a397e0.jpeg,1,Does the number bond show that each student gets 20 cents?,NO,YES,False
+1747,1598224,5e7448a6-5159-4730-b77f-d5fca5a397e0.jpeg,2,Does the number line show that each student gets 20 cents?,NO,YES,False
+1749,1598224,af72065b-ec7c-4b73-9e90-15800f21f974.jpeg,0,Do the number line and the number bond match?,NO,NO,True
+1749,1598224,af72065b-ec7c-4b73-9e90-15800f21f974.jpeg,1,Does the number bond show that each student gets 20 cents?,YES,YES,True
+1749,1598224,af72065b-ec7c-4b73-9e90-15800f21f974.jpeg,2,Does the number line show that each student gets 20 cents?,NO,NO,True
+1748,1598224,763e8b3b-c0c5-443e-bc54-c606c2565b40.jpeg,0,Do the number line and the number bond match?,NO,NO,True
+1748,1598224,763e8b3b-c0c5-443e-bc54-c606c2565b40.jpeg,1,Does the number bond show that each student gets 20 cents?,NO,YES,False
+1748,1598224,763e8b3b-c0c5-443e-bc54-c606c2565b40.jpeg,2,Does the number line show that each student gets 20 cents?,NO,NO,True
+1746,1598224,3a6c3b52-92b2-43e4-b1f2-72baedd721f8.jpeg,0,Do the number line and the number bond match?,NO,YES,False
+1746,1598224,3a6c3b52-92b2-43e4-b1f2-72baedd721f8.jpeg,1,Does the number bond show that each student gets 20 cents?,YES,NO,False
+1746,1598224,3a6c3b52-92b2-43e4-b1f2-72baedd721f8.jpeg,2,Does the number line show that each student gets 20 cents?,YES,NO,False
+1750,1598224,d527fb6f-9863-401d-b409-e65d9c291994.jpeg,0,Do the number line and the number bond match?,YES,YES,True
+1750,1598224,d527fb6f-9863-401d-b409-e65d9c291994.jpeg,1,Does the number bond show that each student gets 20 cents?,YES,YES,True
+1750,1598224,d527fb6f-9863-401d-b409-e65d9c291994.jpeg,2,Does the number line show that each student gets 20 cents?,YES,YES,True
+1751,1598224,e0915a8f-d14f-4a79-8c93-2c3a2ec06a60.jpeg,0,Do the number line and the number bond match?,YES,YES,True
+1751,1598224,e0915a8f-d14f-4a79-8c93-2c3a2ec06a60.jpeg,1,Does the number bond show that each student gets 20 cents?,NO,YES,False
+1751,1598224,e0915a8f-d14f-4a79-8c93-2c3a2ec06a60.jpeg,2,Does the number line show that each student gets 20 cents?,NO,YES,False
+1752,1598224,edaec9b8-5829-4fcf-bca0-8d7d29897987.jpeg,0,Do the number line and the number bond match?,NO,YES,False
+1752,1598224,edaec9b8-5829-4fcf-bca0-8d7d29897987.jpeg,1,Does the number bond show that each student gets 20 cents?,YES,YES,True
+1752,1598224,edaec9b8-5829-4fcf-bca0-8d7d29897987.jpeg,2,Does the number line show that each student gets 20 cents?,NO,YES,False
+1753,1598224,fa1d3f5b-520b-43ad-b7d9-a7b8c54f57a1.jpeg,0,Do the number line and the number bond match?,YES,YES,True
+1753,1598224,fa1d3f5b-520b-43ad-b7d9-a7b8c54f57a1.jpeg,1,Does the number bond show that each student gets 20 cents?,NO,YES,False
+1753,1598224,fa1d3f5b-520b-43ad-b7d9-a7b8c54f57a1.jpeg,2,Does the number line show that each student gets 20 cents?,NO,YES,False
+1754,1598228,01df312a-35e5-4756-9d6b-85736e367578.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,NO,YES,False
+1754,1598228,01df312a-35e5-4756-9d6b-85736e367578.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1755,1598228,0b701ea3-64ef-41fb-adcd-6dcc21a25e30.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,YES,YES,True
+1755,1598228,0b701ea3-64ef-41fb-adcd-6dcc21a25e30.jpeg,1,Did the student equally partition the number line into fifths?,YES,YES,True
+1756,1598228,1354cac7-aa5d-47ff-b855-5d4016706b96.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,YES,YES,True
+1756,1598228,1354cac7-aa5d-47ff-b855-5d4016706b96.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1757,1598228,3703e31d-336c-48c3-81c3-63f8b87c2aa1.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,NO,YES,False
+1757,1598228,3703e31d-336c-48c3-81c3-63f8b87c2aa1.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1760,1598228,7d340170-2989-49e0-b8d5-5fd54a7484c2.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,YES,YES,True
+1760,1598228,7d340170-2989-49e0-b8d5-5fd54a7484c2.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1758,1598228,3fac14d3-8bf0-42b7-95c7-265753b041e0.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,YES,YES,True
+1758,1598228,3fac14d3-8bf0-42b7-95c7-265753b041e0.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1759,1598228,48dc4f0b-606b-4d00-bf37-44f5c4296483.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,YES,YES,True
+1759,1598228,48dc4f0b-606b-4d00-bf37-44f5c4296483.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1762,1598229,017a44f8-63ab-448e-b486-cde212ab5969.jpeg,0,Did the student correctly partition each whole into thirds?,YES,YES,True
+1761,1598228,d2dbff97-e9dc-4fff-93d5-14f428ce1605.jpeg,0,Did the student correctly box the values 10/5 and 15/5?,YES,YES,True
+1761,1598228,d2dbff97-e9dc-4fff-93d5-14f428ce1605.jpeg,1,Did the student equally partition the number line into fifths?,NO,YES,False
+1764,1598229,255693fb-04e0-44fd-8cc0-a546ece95fab.jpeg,0,Did the student correctly partition each whole into thirds?,NO,YES,False
+1765,1598229,2e8bfbae-6571-41cb-b5d1-0fba96df0c82.jpeg,0,Did the student correctly partition each whole into thirds?,YES,YES,True
+1766,1598229,616df4ad-e469-4fe3-ae94-8083a4efed6c.jpeg,0,Did the student correctly partition each whole into thirds?,YES,YES,True
+1763,1598229,1358d77e-bc39-4cec-84f0-3ef0a00b704c.jpeg,0,Did the student correctly partition each whole into thirds?,NO,YES,False
+1767,1598229,68a74be8-915f-4711-ab29-85d33b250642.jpeg,0,Did the student correctly partition each whole into thirds?,NO,YES,False
+1768,1598229,73e99ffe-3ac9-483e-a309-f1c9cf12d8de.jpeg,0,Did the student correctly partition each whole into thirds?,NO,YES,False
+1770,1598446,2043fc06-6b6c-49f5-b27a-2cd22a88fb60.jpeg,0,Did the student divide the whole into fifths?,NO,YES,False
+1769,1598229,e97ad001-96eb-462a-9440-8897840bea29.jpeg,0,Did the student correctly partition each whole into thirds?,YES,YES,True
+1771,1598446,3d4aa04c-7346-4fdf-8a21-3305a0ca04a3.jpeg,0,Did the student divide the whole into fifths?,YES,YES,True
+1772,1598446,5eb438a9-bccd-4c08-a5ee-1fb39e184124.jpeg,0,Did the student divide the whole into fifths?,YES,YES,True
+1773,1598446,5eb7220f-a9f4-4e10-ae48-049bfe5322f7.jpeg,0,Did the student divide the whole into fifths?,YES,YES,True
+1774,1598446,8c0a75af-3c7a-45b2-84ad-3a537affc7b2.jpeg,0,Did the student divide the whole into fifths?,YES,YES,True
+1775,1598446,beee9a3b-6aed-452e-8058-def90f246850.jpeg,0,Did the student divide the whole into fifths?,NO,NO,True
+1776,1598446,c4cd60de-ebbe-43a0-beb2-89fd47597f68.jpeg,0,Did the student divide the whole into fifths?,YES,YES,True
+1777,1598447,071bb881-629e-491b-b554-32f8df180340.jpeg,0,Did the student correctly place 1/2 in the center of the number line?',YES,YES,True
+1779,1598447,650ce4d1-0fe4-4149-b4a8-1766b6be6442.jpeg,0,Did the student correctly place 1/2 in the center of the number line?',YES,YES,True
+1778,1598447,3b03bdfb-80d0-40c8-8d0b-5feb99685f5b.jpeg,0,Did the student correctly place 1/2 in the center of the number line?',YES,YES,True
+1782,1598447,dcdafd90-de1b-4af0-8f6c-aa0a34bb9a86.jpeg,0,Did the student correctly place 1/2 in the center of the number line?',YES,YES,True
+1781,1598447,b2a3307d-798c-4343-9a91-621e26208ff9.jpeg,0,Did the student correctly place 1/2 in the center of the number line?',YES,YES,True
+1780,1598447,698202e6-3779-43f6-a509-4b3a816da6df.jpeg,0,Did the student correctly place 1/2 in the center of the number line?',NO,YES,False
+1858,1736714,186fc9c3-8927-4392-84ac-a6aa585c94aa.png,0,Does the input-output diagram correctly show that there are 60 minutes in one hour?,NO,YES,False
+1858,1736714,186fc9c3-8927-4392-84ac-a6aa585c94aa.png,1,Does the statement reflect that there are 60 minutes in one hour?,NO,YES,False
+1860,1736714,1e780fc3-e04f-476d-88d4-f3806f4821f0.png,0,Does the input-output diagram correctly show that there are 60 minutes in one hour?,NO,YES,False
+1860,1736714,1e780fc3-e04f-476d-88d4-f3806f4821f0.png,1,Does the statement reflect that there are 60 minutes in one hour?,NO,YES,False
+1859,1736714,1a126137-3b05-4807-b044-9bd63a061808.jpeg,0,Does the input-output diagram correctly show that there are 60 minutes in one hour?,YES,YES,True
+1859,1736714,1a126137-3b05-4807-b044-9bd63a061808.jpeg,1,Does the statement reflect that there are 60 minutes in one hour?,YES,YES,True
+1861,1736714,271bb736-6c7a-4c75-bb4b-015c6ae77fe3.png,0,Does the input-output diagram correctly show that there are 60 minutes in one hour?,NO,YES,False
+1861,1736714,271bb736-6c7a-4c75-bb4b-015c6ae77fe3.png,1,Does the statement reflect that there are 60 minutes in one hour?,NO,YES,False
+2003,1876182,1959f3bc-c026-47d8-8b66-2d8385e6b78d.jpeg,0,Did the student correctly show that the quoitent is 12?,YES,YES,True
+2005,1876182,2a407c30-b009-4f89-b21d-597cb60071d9.jpeg,0,Did the student correctly show that the quoitent is 12?,NO,NO,True
+2004,1876182,26798b2f-0c7a-4082-ba33-0108a46caa4f.jpeg,0,Did the student correctly show that the quoitent is 12?,NO,YES,False
+2008,1885548,16d76001-7fa4-4f7f-8c6b-9d697c44f8b2.jpeg,0,Did the student use the standard algorithm to check?,YES,YES,True
+2007,1885548,068b7df7-5291-49b3-8b13-79dee8baf314.jpeg,0,Did the student use the standard algorithm to check?,NO,YES,False
+2006,1876182,78bac5ea-de59-4a0f-a278-efd619503b9f.jpeg,0,Did the student correctly show that the quoitent is 12?,NO,YES,False
+2009,1885548,2bbfcea9-7c04-4cce-b386-b4e2fa09b1c3.jpeg,0,Did the student use the standard algorithm to check?,NO,NO,True
+2010,1885551,054d7529-168d-4d09-a9b4-674732fd9e69.jpeg,0,Did the student use the standard algorithm?,YES,YES,True
+2012,1885551,1a526079-005b-40d1-9174-9d6f06869850.jpeg,0,Did the student use the standard algorithm?,YES,YES,True
+2013,1885551,22fff9c0-a3b4-4012-b86e-a51a1472498a.jpeg,0,Did the student use the standard algorithm?,YES,YES,True
+2011,1885551,1430ed33-cf47-4cfa-ad4a-c1c65c38e7f8.jpeg,0,Did the student use the standard algorithm?,YES,YES,True
+2014,1885551,33e3d136-18ae-4094-b5d7-eec51be827e7.jpeg,0,Did the student use the standard algorithm?,NO,NO,True
+2015,1885654,5c33165a-3abe-4770-864e-6ea27603f5af.jpeg,0,Did the student correctly represent that 121 students can get folders?,YES,YES,True
+2015,1885654,5c33165a-3abe-4770-864e-6ea27603f5af.jpeg,1,Did the student correctly show there is no remainder?,YES,YES,True
