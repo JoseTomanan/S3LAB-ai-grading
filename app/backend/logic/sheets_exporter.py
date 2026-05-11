@@ -99,4 +99,49 @@ class SheetsExporter:
         for row in range(1, total_rows):
             sheet.cell(row=row, column=1).font = bold
 
+        summary_start_row = data_start_row + len(students_list) + 3
+        self._add_summary(sheet, summary_start_row)
+
         return wb
+
+    def _add_summary(self, sheet, start_row: int):
+        if self.max_scores is None:
+            return
+
+        student_pcts = []
+        for scores in self.sheet_items.values():
+            answered = [
+                (item, v) for item, v in scores.items()
+                if v is not None and v >= 0 and item in self.max_scores
+            ]
+            answered_max = sum(self.max_scores[item] for item, _ in answered)
+            if answered_max <= 0:
+                continue
+            total = sum(v for _, v in answered)
+            student_pcts.append(total / answered_max)
+        class_mean_pct = (sum(student_pcts) / len(student_pcts) * 100) if student_pcts else 0.0
+
+        item_pcts: dict[str, float] = {}
+        for item in self.columns:
+            if item not in self.max_scores or self.max_scores[item] <= 0:
+                continue
+            vals: list[float] = [
+                s for scores in self.sheet_items.values()
+                if (s := scores.get(item)) is not None and s >= 0
+            ]
+            if not vals:
+                continue
+            item_pcts[item] = (sum(vals) / len(vals)) / self.max_scores[item] * 100
+
+        bold = Font(bold=True)
+        sheet.cell(row=start_row, column=1, value="Summary").font = bold
+        sheet.cell(row=start_row + 1, column=1, value="Class Mean").font = bold
+        sheet.cell(row=start_row + 1, column=2, value=f"{class_mean_pct:.1f}%")
+
+        if item_pcts:
+            hi = max(item_pcts, key=lambda k: item_pcts[k])
+            lo = min(item_pcts, key=lambda k: item_pcts[k])
+            sheet.cell(row=start_row + 2, column=1, value="Highest Item").font = bold
+            sheet.cell(row=start_row + 2, column=2, value=f"{hi} ({item_pcts[hi]:.1f}%)")
+            sheet.cell(row=start_row + 3, column=1, value="Lowest Item").font = bold
+            sheet.cell(row=start_row + 3, column=2, value=f"{lo} ({item_pcts[lo]:.1f}%)")
