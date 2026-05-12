@@ -1,6 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
 import Icons from 'unplugin-icons/vite';
-import basicSsl from '@vitejs/plugin-basic-ssl';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { enhancedImages } from '@sveltejs/enhanced-img';
 import { defineConfig } from 'vite';
@@ -8,9 +7,10 @@ import { marked } from 'marked';
 
 export default defineConfig({
   server: {
+    host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8111',
         changeOrigin: true,
       }
     }
@@ -24,7 +24,6 @@ export default defineConfig({
 		tailwindcss(),
     enhancedImages(),
 		sveltekit(),
-    basicSsl(),
 		Icons({
 			compiler: 'svelte',
 		}),

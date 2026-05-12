@@ -1,5 +1,5 @@
 """
-Compare LLM_evaluations_QA_Teacher.jsonl against DrawEduMath_SimplifiedQA.csv
+Compare one or more LLM evaluation JSONL files against DrawEduMath_SimplifiedQA.csv
 and write an accuracy report to scripts/LLM_EVALUATION_REPORT.csv.
 
 Each question is counted as one test. Answers are compared after
@@ -8,7 +8,7 @@ trailing punctuation).
 
 Usage:
     python scripts/evaluate_LLM_accuracy.py
-    python scripts/evaluate_LLM_accuracy.py --input <jsonl> --output <csv>
+    python scripts/evaluate_LLM_accuracy.py --input <jsonl> [<jsonl> ...] --output <csv>
 """
 
 import argparse
@@ -67,12 +67,17 @@ def load_ground_truth(gt_csv: Path) -> dict[int, list[dict]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate LLM answer accuracy")
-    parser.add_argument("--input",  type=Path, default=DEFAULT_IN)
+    parser.add_argument("--input", type=Path, nargs="+", default=[DEFAULT_IN],
+                        help="One or more JSONL files to score. Records from all files "
+                             "are combined into a single report; duplicate row_nums across "
+                             "files are scored independently (not deduped).")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
 
-    if not args.input.exists():
-        print(f"ERROR: JSONL not found: {args.input}")
+    missing = [p for p in args.input if not p.exists()]
+    if missing:
+        for p in missing:
+            print(f"ERROR: JSONL not found: {p}")
         return
 
     gt_by_row = load_ground_truth(GT_CSV)
@@ -80,59 +85,60 @@ def main() -> None:
     results: list[ResultRow] = []
     skipped_rows = 0
 
-    with args.input.open(encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                rec = json.loads(line)
-            except json.JSONDecodeError:
-                continue
+    for input_path in args.input:
+        with input_path.open(encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
 
-            row_num    = rec["row_num"]
-            problem_id = rec["problem_id"]
-            image_name = rec["image_name"]
-            questions  = rec["questions"]
-            parse_ok   = rec.get("parse_ok", False)
-            raw        = rec.get("raw_response")
-            m_answers  = rec.get("model_answers", [])
+                row_num    = rec["row_num"]
+                problem_id = rec["problem_id"]
+                image_name = rec["image_name"]
+                questions  = rec["questions"]
+                parse_ok   = rec.get("parse_ok", False)
+                raw        = rec.get("raw_response")
+                m_answers  = rec.get("model_answers", [])
 
-            gt_items = gt_by_row.get(row_num, [])
+                gt_items = gt_by_row.get(row_num, [])
 
-            if not gt_items:
-                print(f"WARNING row={row_num}: no ground-truth found — skipping row.")
-                skipped_rows += 1
-                continue
+                if not gt_items:
+                    print(f"WARNING row={row_num}: no ground-truth found — skipping row.")
+                    skipped_rows += 1
+                    continue
 
-            if len(gt_items) != len(questions):
-                print(
-                    f"WARNING row={row_num}: GT has {len(gt_items)} questions "
-                    f"but JSONL has {len(questions)} — skipping row."
-                )
-                skipped_rows += 1
-                continue
+                if len(gt_items) != len(questions):
+                    print(
+                        f"WARNING row={row_num}: GT has {len(gt_items)} questions "
+                        f"but JSONL has {len(questions)} — skipping row."
+                    )
+                    skipped_rows += 1
+                    continue
 
-            for q_idx, question in enumerate(questions):
-                gt_answer = gt_items[q_idx]["answer"]
+                for q_idx, question in enumerate(questions):
+                    gt_answer = gt_items[q_idx]["answer"]
 
-                if not parse_ok or raw is None or q_idx >= len(m_answers):
-                    model_answer = ""
-                    correct      = False
-                else:
-                    model_answer = m_answers[q_idx]
-                    correct      = is_correct(model_answer, gt_answer)
+                    if not parse_ok or raw is None or q_idx >= len(m_answers):
+                        model_answer = ""
+                        correct      = False
+                    else:
+                        model_answer = m_answers[q_idx]
+                        correct      = is_correct(model_answer, gt_answer)
 
-                results.append(ResultRow(
-                    row_num      = row_num,
-                    problem_id   = problem_id,
-                    image_name   = image_name,
-                    question_idx = q_idx,
-                    question     = question,
-                    model_answer = model_answer,
-                    ground_truth = gt_answer,
-                    correct      = correct,
-                ))
+                    results.append(ResultRow(
+                        row_num      = row_num,
+                        problem_id   = problem_id,
+                        image_name   = image_name,
+                        question_idx = q_idx,
+                        question     = question,
+                        model_answer = model_answer,
+                        ground_truth = gt_answer,
+                        correct      = correct,
+                    ))
 
     total     = len(results)
     correct_n = sum(1 for r in results if r.correct)

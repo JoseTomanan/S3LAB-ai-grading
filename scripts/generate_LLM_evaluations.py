@@ -30,6 +30,27 @@ from logic.ai_interface import AIAnswerEvaluator, ANSWER_RUBRIC_PROMPT  # pyrigh
 from logic.box_segmenter import BoxSegmenter  # pyright: ignore[reportMissingImports] E402
 
 
+def parse_ranges(spec: str) -> list[int]:
+    rows: list[int] = []
+    seen: set[int] = set()
+    for chunk in spec.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if "-" in chunk:
+            lo_s, hi_s = chunk.split("-", 1)
+            lo, hi = int(lo_s), int(hi_s)
+        else:
+            lo = hi = int(chunk)
+        if lo > hi:
+            raise argparse.ArgumentTypeError(f"Invalid range '{chunk}': start > end")
+        for rn in range(lo, hi + 1):
+            if rn not in seen:
+                seen.add(rn)
+                rows.append(rn)
+    return rows
+
+
 CSV_PATH    = REPO_ROOT / "dataset" / "DrawEduMath_SimplifiedQA.csv"
 IMAGES_DIR  = REPO_ROOT / "dataset" / "DrawEduMath" / "Claude_Postprocessing"
 DEFAULT_OUT = REPO_ROOT / "dataset" / "DrawEduMath" / "LLM_evaluations_QA_Teacher.jsonl"
@@ -151,6 +172,8 @@ def main() -> None:
     parser.add_argument("--qa-column", default="QA Teacher", help="CSV column to read QA from")
     parser.add_argument("--start",   type=int,  default=1,    help="First row (1-indexed, inclusive)")
     parser.add_argument("--end",     type=int,  default=2030, help="Last row  (1-indexed, inclusive)")
+    parser.add_argument("--ranges",  type=str,  default=None,
+                        help="Comma-separated inclusive row ranges, e.g. '1104-1131,1297-1338,2003-2015'. Overrides --start/--end when set.")
     parser.add_argument("--workers", type=int,  default=4,    help="Number of parallel API threads")
     parser.add_argument("--output",  type=Path, default=DEFAULT_OUT)
     parser.add_argument("--dry-run", action="store_true",
@@ -158,18 +181,23 @@ def main() -> None:
     args = parser.parse_args()
 
     df    = pd.read_csv(CSV_PATH)
-    total = args.end - args.start + 1
+
+    if args.ranges:
+        requested_rows = parse_ranges(args.ranges)
+    else:
+        requested_rows = list(range(args.start, args.end + 1))
+    total = len(requested_rows)
 
     done_rows: set[int] = set() if args.dry_run else load_done(args.output)
     if done_rows:
         print(f"Resuming — {len(done_rows)} rows already done.")
 
-    # Build pending list, stopping at the first row that exceeds CSV bounds.
+    # Build pending list, skipping out-of-bounds and already-done rows.
     pending: list[int] = []
-    for rn in range(args.start, args.end + 1):
-        if rn - 1 >= len(df):
-            print(f"Row {rn}: beyond CSV length, stopping.")
-            break
+    for rn in requested_rows:
+        if rn < 1 or rn - 1 >= len(df):
+            print(f"Row {rn}: out of CSV bounds, skipping.")
+            continue
         if rn not in done_rows:
             pending.append(rn)
 
