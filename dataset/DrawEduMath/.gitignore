@@ -1,3 +1,7 @@
 Before/
 Postprocessing/
+# Large pre-existing source CSVs (>100MB or near it) — re-downloadable from HuggingFace,
+# see scripts/compare_drawedumath_gemini.py for the download command.
+aftermath_predictions.csv
+DrawEduMath_QA_with_Model_Answers.csv
 !.gitignore
