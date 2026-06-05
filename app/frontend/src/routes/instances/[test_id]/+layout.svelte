@@ -1,116 +1,98 @@
 <script lang="ts">
-  let { data, children }: {data: LayoutData, children: Snippet} = $props();
-
-  import { navigating, page } from '$app/state';
+  import { page } from '$app/state';
   import type { LayoutData } from './$types.d.ts';
   import type { Snippet } from 'svelte';
   import { setContext, untrack } from 'svelte';
 
   import BulkUpload from './BulkUpload.svelte';
   import ExportSheets from './ExportSheets.svelte';
+  import TopBar from '$lib/components/TopBar.svelte';
+  import * as Sheet from '$lib/components/ui/sheet/index.ts';
 
-  import IconInstancesList from '~icons/mdi/format-list-bulleted';
-  import IconBack from '~icons/mdi/chevron-left';
-  import IconTable from '~icons/mdi/table';
   import IconUpload from '~icons/mdi/tray-upload';
 
   import type { TestInstance, TestItemsContext } from '$lib/index.ts';
-  import * as Dialog from '$lib/components/ui/dialog/index.ts';
-	import * as Sheet from '$lib/components/ui/sheet/index.ts';
-  import { Button, buttonVariants } from '$lib/components/CustomButton/index.ts';
-  import { cn } from '$lib/utils.ts';
-	import { Separator } from '$lib/components/ui/separator/index.ts';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.ts';
-	import { goto, invalidateAll } from '$app/navigation';
+  import { invalidateAll } from '$app/navigation';
+
+  let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
   const isRouteItems = $derived(page.route.id!.includes('/items'));
   const isRoutePapers = $derived(page.route.id!.includes('/papers'));
 
   let activeTestInstance: TestInstance = $derived(data.test_instance!);
-  let isBulkUploadOpen: boolean = $state(false);
+  let isBulkUploadOpen = $state(false);
 
-  let testItemsContext: TestItemsContext = $state({items: untrack(() => data.test_items!), isLoading: false});
-  $effect(() => {
-    testItemsContext.items = data.test_items!;
+  let testItemsContext: TestItemsContext = $state({
+    items: untrack(() => data.test_items!),
+    isLoading: false,
   });
-  setContext("testItemsContext", testItemsContext);
+  $effect(() => { testItemsContext.items = data.test_items!; });
+  setContext('testItemsContext', testItemsContext);
 </script>
 
+<div class="flex flex-col min-h-full">
+  {#snippet rightSlot()}
+    <button
+      onclick={() => { isBulkUploadOpen = true; }}
+      class="size-9 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-border transition-colors"
+      title="Bulk upload"
+    >
+      <IconUpload class="size-[18px]" />
+    </button>
+    <ExportSheets test_id={data.test_id} />
+  {/snippet}
 
+  <TopBar
+    title={activeTestInstance.name}
+    sub={activeTestInstance.test_id}
+    back="/instances"
+    right={rightSlot}
+  />
 
-<!-- <div> -->
-  <nav class="bg-sidebar text-sidebar-foreground p-4 pt-6 shadow shadow-sidebar-border space-y-2.5">
-    <span class="flex flex-row items-center justify-between">
-      <Button variant="floating"
-              onclick={() => goto("..")}>
-        <IconBack class="size-8"/>
-      </Button>
-      <h2 class="flex-1 text-center">
-        {activeTestInstance.name} &ThinSpace;&middot;&ThinSpace; {activeTestInstance.test_id.split("_").slice()[0]}
-      </h2>
-      <Button variant="floating"
-              href="/instances">
-        <IconInstancesList class="size-7 m-0.5"/>
-      </Button>
-    </span>
-    
-    <Separator/>
-    <div class="flex flex-row-reverse justify-between gap-x-3 gap-y-1 
-                [&>*>h6]:font-normal [&>*>h6]:opacity-70 [&>*>h6]:leading-none [&>*>h6]:whitespace-nowrap">
-      <h6>
-        Rendered?
-        {activeTestInstance.is_done_rendering 
-          ? "☑️" 
-          : "✖️" }
-      </h6>
-      <h6>
-        Created
-        {activeTestInstance.date
-          ? new Date(activeTestInstance.date).toLocaleDateString()
-          : "(n/d)" }
-      </h6>
+  <!-- tab pills + meta sub-bar -->
+  <div class="bg-card border-b border-border px-3.5 pt-2.5 pb-2">
+    <div class="flex bg-background rounded-md p-[3px] gap-[2px]">
+      <a
+        href="/instances/{data.test_id}/items"
+        class="flex-1 text-center text-[13px] font-semibold py-1.5 rounded transition-all no-underline
+          {isRouteItems
+            ? 'bg-card text-foreground shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'}"
+      >Items</a>
+      <a
+        href="/instances/{data.test_id}/papers"
+        class="flex-1 text-center text-[13px] font-semibold py-1.5 rounded transition-all no-underline
+          {isRoutePapers
+            ? 'bg-card text-foreground shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'}"
+      >Papers</a>
     </div>
-    
-    <div class="flex items-center justify-between underline-offset-3 *:space-x-1 ">
-      <span>
-        <Button class={cn('ring-chart-3', isRouteItems ? 'ring-2' : '')}
-            href="/instances/{data.test_id}/items">
-          Items
-        </Button>
-        <Button class={cn('ring-chart-3', isRoutePapers ? 'ring-2' : '')}
-            href="/instances/{data.test_id}/papers">
-          Papers
-        </Button>
+
+    <div class="flex justify-between mt-2 mb-0.5">
+      <span class="text-[11px] text-foreground/55">
+        Created {activeTestInstance.date ? new Date(activeTestInstance.date).toLocaleDateString() : '—'}
       </span>
-      
-      <span class="flex flex-row gap-x-1">
-        <Dialog.Root>
-          <Dialog.Trigger class={buttonVariants()}
-                          title={"Export sheets"}>
-            <IconTable class="size-5.5" />
-          </Dialog.Trigger>
-          <ExportSheets test_id={data.test_id}/>
-        </Dialog.Root>
-        <Sheet.Root bind:open={isBulkUploadOpen}>
-          <Sheet.Trigger class={buttonVariants()}
-                          title={"Bulk upload"}>
-            <IconUpload class="size-5.5"/>
-          </Sheet.Trigger>
-          <BulkUpload test_instance={activeTestInstance}
-                      defaultNumBoxes={data.test_items?.length ?? 2}
-                      onuploadcomplete={invalidateAll}
-                      open={isBulkUploadOpen}
-                  />
-        </Sheet.Root>
+      <span class="text-[11px] text-foreground/55 flex items-center gap-1">
+        Rendered
+        {#if activeTestInstance.is_done_rendering}
+          <span class="text-secondary-700">✓</span>
+        {:else}
+          <span class="text-muted-foreground">✗</span>
+        {/if}
       </span>
     </div>
-  </nav>
-  
-  <div class="container -mt-4">
-    {#if navigating.to}
-      <Skeleton class="grayscale-50 w-full h-64 rounded-none"/>
-    {:else}
-      {@render children()}
-    {/if}
   </div>
-<!-- </div> -->
+
+  <div class="flex-1">
+    {@render children()}
+  </div>
+</div>
+
+<Sheet.Root bind:open={isBulkUploadOpen}>
+  <BulkUpload
+    test_instance={activeTestInstance}
+    defaultNumBoxes={data.test_items?.length ?? 2}
+    onuploadcomplete={invalidateAll}
+    open={isBulkUploadOpen}
+  />
+</Sheet.Root>

@@ -16,15 +16,19 @@
 			},
 			variant: {
 				default: "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+				primary: "bg-foreground text-background shadow-xs hover:bg-foreground/80",
+				amber: "bg-primary text-white shadow-xs hover:opacity-90",
 				secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
 				destructive: "bg-destructive text-white shadow-xs hover:opacity-80",
+				danger: "bg-destructive text-white shadow-xs hover:opacity-80",
 				outline: "bg-card text-card-foreground shadow-xs ring ring-border border-0",
 				ghost: "hover:bg-accent hover:text-accent-foreground",
 				link: "text-primary underline-offset-4 hover:underline",
-				floating:
-					"bg-white hover:from-neutral-50 hover:to-neutral-200 text-[var(--color-primary-700)] border border-border shadow rounded-full h-fit p-0",
-				"floating-secondary":
-					"bg-white hover:from-neutral-50 hover:to-neutral-200 text-[var(--secondary-700)] border border-border shadow rounded-full h-fit p-0",
+				add: "w-full border-2 border-dashed border-foreground/20 bg-card text-muted-foreground hover:border-foreground hover:text-foreground rounded-xl py-3 justify-center",
+			floating:
+				"bg-card text-primary-700 border border-border shadow-sm rounded-full h-fit p-0 hover:bg-border",
+			"floating-secondary":
+				"bg-card text-secondary-700 border border-border shadow-sm rounded-full h-fit p-0 hover:bg-border",
 			},
 		},
 		defaultVariants: {

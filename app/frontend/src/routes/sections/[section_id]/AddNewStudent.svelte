@@ -1,76 +1,65 @@
 <script lang="ts">
-	import { API_URL } from '$lib/constants.ts';
+  import { API_URL } from '$lib/constants.ts';
+  import { invalidateAll } from '$app/navigation';
+  import { api, ApiError } from '$lib/utils/api.ts';
+  import toast from 'svelte-5-french-toast';
+  import Button from '$lib/components/CustomButton/button.svelte';
+  import { Input } from '$lib/components/ui/input/index.ts';
+  import { Label } from '$lib/components/ui/label/index.ts';
 
-	let { section_id, isAddDialogOpen = $bindable() } = $props();
+  interface Props { section_id: number | undefined; close: () => void }
+  let { section_id, close }: Props = $props();
 
-	import { invalidateAll } from '$app/navigation';
-	import { api, ApiError } from '$lib/utils/api.ts';
-	import toast from 'svelte-5-french-toast';
-	import * as Dialog from "$lib/components/ui/dialog/index.ts";
-	import Button from '$lib/components/CustomButton/button.svelte';
-	import { Input } from '$lib/components/ui/input/index.ts';
-	import { Label } from '$lib/components/ui/label/index.ts';
+  let isLoading = $state(false);
+  let formName = $state('');
+  let formStudentNo = $state('');
 
-	let isLoading = $state(false);
-	let formName: string = $state("");
-	let formStudentNo: string = $state("");
-
-	async function addNewStudent() {
-    if (formStudentNo === "" || formName === "") {
-      toast("Please do not leave empty fields");
+  async function addNewStudent() {
+    if (!formStudentNo || !formName) {
+      toast('Please fill in all fields');
       return;
     }
-
-		isLoading = true;
-		try {
-			const result = await api(`${API_URL}/api/students`, {
-				method: "POST",
-				body: JSON.stringify({
-					student_no: formStudentNo,
-					name: formName,
-					section_id: section_id,
-				})
-			});
-			toast.success("Student added successfully!");
-			await invalidateAll();
-      isAddDialogOpen = false;
-		} catch (e) {
-			toast.error(e instanceof ApiError
-        ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
-        : "Failed to add new student:\n" + e);
-		} finally {
-			isLoading = false;
-		}
-	}
+    isLoading = true;
+    try {
+      await api(`${API_URL}/api/students`, {
+        method: 'POST',
+        body: JSON.stringify({ student_no: formStudentNo, name: formName, section_id }),
+      });
+      toast.success('Student added.');
+      await invalidateAll();
+      close();
+    } catch (e) {
+      toast.error(
+        e instanceof ApiError
+          ? (e.detail ? e.detail : `${e.status} ${e.statusText}`)
+          : 'Failed to add student:\n' + e
+      );
+    } finally {
+      isLoading = false;
+    }
+  }
 </script>
 
+<div class="flex flex-col gap-4">
+  <div>
+    <Label for="new_student_no" class="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground mb-1.5 block">
+      Student number
+    </Label>
+    <Input id="new_student_no" placeholder="e.g. 2024-00421" bind:value={formStudentNo} />
+    <p class="text-[11px] text-muted-foreground mt-1">Student number cannot be changed after creation.</p>
+  </div>
 
-<Dialog.Content>
-	<Dialog.Header>
-		<Dialog.Title>Add new student</Dialog.Title>
-	</Dialog.Header>
-	<Label id="student_no">Student number</Label>
-	<Input id="student_no"
-					placeholder="Student number..."
-					bind:value={formStudentNo}/>
-	<Label id="name">Name</Label>
-	<Input id="name"
-					placeholder="Name..."
-					bind:value={formName} />
-	<Label id="section">Section</Label>
-	<Input id="section"
-					value={"SECTION_ID "+section_id}
-					disabled/>
-	<Dialog.Footer>
-		<Button variant="outline"
-						onclick={() => addNewStudent()}>
-			Add new student
-		</Button>
-		{#if isLoading}
-			<p>Loading...</p>
-		{/if}
-		<Dialog.Description>
-			Note that the student number cannot be changed after creation.
-		</Dialog.Description>
-	</Dialog.Footer>
-</Dialog.Content>
+  <div>
+    <Label for="new_name" class="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground mb-1.5 block">
+      Full name
+    </Label>
+    <Input id="new_name" placeholder="e.g. Juan dela Cruz" bind:value={formName} />
+  </div>
+
+  <div class="flex gap-2 mt-1">
+    <Button variant="ghost" class="flex-1" onclick={close}>Cancel</Button>
+    <Button variant="primary" class="flex-1" disabled={isLoading} onclick={addNewStudent}>
+      {isLoading ? 'Adding…' : 'Save'}
+    </Button>
+  </div>
+</div>

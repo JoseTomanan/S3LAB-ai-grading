@@ -144,20 +144,22 @@
 
 
 
-<div class="flex flex-col gap-3
-            [&>*>img]:object-fit">
-  <span class="flex flex-row justify-between items-center">
-    <span class="flex flex-wrap items-baseline gap-x-4 [&>h5]:opacity-60">
-      <h1>Test answers</h1>
-      <h5>{data.student_no}</h5>
-    </span>
-    <Button variant="secondary"
-            class="flex flex-row items-center gap-x-1"
-            href="/instances/{data.test_id}/papers/{data.student_no}/process">
-      <span class="text-sm">Upload</span>
-      <MdiImagePlus class="size-5"/>
-    </Button>
-  </span>
+<div class="p-4 flex flex-col gap-3">
+  <div class="flex items-center justify-between">
+    <div>
+      <span class="font-heading text-[20px] font-extrabold text-foreground tracking-[-0.04em]">Test Answers</span>
+      <span class="ml-2 text-[12px] font-mono px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+        {data.student_no}
+      </span>
+    </div>
+    <a
+      href="/instances/{data.test_id}/papers/{data.student_no}/process"
+      class="size-9 rounded-full bg-primary flex items-center justify-center text-white hover:opacity-90 transition-opacity"
+      title="Upload image"
+    >
+      <MdiImagePlus class="size-[18px]" />
+    </a>
+  </div>
 
   {#if studentItems.length == 0}
     <p>Nothing to see here. <br>If this is a mistake, check your network connection.</p>
@@ -233,7 +235,7 @@
             {#each e_a_r_qs as e_a_r_q, index}
             {#if e_a_r_q.length != 0}
               <span class="flex flex-row justify-between items-baseline-last gap-x-1">
-                <p class="italic flex-1 text-foreground/60">
+                <p class="italic flex-1 text-muted-foreground">
                   {e_a_r_q}
                 </p>
                 {#if isRequestLoading}

@@ -12,7 +12,6 @@
 
 /* ============THEME============ */
 @import './lib/styles/theme.css';
-@import './lib/styles/bg.css';
 
 
 /* ============RESPONSIVENESS============ */
@@ -91,7 +90,6 @@
   
   body {
     background-color: var(--background);
-    background-image: var(--background-graph-paper);
     color: var(--foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
