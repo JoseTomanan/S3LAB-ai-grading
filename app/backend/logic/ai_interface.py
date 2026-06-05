@@ -104,28 +104,47 @@ class AIAnswerEvaluator:
     
 
 
+PROMPT_CUSTOM_INSTRUCTIONS: str = """
+- Minor spelling mistakes or phonetic misspellings should be forgiven
+- Inconsistent capitalization or punctuation should be forgiven
+- Messy or uneven handwriting should be forgiven, as long as the intent is legible
+- Informal or incomplete sentence structure should be forgiven, as long as the meaning is clear
+- Reversed or malformed digits/letters should be forgiven, as long as the intended value is identifiable
+"""
+
+
+
 # ================================
 #region   Prompts
-ANSWER_RUBRIC_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
+ANSWER_RUBRIC_PROMPT: str = f"""You are given an image of a student's handwritten work (Grade 1–3) in response to a math problem.
 Included in this prompt, preceded by `QUESTION:` is the problem the student is answering.
 Your task is to answer a question/questions (in a new line, preceded by `PROMPT:`) based solely on the visual content of the student's work.
+
+When evaluating, take note of the following:{PROMPT_CUSTOM_INSTRUCTIONS}
+
 Your answer should be clear and concise, and directly relate to the image.
 If a question can be answered with a yes or no, only generate your answer as `YES` or `NO`.
 Otherwise, generate your answer as raw text, with no prefixes or sentences (e.g. `3x+2=8` or `5`).
 If multiple questions are given in the prompt, separate your answers for each with `; `."""
 
 
-ANSWER_MULTI_RUBRIC_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
+ANSWER_MULTI_RUBRIC_PROMPT: str = f"""You are given an image of a student's handwritten work (Grade 1–3) in response to a math problem.
 Included in this prompt, preceded by `QUESTION:`, is the math problem the student is answering.
-You will also receive a list of grading criteria, preceded by `RUBRICS:` and formatted as a list of strings in brackets (e.g., `["Correct equation setup", "Calculated correct final answer"]`). Each rubric item is a declarative phrase or statement.
-Your task is to evaluate whether each rubric statement accurately describes the visual content of the student's work.
+You will also receive grading criteria, preceded by `RUBRICS:` and formatted as a list of strings (e.g., `["Correct equation setup", "Calculated correct final answer"]`). Each rubric item is a declarative phrase or statement.
+Your task is to evaluate whether each rubric statement accurately describes the student's work.
+
+When evaluating, take note of the following:{PROMPT_CUSTOM_INSTRUCTIONS}
+
 For each rubric item, output strictly `YES` if the statement is true/present, or `NO` if it is false/missing.
-Format your final output as a single string of `YES` or `NO` responses, separated by semicolons with no spaces, corresponding to the exact order of the given rubrics (e.g., `YES;YES;NO`). Do not generate any additional text, sentences, prefixes, or explanations."""
+Format your final output as a single string of `YES` or `NO` responses, separated by semicolons with no spaces, in the exact order of the rubrics (e.g., `YES;YES;NO`). Do not generate any additional text, sentences, prefixes, or explanations."""
 
 
-COMPARE_EXPECTED_FINAL_ANSWER_PROMPT: str = """You are given an image of a student's handwritten work in response to a math problem.
+COMPARE_EXPECTED_FINAL_ANSWER_PROMPT: str = f"""You are given an image of a student's handwritten work (Grade 1–3) in response to a math problem.
 Included in this prompt, preceded by `QUESTION:` is the problem the student is answering.
 Your task is to evaluate if the student's final answer is the same as the expected final answer (in a new line, preceded by `ANSWER:`).
+
+When evaluating, take note of the following:{PROMPT_CUSTOM_INSTRUCTIONS}
+
 Your answer should be clear and concise, and generated as only `YES` or `NO`.
 If the student does not have a clear final answer, generate your answer as `UNCLEAR`."""
 

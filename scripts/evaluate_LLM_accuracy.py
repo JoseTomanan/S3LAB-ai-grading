@@ -84,6 +84,7 @@ def main() -> None:
 
     results: list[ResultRow] = []
     skipped_rows = 0
+    total_elapsed_s = 0.0
 
     for input_path in args.input:
         with input_path.open(encoding="utf-8") as f:
@@ -103,6 +104,7 @@ def main() -> None:
                 parse_ok   = rec.get("parse_ok", False)
                 raw        = rec.get("raw_response")
                 m_answers  = rec.get("model_answers", [])
+                total_elapsed_s += rec.get("elapsed_s", 0.0)
 
                 gt_items = gt_by_row.get(row_num, [])
 
@@ -151,6 +153,7 @@ def main() -> None:
         w.writerow(["Number of tests",  total])
         w.writerow(["Number correct",   correct_n])
         w.writerow(["Accuracy rate",    f"{accuracy:.2%}"])
+        w.writerow(["Total elapsed (s)", f"{total_elapsed_s:.2f}"])
         if skipped_rows:
             w.writerow(["Skipped rows (alignment mismatch)", skipped_rows])
         w.writerow([])
@@ -163,6 +166,7 @@ def main() -> None:
     print(f"Tests   : {total}")
     print(f"Correct : {correct_n}")
     print(f"Accuracy: {accuracy:.2%}")
+    print(f"Elapsed : {total_elapsed_s:.2f}s")
     print(f"Report  -> {args.output}")
 
 
