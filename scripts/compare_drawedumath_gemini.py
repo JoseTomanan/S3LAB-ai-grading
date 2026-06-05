@@ -8,16 +8,30 @@ which contains 1396 YES/NO test rows (row_num, problem_id, image_name,
 question_idx, question, model_answer, ground_truth, correct).
 
 This script takes that exact set of items and, for each one, looks up the
-PRE-EXISTING answer from DrawEduMath's published model answers
-(`<Model>_Answer-TeacherQ` in DrawEduMath_QA_with_Model_Answers.csv) and
+PRE-EXISTING answer from a published DrawEduMath model-answers file and
 scores it against the same ground truth. NO API/model calls are made.
+
+Two pre-existing sources are supported (pick with --source):
+  * aftermath — (default) the follow-up paper's long-format aftermath_predictions.csv
+               (one row per model/question). Carries 2025-era models, including the
+               exact label "Gemini 2.5 Pro". Free-form prose answers, scored by the
+               paper's ensemble judge (the "Score" column, 1 = correct).
+  * legacy   — the original benchmark file DrawEduMath_QA_with_Model_Answers.csv
+               (wide/nested: answers packed as JSON in `<Model>_Answer-TeacherQ`).
+               Models: Gemini (1.5 Pro), Claude (3.5 Sonnet), GPT4 (4o), Llama.
+               Terse answers reduced to YES/NO and matched against ground truth.
 
 The output is a single side-by-side comparison CSV over the identical item
 set, so "ours vs theirs" is a true apples-to-apples comparison.
 
+Both source CSVs are large and git-ignored; download aftermath_predictions.csv with:
+    curl -sL -o dataset/DrawEduMath/aftermath_predictions.csv \\
+        https://huggingface.co/datasets/lucy3/aftermath_predictions/resolve/main/predictions.csv
+
 Usage:
-    python scripts/compare_drawedumath_gemini.py
-    python scripts/compare_drawedumath_gemini.py --model Gemini   # or Claude/GPT4/Llama
+    python scripts/compare_drawedumath_gemini.py                                    # aftermath Gemini 2.5 Pro
+    python scripts/compare_drawedumath_gemini.py --model "Claude Sonnet 4.5"        # or "GPT-5", etc.
+    python scripts/compare_drawedumath_gemini.py --source legacy --model Claude     # original benchmark
     python scripts/compare_drawedumath_gemini.py --ours dataset/DrawEduMath/LLM_evaluations_QA_Teacher_first_1000_KS1.csv
 """
 
@@ -31,8 +45,16 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MODEL_ANS = REPO_ROOT / "dataset" / "DrawEduMath" / "DrawEduMath_QA_with_Model_Answers.csv"
+# Long-format predictions from the follow-up paper "The Aftermath of DrawEduMath"
+# (HF dataset lucy3/aftermath_predictions). Carries newer models incl. "Gemini 2.5 Pro".
+AFTERMATH = REPO_ROOT / "dataset" / "DrawEduMath" / "aftermath_predictions.csv"
 DEFAULT_OURS = REPO_ROOT / "dataset" / "DrawEduMath" / "LLM_evaluations_QA_Teacher_KS1_ALL.csv"
-DEFAULT_OUT = REPO_ROOT / "dataset" / "DrawEduMath" / "LLM_evaluations_QA_Teacher_OursVsGemini_KS1_ALL.csv"
+
+
+def out_path_for(model: str) -> Path:
+    """Default report path, e.g. ...OursVsGemini2.5Pro_KS1_ALL.csv."""
+    token = re.sub(r"[^0-9A-Za-z.]+", "", model)
+    return REPO_ROOT / "dataset" / "DrawEduMath" / f"LLM_evaluations_QA_Teacher_OursVs{token}_KS1_ALL.csv"
 
 
 def normalize_q(q: str) -> str:
@@ -83,19 +105,53 @@ def build_ref_index(model_ans_path: Path, answer_col: str) -> dict:
     return index
 
 
+def build_ref_index_aftermath(path: Path, model_name: str, qa_type: str = "teacher") -> dict:
+    """
+    Map (ProblemID, ImageID) -> {normalized_question: {"answer", "score"}} from
+    the long-format aftermath_predictions.csv (one row per model/image/question).
+
+    Unlike the original benchmark, these answers are free-form chain-of-thought
+    prose, so they cannot be reduced to YES/NO. Instead the follow-up paper ships
+    a per-answer correctness judgement in the "Score" column (1 = correct,
+    0 = incorrect, -1 = unscored), produced by an ensemble judge against the
+    teacher's reference answer. We carry that Score through for scoring.
+
+    Columns: "Model Name", "Problem ID", "QA Type", "Image Name", "Question",
+    "Model Answer", "Score". We keep only the requested model and QA type.
+    """
+    df = pd.read_csv(path)
+    df = df[(df["Model Name"] == model_name) & (df["QA Type"] == qa_type)]
+    if df.empty:
+        raise SystemExit(f"No rows for Model Name={model_name!r}, QA Type={qa_type!r} in {path.name}")
+    index: dict[tuple, dict[str, dict]] = {}
+    for _, row in df.iterrows():
+        index.setdefault((row["Problem ID"], row["Image Name"]), {})[
+            normalize_q(row["Question"])] = {"answer": row["Model Answer"], "score": int(row["Score"])}
+    return index
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Compare our pipeline vs pre-existing DrawEduMath answers on identical items")
-    parser.add_argument("--model", default="Gemini",
-                        choices=["Gemini", "Claude", "GPT4", "Llama"],
-                        help="Which pre-existing model's TeacherQ answers to score against ours")
+    parser.add_argument("--source", default="aftermath", choices=["legacy", "aftermath"],
+                        help="Which pre-existing answer file to score against ours (default aftermath)")
+    parser.add_argument("--model", default=None,
+                        help="Reference model. legacy: Gemini/Claude/GPT4/Llama (default Gemini). "
+                             "aftermath: exact 'Model Name' value, e.g. 'Gemini 2.5 Pro' (default).")
     parser.add_argument("--ours", type=Path, default=DEFAULT_OURS,
                         help="Our existing KS1-style report defining the item set")
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--output", type=Path, default=None,
+                        help="Output CSV (default derived from --model)")
     args = parser.parse_args()
 
-    answer_col = f"{args.model}_Answer-TeacherQ"
+    if args.source == "aftermath":
+        model = args.model or "Gemini 2.5 Pro"
+        ref_index = build_ref_index_aftermath(AFTERMATH, model)
+    else:
+        model = args.model or "Gemini"
+        ref_index = build_ref_index(MODEL_ANS, f"{model}_Answer-TeacherQ")
+    output = args.output or out_path_for(model)
+    is_aftermath = args.source == "aftermath"
     ours = read_ours_table(args.ours)
-    ref_index = build_ref_index(MODEL_ANS, answer_col)
 
     records: list[dict] = []
     n = len(ours)
@@ -116,18 +172,28 @@ def main() -> None:
             if close:
                 raw = per_image[close[0]]
 
-        if raw is None:
-            ref_ans = "MISSING"
-            n_missing += 1
+        if is_aftermath:
+            # Free-form prose graded by the follow-up paper's ensemble judge.
+            if raw is None:
+                ref_ans, ref_ok = "MISSING", False
+                n_missing += 1
+            else:
+                ref_ans = re.sub(r"\s+", " ", str(raw["answer"]).strip())[:300]
+                ref_ok = raw["score"] == 1
         else:
-            ref_ans = to_yes_no(raw)
-            if ref_ans not in ("YES", "NO"):
-                n_unparseable += 1
+            # Original benchmark: terse answers reduced to YES/NO and matched.
+            if raw is None:
+                ref_ans = "MISSING"
+                n_missing += 1
+            else:
+                ref_ans = to_yes_no(raw)
+                if ref_ans not in ("YES", "NO"):
+                    n_unparseable += 1
+            ref_ok = ref_ans == gt
+            agree += int(our_ans == ref_ans)
 
-        ref_ok = ref_ans == gt
         our_correct += int(our_ok)
         ref_correct += int(ref_ok)
-        agree += int(our_ans == ref_ans)
 
         records.append({
             "row_num": r["row_num"],
@@ -145,27 +211,34 @@ def main() -> None:
     table = pd.DataFrame.from_records(records)
     our_acc = our_correct / n * 100 if n else 0.0
     ref_acc = ref_correct / n * 100 if n else 0.0
-    agree_pct = agree / n * 100 if n else 0.0
 
-    with args.output.open("w", encoding="utf-8", newline="") as f:
+    with output.open("w", encoding="utf-8", newline="") as f:
         f.write("Metric,Value\n")
         f.write(f"Number of tests,{n}\n")
         f.write(f"Our pipeline correct,{our_correct}\n")
         f.write(f"Our pipeline accuracy,{our_acc:.2f}%\n")
-        f.write(f"{args.model} (pre-existing) correct,{ref_correct}\n")
-        f.write(f"{args.model} (pre-existing) accuracy,{ref_acc:.2f}%\n")
-        f.write(f"Answer agreement,{agree} ({agree_pct:.2f}%)\n")
-        f.write(f"{args.model} missing answers,{n_missing}\n")
-        f.write(f"{args.model} non-YES/NO answers,{n_unparseable}\n")
+        f.write(f"{model} (pre-existing) correct,{ref_correct}\n")
+        f.write(f"{model} (pre-existing) accuracy,{ref_acc:.2f}%\n")
+        if is_aftermath:
+            f.write(f"{model} scoring,ensemble judge (Score==1)\n")
+            f.write(f"{model} missing answers,{n_missing}\n")
+        else:
+            agree_pct = agree / n * 100 if n else 0.0
+            f.write(f"Answer agreement,{agree} ({agree_pct:.2f}%)\n")
+            f.write(f"{model} missing answers,{n_missing}\n")
+            f.write(f"{model} non-YES/NO answers,{n_unparseable}\n")
         f.write("\n")
-    table.to_csv(args.output, mode="a", index=False)
+    table.to_csv(output, mode="a", index=False)
 
-    print(f"Wrote {args.output}")
+    print(f"Wrote {output}")
     print(f"  Items compared:        {n}")
     print(f"  Our pipeline correct:  {our_correct} ({our_acc:.2f}%)")
-    print(f"  {args.model} pre-existing: {ref_correct} ({ref_acc:.2f}%)")
-    print(f"  Agreement:             {agree} ({agree_pct:.2f}%)")
-    print(f"  {args.model} missing: {n_missing}   non-YES/NO: {n_unparseable}")
+    print(f"  {model} pre-existing: {ref_correct} ({ref_acc:.2f}%)")
+    if is_aftermath:
+        print(f"  Scoring: ensemble judge (Score==1)   missing: {n_missing}")
+    else:
+        print(f"  Agreement:             {agree} ({agree / n * 100:.2f}%)")
+        print(f"  {model} missing: {n_missing}   non-YES/NO: {n_unparseable}")
 
 
 if __name__ == "__main__":
